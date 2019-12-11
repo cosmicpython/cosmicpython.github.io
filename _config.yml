@@ -1,6 +1,7 @@
 title: Cosmic Python - Simple Patterns for Building Complex Applications
-theme: jekyll-theme-minimal
+remote_theme: daviddarnes/alembic
 permalink: /blog/:year-:month-:day-:title.html
 plugins:
   - jekyll-redirect-from
   - jekyll-sitemap
+  - jekyll-remote-theme
