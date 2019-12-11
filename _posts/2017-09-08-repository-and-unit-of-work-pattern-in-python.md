@@ -8,8 +8,9 @@ tags:
   - architecture
 ---
 
-In the previous part [https://io.made.com/blog/introducing-command-handler/]  of
-this series we built a toy system that could add a new Issue to an IssueLog, but
+In the previous part
+([Introducing Command Handler]({% post_url 2017-09-07-introducing-command-handler %}))
+of this series we built a toy system that could add a new Issue to an IssueLog, but
 had no real behaviour of its own, and would lose its data every time the
 application restarted. We're going to extend it a little by introducing some
 patterns for persistent data access, and talk a little more about the ideas

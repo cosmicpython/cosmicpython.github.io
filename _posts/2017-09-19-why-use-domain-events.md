@@ -12,12 +12,9 @@ Nota bene: this instalment in the Ports and Adapters with Command Handlers
 series is code-heavy, and isn't going to make much sense unless you've read the
 previous parts:
 
- * Introducing Command Handler
-   [https://io.made.com/blog/introducing-command-handler/]
- * Repositories and Units of Work
-   [https://io.made.com/blog/repository-and-unit-of-work-pattern-in-python/]
- * Commands and Queries, Handlers and Views
-   [https://io.made.com/blog/commands-and-queries-handlers-and-views/]
+ * [Introducing Command Handler]({% post_url 2017-09-07-introducing-command-handler %})
+ * [Repositories and Units of Work]({% post_url 2017-09-08-repository-and-unit-of-work-pattern-in-python %})
+ * [Commands and Queries, Handlers and Views]({% post_url 2017-09-13-commands-and-queries-handlers-and-views %})
 
 Okay, so we have a basic skeleton for an application and we can add new issues
 into the database, then fetch them from a Flask API. So far, though, we don't

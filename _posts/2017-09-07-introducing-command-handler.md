@@ -8,10 +8,9 @@ tags:
   - architecture
 ---
 
-The term DDD comes from the book by Eric Evans: "Domain-Driven Design: Tackling
-Complexity in the Heart of Software
-[https://www.amazon.co.uk/Domain-driven-Design-Tackling-Complexity-Software/dp/0321125215]
-". In his book he describes a set of practices that aim to help us build
+The term DDD comes from the book by Eric Evans: ["Domain-Driven Design: Tackling
+Complexity in the Heart of Software"]([https://www.amazon.co.uk/Domain-driven-Design-Tackling-Complexity-Software/dp/0321125215).
+In his book he describes a set of practices that aim to help us build
 maintainable, rich, software systems that solve customer's problems. The book is
 560 pages of dense insight, so you'll pardon me if my summary elides some
 details, but in brief he suggests:
@@ -37,17 +36,16 @@ they are caused by a lack of organisation in the codebase. In fact, the tools to
 solve these problems take up half of the DDD book, but it can be be difficult to
 understand how to use them together in the context of a complete system.
 
-I want to use this series to introduce an architectural style called Ports and
-Adapters [http://wiki.c2.com/?PortsAndAdaptersArchitecture], and a design
-pattern named Command Handler
-[https://matthiasnoback.nl/2015/01/responsibilities-of-the-command-bus/]. I'll
-be explaining the patterns in Python because that's the language that I use
+I want to use this series to introduce an architectural style called
+[Ports and Adapters](http://wiki.c2.com/?PortsAndAdaptersArchitecture),
+and a design pattern named
+[Command Handler](https://matthiasnoback.nl/2015/01/responsibilities-of-the-command-bus/).
+I'll be explaining the patterns in Python because that's the language that I use
 day-to-day, but the concepts are applicable to any OO language, and can be
 massaged to work perfectly in a functional context. There might be a lot more
 layering and abstraction than you're used to, especially if you're coming from a
 Django background or similar, but please bear with me. In exchange for a more
-complex system at the outset, we can avoid much of our accidental complexity
-[http://wiki.c2.com/?AccidentalComplexity]  later.
+complex system at the outset, we can avoid much of our [accidental complexity](http://wiki.c2.com/?AccidentalComplexity)  later.
 
 The system we're going to build is an issue management system, for use by a
 helpdesk. We're going to be replacing an existing system, which consists of an
@@ -83,7 +81,7 @@ issue.
 
 Okay, before we get to the code, let's talk about architecture. The architecture
 of a software system is the overall structure - the choice of language,
-technology, and design patterns that organise the code and satisfy our 
+technology, and design patterns that organise the code and satisfy our
 constraints [https://en.wikipedia.org/wiki/Non-functional_requirement]. For our
 architecture, we're going to try and stick with three principles:
 
@@ -212,7 +210,7 @@ skip ahead a little to a new command handler:
 class MarkIssueAsResolvedHandler:
     def __init__(self, issue_log):
         self.issue_log = issue_log
-        
+
     def __call__(self, cmd):
         issue = self.issue_log.get(cmd.issue_id)
         # the following line encodes a business rule
@@ -222,9 +220,9 @@ class MarkIssueAsResolvedHandler:
 
 This handler violates our glue-code principle because it encodes a business
 rule: "If an issue is already resolved, then it can't be resolved a second
-time". This rule belongs in our domain model, probably in the mark_as_resolved 
+time". This rule belongs in our domain model, probably in the mark_as_resolved
 method of our Issue object.
-I tend to use classes for my command handlers, and to invoke them with the call 
+I tend to use classes for my command handlers, and to invoke them with the call
 magic method, but a function is perfectly valid as a handler, too. The major
 reason to prefer a class is that it can make dependency management a little
 easier, but the two approaches are completely equivalent. For example, we could
@@ -258,7 +256,7 @@ However you structure them, the important ideas of commands and handlers are:
 
 Let's take a look at the complete system, I'm concatenating all the files into a
 single code listing for each of grokking, but in the git repository
-[https://github.com/bobthemighty/blog-code-samples/tree/master/ports-and-adapters/01] 
+[https://github.com/bobthemighty/blog-code-samples/tree/master/ports-and-adapters/01]
  I'm splitting the layers of the system into separate packages. In the real
 world, I would probably use a single python package for the whole app, but in
 other languages - Java, C#, C++ - I would usually have a single binary for each
@@ -294,7 +292,7 @@ class ReportIssueCommand(NamedTuple):
 
 
 # Service Layer
- 
+
 class ReportIssueHandler:
 
     def __init__(self, issue_log):
