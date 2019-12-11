@@ -20,9 +20,10 @@ about Application-Controlled Identifiers, you'll find those at the end of post,
 after a bunch of stuff about ORMs, CQRS, and some casual trolling of junior
 programmers.
 
-What is CQS ?
-The [Command Query Separation](https://martinfowler.com/bliki/CommandQuerySeparation.html)  principle was
-first described by Bertrand Meyer in the late Eighties. Per
+### What is CQS ?
+
+The [Command Query Separation](https://martinfowler.com/bliki/CommandQuerySeparation.html)
+principle was first described by Bertrand Meyer in the late Eighties. Per
 [wikipedia](https://en.wikipedia.org/wiki/Command%E2%80%93query_separation),
 the principle states:
 
@@ -35,6 +36,7 @@ Referential transparency is an important concept from functional programming.
 Briefly, a function is referentially transparent if you could replace it with a
 static value.
 
+```python
 class LightSwitch:
 
     def toggle_light(self):
@@ -44,7 +46,7 @@ class LightSwitch:
     @property
     def is_on(self):
         return self.light_is_on
-
+```
 
 In this class, the is_on  method is referentially transparent - I can replace it
 with the value True or False without any loss of functionality, but the method
@@ -71,12 +73,13 @@ data back out of our model? What is the equivalent port for queries?
 The answer is "it depends". The lowest-cost option is just to re-use your
 repositories in your UI entrypoints.
 
+```python
 @app.route("/issues")
 def list_issues():
     with unit_of_work_manager.start() as unit_of_work:
         open_issues = unit_of_work.issues.find_by_status('open')
         return json.dumps(open_issues)
-
+```
 
 This is totally fine unless you have complex formatting, or multiple entrypoints
 to your system. The problem with using your repositories directly in this way is
@@ -84,17 +87,19 @@ that it's a slippery slope. Sooner or later you're going to have a tight
 deadline, and a simple requirement, and the temptation is to skip all the
 command/handler nonsense and do it directly in the web api.
 
+```python
 @app.route('/issues/<issue_id>', methods=['DELETE'])
 def delete_issue(issue_id):
      with unit_of_work_manager.start() as uow:
          issue = uow.issues[issue_id]
          issue.delete()
          uow.commit()
-
+```
 
 Super convenient, but then you need to add some error handling and some logging
 and an email notification.
 
+```python
 @app.route('/issues/<issue_id>', methods=['DELETE'])
 def delete_issue(issue_id):
     logging.info("Handling DELETE of issue "+str(issue_id))
@@ -117,6 +122,7 @@ def delete_issue(issue_id):
        else:
           logging.info("Issue already deleted. NOOP")
     return "Deleted!", 202
+```
 
 
 Aaaaand, we're back to where we started: business logic mixed with glue code,
@@ -128,7 +134,7 @@ it's all good, you have my blessing. If you want to avoid this, because your
 reads are complex, or because you're trying to stay pure, then instead we could
 define our views explicitly.
 
-
+```python
 class OpenIssuesList:
 
     def __init__(self, sessionmaker):
@@ -146,45 +152,47 @@ class OpenIssuesList:
 def list_issues():
     view_builder = OpenIssuesList(session_maker)
     return jsonify(view_builder.fetch())
-
+```
 
 This is my favourite part of teaching ports and adapters to junior programmers,
 because the conversation inevitably goes like this:
 
-smooth-faced youngling: Wow, um... are you - are we just going to hardcode that
-sql in there? Just ... run it on the database?
+> smooth-faced youngling: Wow, um... are you - are we just going to hardcode that
+> sql in there? Just ... run it on the database?
 
-grizzled old architect: Yeah, I think so. Do The Simplest Thing That Could
-Possibly Work, right? YOLO, and so forth.
+> grizzled old architect: Yeah, I think so. Do The Simplest Thing That Could
+> Possibly Work, right? YOLO, and so forth.
 
-sfy: Oh, okay. Um... but what about the unit of work and the domain model and
-the service layer and the hexagonal stuff? Didn't you say that "Data access
-ought to be performed against the aggregate root for the use case, so that we
-maintain tight control of transactional boundaries"?
+> sfy: Oh, okay. Um... but what about the unit of work and the domain model and
+> the service layer and the hexagonal stuff? Didn't you say that "Data access
+> ought to be performed against the aggregate root for the use case, so that we
+> maintain tight control of transactional boundaries"?
 
-goa: Ehhhh... I don't feel like doing that right now, I think I'm getting
-hungry.
+> goa: Ehhhh... I don't feel like doing that right now, I think I'm getting
+> hungry.
 
-sfy: Right, right ... but what if your database schema changes?
+> sfy: Right, right ... but what if your database schema changes?
 
-goa: I guess I'll just come back and change that one line of SQL. My acceptance
-tests will fail if I forget, so I can't get the code through CI.
+> goa: I guess I'll just come back and change that one line of SQL. My acceptance
+> tests will fail if I forget, so I can't get the code through CI.
 
-sfy: But why don't we use the Issue model we wrote? It seems weird to just
-ignore it and return this dict... and you said "Avoid taking a dependency
-directly on frameworks. Work against an abstraction so that if your dependency
-changes, that doesn't force change to ripple through your domain". You know we
-can't unit test this, right?
+> sfy: But why don't we use the Issue model we wrote? It seems weird to just
+> ignore it and return this dict... and you said "Avoid taking a dependency
+> directly on frameworks. Work against an abstraction so that if your dependency
+> changes, that doesn't force change to ripple through your domain". You know we
+> can't unit test this, right?
 
-goa: Ha! What are you, some kind of architecture astronaut? Domain models! Who
-needs 'em.
+> goa: Ha! What are you, some kind of architecture astronaut? Domain models! Who
+> needs 'em.
 
-Why have a separate read-model?
+### Why have a separate read-model?
+
 In my experience, there are two ways that teams go wrong when using ORMs. The
 most common mistake is not paying enough attention to the boundaries of their
 use cases. This leads to the application making far too many calls to the
 database because people write code like this:
 
+```python
 # Find all users who are assigned this task
 # [[and]] notify them and their line manager
 # then move the task to their in-queue
@@ -193,7 +201,7 @@ for assignee in task.assignees:
     assignee.manager.notifications.add(notification)
     assignee.notifications.add(notification)
     assignee.queues.inbox.add(task)
-
+```
 
 
 ORMs make it very easy to "dot" through the object model this way, and pretend
@@ -233,7 +241,8 @@ noting that transactional consistency is usually only a real requirement when we
 are changing state. When viewing state, we can almost always accept a weaker
 consistency model.
 
-CQRS is CQS at a system-level
+### CQRS is CQS at a system-level
+
 CQRS stands for Command-Query Responsibility Segregation, and it's an
 architectural pattern that was popularised by Greg Young. A lot of people
 misunderstand CQRS, and think you need to use separate databases and crazy
@@ -263,19 +272,21 @@ my queries are fundamentally different than the requirements for my commands.
 For the write-side of the system, use an ORM, for the read side, use whatever is
 a) fast, and b) convenient.
 
-Application Controlled Identifiers
+### Application Controlled Identifiers
+
 At this point, a non-junior programmer will say
 
-Okay, Mr Smarty-pants Architect, if our commands can't return any values, and
-our domain models don't know anything about the database, then how do I get an
-ID back from my save method?
-Let's say I create an API for creating new issues, and when I have POSTed the
-new issue, I want to redirect the user to an endpoint where they can GET their
-new Issue. How can I get the id back?
+> Okay, Mr Smarty-pants Architect, if our commands can't return any values, and
+> our domain models don't know anything about the database, then how do I get an
+> ID back from my save method?
+> Let's say I create an API for creating new issues, and when I have POSTed the
+> new issue, I want to redirect the user to an endpoint where they can GET their
+> new Issue. How can I get the id back?
 
 The way I would recommend you handle this is simple - instead of letting your
 database choose ids for you, just choose them yourself.
 
+```python
 @api.route('/issues', methods=['POST'])
 def report_issue(self):
     # uuids make great domain-controlled identifiers, because
@@ -286,17 +297,18 @@ def report_issue(self):
     cmd = ReportIssueCommand(issue_id, **request.get_json())
     handler.handle(cmd)
     return "", 201, { 'Location': '/issues/' + str(issue_id) }
-
+```
 
 There's a few ways to do this, the most common is just to use a UUID, but you
-can also implement something like hi-lo
-[https://pypi.python.org/pypi/sqlalchemy-hilo/0.1.2]. In the new code sample
-[https://github.com/bobthemighty/blog-code-samples/tree/master/ports-and-adapters/03]
-, I've implemented three flask endpoints, one to create a new issue, one to list
+can also implement something like
+[hi-lo](https://pypi.python.org/pypi/sqlalchemy-hilo/0.1.2).
+In the new
+[code sample](https://github.com/bobthemighty/blog-code-samples/tree/master/ports-and-adapters/03),
+I've implemented three flask endpoints, one to create a new issue, one to list
 all issues, and one to view a single issue. I'm using UUIDs as my identifiers,
 but I'm still using an integer primary key on the issues table, because using a
-GUID in a clustered index leads to table fragmentation and sadness
-[http://sqlmag.com/database-performance-tuning/clustered-indexes-based-upon-guids]
+GUID in a clustered index leads to table fragmentation and
+[sadness](http://sqlmag.com/database-performance-tuning/clustered-indexes-based-upon-guids)
 .
 
 Okay, quick spot-check - how are we shaping up against our original Ports and
