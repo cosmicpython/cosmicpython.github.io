@@ -15,6 +15,7 @@ feature_text: |
   [github.com/cosmicpython/book](https://github.com/cosmicpython/book#table-of-contents)
 * Read in Early Release via O'Reilly Learning (aka Safari) 
   [learning.oreilly.com]( https://learning.oreilly.com/library/view/architecture-patterns-with/9781492052197/)
+* Preorder on [Amazon.com](https://amzn.to/37pR2DH) or [Amazon.co.uk](https://amzn.to/38CmFu1)
 
 
 ## Blog Posts
