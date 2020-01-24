@@ -5,7 +5,18 @@ styles: true
 
 @import "alembic";
 
+/*
+@import url('https://fonts.googleapis.com/css?family=Cutive+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Cutive+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap');
+*/
+@import url('https://fonts.googleapis.com/css?family=Cousine&display=swap');
+
+
 /* HP edit add pale text for header */
 .feature h2 {
-    color: white
+    font-family: 'Cousine', monospace;
+    color: #222222;
+    font-size: 4em;
+    text-shadow: 4px 4px grey;
 }

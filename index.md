@@ -1,9 +1,9 @@
 ---
-title: Cosmic Python
+title:
 layout: page
 feature_image: "https://www.jpl.nasa.gov/spaceimages/images/largesize/PIA13111_hires.jpg"
 feature_text: |
-  ## Cosmic Python
+  ## cosmic_python
 ---
 
 {% include figure.html image="images/cover.png" alt="Cover Image for Architecture Patterns with Python Book" position="right" width="200" %}
