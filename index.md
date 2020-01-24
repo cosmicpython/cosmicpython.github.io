@@ -6,6 +6,9 @@ feature_text: |
   ## Cosmic Python
 ---
 
+{% include figure.html image="images/cover.png" alt="Cover Image for Architecture Patterns with Python Book" position="right" width="200" %}
+
+
 ## The Book
 
 * Read for free from the sources using Github previews:
