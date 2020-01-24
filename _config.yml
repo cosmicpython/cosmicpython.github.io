@@ -5,3 +5,13 @@ plugins:
   - jekyll-redirect-from
   - jekyll-sitemap
   - jekyll-remote-theme
+
+favicons: # Favicons are also used in the manifest file. Syntax is 'size: path'
+  16: '/assets/favicon.png'
+  32: '/assets/favicon32.png'
+  96: '/assets/favicon96.png'
+  # 120: '/assets/logos/logo@120px.png'
+  # 144: '/assets/logos/logo@144px.png'
+  # 180: '/assets/logos/logo@180px.png'
+  # 512: '/assets/logos/logo@512px.png'
+  # 1024: '/assets/logos/logo@1024px.png'
