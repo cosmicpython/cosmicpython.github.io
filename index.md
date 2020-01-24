@@ -18,12 +18,17 @@ feature_text: |
 * Preorder on [Amazon.com](https://amzn.to/37pR2DH) or [Amazon.co.uk](https://amzn.to/38CmFu1)
 
 
-## Blog Posts
+## Blog
+
+
+### Classic 2017 Episodes on Ports & Adapters, by Bob
 
 <ul>
   {% for post in site.posts %}
-    <li>
-      <a href="{{ post.url }}">{{ post.date | date: "%Y-%m-%d" }} {{ post.title }}</a>
-    </li>
+    {% if post.date | date: "%Y" == "2017" %}
+      <li>
+        <a href="{{ post.url }}">{{ post.date | date: "%Y-%m-%d" }} {{ post.title }}</a>
+      </li>
+    {% endif %}
   {% endfor %}
 </ul>
