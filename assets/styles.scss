@@ -14,9 +14,14 @@ styles: true
 
 
 /* HP edit add pale text for header */
-.feature h2 {
+.feature h1 {
     font-family: 'Cousine', monospace;
     color: #222222;
     font-size: 4em;
     text-shadow: 4px 4px grey;
+}
+.feature em {
+    color: #222222;
+    font-size: 1.15em;
+    text-shadow: 2px 2px grey;
 }
