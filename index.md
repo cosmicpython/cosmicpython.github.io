@@ -25,6 +25,18 @@ _(Because "Cosmos" is the [opposite of Chaos](https://www.goodreads.com/quotes/6
 
 ## Blog
 
+### Recent posts
+
+<ul>
+  {% for post in site.posts reversed %}
+    {% assign year = post.date | date: "%Y" %}
+    {% if year != "2017" %}
+      <li>
+        <a href="{{ post.url }}">{{ post.date | date: "%Y-%m-%d" }} {{ post.title }}</a>
+      </li>
+    {% endif %}
+  {% endfor %}
+</ul>
 
 ### Classic 2017 Episodes on Ports & Adapters, by Bob
 
