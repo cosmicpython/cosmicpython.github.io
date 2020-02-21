@@ -237,8 +237,155 @@ cons:
   so you need a sandbox, or some way of faking it out irl
 
 
+# Step 1: Build an Adapter (a wrapper for the external API)
 
-# step 1: DI
+```python
+class RealCargoAPI:
+    API_URL = 'https://example.org'
+
+    def sync(self, shipment: Shipment) -> None:
+        external_shipment_id = self._get_shipment_id(shipment.reference)
+        if external_shipment_id is None:
+            requests.post(f'{self.API_URL}/shipments/', json={
+              ...
+
+        else:
+            requests.put(f'{self.API_URL}/shipments/{external_shipment_id}/', json={
+              ...
+
+
+    def _get_shipment_id(self, our_reference) -> Optional[str]:
+        try:
+            their_shipments = requests.get(f"{self.API_URL}/shipments/").json()['items']
+            return next(
+              ...
+        except requests.exceptions.RequestException:
+            ...
+          
+```
+
+Now how do our tests look?
+
+
+```python
+def test_create_shipment_syncs_to_api():
+    with mock.patch('use_cases.cargo_api') as mock_cargo_api:
+        shipment = create_shipment({'sku1': 10}, incoterm='EXW')
+        assert mock_cargo_api.sync.call_args == mock.call(shipment)
+```
+
+Much more manageable!
+
+
+But:
+
+* we still have the `mock.patch` brittleness, meaning if we change our mind about how
+  we import things, we need to change our mocks
+
+* and we still need to test the api adapters itself:
+
+
+```python
+def test_sync_does_post_for_new_shipment():
+    api = RealCargoAPI()
+    line = OrderLine('sku1', 10)
+    shipment = Shipment(reference='ref', lines=[line], eta=None, incoterm='foo')
+    with mock.patch('cargo_api.requests') as mock_requests:
+        api.sync(shipment)
+
+        expected_data = {
+            'client_reference': shipment.reference,
+            'arrival_date': None,
+            'products': [{'sku': 'sku1', 'quantity': 10}],
+        }
+        assert mock_requests.post.call_args == mock.call(
+            API_URL + '/shipments/', json=expected_data
+        )
+```
+
+
+# Use integration tests to test your Adapter
+
+
+Now we can test our adapter separately from our main application code, we
+can have a think about what the best way to test it is.  Since it's just
+a thin wrapper around an external system, the best kinds of tests are integration
+tests:
+
+```python
+def test_can_create_new_shipment():
+    api = RealCargoAPI('http://localhost:8543')
+    line = OrderLine('sku1', 10)
+    ref = random_reference()
+    shipment = Shipment(reference=ref, lines=[line], eta=None, incoterm='foo')
+
+    api.sync(shipment)
+
+    shipments = requests.get(api.api_url + '/shipments/').json()['items']
+    new_shipment = next(s for s in shipments if s['client_reference'] == ref)
+    assert new_shipment['arrival_date'] is None
+    assert new_shipment['products'] == [{'sku': 'sku1', 'quantity': 10}]
+
+
+def test_can_update_a_shipment():
+    api = RealCargoAPI('http://localhost:8543')
+    line = OrderLine('sku1', 10)
+    ref = random_reference()
+    shipment = Shipment(reference=ref, lines=[line], eta=None, incoterm='foo')
+
+    api.sync(shipment)
+
+    shipment.lines[0].qty = 20
+
+    api.sync(shipment)
+
+    shipments = requests.get(api.api_url + '/shipments/').json()['items']
+    new_shipment = next(s for s in shipments if s['client_reference'] == ref)
+    assert new_shipment['products'] == [{'sku': 'sku1', 'quantity': 20}]
+```
+
+That relies on your third-party api having a decent sandbox that you can test against
+
+
+
+
+# Build a fake
+
+
+```python
+from flask import Flask, request
+
+app = Flask('fake-cargo-api')
+
+SHIPMENTS = {}  # type: Dict[str, Dict]
+
+@app.route('/shipments/', methods=["GET"])
+def list_shipments():
+    print('returning', SHIPMENTS)
+    return {'items': list(SHIPMENTS.values())}
+
+
+@app.route('/shipments/', methods=["POST"])
+def create_shipment():
+    new_id = uuid.uuid4().hex
+    refs = {s['client_reference'] for s in SHIPMENTS.values()}
+    if request.json['client_reference'] in refs:
+        return 'already exists', 400
+    SHIPMENTS[new_id] = {'id': new_id, **request.json}
+    print('saved', SHIPMENTS)
+    return 'ok', 201
+
+
+@app.route('/shipments/<shipment_id>/', methods=["PUT"])
+def update_shipment(shipment_id):
+    existing = SHIPMENTS[shipment_id]
+    SHIPMENTS[shipment_id] = {**existing, **request.json}
+    print('updated', SHIPMENTS)
+    return 'ok', 200
+```
+
+
+# step 2: DI
 
     example
 
