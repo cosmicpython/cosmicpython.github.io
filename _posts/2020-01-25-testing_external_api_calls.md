@@ -18,16 +18,13 @@ common question, how do i write tests for external api calls
 
 Let's take an example to do with logistics, we have a model of a shipment which contains a number
 of order lines.  We also care about its estimated time of arrival (`eta`) and a bit of jargon
-called the "incoterm".
+called the "incoterm" (you don't need to understand what that is, I'm just trying to illustrate
+a bit of real-life complexity, in this small example).
 
 ```python
-from dataclasses import dataclass
-from datetime import date
-from typing import List, Optional
-
 @dataclass
 class OrderLine:
-    sku: str
+    sku: str  # sku="stock keeping unit", it's a product id basically
     qty: int
 
 
@@ -39,15 +36,21 @@ class Shipment:
     incoterm: str
 
     def save(self):
-        ...
+        ...  # for the sake of the example, let's imagine the model
+             # knows how to save itself to the DB.  like Django.
+
 ```
 
 
-We want to sink our shipments model with a third party, the cargo freight company, via their API.
+We want to sync our shipments model with a third party, the cargo freight company, via their API.
 We have a couple of use cases, new shipment creation, and checking for updated etas:
 
 
-Creating a new shipment isn't too hard:
+Let's say we have some sort of controller function that's in charge of doing this.  It
+takes a dict mapping skus to quantities, creates our model objects, saves them, and
+then calls a helper function to sync to the API.  Hopefully this sort of thing
+looks familiar:
+
 ```python
 def create_shipment(quantities: Dict[str, int], incoterm):
     reference = uuid.uuid4().hex[:10]
@@ -96,6 +99,7 @@ lines.  Three tests, one mock each, we're ok.
 
 The trouble is that it never stays quite that simple does it?  For example,
 the cargo company may already have a shipment on record, because reasons.
+And if you do a POST when something already exists, then bad things happen.
 So we first need to check whether they have a shipment on file, using
 a GET request, and then we either do a POST if it's new, or a PUT for
 an existing one:
@@ -164,11 +168,12 @@ def test_does_PUT_if_shipment_already_exists():
         )
 ```
 
+and our tests are getting less and less pleasant.  Again, the details don't matter too
+much, the hope is that this sort of test ugliness is familiar.
 
-yeesh.  This is getting less pleasant.  
 
-
-But it gets better!  We want to poll our third party api now and again to get updated etas
+And this is only the beginning, we've shown an API integration that only cares about writes,
+but what about reads?  Say we want to poll our third party api now and again to get updated etas
 for ours shipments.  Depending on the eta, we have some business logic about notifying
 people of delays...
 
@@ -210,19 +215,23 @@ I haven't coded up what all the tests would look like, but you could imagine the
 * two test for the large shipments notification
 * and a general test that we update the local eta and save it.
 
+
 And each one of these tests needs to set up three or four mocks.  We're getting into what Ed Jung
 calls [Mock Hell](https://www.youtube.com/watch?v=CdKaZ7boiZ4).
 
 On top of our tests being hard to read and write, they're also brittle.  If we change the way we
 import, from `import requests` to `from requests import get` (not that you'd ever do that, but
-you get the point), then all our mocks break.  Or perhaps we decide to stop using
-`requests.get()` because we want to use `requests.Session()` for whatever reason.
+you get the point), then all our mocks break.  If you want a more plausible example,
+perhaps we decide to stop using `requests.get()` because we want to use
+`requests.Session()` for whatever reason.  
+
+> The point is that `mock.patch` ties you to specific implementation details
 
 
 pros:
 * no change to client code
 * low effort
-* everyone understands it
+* it's familiar to (most? many?) devs
 
 cons:
 * tightly coupled
@@ -237,7 +246,7 @@ cons:
   so you need a sandbox, or some way of faking it out irl
 
 
-# Step 1: Build an Adapter (a wrapper for the external API)
+# SUGGESTION: Build an Adapter (a wrapper for the external API)
 
 ```python
 class RealCargoAPI:
@@ -304,7 +313,7 @@ def test_sync_does_post_for_new_shipment():
 ```
 
 
-# Use integration tests to test your Adapter
+# SUGGESTION: Use (only?) integration tests to test your Adapter
 
 
 Now we can test our adapter separately from our main application code, we
@@ -314,7 +323,7 @@ tests:
 
 ```python
 def test_can_create_new_shipment():
-    api = RealCargoAPI('http://localhost:8543')
+    api = RealCargoAPI('https://sandbox.example.com/')
     line = OrderLine('sku1', 10)
     ref = random_reference()
     shipment = Shipment(reference=ref, lines=[line], eta=None, incoterm='foo')
@@ -328,7 +337,7 @@ def test_can_create_new_shipment():
 
 
 def test_can_update_a_shipment():
-    api = RealCargoAPI('http://localhost:8543')
+    api = RealCargoAPI('https://sandbox.example.com/')
     line = OrderLine('sku1', 10)
     ref = random_reference()
     shipment = Shipment(reference=ref, lines=[line], eta=None, incoterm='foo')
@@ -344,13 +353,60 @@ def test_can_update_a_shipment():
     assert new_shipment['products'] == [{'sku': 'sku1', 'quantity': 20}]
 ```
 
-That relies on your third-party api having a decent sandbox that you can test against
+That relies on your third-party api having a decent sandbox that you can test against.
+You'll need to think about:
+
+* how do you clean up?  running dozens of tests dozens of times a day in dev
+  and CI will start filling the sandbox with test data. s i can't, how much
+  data will start piling up in the sandbox
+
+* is the sandbox slow and annoying to test against?  are devs going to be
+  annoyed at waiting for integration tests to finish on their machines, or
+  in CI?
+
+* is the sandbox flakey at all?  have you now introduced randomly-failing
+  tests in your build?
+
+
+Adapter around api, with integration tests
+
+Pros:
+
+* obey the "don't mock what you don't own" rule.
+* we present a simple api, which is easier to mock
+* we stop messing about with mocks like `requests.get.return_value.json.return_value`
+* if we ever change our third party, there's a good chance that the API of our
+  adapter will _not_ change.  so our core app code (and its tests) don't need
+  to change.
+
+Cons:
+* we've added an extra layer in our application code, which for simple cases might be unnecessary complexity
+* integration tests are strongly dependent on your third party providing a good test sandbox
+* integration tests may be slow and flakey
 
 
 
 
-# Build a fake
+# OPTION: Build your own fake for integration tests
 
+We're into dangerous territory now,  the solution we're about to present is not
+necessarily a good idea in all cases.  Like any solution you find on random blogs
+on the internet I suppose, but still.
+
+So when might you think about doing this?
+
+* if the integration is not core to your application, ie it's an incidental feature
+* if the bulk of the code you write, and the feedback you want, is not about
+  integration issues, but about other things in your app
+* if you really can't figure out how to fix the problems with your integration
+  tests another way (retries? perhaps they'd be a good idea anyway?)
+
+Then you might consider building your own fake version of the external API.  Then
+you can spin it up in a docker container, run it alongside your test code, and
+talk to that instead of the real API.
+
+Faking a third party is often quite simple.  A REST API around a CRUD data model
+might just pop json objects in an out of an in-memory dict, for example:
 
 ```python
 from flask import Flask, request
@@ -385,67 +441,172 @@ def update_shipment(shipment_id):
 ```
 
 
-# step 2: DI
+This doesn't mean you _never_ test against the third-party API, but
+you've now given yourself the _option_ not to.
 
-    example
+* perhaps you test against the real API in CI, but not in dev
 
-- this will fix your brittleness and "remember to mock.patch" problem
-- comes at the cost of a new "unnecessary" argument to your app code
-* some people like that tho.
+* perhaps you have a way of marking certain PRs as needing
+  "real" api integration tests
 
-
-link to brandon "hoist your io" video
-
-
-# step 2a: build an adapter. or a wrapper. or whatever you want to call it
-
-- maybe not worth it if you really do only have that one api call
-
-but if there's more, this is great.
-
-    example goes here
+* perhaps you have some logic in CI that looks at what code has
+  changed in a given PR, tries to spot anything to do with the
+  third party api, and only _then_ runs against the real API
 
 
+# OPTION: Contract tests
+
+I'm not sure if "contract tests" is a real bit of terminology, but the idea is
+to test that the behaviour of the third party API conforms to a contract.  That
+it does what you need it to do.
+
+They're different from integration tests because you may not be testing
+your adapter itself, and they tend to be against a single endpoint at a time.
+Things like:
+
+* checking the format and datatypes of data for given endpoints.  are all
+  the fields you need there?
+
+* if the third party api has bugs you need to work around, you might repro
+  that bug in a test, so that you know if they ever fix it
+
+These tests tend to be more lightweight than integration tests, in that
+they are often read-only, so they suffer less from problems related to
+clean-up
 
 
-# step 2b: integration tests for the adapter
+# OPTION: DI 
 
-* mention contract testing
-* you still need to solve the sandbox problem here
+We still have the problem that using `mock.patch` ties us to specific
+ways of importing our adapter.  We also need to remember to set up
+that mock on _any_ test that might use the third party adapter.
 
+> Making the dependency explicit and using DI solves these problems
 
-# step 2c: unit tests for the things that use the adapter
-
-* test pyramid yay
-
-
-# step 2d: consider building a fake for CI
-
-* once you've got an integration working, if it's not the core
-  of you're app, you don't your CI builds to be flakey because
-  a third party is flakey
+Again, we're in dangerous territory here.  Python people are skeptical
+of DI, and neither of these problems is _that_ big of a deal.  But
+DI does buy us some nice things, so read on with an open mind.
 
 
+First, you might like to define an interface for your dependency explicitly.
+You could use an `abc.ABC`, or if you're anti-inheritance, a newfangled
+`typing.Protocol`:
 
-    example here
+```python
+class CargoAPI(Protocol):
 
-pros: faster CI, faster local dev
-cons: need a way to occasionally run tests against the real thing.
-      also: more code
+    def get_latest_eta(self, reference: str) -> date:
+        ...
+
+    def sync(self, shipment: Shipment) -> None:
+        ...
+```
 
 
-# general pros + cons re: adapters
+Now we can add our explicit dependency where it's needed, replacing
+a hardcoded `import` with a new, explicit argument to a function somewhere.
+Possibly event with a type hint:
 
-pros:
- * no brittle mocks everywhere
- * decoupling; our app code is now no longer dependeent on the specific api
-   we're calling. if it changes, or we change it, our app doesnt need to know
- * and our app code looks nicer too
- * we've created a clear separation between things that get unit tested
-   and things that get integration tested
+```python
+def create_shipment(
+    quantities: Dict[str, int],
+    incoterm: str, 
+    cargo_api: CargoAPI
+) -> Shipment:
+    ...
+```
 
-cons:
- * more code
- * DI is still a hard sell in the python world
+> This change of an `import` to an explicit dependency is memorably advocated
+> for in Yeray Díaz's talk [Import as an antipattern](https://www.youtube.com/watch?v=qkGxy4c64Jg)
 
+
+What effect does that have on our tests?  Well, instead of needing to
+call `with mock.patch()`, we can create a standalone mock, and pass it
+in:
+
+
+```python
+def test_create_shipment_syncs_to_api():
+    mock_api = mock.Mock()
+    shipment = create_shipment({'sku1': 10}, incoterm='EXW', cargo_api=mock_api)
+    assert mock_api.sync.call_args == mock.call(shipment)
+```
+
+Pros:
+* no need to _remember_ to do `mock.patch()`, the function arguments
+  always require the dependency
+
+Cons
+* we've added an "unnecessary" extra argument to our function
+
+
+So far you may think the pros isn't enough of a wow to justify the con?
+Well, if we take it one step further and really commit, you may yet get
+on board.
+
+# OPTION: build your own fake for unit tests
+
+Just like we can build our own fake for integration testing,
+we can build our own fake for unit tests too.  Yes it's more
+lines of code than `mock_api = mock.Mock()`, but it's not a
+lot:
+
+```python
+class FakeCargoAPI:
+
+    def __init__(self):
+        self._shipments = {}
+
+    def get_latest_eta(self, reference) -> date:
+        return self._shipments[reference].eta
+
+    def sync(self, shipment: Shipment):
+        self._shipments[shipment.reference] = shipment
+
+    def __contains__(self, shipment):
+        return shipment in self._shipments.values()
+
+
+```
+
+The fake is in-memory and in-process this time, but again, it's just a
+thin wrapper around some sort of container, a dict in this case.
+
+`get_latest_eta()` and `sync()` are the two methods we need to define
+to make it emulate the real api (and comply with the `Protocol`).
+
+> `mypy` will tell you when you get this right, or if you ever need to change it
+
+The `__contains__` is just a bit of syntactic sugar that lets us use
+`assert in` in our tests, which looks nice.  It's a Bob thing.
+
+```python
+def test_create_shipment_syncs_to_api():
+    api = FakeCargoAPI()
+    shipment = create_shipment({'sku1': 10}, incoterm='EXW', cargo_api=api)
+    assert shipment in api
+```
+
+Why bother with this?
+
+Pros:
+* tests can be more readable, no more `mock.call_args == call(foo,bar)` stuff
+* _Our fake exercises design pressure on our Adapter's API_
+
+Cons:
+* more code in tests
+* need to keep the fake in sync with the real thing
+
+The design pressure is the killer argument in our opinion.  Because hand-rolling
+a fake _is_ more effort, it forces us to think about the API of our adapter,
+and it gives us an incentive to keep it simple.
+
+(callback to initial decision to build a wrapper.  the fake helps do it right)
+
+* link to [example code](https://github.com/cosmicpython/code/tree/blogpost-testing-api)
+
+
+# TODOS:
+
+* link to Brandon [Hoist your I/O](https://www.youtube.com/watch?v=PBQN62oUnN8) video?
 
