@@ -1,5 +1,5 @@
 ---
-title: Testing external API calls
+title: Writing tests for external API calls
 layout: post
 author: Harry
 categories:
@@ -12,13 +12,30 @@ tags:
 ---
 
 
-TODO: intro, common question, how do i write tests for external api calls
+Here's a common question from people doing testing in Python:
+
+> How do I write tests for for code that calls out to a third-party API?
+
+(with thanks to Brian Okken for suggesting the question).
+
+In this article I'd like to outline several options, starting from the
+most familiar (mocks) going out to the most architecture-astronautey,
+and try and discuss the pros and cons of each one.  With luck I'll convince you
+to at least try out some of the ideas near the end.
 
 
-Let's take an example to do with logistics, we have a model of a shipment which contains a number
-of order lines.  We also care about its estimated time of arrival (`eta`) and a bit of jargon
-called the "incoterm" (you don't need to understand what that is, I'm just trying to illustrate
-a bit of real-life complexity, in this small example).
+I'm going to use an example from the domain of logistics where we need to sync
+to a cargo provider's API, but you can really imagine any old API--a payment
+gateway, an SMS notifications engine, a cloud storage provider.  Or you can
+imagine an external dependency that's nothing to do with the web at all, just
+any kind of external I/O dependency that's hard to unit test.
+
+
+But to make things concrete, in our logistics example, we'll have a model of a
+shipment which contains a number of order lines.  We also care about its
+estimated time of arrival (`eta`) and a bit of jargon called the _incoterm_
+(you don't need to understand what that is, I'm just trying to illustrate a bit
+of real-life complexity, in this small example).
 
 ```python
 @dataclass
@@ -41,8 +58,9 @@ class Shipment:
 ```
 
 
-We want to sync our shipments model with a third party, the cargo freight company, via their API.
-We have a couple of use cases, new shipment creation, and checking for updated etas:
+We want to sync our shipments model with a third party, the cargo freight
+company, via their API. We have a couple of use cases, new shipment creation,
+and checking for updated etas:
 
 
 Let's say we have some sort of controller function that's in charge of doing this.  It
@@ -60,7 +78,8 @@ def create_shipment(quantities: Dict[str, int], incoterm):
 ```
 
 
-How do we sync to the API?  a simple post request, with a bit of datatype conversion and wrangling.
+How do we sync to the API?  A simple POST request, with a bit of datatype
+conversion and wrangling.
 
 ```python
 def sync_to_api(shipment):
@@ -74,13 +93,15 @@ def sync_to_api(shipment):
     })
 ```
 
-Not too bad!  In a case like this, the typical reaction is to reach for mocks,
+Not too bad!
+
+In a case like this, the typical reaction is to reach for mocks,
 and _as long as things stay simple_, it's pretty manageable
 
 
 ```python
 def test_create_shipment_does_post_to_external_api():
-    with mock.patch('use_cases.requests') as mock_requests:
+    with mock.patch('controllers.requests') as mock_requests:
         shipment = create_shipment({'sku1': 10}, incoterm='EXW')
         expected_data = {
             'client_reference': shipment.reference,
@@ -92,9 +113,9 @@ def test_create_shipment_does_post_to_external_api():
         )
 ```
 
-And you can imagine adding a few more tests, perhaps one that checks that
-we do the date-to-isoformat conversion correctly, maybe one that checks we can handle multiple
-lines.  Three tests, one mock each, we're ok.
+And you can imagine adding a few more tests, perhaps one that checks that we do
+the date-to-isoformat conversion correctly, maybe one that checks we can handle
+multiple lines.  Three tests, one mock each, we're ok.
 
 The trouble is that it never stays quite that simple does it?  For example,
 the cargo company may already have a shipment on record, because reasons.
@@ -104,15 +125,6 @@ a GET request, and then we either do a POST if it's new, or a PUT for
 an existing one:
 
 ```python
-def get_shipment_id(our_reference) -> Optional[str]:
-    their_shipments = requests.get(f"{API_URL}/shipments/").json()['items']
-    return next(
-        (s['id'] for s in their_shipments if s['client_reference'] == our_reference),
-        None
-    )
-
-
-
 def sync_to_api(shipment):
     external_shipment_id = get_shipment_id(shipment.reference)
     if external_shipment_id is None:
@@ -136,20 +148,28 @@ def sync_to_api(shipment):
         })
 
 
-
+def get_shipment_id(our_reference) -> Optional[str]:
+    their_shipments = requests.get(f"{API_URL}/shipments/").json()['items']
+    return next(
+        (s['id'] for s in their_shipments if s['client_reference'] == our_reference),
+        None
+    )
 ```
 
-* because things are never easy, the third party has different reference numbers to us,
-  so we need the `get_shipment_id()` function that finds the right one for us
+And as usual, complexity creeps in:
 
-* and we need to use POST if it's a new shipment, or PUT if it's an existing one.
-  don't ask why they would know about a shipment before we do, it happens.
+* Because things are never easy, the third party has different reference
+  numbers to us, so we need the `get_shipment_id()` function that finds the
+  right one for us
 
-Already you can imagine we're going to need to write quite a few tests to cover all these options.
+* And we need to use POST if it's a new shipment, or PUT if it's an existing one.
+
+Already you can imagine we're going to need to write quite a few tests to cover
+all these options.  Here's just one, as an example:
 
 ```python
 def test_does_PUT_if_shipment_already_exists():
-    with mock.patch('use_cases.uuid') as mock_uuid, mock.patch('use_cases.requests') as mock_requests:
+    with mock.patch('controllers.uuid') as mock_uuid, mock.patch('controllers.requests') as mock_requests:
         mock_uuid.uuid4.return_value.hex = 'our-id'
         mock_requests.get.return_value.json.return_value = {
             'items': [{'id': 'their-id', 'client_reference': 'our-id'}]
@@ -167,34 +187,31 @@ def test_does_PUT_if_shipment_already_exists():
         )
 ```
 
-and our tests are getting less and less pleasant.  Again, the details don't matter too
-much, the hope is that this sort of test ugliness is familiar.
+...and our tests are getting less and less pleasant.  Again, the details don't
+matter too much, the hope is that this sort of test ugliness is familiar.
 
 
-And this is only the beginning, we've shown an API integration that only cares about writes,
-but what about reads?  Say we want to poll our third party api now and again to get updated etas
-for ours shipments.  Depending on the eta, we have some business logic about notifying
-people of delays...
+And this is only the beginning, we've shown an API integration that only cares
+about writes, but what about reads?  Say we want to poll our third party api
+now and again to get updated etas for ours shipments.  Depending on the eta, we
+have some business logic about notifying people of delays...
 
 
 ```python
+# another example controller,
+# showing business logic getting intermingled with API calls
+
 def get_updated_eta(shipment):
     external_shipment_id = get_shipment_id(shipment.reference)
     if external_shipment_id is None:
-        logging.warning(
-            'tried to get updated eta for shipment %s not yet sent to partners',
-            shipment.reference
-        )
+        logging.warning('tried to get updated eta for shipment %s not yet sent to partners', shipment.reference)
         return
 
     [journey] = requests.get(f"{API_URL}/shipments/{external_shipment_id}/journeys").json()['items']
     latest_eta = journey['eta']
     if latest_eta == shipment.eta:
         return
-    logging.info(
-        'setting new shipment eta for %s: %s (was %s)',
-        shipment.reference, latest_eta, shipment.eta
-    )
+    logging.info('setting new shipment eta for %s: %s (was %s)', shipment.reference, latest_eta, shipment.eta)
     if shipment.eta is not None and latest_eta > shipment.eta:
         notify_delay(shipment_ref=shipment.reference, delay=latest_eta - shipment.eta)
     if shipment.eta is None and shipment.incoterm == 'FOB' and len(shipment.lines) > 10:
@@ -206,47 +223,70 @@ def get_updated_eta(shipment):
 
 I haven't coded up what all the tests would look like, but you could imagine them:
 
-* a test that if the shipment does not exist, we log a warning.  Needs to mock `requests.get` or `get_shipment_id()`
-* a test that if the eta has not changed, we do nothing.  Needs two different mocks on `requests.get`
-* a test for the error case where the shipments api has no journeys
-* a test for the edge case where the shipment has multiple journeys
-* two tests to check that if the eta is is later than the current one, we do a notification.
-* two test for the large shipments notification
-* and a general test that we update the local eta and save it.
+1. a test that if the shipment does not exist, we log a warning.  Needs to mock `requests.get` or `get_shipment_id()`
+1. a test that if the eta has not changed, we do nothing.  Needs two different mocks on `requests.get`
+1. a test for the error case where the shipments api has no journeys
+1. a test for the edge case where the shipment has multiple journeys
+1. a tests to check that if the eta is is later than the current one, we do a
+   notification.
+1. and a test of the converse, no notification if eta sooner
+1. a test for the large shipments notification
+1. and a test that we only do that one if necessary
+1. and a general test that we update the local eta and save it.
+1. ...I'm sure we can imagine some more.
 
+And each one of these tests needs to set up three or four mocks.  We're getting
+into what Ed Jung calls [Mock Hell](https://www.youtube.com/watch?v=CdKaZ7boiZ4).
 
-And each one of these tests needs to set up three or four mocks.  We're getting into what Ed Jung
-calls [Mock Hell](https://www.youtube.com/watch?v=CdKaZ7boiZ4).
-
-On top of our tests being hard to read and write, they're also brittle.  If we change the way we
-import, from `import requests` to `from requests import get` (not that you'd ever do that, but
-you get the point), then all our mocks break.  If you want a more plausible example,
-perhaps we decide to stop using `requests.get()` because we want to use
-`requests.Session()` for whatever reason.  
+On top of our tests being hard to read and write, they're also brittle.  If we
+change the way we import, from `import requests` to `from requests import get`
+(not that you'd ever do that, but you get the point), then all our mocks break.
+If you want a more plausible example, perhaps we decide to stop using
+`requests.get()` because we want to use `requests.Session()` for whatever
+reason.
 
 > The point is that `mock.patch` ties you to specific implementation details
 
+And we haven't even spoken about other kinds of tests.  To reassure yourself
+that things _really_ work, you're probably going to want an integration test or
+two, and maybe an E2E test.
 
-pros:
+
+Here's a little recap of the pros and cons of the mocking approach.  We'll
+have one of these each time we introduce a new option.
+
+#### Mocking and patching: tradeoffs
+
+##### Pros:
+
 * no change to client code
 * low effort
 * it's familiar to (most? many?) devs
 
-cons:
+##### Cons:
+
 * tightly coupled
-* brittle.  requests.get -> requests.Session().get will break it.
+* brittle.  `requests.get` -> `requests.Session().get` will break it.
 * need to remember to `@mock.patch` every single test that might
  end up invoking that api
+* easy to mix together business logic and I/O concerns
+* probably need integration & E2E tests as well.
 
 
-- could mention vcr.py here.  ingenious but i've found it confuses ppl.
-
-* and you still need an integration test or two, and maybe an E2E test.
-  so you need a sandbox, or some way of faking it out irl
 
 
-# SUGGESTION: Build an Adapter (a wrapper for the external API)
+**TIP** I want to give a quick nod to [vcr.py](https://vcrpy.readthedocs.io/en/latest/)
+here.  It's a very neat solution, and I've used it successfully, but it does
+have limitations.  This really deserves a blog post of its own, but in brief,
+it can't simulate state-dependent interactions, and it can
+also be quite confusing to new team members.  Still, give it a try!
 
+
+
+## SUGGESTION: Build an Adapter (a wrapper for the external API)
+
+
+You'll probably tend towards
 ```python
 class RealCargoAPI:
     API_URL = 'https://example.org'
@@ -269,7 +309,7 @@ class RealCargoAPI:
               ...
         except requests.exceptions.RequestException:
             ...
-          
+
 ```
 
 Now how do our tests look?
@@ -277,7 +317,7 @@ Now how do our tests look?
 
 ```python
 def test_create_shipment_syncs_to_api():
-    with mock.patch('use_cases.cargo_api') as mock_cargo_api:
+    with mock.patch('controllers.cargo_api') as mock_cargo_api:
         shipment = create_shipment({'sku1': 10}, incoterm='EXW')
         assert mock_cargo_api.sync.call_args == mock.call(shipment)
 ```
@@ -367,9 +407,9 @@ You'll need to think about:
   tests in your build?
 
 
-Adapter around api, with integration tests
+#### Adapter around api, with integration tests, tradeoffs:
 
-Pros:
+##### Pros:
 
 * obey the "don't mock what you don't own" rule.
 * we present a simple api, which is easier to mock
@@ -378,15 +418,17 @@ Pros:
   adapter will _not_ change.  so our core app code (and its tests) don't need
   to change.
 
-Cons:
-* we've added an extra layer in our application code, which for simple cases might be unnecessary complexity
-* integration tests are strongly dependent on your third party providing a good test sandbox
+##### Cons:
+* we've added an extra layer in our application code, which for simple cases
+  might be unnecessary complexity
+* integration tests are strongly dependent on your third party providing a good
+  test sandbox
 * integration tests may be slow and flakey
 
 
 
 
-# OPTION: Build your own fake for integration tests
+## OPTION: Build your own fake for integration tests
 
 We're into dangerous territory now,  the solution we're about to present is not
 necessarily a good idea in all cases.  Like any solution you find on random blogs
@@ -453,7 +495,7 @@ you've now given yourself the _option_ not to.
   third party api, and only _then_ runs against the real API
 
 
-# OPTION: Contract tests
+## OPTION: Contract tests
 
 I'm not sure if "contract tests" is a real bit of terminology, but the idea is
 to test that the behaviour of the third party API conforms to a contract.  That
@@ -471,10 +513,13 @@ Things like:
 
 These tests tend to be more lightweight than integration tests, in that
 they are often read-only, so they suffer less from problems related to
-clean-up
+clean-up.  You might decide they're useful in addition to integration tests,
+or they might be a useful backup option if proper integration tests aren't
+possible.  In a similar way, you probably want ways of _selectively_ running
+your contract tests against your third party.
 
 
-# OPTION: DI 
+## OPTION: DI
 
 We still have the problem that using `mock.patch` ties us to specific
 ways of importing our adapter.  We also need to remember to set up
@@ -509,15 +554,12 @@ Possibly event with a type hint:
 ```python
 def create_shipment(
     quantities: Dict[str, int],
-    incoterm: str, 
+    incoterm: str,
     cargo_api: CargoAPI
 ) -> Shipment:
     ...
+    # rest of controller code essentially unchanged.
 ```
-
-> This change of an `import` to an explicit dependency is memorably advocated
-> for in Yeray Díaz's talk [Import as an antipattern](https://www.youtube.com/watch?v=qkGxy4c64Jg)
-
 
 What effect does that have on our tests?  Well, instead of needing to
 call `with mock.patch()`, we can create a standalone mock, and pass it
@@ -531,19 +573,29 @@ def test_create_shipment_syncs_to_api():
     assert mock_api.sync.call_args == mock.call(shipment)
 ```
 
-Pros:
+#### DI tradeoffs
+
+##### Pros:
+
 * no need to _remember_ to do `mock.patch()`, the function arguments
   always require the dependency
 
-Cons
+##### Cons
+
 * we've added an "unnecessary" extra argument to our function
+
+
+> This change of an `import` to an explicit dependency is memorably advocated
+> for in Yeray Díaz's talk [import as an antipattern](https://www.youtube.com/watch?v=qkGxy4c64Jg)
+
 
 
 So far you may think the pros isn't enough of a wow to justify the con?
 Well, if we take it one step further and really commit, you may yet get
 on board.
 
-# OPTION: build your own fake for unit tests
+
+## OPTION: build your own fake for unit tests
 
 Just like we can build our own fake for integration testing,
 we can build our own fake for unit tests too.  Yes it's more
@@ -552,7 +604,6 @@ lot:
 
 ```python
 class FakeCargoAPI:
-
     def __init__(self):
         self._shipments = {}
 
@@ -564,8 +615,6 @@ class FakeCargoAPI:
 
     def __contains__(self, shipment):
         return shipment in self._shipments.values()
-
-
 ```
 
 The fake is in-memory and in-process this time, but again, it's just a
@@ -588,11 +637,13 @@ def test_create_shipment_syncs_to_api():
 
 Why bother with this?
 
-Pros:
-* tests can be more readable, no more `mock.call_args == call(foo,bar)` stuff
-* _Our fake exercises design pressure on our Adapter's API_
+#### handrolled fakes for unit tests, the tradeoffs
 
-Cons:
+##### Pros:
+* tests can be more readable, no more `mock.call_args == call(foo,bar)` stuff
+* 👉Our fake exercises design pressure on our Adapter's API👈
+
+##### Cons:
 * more code in tests
 * need to keep the fake in sync with the real thing
 
