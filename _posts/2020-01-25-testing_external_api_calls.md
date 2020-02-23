@@ -11,9 +11,8 @@ tags:
   - adapters
 ---
 
-## Notes
 
-common question, how do i write tests for external api calls
+TODO: intro, common question, how do i write tests for external api calls
 
 
 Let's take an example to do with logistics, we have a model of a shipment which contains a number
