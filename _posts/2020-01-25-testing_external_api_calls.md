@@ -760,7 +760,7 @@ we're abstracting out.
 ## Prior art
 
 * [Mock Hell](https://www.youtube.com/watch?v=CdKaZ7boiZ4) by Ed Jung
-* [stop mocking and start testing](https://nedbatchelder.com/blog/201206/tldw_stop_mocking_start_testing.html) by Augie Fackler Nathaniel Manista (and summarised by Ned Batchelder)
-* [verified fakes](https://pythonspeed.com/articles/verified-fakes/) by Itamar Turner-Trauring
+* [Stop mocking and start testing](https://nedbatchelder.com/blog/201206/tldw_stop_mocking_start_testing.html) by Augie Fackler Nathaniel Manista (and summarised by Ned Batchelder)
+* [Verified fakes](https://pythonspeed.com/articles/verified-fakes/) by Itamar Turner-Trauring
 * [Hoist your I/O](https://www.youtube.com/watch?v=PBQN62oUnN8) by Brandon Rhodes
 
