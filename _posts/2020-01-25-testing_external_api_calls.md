@@ -25,9 +25,9 @@ to at least try out some of the ideas near the end.
 
 
 I'm going to use an example from the domain of logistics where we need to sync
-to a cargo provider's API, but you can really imagine any old API--a payment
-gateway, an SMS notifications engine, a cloud storage provider.  Or you can
-imagine an external dependency that's nothing to do with the web at all, just
+shipments to a cargo provider's API, but you can really imagine any old API--a
+payment gateway, an SMS notifications engine, a cloud storage provider.  Or you
+can imagine an external dependency that's nothing to do with the web at all, just
 any kind of external I/O dependency that's hard to unit test.
 
 
@@ -59,8 +59,8 @@ class Shipment:
 
 
 We want to sync our shipments model with a third party, the cargo freight
-company, via their API. We have a couple of use cases, new shipment creation,
-and checking for updated etas:
+company, via their API. We have a couple of use cases: creating new shipments,
+and checking for updated etas.
 
 
 Let's say we have some sort of controller function that's in charge of doing this.  It
@@ -95,7 +95,7 @@ def sync_to_api(shipment):
 
 Not too bad!
 
-In a case like this, the typical reaction is to reach for mocks,
+How do we test it? In a case like this, the typical reaction is to reach for mocks,
 and _as long as things stay simple_, it's pretty manageable
 
 
@@ -193,7 +193,7 @@ matter too much, the hope is that this sort of test ugliness is familiar.
 
 And this is only the beginning, we've shown an API integration that only cares
 about writes, but what about reads?  Say we want to poll our third party api
-now and again to get updated etas for ours shipments.  Depending on the eta, we
+now and again to get updated etas for our shipments.  Depending on the eta, we
 have some business logic about notifying people of delays...
 
 
@@ -395,9 +395,8 @@ def test_can_update_a_shipment():
 That relies on your third-party api having a decent sandbox that you can test against.
 You'll need to think about:
 
-* how do you clean up?  running dozens of tests dozens of times a day in dev
-  and CI will start filling the sandbox with test data. s i can't, how much
-  data will start piling up in the sandbox
+* how do you clean up? Running dozens of tests dozens of times a day in dev
+  and CI will start filling the sandbox with test data.
 
 * is the sandbox slow and annoying to test against?  are devs going to be
   annoyed at waiting for integration tests to finish on their machines, or
@@ -436,7 +435,7 @@ on the internet I suppose, but still.
 
 So when might you think about doing this?
 
-* if the integration is not core to your application, ie it's an incidental feature
+* if the integration is not core to your application, i.e it's an incidental feature
 * if the bulk of the code you write, and the feedback you want, is not about
   integration issues, but about other things in your app
 * if you really can't figure out how to fix the problems with your integration
@@ -527,7 +526,7 @@ that mock on _any_ test that might use the third party adapter.
 
 > Making the dependency explicit and using DI solves these problems
 
-Again, we're in dangerous territory here.  Python people are skeptical
+Again, we're in dangerous territory here. Python people are skeptical
 of DI, and neither of these problems is _that_ big of a deal.  But
 DI does buy us some nice things, so read on with an open mind.
 
@@ -590,8 +589,8 @@ def test_create_shipment_syncs_to_api():
 
 
 
-So far you may think the pros isn't enough of a wow to justify the con?
-Well, if we take it one step further and really commit, you may yet get
+So far you may think the pros aren't enough of a wow to justify the con?
+Well, if we take it one step further and really commit to DI, you may yet get
 on board.
 
 
@@ -637,11 +636,11 @@ def test_create_shipment_syncs_to_api():
 
 Why bother with this?
 
-#### handrolled fakes for unit tests, the tradeoffs
+#### Handrolled fakes for unit tests, the tradeoffs
 
 ##### Pros:
 * tests can be more readable, no more `mock.call_args == call(foo,bar)` stuff
-* 👉Our fake exercises design pressure on our Adapter's API👈
+* 👉Our fake exerts design pressure on our Adapter's API👈
 
 ##### Cons:
 * more code in tests
