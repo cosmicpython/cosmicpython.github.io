@@ -277,8 +277,16 @@ have one of these each time we introduce a new option.
 
 ## SUGGESTION: Build an Adapter (a wrapper for the external API)
 
+We really want to disentangle our business logic from our API integration.
+Building an abstraction, a wrapper around the API that just exposes nice,
+readable methods for us to call in our code.
 
-You'll probably tend towards
+> We call it an "adapter" in [ports & adapters](https://github.com/cosmicpython/book/blob/master/chapter_02_repository.asciidoc#what_is_a_port_and_what_is_an_adapter) sense,
+> but you don't have to go full-on hexagonal architecture to use
+> this pattern.
+
+
+
 ```python
 class RealCargoAPI:
     API_URL = 'https://example.org'
@@ -562,6 +570,14 @@ or they might be a useful backup option if proper integration tests aren't
 possible.  In a similar way, you probably want ways of _selectively_ running
 your contract tests against your third party.
 
+> you can also run your contract tests against your fake api.
+
+When you run your contract tests against your own fake api as well as
+against the real thing, you're confirming the quality of your fake.
+Some people call this [verified fakes](https://pythonspeed.com/articles/verified-fakes/)
+(see also ["stop mocking and start testing"](https://nedbatchelder.com/blog/201206/tldw_stop_mocking_start_testing.html).)
+[](https://nedbatchelder.com/blog/201206/tldw_stop_mocking_start_testing.html)
+
 
 ## OPTION: DI
 
@@ -695,12 +711,56 @@ The design pressure is the killer argument in our opinion.  Because hand-rolling
 a fake _is_ more effort, it forces us to think about the API of our adapter,
 and it gives us an incentive to keep it simple.
 
-(callback to initial decision to build a wrapper.  the fake helps do it right)
+If you think back to our initial decision to build a wrapper, in our toy example
+it was quite easy to decide what the adapter should look like, we just needed
+one public method called `sync()`.  In real life it's sometimes harder to figure
+out what belongs in an adapter, and what stays in business logic.   By forcing
+ourselves to build a fake, we get to really see the shape of the thing that
+we're abstracting out.
 
-* link to [example code](https://github.com/cosmicpython/code/tree/blogpost-testing-api)
+* See this excerpt from our book in which we talk about
+  [heuristics for abstracting out dependencies](http://www.obeythetestinggoat.com/new-book-excerpt-abstractions.html).
 
 
-# TODOS:
+> For bonus points, you can even share code between the fake class you use
+> for your unit tests, and the fake you use for your integration tests.
 
-* link to Brandon [Hoist your I/O](https://www.youtube.com/watch?v=PBQN62oUnN8) video?
+
+
+
+## Recap
+
+* As soon as your integration with an external API gets beyond the trivial,
+  mocking and patching starts to be quite painful
+
+* Consider abstracting out a wrapper around your API
+
+* Use integration tests to test your adapter, and unit tests for your
+  business logic (and to check that you call your adapter correctly)
+
+* Consider writing your own fakes for your unit tests.  They will
+  help you find a good abstraction.
+
+* If you want a way for devs or CI to run tests without depending
+  on the external API, consider also writing a fully-functional fake of the
+  third-party API (an actual web server).
+
+* For bonus points, the two fakes can share code.
+
+* Selectively running integration tests against both the fake and the real API
+  can validate that both continue to work over time.
+
+* You could also consider adding more targeted "contract tests" for this purpose.
+
+
+> If you'd like to play around with the code from this blog post, you can
+> [check it out here](https://github.com/cosmicpython/code/tree/blogpost-testing-api)
+
+
+## Prior art
+
+* [Mock Hell](https://www.youtube.com/watch?v=CdKaZ7boiZ4) by Ed Jung
+* [stop mocking and start testing](https://nedbatchelder.com/blog/201206/tldw_stop_mocking_start_testing.html) by Augie Fackler Nathaniel Manista (and summarised by Ned Batchelder)
+* [verified fakes](https://pythonspeed.com/articles/verified-fakes/) by Itamar Turner-Trauring
+* [Hoist your I/O](https://www.youtube.com/watch?v=PBQN62oUnN8) by Brandon Rhodes
 
