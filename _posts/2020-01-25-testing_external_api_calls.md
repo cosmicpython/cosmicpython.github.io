@@ -275,14 +275,6 @@ have one of these each time we introduce a new option.
 
 
 
-**TIP** I want to give a quick nod to [vcr.py](https://vcrpy.readthedocs.io/en/latest/)
-here.  It's a very neat solution, and I've used it successfully, but it does
-have limitations.  This really deserves a blog post of its own, but in brief,
-it can't simulate state-dependent interactions, and it can
-also be quite confusing to new team members.  Still, give it a try!
-
-
-
 ## SUGGESTION: Build an Adapter (a wrapper for the external API)
 
 
@@ -424,6 +416,59 @@ You'll need to think about:
   test sandbox
 * integration tests may be slow and flakey
 
+
+## OPTION: vcr.py
+
+I want to give a quick nod to [vcr.py](https://vcrpy.readthedocs.io/en/latest/)
+at this point.
+
+VCR is a very neat solution. It lets you run your tests against a real
+endpoint, and then it captures the outgoing and incoming requests, and
+serializes them to disk. Next time you run the tests, it intercepts your HTTP
+requests, compares them against the saved ones, and replays past responses.
+
+The end result is that you have a way of running integration tests with
+realistic simulated responses, but without actually needing to talk to
+an external third party.
+
+At any time you like, you can also trigger a test run against the real API,
+and it will update your saved response files.  This gives you a way of
+checking whether things have changed on a periodic basis, and updating
+your recorded responses when they do.
+
+As I say it's a very neat solution, and I've used it successfully, but it does
+have some drawbacks:
+
+* Firstly the workflow can be quite confusing.  While you're still evolving
+  your integration, your code is going to change, and the canned responses too,
+  and it can be hard to keep track of what's on disk, what's fake and what's not.
+  One person can usually wrap their head around it, but it's a steep learning
+  curve for other members of the team.  That can be particularly painful if
+  it's code that only gets changed infrequently, because it's long enough for
+  everyone to forget.
+
+* Secondly, `vcr.py` is tricky to configure when you have randomised data in
+  your requests (eg unique ids).  By default it looks for requests that are
+  exactly the same as the ones it's recorded. You can configure "matchers" to
+  selectively ignore certain fields when recognising requests, but that
+  only deals with half the problem.
+
+* If you send out a POST and follow up with a GET for the same ID, you might be
+  able to configure a matcher to ignore the ID in the requests, but the
+  responses will still contain the old IDs.  That will break any logic on your
+  own side that's doing any logic based on those IDs.
+
+#### vcr.py tradeoffs
+
+##### Pros:
+* gives you a way of isolating tests from external dependencies by replaying canned responses
+* can re-run against real API at any time
+* no changes to application code required
+
+##### Cons:
+* can be tricky for team-members to understand
+* dealing with randomly-generated data is hard
+* challenging to simulate state-based workflows
 
 
 
