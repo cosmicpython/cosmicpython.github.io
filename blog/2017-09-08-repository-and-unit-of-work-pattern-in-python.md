@@ -1,11 +1,6 @@
----
-layout: post
-author: Bob
-categories:
-  - ports & adapters
-tags:
-  - python
-  - architecture
+blog_author: Bob
+blog_heading: Repository and Unit of Work Pattern
+
 ---
 
 In the previous part

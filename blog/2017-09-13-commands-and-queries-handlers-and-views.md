@@ -1,11 +1,6 @@
----
-layout: post
-author: Bob
-categories:
-  - ports & adapters
-tags:
-  - python
-  - architecture
+blog_author: Bob
+blog_heading: Commands, Handlers, Queries and Views
+
 ---
 
 In the first and second parts of this series I introduced the

@@ -1,14 +1,6 @@
----
-title: Writing tests for external API calls
-layout: post
-author: Harry
-categories:
-  - testing
-tags:
-  - tdd
-  - fakes
-  - mocks
-  - adapters
+blog_heading: Writing tests for external API calls
+blog_author: Harry
+
 ---
 
 

@@ -1,0 +1,70 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title>
+            Cosmic Python
+        </title>
+        <description>
+            Simple patterns for building complex apps
+        </description>
+        <link>https://cosmicpython.com</link>
+        <lastBuildDate>Tue, 10 Mar 2020 19:28:16 -0000</lastBuildDate>
+        <pubDate>Sat, 4 Jan 2020 19:15:54 -0500</pubDate>
+        <atom:link href="https://cosmicpython.com/rss.xml" rel="self" type="application/rss+xml" />
+        
+        <item>
+            <title>Writing tests for external API calls</title>
+            <description>
+                
+            </description>
+            <link>https://tonybaloney.github.io/posts/2020-01-25-testing_external_api_calls.html</link>
+            <pubDate></pubDate>
+            <dc:creator>Harry</dc:creator>
+            <guid>https://tonybaloney.github.io/posts/2020-01-25-testing_external_api_calls.html</guid>
+        </item>
+        
+        <item>
+            <title>Why use domain events?</title>
+            <description>
+                
+            </description>
+            <link>https://tonybaloney.github.io/posts/2017-09-19-why-use-domain-events.html</link>
+            <pubDate></pubDate>
+            <dc:creator>Bob</dc:creator>
+            <guid>https://tonybaloney.github.io/posts/2017-09-19-why-use-domain-events.html</guid>
+        </item>
+        
+        <item>
+            <title>Commands, Handlers, Queries and Views</title>
+            <description>
+                
+            </description>
+            <link>https://tonybaloney.github.io/posts/2017-09-13-commands-and-queries-handlers-and-views.html</link>
+            <pubDate></pubDate>
+            <dc:creator>Bob</dc:creator>
+            <guid>https://tonybaloney.github.io/posts/2017-09-13-commands-and-queries-handlers-and-views.html</guid>
+        </item>
+        
+        <item>
+            <title>Repository and Unit of Work Pattern</title>
+            <description>
+                
+            </description>
+            <link>https://tonybaloney.github.io/posts/2017-09-08-repository-and-unit-of-work-pattern-in-python.html</link>
+            <pubDate></pubDate>
+            <dc:creator>Bob</dc:creator>
+            <guid>https://tonybaloney.github.io/posts/2017-09-08-repository-and-unit-of-work-pattern-in-python.html</guid>
+        </item>
+        
+        <item>
+            <title>Introducing Command Handler</title>
+            <description>
+                
+            </description>
+            <link>https://tonybaloney.github.io/posts/2017-09-07-introducing-command-handler.html</link>
+            <pubDate></pubDate>
+            <dc:creator>Bob</dc:creator>
+            <guid>https://tonybaloney.github.io/posts/2017-09-07-introducing-command-handler.html</guid>
+        </item>
+        
+    </channel>
+</rss>

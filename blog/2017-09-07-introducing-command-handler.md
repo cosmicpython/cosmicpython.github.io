@@ -1,11 +1,5 @@
----
-layout: post
-author: Bob
-categories:
-  - ports & adapters
-tags:
-  - python
-  - architecture
+blog_heading: Introducing Command Handler
+blog_author: Bob
 ---
 
 The term DDD comes from the book by Eric Evans: ["Domain-Driven Design: Tackling

@@ -1,11 +1,6 @@
----
-layout: post
-author: Bob
-categories:
-  - ports & adapters
-tags:
-  - python
-  - architecture
+blog_heading: Why use domain events?
+blog_author: Bob
+
 ---
 
 Nota bene: this instalment in the Ports and Adapters with Command Handlers
