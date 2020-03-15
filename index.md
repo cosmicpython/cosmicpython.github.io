@@ -1,4 +1,3 @@
----
 title:
 layout: page
 feature_image: "https://www.jpl.nasa.gov/spaceimages/images/largesize/PIA13111_hires.jpg"
@@ -11,7 +10,7 @@ feature_text: |
 
 _(Because "Cosmos" is the [opposite of Chaos](https://www.goodreads.com/quotes/604655-cosmos-is-a-greek-word-for-the-order-of-the), you see)_
 
-{% include figure.html image="images/cover.png" alt="Cover Image for Architecture Patterns with Python Book" position="right" width="200" %}
+<img src="images/cover.png" alt="Cover Image for Architecture Patterns with Python Book" style="float: right;" width="200" />
 
 
 ## The Book

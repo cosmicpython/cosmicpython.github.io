@@ -23,8 +23,8 @@ def main():
         print("rendering {0}".format(post))
         post_date =  date.fromisoformat(post[5:15])
         url = post.replace(".md", ".html").replace("blog/", "posts/")
-        with open(post) as post_f:
-            html = _md.convert(post_f.read())
+        with open(post) as f:
+            html = _md.convert(f.read())
             context = {
                 'blog_publish_date': post_date,
                 **_md.Meta
@@ -35,7 +35,15 @@ def main():
         with open(post_html, "w") as post_html_f:
             post_html_f.write(doc)
         # all_posts.append(dict(**_md.Meta, date=post_date, rfc2822_date=format_datetime(post_date), link="{0}{1}".format(BASE_URL, url)))
-        all_posts.append(dict(**_md.Meta, date=post_date, rfc2822_date='', link="{0}{1}".format(BASE_URL, url)))
+        all_posts.append(dict(**_md.Meta, date=post_date, rfc2822_date='', link="{0}{1}".format(BASE_URL, url)))  # TODO fix date
+
+    # index
+    print("rendering index.html")
+    with open('index.md') as f:
+        index_html = _md.convert(f.read())
+    doc = env.get_template('templates/index.html').render(content=index_html)
+    with open('index.html', "w") as f:
+        f.write(doc)
 
     # Order blog posts by date published
     all_posts.sort(key=lambda item: item['date'], reverse=True)
