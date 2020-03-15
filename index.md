@@ -17,11 +17,11 @@ _(Because "Cosmos" is the [opposite of Chaos](https://www.goodreads.com/quotes/6
 ## The Book
 
 * Read for free from the sources using Github previews:
-  [github.com/cosmicpython/book](https://github.com/cosmicpython/book#table-of-contents)
-* Read in Early Release via O'Reilly Learning (aka Safari) 
+  [github.com/cosmicpython/book](https://github.com/cosmicpython/book#table-of-contents) (CC-By-NC-ND)
+* Read it online on O'Reilly Learning (aka Safari) 
   [learning.oreilly.com]( https://learning.oreilly.com/library/view/architecture-patterns-with/9781492052197/)
-* Preorder on [Amazon.com](https://amzn.to/37pR2DH) or [Amazon.co.uk](https://amzn.to/38CmFu1)
-
+* Preorder print books on [Amazon.com](https://amzn.to/37pR2DH) or [Amazon.co.uk](https://amzn.to/38CmFu1)
+* Buy a DRM-free ebook at [ebooks.com](https://www.ebooks.com/en-us/book/209971850/architecture-patterns-with-python/harry-percival/)
 
 ## Blog
 
