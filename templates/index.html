@@ -25,13 +25,47 @@
     </li>
 
     <li>
-      Read in Early Release via O'Reilly Learning (aka Safari) 
+      Read in online on O'Reilly Learning (aka Safari) 
       <a href="https://learning.oreilly.com/library/view/architecture-patterns-with/9781492052197/">learning.oreilly.com</a>
     </li>
 
     <li>
-    Preorder on [Amazon.com](https://amzn.to/37pR2DH) or [Amazon.co.uk](https://amzn.to/38CmFu1)
+      Preorder print books on
+      <a href="https://amzn.to/37pR2DH">Amazon.com</a>
+      or
+      <a href="https://amzn.to/38CmFu1">Amazon.co.uk</a>.
+    </li>
+    <li>
+      Buy a DRM-free ebook at
+      <a href="https://www.ebooks.com/en-us/book/209971850/architecture-patterns-with-python/harry-percival/">ebooks.com</a>
+    </li>
+  </ul>
 
+  <h1>Blog</h1>
+
+  <h3>Recent posts</h3>
+
+<ul>
+  {% for post in posts %}
+    {% if post.date.year != 2017 %}
+      <li>
+        <a href="{{ post.url }}">{{ post.date }} {{ post.title }}</a>
+      </li>
+    {% endif %}
+  {% endfor %}
+</ul>
+
+<h3>Classic 2017 Episodes on Ports & Adapters, by Bob</h3>
+
+
+<ul>
+  {% for post in posts %}
+    {% if post.date.year == 2017 %}
+      <li>
+        <a href="{{ post.link }}">{{ post.date }} {{ post.title }}</a>
+      </li>
+    {% endif %}
+  {% endfor %}
+</ul>
 
 {% endblock %}
-
