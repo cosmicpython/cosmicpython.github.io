@@ -1,15 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-</head>
+  <head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="Harry Percival and Bob Gregory">
+		<meta name="description" content="">
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/milligram/1.3.0/milligram.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pygments-css@1.0.0/friendly.css">
+  </head>
 
-<body>
-  <h1> Introducing Command Handler</h1>
-  <p>by Bob, </p>
+  <body>
+		<main class="wrapper">
 
-  <div class="content">
-    <p>The term DDD comes from the book by Eric Evans: <a href="[https://www.amazon.co.uk/Domain-driven-Design-Tackling-Complexity-Software/dp/0321125215">&ldquo;Domain-Driven Design: Tackling
+			<nav class="navigation">
+				<section class="container">
+					<a class="navigation-title" href="https://cosmicpython.com">
+						<h1 class="title">Cosmic Python</h1>
+					</a>
+        </section>
+      </nav>
+
+      <section class="container">
+        <h1> Introducing Command Handler</h1>
+        <p>by Bob, </p>
+
+        <div class="content">
+          <p>The term DDD comes from the book by Eric Evans: <a href="[https://www.amazon.co.uk/Domain-driven-Design-Tackling-Complexity-Software/dp/0321125215">&ldquo;Domain-Driven Design: Tackling
 Complexity in the Heart of Software&rdquo;</a>.
 In his book he describes a set of practices that aim to help us build
 maintainable, rich, software systems that solve customer&rsquo;s problems. The book is
@@ -109,10 +128,13 @@ that orchestrates a business process. It does the boring work of fetching the
 right objects, and invoking the right methods on them. It&rsquo;s similar to the
 concept of a Controller in an MVC architecture.</p>
 <p>First, we create a Command object.</p>
-<p>class ReportIssueCommand(NamedTuple):
-        reporter_name: str
-        reporter_email: str
-        problem_description: str</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">ReportIssueCommand</span><span class="p">(</span><span class="n">NamedTuple</span><span class="p">):</span>
+        <span class="n">reporter_name</span><span class="p">:</span> <span class="nb">str</span>
+        <span class="n">reporter_email</span><span class="p">:</span> <span class="nb">str</span>
+        <span class="n">problem_description</span><span class="p">:</span> <span class="nb">str</span>
+</code></pre></div>
+
+
 <p>A command object is a small object that represents a state-changing action that
 can happen in the system. Commands have no behaviour, they&rsquo;re pure data
 structures. There&rsquo;s no reason why you have to represent them with classes, since
@@ -149,16 +171,19 @@ model. This has two major benefits:</p>
     on any implementation details and can be invoked in multiple ways.</li>
 </ol>
 <p>In order to process our new command, we&rsquo;ll need to create a command handler.</p>
-<p>class ReportIssueCommandHandler:
-    def <strong>init</strong>(self, issue_log):
-        self.issue_log = issue_log</p>
-<pre><code>def __call__(self, cmd):
-    reported_by = IssueReporter(
-        cmd.reporter_name,
-        cmd.reporter_email)
-    issue = Issue(reported_by, cmd.problem_description)
-    self.issue_log.add(issue)
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">ReportIssueCommandHandler</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">issue_log</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">issue_log</span> <span class="o">=</span> <span class="n">issue_log</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">):</span>
+        <span class="n">reported_by</span> <span class="o">=</span> <span class="n">IssueReporter</span><span class="p">(</span>
+            <span class="n">cmd</span><span class="o">.</span><span class="n">reporter_name</span><span class="p">,</span>
+            <span class="n">cmd</span><span class="o">.</span><span class="n">reporter_email</span><span class="p">)</span>
+        <span class="n">issue</span> <span class="o">=</span> <span class="n">Issue</span><span class="p">(</span><span class="n">reported_by</span><span class="p">,</span> <span class="n">cmd</span><span class="o">.</span><span class="n">problem_description</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">issue_log</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">issue</span><span class="p">)</span>
+</code></pre></div>
+
+
 <p>Command handlers are stateless objects that orchestrate the behaviour of a
 system. They are a kind of glue code, and manage the boring work of fetching and
 saving objects, and then notifying other parts of the system. In keeping with
@@ -178,15 +203,18 @@ handlers, and stick to a single possible line of execution. Command handlers are
 Since our command handlers are just glue code, we won&rsquo;t put any business logic
 into them - they shouldn&rsquo;t be making any business decisions. For example, let&rsquo;s
 skip ahead a little to a new command handler:</p>
-<p>class MarkIssueAsResolvedHandler:
-    def <strong>init</strong>(self, issue_log):
-        self.issue_log = issue_log</p>
-<pre><code>def __call__(self, cmd):
-    issue = self.issue_log.get(cmd.issue_id)
-    # the following line encodes a business rule
-    if (issue.state != IssueStatus.Resolved):
-        issue.mark_as_resolved(cmd.resolution)
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">MarkIssueAsResolvedHandler</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">issue_log</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">issue_log</span> <span class="o">=</span> <span class="n">issue_log</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">):</span>
+        <span class="n">issue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">issue_log</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cmd</span><span class="o">.</span><span class="n">issue_id</span><span class="p">)</span>
+        <span class="c1"># the following line encodes a business rule</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">issue</span><span class="o">.</span><span class="n">state</span> <span class="o">!=</span> <span class="n">IssueStatus</span><span class="o">.</span><span class="n">Resolved</span><span class="p">):</span>
+            <span class="n">issue</span><span class="o">.</span><span class="n">mark_as_resolved</span><span class="p">(</span><span class="n">cmd</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span>
+</code></pre></div>
+
+
 <p>This handler violates our glue-code principle because it encodes a business
 rule: &ldquo;If an issue is already resolved, then it can&rsquo;t be resolved a second
 time&rdquo;. This rule belongs in our domain model, probably in the mark_as_resolved
@@ -196,17 +224,23 @@ magic method, but a function is perfectly valid as a handler, too. The major
 reason to prefer a class is that it can make dependency management a little
 easier, but the two approaches are completely equivalent. For example, we could
 rewrite our ReportIssueHandler like this:</p>
-<p>def ReportIssue(issue_log, cmd):
-    reported_by = IssueReporter(
-        cmd.reporter_name,
-        cmd.reporter_email)
-    issue = Issue(reported_by, cmd.problem_description)
-    issue_log.add(issue)</p>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">ReportIssue</span><span class="p">(</span><span class="n">issue_log</span><span class="p">,</span> <span class="n">cmd</span><span class="p">):</span>
+    <span class="n">reported_by</span> <span class="o">=</span> <span class="n">IssueReporter</span><span class="p">(</span>
+        <span class="n">cmd</span><span class="o">.</span><span class="n">reporter_name</span><span class="p">,</span>
+        <span class="n">cmd</span><span class="o">.</span><span class="n">reporter_email</span><span class="p">)</span>
+    <span class="n">issue</span> <span class="o">=</span> <span class="n">Issue</span><span class="p">(</span><span class="n">reported_by</span><span class="p">,</span> <span class="n">cmd</span><span class="o">.</span><span class="n">problem_description</span><span class="p">)</span>
+    <span class="n">issue_log</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">issue</span><span class="p">)</span>
+</code></pre></div>
+
+
 <p>If magic methods make you feel queasy, you can define a handler to be a class
 that exposes a handle method like this:</p>
-<p>class ReportIssueHandler:
-    def handle(self, cmd):
-       &hellip;</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">ReportIssueHandler</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">):</span>
+       <span class="o">...</span>
+</code></pre></div>
+
+
 <p>However you structure them, the important ideas of commands and handlers are:</p>
 <ol>
 <li>Commands are logic-free data structures with a name and a bunch of values.</li>
@@ -225,81 +259,104 @@ world, I would probably use a single python package for the whole app, but in
 other languages - Java, C#, C++ - I would usually have a single binary for each
 layer. Splitting the packages up this way makes it easier to understand how the
 dependencies work.</p>
-<p>from typing import NamedTuple
-from expects import expect, have_len, equal</p>
-<h1>Domain model</h1>
-<p>class IssueReporter:
-    def <strong>init</strong>(self, name, email):
-        self.name = name
-        self.email = email</p>
-<p>class Issue:
-    def <strong>init</strong>(self, reporter, description):
-        self.description = description
-        self.reporter = reporter</p>
-<p>class IssueLog:
-    def add(self, issue):
-        pass</p>
-<p>class ReportIssueCommand(NamedTuple):
-    reporter_name: str
-    reporter_email: str
-    problem_description: str</p>
-<h1>Service Layer</h1>
-<p>class ReportIssueHandler:</p>
-<pre><code>def __init__(self, issue_log):
-    self.issue_log = issue_log
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">NamedTuple</span>
+<span class="kn">from</span> <span class="nn">expects</span> <span class="kn">import</span> <span class="n">expect</span><span class="p">,</span> <span class="n">have_len</span><span class="p">,</span> <span class="n">equal</span>
 
-def __call__(self, cmd):
-    reported_by = IssueReporter(
-        cmd.reporter_name,
-        cmd.reporter_email)
-    issue = Issue(reported_by, cmd.problem_description)
-    self.issue_log.add(issue)
-</code></pre>
-<h1>Adapters</h1>
-<p>class FakeIssueLog(IssueLog):</p>
-<pre><code>def __init__(self):
-    self.issues = []
+<span class="c1"># Domain model</span>
 
-def add(self, issue):
-    self.issues.append(issue)
+<span class="k">class</span> <span class="nc">IssueReporter</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">email</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="n">email</span>
 
-def get(self, id):
-    return self.issues[id]
 
-def __len__(self):
-    return len(self.issues)
+<span class="k">class</span> <span class="nc">Issue</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reporter</span><span class="p">,</span> <span class="n">description</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reporter</span> <span class="o">=</span> <span class="n">reporter</span>
 
-def __getitem__(self, idx):
-    return self.issues[idx]
-</code></pre>
-<p>email = &ldquo;bob@example.org&rdquo;
-name = &ldquo;bob&rdquo;
-desc = &ldquo;My mouse won&rsquo;t move&rdquo;</p>
-<p>class When_reporting_an_issue:</p>
-<pre><code>def given_an_empty_issue_log(self):
-    self.issues = FakeIssueLog()
 
-def because_we_report_a_new_issue(self):
-    handler = ReportIssueHandler(self.issues)
-    cmd = ReportIssueCommand(name, email, desc)
+<span class="k">class</span> <span class="nc">IssueLog</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">issue</span><span class="p">):</span>
+        <span class="k">pass</span>
 
-    handler(cmd)
 
-def the_handler_should_have_created_a_new_issue(self):
-    expect(self.issues).to(have_len(1))
+<span class="k">class</span> <span class="nc">ReportIssueCommand</span><span class="p">(</span><span class="n">NamedTuple</span><span class="p">):</span>
+    <span class="n">reporter_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">reporter_email</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">problem_description</span><span class="p">:</span> <span class="nb">str</span>
 
-def it_should_have_recorded_the_issuer(self):
-    expect(self.issues[0].reporter.name).to(equal(name))
-    expect(self.issues[0].reporter.email).to(equal(email))
 
-def it_should_have_recorded_the_description(self):
-    expect(self.issues[0].description).to(equal(desc))
-</code></pre>
+<span class="c1"># Service Layer</span>
+
+<span class="k">class</span> <span class="nc">ReportIssueHandler</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">issue_log</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">issue_log</span> <span class="o">=</span> <span class="n">issue_log</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">):</span>
+        <span class="n">reported_by</span> <span class="o">=</span> <span class="n">IssueReporter</span><span class="p">(</span>
+            <span class="n">cmd</span><span class="o">.</span><span class="n">reporter_name</span><span class="p">,</span>
+            <span class="n">cmd</span><span class="o">.</span><span class="n">reporter_email</span><span class="p">)</span>
+        <span class="n">issue</span> <span class="o">=</span> <span class="n">Issue</span><span class="p">(</span><span class="n">reported_by</span><span class="p">,</span> <span class="n">cmd</span><span class="o">.</span><span class="n">problem_description</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">issue_log</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">issue</span><span class="p">)</span>
+
+
+<span class="c1"># Adapters</span>
+
+<span class="k">class</span> <span class="nc">FakeIssueLog</span><span class="p">(</span><span class="n">IssueLog</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">issues</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">issue</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">issues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">issue</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">issues</span><span class="p">[</span><span class="nb">id</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">issues</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">issues</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+
+<span class="n">email</span> <span class="o">=</span> <span class="s2">&quot;bob@example.org&quot;</span>
+<span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;bob&quot;</span>
+<span class="n">desc</span> <span class="o">=</span> <span class="s2">&quot;My mouse won&#39;t move&quot;</span>
+
+
+<span class="k">class</span> <span class="nc">When_reporting_an_issue</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">given_an_empty_issue_log</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">issues</span> <span class="o">=</span> <span class="n">FakeIssueLog</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">because_we_report_a_new_issue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">handler</span> <span class="o">=</span> <span class="n">ReportIssueHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">issues</span><span class="p">)</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="n">ReportIssueCommand</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">email</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span>
+
+        <span class="n">handler</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">the_handler_should_have_created_a_new_issue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">expect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">issues</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">have_len</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">it_should_have_recorded_the_issuer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">expect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">issues</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reporter</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+        <span class="n">expect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">issues</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reporter</span><span class="o">.</span><span class="n">email</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">email</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">it_should_have_recorded_the_description</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">expect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">issues</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">description</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">desc</span><span class="p">))</span>
+</code></pre></div>
+
+
 <p>There&rsquo;s not a lot of functionality here, and our issue log has a couple of
 problems, firstly there&rsquo;s no way to see the issues in the log yet, and secondly
 we&rsquo;ll lose all of our data every time we restart the process. We&rsquo;ll fix the
 second of those in the next part
 [https://io.made.com/blog/repository-and-unit-of-work-pattern-in-python/].</p>
-  </div>
-</body>
+        </div>
+      </section>
+    </main>
+  </body>
 </html>

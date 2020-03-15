@@ -123,11 +123,12 @@ concept of a Controller in an MVC architecture.
 
 First, we create a Command object.
 
+```python
 class ReportIssueCommand(NamedTuple):
         reporter_name: str
         reporter_email: str
         problem_description: str
-
+```
 
 A command object is a small object that represents a state-changing action that
 can happen in the system. Commands have no behaviour, they're pure data
@@ -167,6 +168,7 @@ model. This has two major benefits:
 
 In order to process our new command, we'll need to create a command handler.
 
+```python
 class ReportIssueCommandHandler:
     def __init__(self, issue_log):
         self.issue_log = issue_log
@@ -177,7 +179,7 @@ class ReportIssueCommandHandler:
             cmd.reporter_email)
         issue = Issue(reported_by, cmd.problem_description)
         self.issue_log.add(issue)
-
+```
 
 
 Command handlers are stateless objects that orchestrate the behaviour of a
@@ -201,6 +203,7 @@ Since our command handlers are just glue code, we won't put any business logic
 into them - they shouldn't be making any business decisions. For example, let's
 skip ahead a little to a new command handler:
 
+```python
 class MarkIssueAsResolvedHandler:
     def __init__(self, issue_log):
         self.issue_log = issue_log
@@ -210,7 +213,7 @@ class MarkIssueAsResolvedHandler:
         # the following line encodes a business rule
         if (issue.state != IssueStatus.Resolved):
             issue.mark_as_resolved(cmd.resolution)
-
+```
 
 This handler violates our glue-code principle because it encodes a business
 rule: "If an issue is already resolved, then it can't be resolved a second
@@ -222,21 +225,23 @@ reason to prefer a class is that it can make dependency management a little
 easier, but the two approaches are completely equivalent. For example, we could
 rewrite our ReportIssueHandler like this:
 
+```python
 def ReportIssue(issue_log, cmd):
     reported_by = IssueReporter(
         cmd.reporter_name,
         cmd.reporter_email)
     issue = Issue(reported_by, cmd.problem_description)
     issue_log.add(issue)
-
+```
 
 If magic methods make you feel queasy, you can define a handler to be a class
 that exposes a handle method like this:
 
+```python
 class ReportIssueHandler:
     def handle(self, cmd):
        ...
-
+```
 
 However you structure them, the important ideas of commands and handlers are:
 
@@ -257,6 +262,7 @@ other languages - Java, C#, C++ - I would usually have a single binary for each
 layer. Splitting the packages up this way makes it easier to understand how the
 dependencies work.
 
+```python
 from typing import NamedTuple
 from expects import expect, have_len, equal
 
@@ -345,7 +351,7 @@ class When_reporting_an_issue:
 
     def it_should_have_recorded_the_description(self):
         expect(self.issues[0].description).to(equal(desc))
-
+```
 
 There's not a lot of functionality here, and our issue log has a couple of
 problems, firstly there's no way to see the issues in the log yet, and secondly

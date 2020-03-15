@@ -1,15 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-</head>
+  <head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="Harry Percival and Bob Gregory">
+		<meta name="description" content="">
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/milligram/1.3.0/milligram.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pygments-css@1.0.0/friendly.css">
+  </head>
 
-<body>
-  <h1> Writing tests for external API calls</h1>
-  <p>by Harry, </p>
+  <body>
+		<main class="wrapper">
 
-  <div class="content">
-    <hr>
+			<nav class="navigation">
+				<section class="container">
+					<a class="navigation-title" href="https://cosmicpython.com">
+						<h1 class="title">Cosmic Python</h1>
+					</a>
+        </section>
+      </nav>
+
+      <section class="container">
+        <h1> Writing tests for external API calls</h1>
+        <p>by Harry, </p>
+
+        <div class="content">
+          <hr>
 <p>Here&rsquo;s a common question from people doing testing in Python:</p>
 <blockquote>
 <p>How do I write tests for for code that calls out to a third-party API?</p>
@@ -29,24 +48,24 @@ shipment which contains a number of order lines.  We also care about its
 estimated time of arrival (<code>eta</code>) and a bit of jargon called the <em>incoterm</em>
 (you don&rsquo;t need to understand what that is, I&rsquo;m just trying to illustrate a bit
 of real-life complexity, in this small example).</p>
-<pre><code class="python">@dataclass
-class OrderLine:
-    sku: str  # sku=&quot;stock keeping unit&quot;, it's a product id basically
-    qty: int
+<div class="codehilite"><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">OrderLine</span><span class="p">:</span>
+    <span class="n">sku</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># sku=&quot;stock keeping unit&quot;, it&#39;s a product id basically</span>
+    <span class="n">qty</span><span class="p">:</span> <span class="nb">int</span>
 
 
-@dataclass
-class Shipment:
-    reference: str
-    lines: List[OrderLine]
-    eta: Optional[date]
-    incoterm: str
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">Shipment</span><span class="p">:</span>
+    <span class="n">reference</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">lines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">OrderLine</span><span class="p">]</span>
+    <span class="n">eta</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">date</span><span class="p">]</span>
+    <span class="n">incoterm</span><span class="p">:</span> <span class="nb">str</span>
 
-    def save(self):
-        ...  # for the sake of the example, let's imagine the model
-             # knows how to save itself to the DB.  like Django.
+    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="o">...</span>  <span class="c1"># for the sake of the example, let&#39;s imagine the model</span>
+             <span class="c1"># knows how to save itself to the DB.  like Django.</span>
+</code></pre></div>
 
-</code></pre>
 
 <p>We want to sync our shipments model with a third party, the cargo freight
 company, via their API. We have a couple of use cases: creating new shipments,
@@ -55,42 +74,45 @@ and checking for updated etas.</p>
 takes a dict mapping skus to quantities, creates our model objects, saves them, and
 then calls a helper function to sync to the API.  Hopefully this sort of thing
 looks familiar:</p>
-<pre><code class="python">def create_shipment(quantities: Dict[str, int], incoterm):
-    reference = uuid.uuid4().hex[:10]
-    order_lines = [OrderLine(sku=sku, qty=qty) for sku, qty in quantities.items()]
-    shipment = Shipment(reference=reference, lines=order_lines, eta=None, incoterm=incoterm)
-    shipment.save()
-    sync_to_api(shipment)
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">create_shipment</span><span class="p">(</span><span class="n">quantities</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">incoterm</span><span class="p">):</span>
+    <span class="n">reference</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span><span class="p">[:</span><span class="mi">10</span><span class="p">]</span>
+    <span class="n">order_lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">OrderLine</span><span class="p">(</span><span class="n">sku</span><span class="o">=</span><span class="n">sku</span><span class="p">,</span> <span class="n">qty</span><span class="o">=</span><span class="n">qty</span><span class="p">)</span> <span class="k">for</span> <span class="n">sku</span><span class="p">,</span> <span class="n">qty</span> <span class="ow">in</span> <span class="n">quantities</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+    <span class="n">shipment</span> <span class="o">=</span> <span class="n">Shipment</span><span class="p">(</span><span class="n">reference</span><span class="o">=</span><span class="n">reference</span><span class="p">,</span> <span class="n">lines</span><span class="o">=</span><span class="n">order_lines</span><span class="p">,</span> <span class="n">eta</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">incoterm</span><span class="o">=</span><span class="n">incoterm</span><span class="p">)</span>
+    <span class="n">shipment</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+    <span class="n">sync_to_api</span><span class="p">(</span><span class="n">shipment</span><span class="p">)</span>
+</code></pre></div>
+
 
 <p>How do we sync to the API?  A simple POST request, with a bit of datatype
 conversion and wrangling.</p>
-<pre><code class="python">def sync_to_api(shipment):
-    requests.post(f'{API_URL}/shipments/', json={
-        'client_reference': shipment.reference,
-        'arrival_date': shipment.eta.isoformat(),
-        'products': [
-            {'sku': ol.sku, 'quantity': ol.quantity}
-            for ol in shipment.lines
-        ]
-    })
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">sync_to_api</span><span class="p">(</span><span class="n">shipment</span><span class="p">):</span>
+    <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">API_URL</span><span class="si">}</span><span class="s1">/shipments/&#39;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;client_reference&#39;</span><span class="p">:</span> <span class="n">shipment</span><span class="o">.</span><span class="n">reference</span><span class="p">,</span>
+        <span class="s1">&#39;arrival_date&#39;</span><span class="p">:</span> <span class="n">shipment</span><span class="o">.</span><span class="n">eta</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+        <span class="s1">&#39;products&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span><span class="s1">&#39;sku&#39;</span><span class="p">:</span> <span class="n">ol</span><span class="o">.</span><span class="n">sku</span><span class="p">,</span> <span class="s1">&#39;quantity&#39;</span><span class="p">:</span> <span class="n">ol</span><span class="o">.</span><span class="n">quantity</span><span class="p">}</span>
+            <span class="k">for</span> <span class="n">ol</span> <span class="ow">in</span> <span class="n">shipment</span><span class="o">.</span><span class="n">lines</span>
+        <span class="p">]</span>
+    <span class="p">})</span>
+</code></pre></div>
+
 
 <p>Not too bad!</p>
 <p>How do we test it? In a case like this, the typical reaction is to reach for mocks,
 and <em>as long as things stay simple</em>, it&rsquo;s pretty manageable</p>
-<pre><code class="python">def test_create_shipment_does_post_to_external_api():
-    with mock.patch('controllers.requests') as mock_requests:
-        shipment = create_shipment({'sku1': 10}, incoterm='EXW')
-        expected_data = {
-            'client_reference': shipment.reference,
-            'arrival_date': None,
-            'products': [{'sku': 'sku1', 'quantity': 10}],
-        }
-        assert mock_requests.post.call_args == mock.call(
-            API_URL + '/shipments/', json=expected_data
-        )
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">test_create_shipment_does_post_to_external_api</span><span class="p">():</span>
+    <span class="k">with</span> <span class="n">mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;controllers.requests&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mock_requests</span><span class="p">:</span>
+        <span class="n">shipment</span> <span class="o">=</span> <span class="n">create_shipment</span><span class="p">({</span><span class="s1">&#39;sku1&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">},</span> <span class="n">incoterm</span><span class="o">=</span><span class="s1">&#39;EXW&#39;</span><span class="p">)</span>
+        <span class="n">expected_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;client_reference&#39;</span><span class="p">:</span> <span class="n">shipment</span><span class="o">.</span><span class="n">reference</span><span class="p">,</span>
+            <span class="s1">&#39;arrival_date&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s1">&#39;products&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s1">&#39;sku&#39;</span><span class="p">:</span> <span class="s1">&#39;sku1&#39;</span><span class="p">,</span> <span class="s1">&#39;quantity&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">}],</span>
+        <span class="p">}</span>
+        <span class="k">assert</span> <span class="n">mock_requests</span><span class="o">.</span><span class="n">post</span><span class="o">.</span><span class="n">call_args</span> <span class="o">==</span> <span class="n">mock</span><span class="o">.</span><span class="n">call</span><span class="p">(</span>
+            <span class="n">API_URL</span> <span class="o">+</span> <span class="s1">&#39;/shipments/&#39;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">expected_data</span>
+        <span class="p">)</span>
+</code></pre></div>
+
 
 <p>And you can imagine adding a few more tests, perhaps one that checks that we do
 the date-to-isoformat conversion correctly, maybe one that checks we can handle
@@ -101,36 +123,37 @@ And if you do a POST when something already exists, then bad things happen.
 So we first need to check whether they have a shipment on file, using
 a GET request, and then we either do a POST if it&rsquo;s new, or a PUT for
 an existing one:</p>
-<pre><code class="python">def sync_to_api(shipment):
-    external_shipment_id = get_shipment_id(shipment.reference)
-    if external_shipment_id is None:
-        requests.post(f'{API_URL}/shipments/', json={
-            'client_reference': shipment.reference,
-            'arrival_date': shipment.eta,
-            'products': [
-                {'sku': ol.sku, 'quantity': ol.quantity}
-                for ol in shipment.lines
-            ]
-        })
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">sync_to_api</span><span class="p">(</span><span class="n">shipment</span><span class="p">):</span>
+    <span class="n">external_shipment_id</span> <span class="o">=</span> <span class="n">get_shipment_id</span><span class="p">(</span><span class="n">shipment</span><span class="o">.</span><span class="n">reference</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">external_shipment_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">API_URL</span><span class="si">}</span><span class="s1">/shipments/&#39;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;client_reference&#39;</span><span class="p">:</span> <span class="n">shipment</span><span class="o">.</span><span class="n">reference</span><span class="p">,</span>
+            <span class="s1">&#39;arrival_date&#39;</span><span class="p">:</span> <span class="n">shipment</span><span class="o">.</span><span class="n">eta</span><span class="p">,</span>
+            <span class="s1">&#39;products&#39;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s1">&#39;sku&#39;</span><span class="p">:</span> <span class="n">ol</span><span class="o">.</span><span class="n">sku</span><span class="p">,</span> <span class="s1">&#39;quantity&#39;</span><span class="p">:</span> <span class="n">ol</span><span class="o">.</span><span class="n">quantity</span><span class="p">}</span>
+                <span class="k">for</span> <span class="n">ol</span> <span class="ow">in</span> <span class="n">shipment</span><span class="o">.</span><span class="n">lines</span>
+            <span class="p">]</span>
+        <span class="p">})</span>
 
-    else:
-        requests.put(f'{API_URL}/shipments/{external_shipment_id}', json={
-            'client_reference': shipment.reference,
-            'arrival_date': shipment.eta,
-            'products': [
-                {'sku': ol.sku, 'quantity': ol.quantity}
-                for ol in shipment.lines
-            ]
-        })
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">requests</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">API_URL</span><span class="si">}</span><span class="s1">/shipments/</span><span class="si">{</span><span class="n">external_shipment_id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;client_reference&#39;</span><span class="p">:</span> <span class="n">shipment</span><span class="o">.</span><span class="n">reference</span><span class="p">,</span>
+            <span class="s1">&#39;arrival_date&#39;</span><span class="p">:</span> <span class="n">shipment</span><span class="o">.</span><span class="n">eta</span><span class="p">,</span>
+            <span class="s1">&#39;products&#39;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s1">&#39;sku&#39;</span><span class="p">:</span> <span class="n">ol</span><span class="o">.</span><span class="n">sku</span><span class="p">,</span> <span class="s1">&#39;quantity&#39;</span><span class="p">:</span> <span class="n">ol</span><span class="o">.</span><span class="n">quantity</span><span class="p">}</span>
+                <span class="k">for</span> <span class="n">ol</span> <span class="ow">in</span> <span class="n">shipment</span><span class="o">.</span><span class="n">lines</span>
+            <span class="p">]</span>
+        <span class="p">})</span>
 
 
-def get_shipment_id(our_reference) -&gt; Optional[str]:
-    their_shipments = requests.get(f&quot;{API_URL}/shipments/&quot;).json()['items']
-    return next(
-        (s['id'] for s in their_shipments if s['client_reference'] == our_reference),
-        None
-    )
-</code></pre>
+<span class="k">def</span> <span class="nf">get_shipment_id</span><span class="p">(</span><span class="n">our_reference</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="n">their_shipments</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">API_URL</span><span class="si">}</span><span class="s2">/shipments/&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s1">&#39;items&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="nb">next</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">their_shipments</span> <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s1">&#39;client_reference&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">our_reference</span><span class="p">),</span>
+        <span class="kc">None</span>
+    <span class="p">)</span>
+</code></pre></div>
+
 
 <p>And as usual, complexity creeps in:</p>
 <ul>
@@ -145,24 +168,25 @@ def get_shipment_id(our_reference) -&gt; Optional[str]:
 </ul>
 <p>Already you can imagine we&rsquo;re going to need to write quite a few tests to cover
 all these options.  Here&rsquo;s just one, as an example:</p>
-<pre><code class="python">def test_does_PUT_if_shipment_already_exists():
-    with mock.patch('controllers.uuid') as mock_uuid, mock.patch('controllers.requests') as mock_requests:
-        mock_uuid.uuid4.return_value.hex = 'our-id'
-        mock_requests.get.return_value.json.return_value = {
-            'items': [{'id': 'their-id', 'client_reference': 'our-id'}]
-        }
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">test_does_PUT_if_shipment_already_exists</span><span class="p">():</span>
+    <span class="k">with</span> <span class="n">mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;controllers.uuid&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mock_uuid</span><span class="p">,</span> <span class="n">mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;controllers.requests&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mock_requests</span><span class="p">:</span>
+        <span class="n">mock_uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="o">.</span><span class="n">return_value</span><span class="o">.</span><span class="n">hex</span> <span class="o">=</span> <span class="s1">&#39;our-id&#39;</span>
+        <span class="n">mock_requests</span><span class="o">.</span><span class="n">get</span><span class="o">.</span><span class="n">return_value</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">return_value</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;items&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="s1">&#39;their-id&#39;</span><span class="p">,</span> <span class="s1">&#39;client_reference&#39;</span><span class="p">:</span> <span class="s1">&#39;our-id&#39;</span><span class="p">}]</span>
+        <span class="p">}</span>
 
-        shipment = create_shipment({'sku1': 10}, incoterm='EXW')
-        assert mock_requests.post.called is False
-        expected_data = {
-            'client_reference': 'our-id',
-            'arrival_date': None,
-            'products': [{'sku': 'sku1', 'quantity': 10}],
-        }
-        assert mock_requests.put.call_args == mock.call(
-            API_URL + '/shipments/their-id/', json=expected_data
-        )
-</code></pre>
+        <span class="n">shipment</span> <span class="o">=</span> <span class="n">create_shipment</span><span class="p">({</span><span class="s1">&#39;sku1&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">},</span> <span class="n">incoterm</span><span class="o">=</span><span class="s1">&#39;EXW&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">mock_requests</span><span class="o">.</span><span class="n">post</span><span class="o">.</span><span class="n">called</span> <span class="ow">is</span> <span class="kc">False</span>
+        <span class="n">expected_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;client_reference&#39;</span><span class="p">:</span> <span class="s1">&#39;our-id&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;arrival_date&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s1">&#39;products&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s1">&#39;sku&#39;</span><span class="p">:</span> <span class="s1">&#39;sku1&#39;</span><span class="p">,</span> <span class="s1">&#39;quantity&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">}],</span>
+        <span class="p">}</span>
+        <span class="k">assert</span> <span class="n">mock_requests</span><span class="o">.</span><span class="n">put</span><span class="o">.</span><span class="n">call_args</span> <span class="o">==</span> <span class="n">mock</span><span class="o">.</span><span class="n">call</span><span class="p">(</span>
+            <span class="n">API_URL</span> <span class="o">+</span> <span class="s1">&#39;/shipments/their-id/&#39;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">expected_data</span>
+        <span class="p">)</span>
+</code></pre></div>
+
 
 <p>&hellip;and our tests are getting less and less pleasant.  Again, the details don&rsquo;t
 matter too much, the hope is that this sort of test ugliness is familiar.</p>
@@ -170,28 +194,29 @@ matter too much, the hope is that this sort of test ugliness is familiar.</p>
 about writes, but what about reads?  Say we want to poll our third party api
 now and again to get updated etas for our shipments.  Depending on the eta, we
 have some business logic about notifying people of delays&hellip;</p>
-<pre><code class="python"># another example controller,
-# showing business logic getting intermingled with API calls
+<div class="codehilite"><pre><span></span><code><span class="c1"># another example controller,</span>
+<span class="c1"># showing business logic getting intermingled with API calls</span>
 
-def get_updated_eta(shipment):
-    external_shipment_id = get_shipment_id(shipment.reference)
-    if external_shipment_id is None:
-        logging.warning('tried to get updated eta for shipment %s not yet sent to partners', shipment.reference)
-        return
+<span class="k">def</span> <span class="nf">get_updated_eta</span><span class="p">(</span><span class="n">shipment</span><span class="p">):</span>
+    <span class="n">external_shipment_id</span> <span class="o">=</span> <span class="n">get_shipment_id</span><span class="p">(</span><span class="n">shipment</span><span class="o">.</span><span class="n">reference</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">external_shipment_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;tried to get updated eta for shipment </span><span class="si">%s</span><span class="s1"> not yet sent to partners&#39;</span><span class="p">,</span> <span class="n">shipment</span><span class="o">.</span><span class="n">reference</span><span class="p">)</span>
+        <span class="k">return</span>
 
-    [journey] = requests.get(f&quot;{API_URL}/shipments/{external_shipment_id}/journeys&quot;).json()['items']
-    latest_eta = journey['eta']
-    if latest_eta == shipment.eta:
-        return
-    logging.info('setting new shipment eta for %s: %s (was %s)', shipment.reference, latest_eta, shipment.eta)
-    if shipment.eta is not None and latest_eta &gt; shipment.eta:
-        notify_delay(shipment_ref=shipment.reference, delay=latest_eta - shipment.eta)
-    if shipment.eta is None and shipment.incoterm == 'FOB' and len(shipment.lines) &gt; 10:
-        notify_new_large_shipment(shipment_ref=shipment.reference, eta=latest_eta)
+    <span class="p">[</span><span class="n">journey</span><span class="p">]</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">API_URL</span><span class="si">}</span><span class="s2">/shipments/</span><span class="si">{</span><span class="n">external_shipment_id</span><span class="si">}</span><span class="s2">/journeys&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s1">&#39;items&#39;</span><span class="p">]</span>
+    <span class="n">latest_eta</span> <span class="o">=</span> <span class="n">journey</span><span class="p">[</span><span class="s1">&#39;eta&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">latest_eta</span> <span class="o">==</span> <span class="n">shipment</span><span class="o">.</span><span class="n">eta</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;setting new shipment eta for </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1"> (was </span><span class="si">%s</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="n">shipment</span><span class="o">.</span><span class="n">reference</span><span class="p">,</span> <span class="n">latest_eta</span><span class="p">,</span> <span class="n">shipment</span><span class="o">.</span><span class="n">eta</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">shipment</span><span class="o">.</span><span class="n">eta</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">latest_eta</span> <span class="o">&gt;</span> <span class="n">shipment</span><span class="o">.</span><span class="n">eta</span><span class="p">:</span>
+        <span class="n">notify_delay</span><span class="p">(</span><span class="n">shipment_ref</span><span class="o">=</span><span class="n">shipment</span><span class="o">.</span><span class="n">reference</span><span class="p">,</span> <span class="n">delay</span><span class="o">=</span><span class="n">latest_eta</span> <span class="o">-</span> <span class="n">shipment</span><span class="o">.</span><span class="n">eta</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">shipment</span><span class="o">.</span><span class="n">eta</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">shipment</span><span class="o">.</span><span class="n">incoterm</span> <span class="o">==</span> <span class="s1">&#39;FOB&#39;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">shipment</span><span class="o">.</span><span class="n">lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
+        <span class="n">notify_new_large_shipment</span><span class="p">(</span><span class="n">shipment_ref</span><span class="o">=</span><span class="n">shipment</span><span class="o">.</span><span class="n">reference</span><span class="p">,</span> <span class="n">eta</span><span class="o">=</span><span class="n">latest_eta</span><span class="p">)</span>
 
-    shipment.eta = latest_eta
-    shipment.save()
-</code></pre>
+    <span class="n">shipment</span><span class="o">.</span><span class="n">eta</span> <span class="o">=</span> <span class="n">latest_eta</span>
+    <span class="n">shipment</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</code></pre></div>
+
 
 <p>I haven&rsquo;t coded up what all the tests would look like, but you could imagine them:</p>
 <ol>
@@ -248,36 +273,37 @@ readable methods for us to call in our code.</p>
 but you don&rsquo;t have to go full-on hexagonal architecture to use
 this pattern.</p>
 </blockquote>
-<pre><code class="python">class RealCargoAPI:
-    API_URL = 'https://example.org'
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">RealCargoAPI</span><span class="p">:</span>
+    <span class="n">API_URL</span> <span class="o">=</span> <span class="s1">&#39;https://example.org&#39;</span>
 
-    def sync(self, shipment: Shipment) -&gt; None:
-        external_shipment_id = self._get_shipment_id(shipment.reference)
-        if external_shipment_id is None:
-            requests.post(f'{self.API_URL}/shipments/', json={
-              ...
+    <span class="k">def</span> <span class="nf">sync</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shipment</span><span class="p">:</span> <span class="n">Shipment</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">external_shipment_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_shipment_id</span><span class="p">(</span><span class="n">shipment</span><span class="o">.</span><span class="n">reference</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">external_shipment_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">API_URL</span><span class="si">}</span><span class="s1">/shipments/&#39;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span>
+              <span class="o">...</span>
 
-        else:
-            requests.put(f'{self.API_URL}/shipments/{external_shipment_id}/', json={
-              ...
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">requests</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">API_URL</span><span class="si">}</span><span class="s1">/shipments/</span><span class="si">{</span><span class="n">external_shipment_id</span><span class="si">}</span><span class="s1">/&#39;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span>
+              <span class="o">...</span>
 
 
-    def _get_shipment_id(self, our_reference) -&gt; Optional[str]:
-        try:
-            their_shipments = requests.get(f&quot;{self.API_URL}/shipments/&quot;).json()['items']
-            return next(
-              ...
-        except requests.exceptions.RequestException:
-            ...
+    <span class="k">def</span> <span class="nf">_get_shipment_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">our_reference</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">their_shipments</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">API_URL</span><span class="si">}</span><span class="s2">/shipments/&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s1">&#39;items&#39;</span><span class="p">]</span>
+            <span class="k">return</span> <span class="nb">next</span><span class="p">(</span>
+              <span class="o">...</span>
+        <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">RequestException</span><span class="p">:</span>
+            <span class="o">...</span>
+</code></pre></div>
 
-</code></pre>
 
 <p>Now how do our tests look?</p>
-<pre><code class="python">def test_create_shipment_syncs_to_api():
-    with mock.patch('controllers.cargo_api') as mock_cargo_api:
-        shipment = create_shipment({'sku1': 10}, incoterm='EXW')
-        assert mock_cargo_api.sync.call_args == mock.call(shipment)
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">test_create_shipment_syncs_to_api</span><span class="p">():</span>
+    <span class="k">with</span> <span class="n">mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;controllers.cargo_api&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mock_cargo_api</span><span class="p">:</span>
+        <span class="n">shipment</span> <span class="o">=</span> <span class="n">create_shipment</span><span class="p">({</span><span class="s1">&#39;sku1&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">},</span> <span class="n">incoterm</span><span class="o">=</span><span class="s1">&#39;EXW&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">mock_cargo_api</span><span class="o">.</span><span class="n">sync</span><span class="o">.</span><span class="n">call_args</span> <span class="o">==</span> <span class="n">mock</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">shipment</span><span class="p">)</span>
+</code></pre></div>
+
 
 <p>Much more manageable!</p>
 <p>But:</p>
@@ -290,58 +316,60 @@ this pattern.</p>
 <p>and we still need to test the api adapters itself:</p>
 </li>
 </ul>
-<pre><code class="python">def test_sync_does_post_for_new_shipment():
-    api = RealCargoAPI()
-    line = OrderLine('sku1', 10)
-    shipment = Shipment(reference='ref', lines=[line], eta=None, incoterm='foo')
-    with mock.patch('cargo_api.requests') as mock_requests:
-        api.sync(shipment)
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">test_sync_does_post_for_new_shipment</span><span class="p">():</span>
+    <span class="n">api</span> <span class="o">=</span> <span class="n">RealCargoAPI</span><span class="p">()</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">OrderLine</span><span class="p">(</span><span class="s1">&#39;sku1&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="n">shipment</span> <span class="o">=</span> <span class="n">Shipment</span><span class="p">(</span><span class="n">reference</span><span class="o">=</span><span class="s1">&#39;ref&#39;</span><span class="p">,</span> <span class="n">lines</span><span class="o">=</span><span class="p">[</span><span class="n">line</span><span class="p">],</span> <span class="n">eta</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">incoterm</span><span class="o">=</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;cargo_api.requests&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mock_requests</span><span class="p">:</span>
+        <span class="n">api</span><span class="o">.</span><span class="n">sync</span><span class="p">(</span><span class="n">shipment</span><span class="p">)</span>
 
-        expected_data = {
-            'client_reference': shipment.reference,
-            'arrival_date': None,
-            'products': [{'sku': 'sku1', 'quantity': 10}],
-        }
-        assert mock_requests.post.call_args == mock.call(
-            API_URL + '/shipments/', json=expected_data
-        )
-</code></pre>
+        <span class="n">expected_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;client_reference&#39;</span><span class="p">:</span> <span class="n">shipment</span><span class="o">.</span><span class="n">reference</span><span class="p">,</span>
+            <span class="s1">&#39;arrival_date&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s1">&#39;products&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s1">&#39;sku&#39;</span><span class="p">:</span> <span class="s1">&#39;sku1&#39;</span><span class="p">,</span> <span class="s1">&#39;quantity&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">}],</span>
+        <span class="p">}</span>
+        <span class="k">assert</span> <span class="n">mock_requests</span><span class="o">.</span><span class="n">post</span><span class="o">.</span><span class="n">call_args</span> <span class="o">==</span> <span class="n">mock</span><span class="o">.</span><span class="n">call</span><span class="p">(</span>
+            <span class="n">API_URL</span> <span class="o">+</span> <span class="s1">&#39;/shipments/&#39;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">expected_data</span>
+        <span class="p">)</span>
+</code></pre></div>
+
 
 <h1>SUGGESTION: Use (only?) integration tests to test your Adapter</h1>
 <p>Now we can test our adapter separately from our main application code, we
 can have a think about what the best way to test it is.  Since it&rsquo;s just
 a thin wrapper around an external system, the best kinds of tests are integration
 tests:</p>
-<pre><code class="python">def test_can_create_new_shipment():
-    api = RealCargoAPI('https://sandbox.example.com/')
-    line = OrderLine('sku1', 10)
-    ref = random_reference()
-    shipment = Shipment(reference=ref, lines=[line], eta=None, incoterm='foo')
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">test_can_create_new_shipment</span><span class="p">():</span>
+    <span class="n">api</span> <span class="o">=</span> <span class="n">RealCargoAPI</span><span class="p">(</span><span class="s1">&#39;https://sandbox.example.com/&#39;</span><span class="p">)</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">OrderLine</span><span class="p">(</span><span class="s1">&#39;sku1&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="n">ref</span> <span class="o">=</span> <span class="n">random_reference</span><span class="p">()</span>
+    <span class="n">shipment</span> <span class="o">=</span> <span class="n">Shipment</span><span class="p">(</span><span class="n">reference</span><span class="o">=</span><span class="n">ref</span><span class="p">,</span> <span class="n">lines</span><span class="o">=</span><span class="p">[</span><span class="n">line</span><span class="p">],</span> <span class="n">eta</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">incoterm</span><span class="o">=</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span>
 
-    api.sync(shipment)
+    <span class="n">api</span><span class="o">.</span><span class="n">sync</span><span class="p">(</span><span class="n">shipment</span><span class="p">)</span>
 
-    shipments = requests.get(api.api_url + '/shipments/').json()['items']
-    new_shipment = next(s for s in shipments if s['client_reference'] == ref)
-    assert new_shipment['arrival_date'] is None
-    assert new_shipment['products'] == [{'sku': 'sku1', 'quantity': 10}]
+    <span class="n">shipments</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">api</span><span class="o">.</span><span class="n">api_url</span> <span class="o">+</span> <span class="s1">&#39;/shipments/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s1">&#39;items&#39;</span><span class="p">]</span>
+    <span class="n">new_shipment</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">shipments</span> <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s1">&#39;client_reference&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">ref</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">new_shipment</span><span class="p">[</span><span class="s1">&#39;arrival_date&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
+    <span class="k">assert</span> <span class="n">new_shipment</span><span class="p">[</span><span class="s1">&#39;products&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="p">[{</span><span class="s1">&#39;sku&#39;</span><span class="p">:</span> <span class="s1">&#39;sku1&#39;</span><span class="p">,</span> <span class="s1">&#39;quantity&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">}]</span>
 
 
-def test_can_update_a_shipment():
-    api = RealCargoAPI('https://sandbox.example.com/')
-    line = OrderLine('sku1', 10)
-    ref = random_reference()
-    shipment = Shipment(reference=ref, lines=[line], eta=None, incoterm='foo')
+<span class="k">def</span> <span class="nf">test_can_update_a_shipment</span><span class="p">():</span>
+    <span class="n">api</span> <span class="o">=</span> <span class="n">RealCargoAPI</span><span class="p">(</span><span class="s1">&#39;https://sandbox.example.com/&#39;</span><span class="p">)</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">OrderLine</span><span class="p">(</span><span class="s1">&#39;sku1&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="n">ref</span> <span class="o">=</span> <span class="n">random_reference</span><span class="p">()</span>
+    <span class="n">shipment</span> <span class="o">=</span> <span class="n">Shipment</span><span class="p">(</span><span class="n">reference</span><span class="o">=</span><span class="n">ref</span><span class="p">,</span> <span class="n">lines</span><span class="o">=</span><span class="p">[</span><span class="n">line</span><span class="p">],</span> <span class="n">eta</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">incoterm</span><span class="o">=</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span>
 
-    api.sync(shipment)
+    <span class="n">api</span><span class="o">.</span><span class="n">sync</span><span class="p">(</span><span class="n">shipment</span><span class="p">)</span>
 
-    shipment.lines[0].qty = 20
+    <span class="n">shipment</span><span class="o">.</span><span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">qty</span> <span class="o">=</span> <span class="mi">20</span>
 
-    api.sync(shipment)
+    <span class="n">api</span><span class="o">.</span><span class="n">sync</span><span class="p">(</span><span class="n">shipment</span><span class="p">)</span>
 
-    shipments = requests.get(api.api_url + '/shipments/').json()['items']
-    new_shipment = next(s for s in shipments if s['client_reference'] == ref)
-    assert new_shipment['products'] == [{'sku': 'sku1', 'quantity': 20}]
-</code></pre>
+    <span class="n">shipments</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">api</span><span class="o">.</span><span class="n">api_url</span> <span class="o">+</span> <span class="s1">&#39;/shipments/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s1">&#39;items&#39;</span><span class="p">]</span>
+    <span class="n">new_shipment</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">shipments</span> <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s1">&#39;client_reference&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">ref</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">new_shipment</span><span class="p">[</span><span class="s1">&#39;products&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="p">[{</span><span class="s1">&#39;sku&#39;</span><span class="p">:</span> <span class="s1">&#39;sku1&#39;</span><span class="p">,</span> <span class="s1">&#39;quantity&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">}]</span>
+</code></pre></div>
+
 
 <p>That relies on your third-party api having a decent sandbox that you can test against.
 You&rsquo;ll need to think about:</p>
@@ -448,36 +476,37 @@ you can spin it up in a docker container, run it alongside your test code, and
 talk to that instead of the real API.</p>
 <p>Faking a third party is often quite simple.  A REST API around a CRUD data model
 might just pop json objects in an out of an in-memory dict, for example:</p>
-<pre><code class="python">from flask import Flask, request
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">request</span>
 
-app = Flask('fake-cargo-api')
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="s1">&#39;fake-cargo-api&#39;</span><span class="p">)</span>
 
-SHIPMENTS = {}  # type: Dict[str, Dict]
+<span class="n">SHIPMENTS</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: Dict[str, Dict]</span>
 
-@app.route('/shipments/', methods=[&quot;GET&quot;])
-def list_shipments():
-    print('returning', SHIPMENTS)
-    return {'items': list(SHIPMENTS.values())}
-
-
-@app.route('/shipments/', methods=[&quot;POST&quot;])
-def create_shipment():
-    new_id = uuid.uuid4().hex
-    refs = {s['client_reference'] for s in SHIPMENTS.values()}
-    if request.json['client_reference'] in refs:
-        return 'already exists', 400
-    SHIPMENTS[new_id] = {'id': new_id, **request.json}
-    print('saved', SHIPMENTS)
-    return 'ok', 201
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/shipments/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">list_shipments</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;returning&#39;</span><span class="p">,</span> <span class="n">SHIPMENTS</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;items&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">SHIPMENTS</span><span class="o">.</span><span class="n">values</span><span class="p">())}</span>
 
 
-@app.route('/shipments/&lt;shipment_id&gt;/', methods=[&quot;PUT&quot;])
-def update_shipment(shipment_id):
-    existing = SHIPMENTS[shipment_id]
-    SHIPMENTS[shipment_id] = {**existing, **request.json}
-    print('updated', SHIPMENTS)
-    return 'ok', 200
-</code></pre>
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/shipments/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">create_shipment</span><span class="p">():</span>
+    <span class="n">new_id</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span>
+    <span class="n">refs</span> <span class="o">=</span> <span class="p">{</span><span class="n">s</span><span class="p">[</span><span class="s1">&#39;client_reference&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">SHIPMENTS</span><span class="o">.</span><span class="n">values</span><span class="p">()}</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">[</span><span class="s1">&#39;client_reference&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">refs</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;already exists&#39;</span><span class="p">,</span> <span class="mi">400</span>
+    <span class="n">SHIPMENTS</span><span class="p">[</span><span class="n">new_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="n">new_id</span><span class="p">,</span> <span class="o">**</span><span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">}</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;saved&#39;</span><span class="p">,</span> <span class="n">SHIPMENTS</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s1">&#39;ok&#39;</span><span class="p">,</span> <span class="mi">201</span>
+
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/shipments/&lt;shipment_id&gt;/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;PUT&quot;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">update_shipment</span><span class="p">(</span><span class="n">shipment_id</span><span class="p">):</span>
+    <span class="n">existing</span> <span class="o">=</span> <span class="n">SHIPMENTS</span><span class="p">[</span><span class="n">shipment_id</span><span class="p">]</span>
+    <span class="n">SHIPMENTS</span><span class="p">[</span><span class="n">shipment_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">existing</span><span class="p">,</span> <span class="o">**</span><span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">}</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;updated&#39;</span><span class="p">,</span> <span class="n">SHIPMENTS</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s1">&#39;ok&#39;</span><span class="p">,</span> <span class="mi">200</span>
+</code></pre></div>
+
 
 <p>This doesn&rsquo;t mean you <em>never</em> test against the third-party API, but
 you&rsquo;ve now given yourself the <em>option</em> not to.</p>
@@ -539,35 +568,38 @@ DI does buy us some nice things, so read on with an open mind.</p>
 <p>First, you might like to define an interface for your dependency explicitly.
 You could use an <code>abc.ABC</code>, or if you&rsquo;re anti-inheritance, a newfangled
 <code>typing.Protocol</code>:</p>
-<pre><code class="python">class CargoAPI(Protocol):
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">CargoAPI</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
 
-    def get_latest_eta(self, reference: str) -&gt; date:
-        ...
+    <span class="k">def</span> <span class="nf">get_latest_eta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reference</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+        <span class="o">...</span>
 
-    def sync(self, shipment: Shipment) -&gt; None:
-        ...
-</code></pre>
+    <span class="k">def</span> <span class="nf">sync</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shipment</span><span class="p">:</span> <span class="n">Shipment</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="o">...</span>
+</code></pre></div>
+
 
 <p>Now we can add our explicit dependency where it&rsquo;s needed, replacing
 a hardcoded <code>import</code> with a new, explicit argument to a function somewhere.
 Possibly event with a type hint:</p>
-<pre><code class="python">def create_shipment(
-    quantities: Dict[str, int],
-    incoterm: str,
-    cargo_api: CargoAPI
-) -&gt; Shipment:
-    ...
-    # rest of controller code essentially unchanged.
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">create_shipment</span><span class="p">(</span>
+    <span class="n">quantities</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+    <span class="n">incoterm</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">cargo_api</span><span class="p">:</span> <span class="n">CargoAPI</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Shipment</span><span class="p">:</span>
+    <span class="o">...</span>
+    <span class="c1"># rest of controller code essentially unchanged.</span>
+</code></pre></div>
+
 
 <p>What effect does that have on our tests?  Well, instead of needing to
 call <code>with mock.patch()</code>, we can create a standalone mock, and pass it
 in:</p>
-<pre><code class="python">def test_create_shipment_syncs_to_api():
-    mock_api = mock.Mock()
-    shipment = create_shipment({'sku1': 10}, incoterm='EXW', cargo_api=mock_api)
-    assert mock_api.sync.call_args == mock.call(shipment)
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">test_create_shipment_syncs_to_api</span><span class="p">():</span>
+    <span class="n">mock_api</span> <span class="o">=</span> <span class="n">mock</span><span class="o">.</span><span class="n">Mock</span><span class="p">()</span>
+    <span class="n">shipment</span> <span class="o">=</span> <span class="n">create_shipment</span><span class="p">({</span><span class="s1">&#39;sku1&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">},</span> <span class="n">incoterm</span><span class="o">=</span><span class="s1">&#39;EXW&#39;</span><span class="p">,</span> <span class="n">cargo_api</span><span class="o">=</span><span class="n">mock_api</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">mock_api</span><span class="o">.</span><span class="n">sync</span><span class="o">.</span><span class="n">call_args</span> <span class="o">==</span> <span class="n">mock</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">shipment</span><span class="p">)</span>
+</code></pre></div>
+
 
 <h4>DI tradeoffs</h4>
 <h5>Pros:</h5>
@@ -591,19 +623,20 @@ on board.</p>
 we can build our own fake for unit tests too.  Yes it&rsquo;s more
 lines of code than <code>mock_api = mock.Mock()</code>, but it&rsquo;s not a
 lot:</p>
-<pre><code class="python">class FakeCargoAPI:
-    def __init__(self):
-        self._shipments = {}
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">FakeCargoAPI</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shipments</span> <span class="o">=</span> <span class="p">{}</span>
 
-    def get_latest_eta(self, reference) -&gt; date:
-        return self._shipments[reference].eta
+    <span class="k">def</span> <span class="nf">get_latest_eta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reference</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shipments</span><span class="p">[</span><span class="n">reference</span><span class="p">]</span><span class="o">.</span><span class="n">eta</span>
 
-    def sync(self, shipment: Shipment):
-        self._shipments[shipment.reference] = shipment
+    <span class="k">def</span> <span class="nf">sync</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shipment</span><span class="p">:</span> <span class="n">Shipment</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shipments</span><span class="p">[</span><span class="n">shipment</span><span class="o">.</span><span class="n">reference</span><span class="p">]</span> <span class="o">=</span> <span class="n">shipment</span>
 
-    def __contains__(self, shipment):
-        return shipment in self._shipments.values()
-</code></pre>
+    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shipment</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">shipment</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shipments</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+</code></pre></div>
+
 
 <p>The fake is in-memory and in-process this time, but again, it&rsquo;s just a
 thin wrapper around some sort of container, a dict in this case.</p>
@@ -614,11 +647,12 @@ to make it emulate the real api (and comply with the <code>Protocol</code>).</p>
 </blockquote>
 <p>The <code>__contains__</code> is just a bit of syntactic sugar that lets us use
 <code>assert in</code> in our tests, which looks nice.  It&rsquo;s a Bob thing.</p>
-<pre><code class="python">def test_create_shipment_syncs_to_api():
-    api = FakeCargoAPI()
-    shipment = create_shipment({'sku1': 10}, incoterm='EXW', cargo_api=api)
-    assert shipment in api
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">test_create_shipment_syncs_to_api</span><span class="p">():</span>
+    <span class="n">api</span> <span class="o">=</span> <span class="n">FakeCargoAPI</span><span class="p">()</span>
+    <span class="n">shipment</span> <span class="o">=</span> <span class="n">create_shipment</span><span class="p">({</span><span class="s1">&#39;sku1&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">},</span> <span class="n">incoterm</span><span class="o">=</span><span class="s1">&#39;EXW&#39;</span><span class="p">,</span> <span class="n">cargo_api</span><span class="o">=</span><span class="n">api</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">shipment</span> <span class="ow">in</span> <span class="n">api</span>
+</code></pre></div>
+
 
 <p>Why bother with this?</p>
 <h4>Handrolled fakes for unit tests, the tradeoffs</h4>
@@ -693,6 +727,8 @@ for your unit tests, and the fake you use for your integration tests.</p>
 <li><a href="https://pythonspeed.com/articles/verified-fakes/">Verified fakes</a> by Itamar Turner-Trauring</li>
 <li><a href="https://www.youtube.com/watch?v=PBQN62oUnN8">Hoist your I/O</a> by Brandon Rhodes</li>
 </ul>
-  </div>
-</body>
+        </div>
+      </section>
+    </main>
+  </body>
 </html>

@@ -1,15 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-</head>
+  <head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="Harry Percival and Bob Gregory">
+		<meta name="description" content="">
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/milligram/1.3.0/milligram.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pygments-css@1.0.0/friendly.css">
+  </head>
 
-<body>
-  <h1> Commands, Handlers, Queries and Views</h1>
-  <p>by Bob, </p>
+  <body>
+		<main class="wrapper">
 
-  <div class="content">
-    <hr>
+			<nav class="navigation">
+				<section class="container">
+					<a class="navigation-title" href="https://cosmicpython.com">
+						<h1 class="title">Cosmic Python</h1>
+					</a>
+        </section>
+      </nav>
+
+      <section class="container">
+        <h1> Commands, Handlers, Queries and Views</h1>
+        <p>by Bob, </p>
+
+        <div class="content">
+          <hr>
 <p>In the first and second parts of this series I introduced the
 <a href="{% post_url 2017-09-07-introducing-command-handler %}">Command-Handler</a>
 and
@@ -32,16 +51,17 @@ if they are referentially transparent and hence possess no side effects.</p>
 <p>Referential transparency is an important concept from functional programming.
 Briefly, a function is referentially transparent if you could replace it with a
 static value.</p>
-<pre><code class="python">class LightSwitch:
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">LightSwitch</span><span class="p">:</span>
 
-    def toggle_light(self):
-        self.light_is_on = not self.light_is_on
-        return self.light_is_on
+    <span class="k">def</span> <span class="nf">toggle_light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">light_is_on</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">light_is_on</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">light_is_on</span>
 
-    @property
-    def is_on(self):
-        return self.light_is_on
-</code></pre>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_on</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">light_is_on</span>
+</code></pre></div>
+
 
 <p>In this class, the is_on  method is referentially transparent - I can replace it
 with the value True or False without any loss of functionality, but the method
@@ -64,51 +84,54 @@ Handlers to perform state changes, but what should we do when we want to get
 data back out of our model? What is the equivalent port for queries?</p>
 <p>The answer is &ldquo;it depends&rdquo;. The lowest-cost option is just to re-use your
 repositories in your UI entrypoints.</p>
-<pre><code class="python">@app.route(&quot;/issues&quot;)
-def list_issues():
-    with unit_of_work_manager.start() as unit_of_work:
-        open_issues = unit_of_work.issues.find_by_status('open')
-        return json.dumps(open_issues)
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/issues&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">list_issues</span><span class="p">():</span>
+    <span class="k">with</span> <span class="n">unit_of_work_manager</span><span class="o">.</span><span class="n">start</span><span class="p">()</span> <span class="k">as</span> <span class="n">unit_of_work</span><span class="p">:</span>
+        <span class="n">open_issues</span> <span class="o">=</span> <span class="n">unit_of_work</span><span class="o">.</span><span class="n">issues</span><span class="o">.</span><span class="n">find_by_status</span><span class="p">(</span><span class="s1">&#39;open&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">open_issues</span><span class="p">)</span>
+</code></pre></div>
+
 
 <p>This is totally fine unless you have complex formatting, or multiple entrypoints
 to your system. The problem with using your repositories directly in this way is
 that it&rsquo;s a slippery slope. Sooner or later you&rsquo;re going to have a tight
 deadline, and a simple requirement, and the temptation is to skip all the
 command/handler nonsense and do it directly in the web api.</p>
-<pre><code class="python">@app.route('/issues/&lt;issue_id&gt;', methods=['DELETE'])
-def delete_issue(issue_id):
-     with unit_of_work_manager.start() as uow:
-         issue = uow.issues[issue_id]
-         issue.delete()
-         uow.commit()
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/issues/&lt;issue_id&gt;&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;DELETE&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">delete_issue</span><span class="p">(</span><span class="n">issue_id</span><span class="p">):</span>
+     <span class="k">with</span> <span class="n">unit_of_work_manager</span><span class="o">.</span><span class="n">start</span><span class="p">()</span> <span class="k">as</span> <span class="n">uow</span><span class="p">:</span>
+         <span class="n">issue</span> <span class="o">=</span> <span class="n">uow</span><span class="o">.</span><span class="n">issues</span><span class="p">[</span><span class="n">issue_id</span><span class="p">]</span>
+         <span class="n">issue</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+         <span class="n">uow</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+</code></pre></div>
+
 
 <p>Super convenient, but then you need to add some error handling and some logging
 and an email notification.</p>
-<pre><code class="python">@app.route('/issues/&lt;issue_id&gt;', methods=['DELETE'])
-def delete_issue(issue_id):
-    logging.info(&quot;Handling DELETE of issue &quot;+str(issue_id))
+<div class="codehilite"><pre><span></span><code><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/issues/&lt;issue_id&gt;&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;DELETE&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">delete_issue</span><span class="p">(</span><span class="n">issue_id</span><span class="p">):</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Handling DELETE of issue &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">issue_id</span><span class="p">))</span>
 
-    with unit_of_work_manager.start() as uow:
-       issue = uow.issues[issue_id]
+    <span class="k">with</span> <span class="n">unit_of_work_manager</span><span class="o">.</span><span class="n">start</span><span class="p">()</span> <span class="k">as</span> <span class="n">uow</span><span class="p">:</span>
+       <span class="n">issue</span> <span class="o">=</span> <span class="n">uow</span><span class="o">.</span><span class="n">issues</span><span class="p">[</span><span class="n">issue_id</span><span class="p">]</span>
 
-       if issue is None:
-           logging.warn(&quot;Issue not found&quot;)
-           flask.abort(404)
-       if issue.status != 'deleted':
-          issue.delete()
-          uow.commit()
-          try:
-             smtp.send_notification(Issue.Deleted, issue_id)
-          except:
-             logging.error(
-                &quot;Failed to send email notification for deleted issue &quot;
-                 + str(issue_id), exn_info=True)
-       else:
-          logging.info(&quot;Issue already deleted. NOOP&quot;)
-    return &quot;Deleted!&quot;, 202
-</code></pre>
+       <span class="k">if</span> <span class="n">issue</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+           <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Issue not found&quot;</span><span class="p">)</span>
+           <span class="n">flask</span><span class="o">.</span><span class="n">abort</span><span class="p">(</span><span class="mi">404</span><span class="p">)</span>
+       <span class="k">if</span> <span class="n">issue</span><span class="o">.</span><span class="n">status</span> <span class="o">!=</span> <span class="s1">&#39;deleted&#39;</span><span class="p">:</span>
+          <span class="n">issue</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+          <span class="n">uow</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+          <span class="k">try</span><span class="p">:</span>
+             <span class="n">smtp</span><span class="o">.</span><span class="n">send_notification</span><span class="p">(</span><span class="n">Issue</span><span class="o">.</span><span class="n">Deleted</span><span class="p">,</span> <span class="n">issue_id</span><span class="p">)</span>
+          <span class="k">except</span><span class="p">:</span>
+             <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;Failed to send email notification for deleted issue &quot;</span>
+                 <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">issue_id</span><span class="p">),</span> <span class="n">exn_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+       <span class="k">else</span><span class="p">:</span>
+          <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Issue already deleted. NOOP&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">&quot;Deleted!&quot;</span><span class="p">,</span> <span class="mi">202</span>
+</code></pre></div>
+
 
 <p>Aaaaand, we&rsquo;re back to where we started: business logic mixed with glue code,
 and the whole mess slowly congealing in our web controllers. Of course, the
@@ -118,24 +141,25 @@ your controllers, then you might as well go ahead and read from repositories,
 it&rsquo;s all good, you have my blessing. If you want to avoid this, because your
 reads are complex, or because you&rsquo;re trying to stay pure, then instead we could
 define our views explicitly.</p>
-<pre><code class="python">class OpenIssuesList:
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">OpenIssuesList</span><span class="p">:</span>
 
-    def __init__(self, sessionmaker):
-        self.sessionmaker = sessionmaker
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sessionmaker</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sessionmaker</span> <span class="o">=</span> <span class="n">sessionmaker</span>
 
-    def fetch(self):
-        with self.sessionmaker() as session:
-            result = session.execute(
-                'SELECT reporter_name, timestamp, title
-                 FROM issues WHERE state=&quot;open&quot;')
-            return [dict(r) for r in result.fetchall()]
+    <span class="k">def</span> <span class="nf">fetch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">sessionmaker</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="s1">&#39;SELECT reporter_name, timestamp, title</span>
+                 <span class="n">FROM</span> <span class="n">issues</span> <span class="n">WHERE</span> <span class="n">state</span><span class="o">=</span><span class="s2">&quot;open&quot;</span><span class="s1">&#39;)</span>
+            <span class="k">return</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()]</span>
 
 
-@api.route('/issues/')
-def list_issues():
-    view_builder = OpenIssuesList(session_maker)
-    return jsonify(view_builder.fetch())
-</code></pre>
+<span class="nd">@api</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/issues/&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">list_issues</span><span class="p">():</span>
+    <span class="n">view_builder</span> <span class="o">=</span> <span class="n">OpenIssuesList</span><span class="p">(</span><span class="n">session_maker</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">view_builder</span><span class="o">.</span><span class="n">fetch</span><span class="p">())</span>
+</code></pre></div>
+
 
 <p>This is my favourite part of teaching ports and adapters to junior programmers,
 because the conversation inevitably goes like this:</p>
@@ -166,15 +190,16 @@ needs &lsquo;em.</p>
 most common mistake is not paying enough attention to the boundaries of their
 use cases. This leads to the application making far too many calls to the
 database because people write code like this:</p>
-<pre><code class="python"># Find all users who are assigned this task
-# [[and]] notify them and their line manager
-# then move the task to their in-queue
-notification = task.as_notification()
-for assignee in task.assignees:
-    assignee.manager.notifications.add(notification)
-    assignee.notifications.add(notification)
-    assignee.queues.inbox.add(task)
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Find all users who are assigned this task</span>
+<span class="c1"># [[and]] notify them and their line manager</span>
+<span class="c1"># then move the task to their in-queue</span>
+<span class="n">notification</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">as_notification</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">assignee</span> <span class="ow">in</span> <span class="n">task</span><span class="o">.</span><span class="n">assignees</span><span class="p">:</span>
+    <span class="n">assignee</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">notification</span><span class="p">)</span>
+    <span class="n">assignee</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">notification</span><span class="p">)</span>
+    <span class="n">assignee</span><span class="o">.</span><span class="n">queues</span><span class="o">.</span><span class="n">inbox</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+</code></pre></div>
+
 
 <p>ORMs make it very easy to &ldquo;dot&rdquo; through the object model this way, and pretend
 that we have our data in memory, but this quickly leads to performance issues
@@ -248,17 +273,18 @@ new Issue. How can I get the id back?</p>
 </blockquote>
 <p>The way I would recommend you handle this is simple - instead of letting your
 database choose ids for you, just choose them yourself.</p>
-<pre><code class="python">@api.route('/issues', methods=['POST'])
-def report_issue(self):
-    # uuids make great domain-controlled identifiers, because
-    # they can be shared amongst several systems and are easy
-    # to generate.
-    issue_id = uuid.uuid4()
+<div class="codehilite"><pre><span></span><code><span class="nd">@api</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/issues&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">report_issue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1"># uuids make great domain-controlled identifiers, because</span>
+    <span class="c1"># they can be shared amongst several systems and are easy</span>
+    <span class="c1"># to generate.</span>
+    <span class="n">issue_id</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span>
 
-    cmd = ReportIssueCommand(issue_id, **request.get_json())
-    handler.handle(cmd)
-    return &quot;&quot;, 201, { 'Location': '/issues/' + str(issue_id) }
-</code></pre>
+    <span class="n">cmd</span> <span class="o">=</span> <span class="n">ReportIssueCommand</span><span class="p">(</span><span class="n">issue_id</span><span class="p">,</span> <span class="o">**</span><span class="n">request</span><span class="o">.</span><span class="n">get_json</span><span class="p">())</span>
+    <span class="n">handler</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">201</span><span class="p">,</span> <span class="p">{</span> <span class="s1">&#39;Location&#39;</span><span class="p">:</span> <span class="s1">&#39;/issues/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">issue_id</span><span class="p">)</span> <span class="p">}</span>
+</code></pre></div>
+
 
 <p>There&rsquo;s a few ways to do this, the most common is just to use a UUID, but you
 can also implement something like
@@ -278,6 +304,8 @@ or IO. We have a command and a handler that orchestrate a use-case, and we can
 drive our application from tests or Flask. Most importantly, the layers on the
 outside depend on the layers toward the centre.</p>
 <p>Next time I&rsquo;ll get back to talking about message buses.</p>
-  </div>
-</body>
+        </div>
+      </section>
+    </main>
+  </body>
 </html>

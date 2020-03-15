@@ -1,15 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-</head>
+  <head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="Harry Percival and Bob Gregory">
+		<meta name="description" content="">
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/milligram/1.3.0/milligram.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pygments-css@1.0.0/friendly.css">
+  </head>
 
-<body>
-  <h1> Repository and Unit of Work Pattern</h1>
-  <p>by Bob, </p>
+  <body>
+		<main class="wrapper">
 
-  <div class="content">
-    <hr>
+			<nav class="navigation">
+				<section class="container">
+					<a class="navigation-title" href="https://cosmicpython.com">
+						<h1 class="title">Cosmic Python</h1>
+					</a>
+        </section>
+      </nav>
+
+      <section class="container">
+        <h1> Repository and Unit of Work Pattern</h1>
+        <p>by Bob, </p>
+
+        <div class="content">
+          <hr>
 <p>In the previous part
 (<a href="{% post_url 2017-09-07-introducing-command-handler %}">Introducing Command Handler</a>)
 of this series we built a toy system that could add a new Issue to an IssueLog, but
@@ -46,17 +65,19 @@ Into our circuit we attach two ports, one for current in, and one for current
 out. The input and output channels are part of our circuit: without them, the
 circuit is useless.</p>
 <p>class ThresholdDetectionCircuit:</p>
-<pre><code>arbitrary_threshold = 4
+<div class="codehilite"><pre><span></span><code><span class="n">arbitrary_threshold</span> <span class="o">=</span> <span class="mi">4</span>
 
-def __init__(self, input: ReadablePort, output: WriteablePort):
-    self.input = input
-    self.output = output
+<span class="n">def</span> <span class="n">__init__</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="k">input</span><span class="p">:</span> <span class="n">ReadablePort</span><span class="p">,</span> <span class="k">output</span><span class="p">:</span> <span class="n">WriteablePort</span><span class="p">):</span>
+    <span class="k">self</span><span class="p">.</span><span class="k">input</span> <span class="o">=</span> <span class="k">input</span>
+    <span class="k">self</span><span class="p">.</span><span class="k">output</span> <span class="o">=</span> <span class="k">output</span>
 
-def read_from_input(self):
-    next_value = self.input.read()
-    if next_value &gt; self.arbitrary_threshold:
-        self.output.write(1)
-</code></pre>
+<span class="n">def</span> <span class="n">read_from_input</span><span class="p">(</span><span class="k">self</span><span class="p">):</span>
+    <span class="n">next_value</span> <span class="o">=</span> <span class="k">self</span><span class="p">.</span><span class="k">input</span><span class="p">.</span><span class="k">read</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">next_value</span> <span class="o">&gt;</span> <span class="k">self</span><span class="p">.</span><span class="n">arbitrary_threshold</span><span class="p">:</span>
+        <span class="k">self</span><span class="p">.</span><span class="k">output</span><span class="p">.</span><span class="k">write</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>
+
+
 <p>Because we had the great foresight to use standardised ports, we can plug any
 number of different devices into our circuit. For example, we could attach a
 light-detector to the input and a buzzer to the output, or we could attach a
@@ -85,20 +106,24 @@ the domain model through well-defined ports. How does all of this relate to
 databases?</p>
 <p>from SqlAlchemy import Session</p>
 <p>class SqlAlchemyIssueLog (IssueLog):</p>
-<pre><code>def __init__(self, session: Session):
-    self.session = session
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">__init__</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="k">session</span><span class="p">:</span> <span class="k">Session</span><span class="p">):</span>
+    <span class="k">self</span><span class="p">.</span><span class="k">session</span> <span class="o">=</span> <span class="k">session</span>
 
-def add(self, issue):
-    self.session.add(issue)
-</code></pre>
+<span class="n">def</span> <span class="k">add</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">issue</span><span class="p">):</span>
+    <span class="k">self</span><span class="p">.</span><span class="k">session</span><span class="p">.</span><span class="k">add</span><span class="p">(</span><span class="n">issue</span><span class="p">)</span>
+</code></pre></div>
+
+
 <p>class TextFileIssueLog (IssueLog):</p>
-<pre><code>def __init__(self, path):
-    self.path = path
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">__init__</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="k">self</span><span class="p">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
 
-def add(self, issue):
-    with open(self.path, 'w') as f:
-        json.dump(f)
-</code></pre>
+<span class="n">def</span> <span class="k">add</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">issue</span><span class="p">):</span>
+    <span class="k">with</span> <span class="k">open</span><span class="p">(</span><span class="k">self</span><span class="p">.</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">json</span><span class="p">.</span><span class="n">dump</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</code></pre></div>
+
+
 <p>By analogy to our circuit example, the IssueLog is a WriteablePort - it&rsquo;s a way
 for us to get data out of the system. SqlAlchemy and the file system are two
 types of adapter that we can plug in, just like the Buzzer or Light classes. In
@@ -111,16 +136,18 @@ repository, and get things out of the repository, and that&rsquo;s essentially i
 <p>class FooRepository:
     def <strong>init</strong>(self, db_session):
         self.session = db_session</p>
-<pre><code>def add_new_item(self, item):
-    self.db_session.add(item)
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">add_new_item</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+    <span class="k">self</span><span class="p">.</span><span class="n">db_session</span><span class="p">.</span><span class="k">add</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 
-def get_item(self, id):
-    return self.db_session.get(Foo, id)
+<span class="n">def</span> <span class="n">get_item</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">id</span><span class="p">):</span>
+    <span class="k">return</span> <span class="k">self</span><span class="p">.</span><span class="n">db_session</span><span class="p">.</span><span class="k">get</span><span class="p">(</span><span class="n">Foo</span><span class="p">,</span> <span class="n">id</span><span class="p">)</span>
 
-def find_foos_by_latitude(self, latitude):
-    return self.session.query(Foo).\
-            filter(foo.latitude == latitude)
-</code></pre>
+<span class="n">def</span> <span class="n">find_foos_by_latitude</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">latitude</span><span class="p">):</span>
+    <span class="k">return</span> <span class="k">self</span><span class="p">.</span><span class="k">session</span><span class="p">.</span><span class="n">query</span><span class="p">(</span><span class="n">Foo</span><span class="p">).</span><span class="err">\</span>
+            <span class="n">filter</span><span class="p">(</span><span class="n">foo</span><span class="p">.</span><span class="n">latitude</span> <span class="o">==</span> <span class="n">latitude</span><span class="p">)</span>
+</code></pre></div>
+
+
 <p>We expose a few methods, one to add new items, one to get items by their id, and
 a third to find items by some criterion. This FooRepository is using a 
 SqlAlchemy session
@@ -130,17 +157,19 @@ tests.</p>
 <p>class FooRepository:
     def <strong>init</strong>(self, db_session):
         self.items = []</p>
-<pre><code>def add_new_item(self, item):
-    self.items.append(item)
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">add_new_item</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+    <span class="k">self</span><span class="p">.</span><span class="n">items</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 
-def get_item(self, id):
-    return next((item for item in self.items 
-                      if item.id == id))
+<span class="n">def</span> <span class="n">get_item</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">id</span><span class="p">):</span>
+    <span class="k">return</span> <span class="k">next</span><span class="p">((</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="k">in</span> <span class="k">self</span><span class="p">.</span><span class="n">items</span> 
+                      <span class="k">if</span> <span class="n">item</span><span class="p">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">id</span><span class="p">))</span>
 
-def find_foos_by_latitude(self, latitude):
-    return (item for item in self.items
-                 if item.latitude == latitude)
-</code></pre>
+<span class="n">def</span> <span class="n">find_foos_by_latitude</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">latitude</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="k">in</span> <span class="k">self</span><span class="p">.</span><span class="n">items</span>
+                 <span class="k">if</span> <span class="n">item</span><span class="p">.</span><span class="n">latitude</span> <span class="o">==</span> <span class="n">latitude</span><span class="p">)</span>
+</code></pre></div>
+
+
 <p>This adapter works just the same as the one backed by a real database, but does
 so without any external state. This allows us to test our code without resorting
 to Setup/Teardown scripts on our database, or monkey patching our ORM to return
@@ -163,37 +192,41 @@ request.</p>
        long-lived background job.&rdquo;&ldquo;&rdquo;
     def <strong>init</strong>(self, session_maker):
         self.session_maker = session_maker</p>
-<pre><code>def start(self):
-    return SqlAlchemyUnitOfWork(self.session_maker)
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="err">def start(self):</span>
+<span class="err">    return SqlAlchemyUnitOfWork(self.session_maker)</span>
+</code></pre></div>
+
+
 <p>class SqlAlchemyUnitOfWork(UnitOfWork):
     &ldquo;&rdquo;&ldquo;The unit of work captures the idea of a set of things that
        need to happen together. </p>
-<pre><code>   Usually, in a relational database, 
-   one unit of work == one database transaction."""
+<div class="codehilite"><pre><span></span><code><span class="w">   </span><span class="n">Usually</span><span class="p">,</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">relational</span><span class="w"> </span><span class="k">database</span><span class="p">,</span><span class="w"> </span>
+<span class="w">   </span><span class="n">one</span><span class="w"> </span><span class="n">unit</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="k">work</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">one</span><span class="w"> </span><span class="k">database</span><span class="w"> </span><span class="k">transaction</span><span class="p">.</span><span class="ss">&quot;&quot;</span><span class="err">&quot;</span><span class="w"></span>
 
-def __init__(self, sessionfactory):
-    self.sessionfactory = sessionfactory
+<span class="n">def</span><span class="w"> </span><span class="n">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">sessionfactory</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">self</span><span class="p">.</span><span class="n">sessionfactory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sessionfactory</span><span class="w"></span>
 
-def __enter__(self):
-    self.session = self.sessionfactory()
-    return self
+<span class="n">def</span><span class="w"> </span><span class="n">__enter__</span><span class="p">(</span><span class="n">self</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">self</span><span class="p">.</span><span class="k">session</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">sessionfactory</span><span class="p">()</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">self</span><span class="w"></span>
 
-def __exit__(self, type, value, traceback):
-    self.session.close()
+<span class="n">def</span><span class="w"> </span><span class="n">__exit__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">type</span><span class="p">,</span><span class="w"> </span><span class="k">value</span><span class="p">,</span><span class="w"> </span><span class="n">traceback</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">self</span><span class="p">.</span><span class="k">session</span><span class="p">.</span><span class="k">close</span><span class="p">()</span><span class="w"></span>
 
-def commit(self):
-    self.session.commit()
+<span class="n">def</span><span class="w"> </span><span class="k">commit</span><span class="p">(</span><span class="n">self</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">self</span><span class="p">.</span><span class="k">session</span><span class="p">.</span><span class="k">commit</span><span class="p">()</span><span class="w"></span>
 
-def rollback(self):
-    self.session.rollback()
+<span class="n">def</span><span class="w"> </span><span class="k">rollback</span><span class="p">(</span><span class="n">self</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">self</span><span class="p">.</span><span class="k">session</span><span class="p">.</span><span class="k">rollback</span><span class="p">()</span><span class="w"></span>
 
-# I tend to put my repositories onto my UOW
-# for convenient access. 
-@property
-def issues(self):
-    return IssueRepository(self.session)
-</code></pre>
+<span class="err">#</span><span class="w"> </span><span class="n">I</span><span class="w"> </span><span class="n">tend</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">put</span><span class="w"> </span><span class="n">my</span><span class="w"> </span><span class="n">repositories</span><span class="w"> </span><span class="n">onto</span><span class="w"> </span><span class="n">my</span><span class="w"> </span><span class="n">UOW</span><span class="w"></span>
+<span class="err">#</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">convenient</span><span class="w"> </span><span class="n">access</span><span class="p">.</span><span class="w"> </span>
+<span class="nv">@property</span><span class="w"></span>
+<span class="n">def</span><span class="w"> </span><span class="n">issues</span><span class="p">(</span><span class="n">self</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">IssueRepository</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="k">session</span><span class="p">)</span><span class="w"></span>
+</code></pre></div>
+
+
 <p>This code is taken from a current production system - the code to implement
 these patterns really isn&rsquo;t complex. The only thing missing here is some logging
 and error handling in the commit method. Our unit-of-work manager creates a new
@@ -204,13 +237,15 @@ first command handler and see how we might use these patterns together.</p>
 <p>class ReportIssueHandler:
     def <strong>init</strong>(self, uowm:UnitOfWorkManager):
         self.uowm = uowm</p>
-<pre><code>def handle(self, cmd):
-    with self.uowm.start() as unit_of_work:
-        reporter = IssueReporter(cmd.reporter_name, cmd.reporter_email)
-        issue = Issue(reporter, cmd.problem_description)
-        unit_of_work.issues.add(issue)
-        unit_of_work.commit()
-</code></pre>
+<div class="codehilite"><pre><span></span><code><span class="err">def handle(self, cmd):</span>
+<span class="err">    with self.uowm.start() as unit_of_work:</span>
+<span class="err">        reporter = IssueReporter(cmd.reporter_name, cmd.reporter_email)</span>
+<span class="err">        issue = Issue(reporter, cmd.problem_description)</span>
+<span class="err">        unit_of_work.issues.add(issue)</span>
+<span class="err">        unit_of_work.commit()</span>
+</code></pre></div>
+
+
 <p>Our command handler looks more or less the same, except that it&rsquo;s now
 responsible for starting a unit-of-work, and committing the unit-of-work when it
 has finished. This is in keeping with our rule #1 - we will clearly define the
@@ -240,30 +275,34 @@ delete SqlAlchemy from our code base, and our unit tests would continue to work,
 because we have a pure domain model and we expose abstract ports from our
 service layer.</p>
 <p>class When_reporting_an_issue:</p>
-<pre><code>def given_an_empty_unit_of_work(self):
-    self.uow = FakeUnitOfWork()
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">given_an_empty_unit_of_work</span><span class="p">(</span><span class="k">self</span><span class="p">):</span>
+    <span class="k">self</span><span class="p">.</span><span class="n">uow</span> <span class="o">=</span> <span class="n">FakeUnitOfWork</span><span class="p">()</span>
 
-def because_we_report_a_new_issue(self):
-    handler = ReportIssueHandler(self.uow)
-    cmd = ReportIssueCommand(name, email, desc)
+<span class="n">def</span> <span class="n">because_we_report_a_new_issue</span><span class="p">(</span><span class="k">self</span><span class="p">):</span>
+    <span class="k">handler</span> <span class="o">=</span> <span class="n">ReportIssueHandler</span><span class="p">(</span><span class="k">self</span><span class="p">.</span><span class="n">uow</span><span class="p">)</span>
+    <span class="n">cmd</span> <span class="o">=</span> <span class="n">ReportIssueCommand</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">email</span><span class="p">,</span> <span class="k">desc</span><span class="p">)</span>
 
-    handler.handle(cmd)
+    <span class="k">handler</span><span class="p">.</span><span class="n">handle</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
 
-def the_handler_should_have_created_a_new_issue(self):
-    expect(self.uow.issues).to(have_len(1))
+<span class="n">def</span> <span class="n">the_handler_should_have_created_a_new_issue</span><span class="p">(</span><span class="k">self</span><span class="p">):</span>
+    <span class="n">expect</span><span class="p">(</span><span class="k">self</span><span class="p">.</span><span class="n">uow</span><span class="p">.</span><span class="n">issues</span><span class="p">).</span><span class="k">to</span><span class="p">(</span><span class="n">have_len</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
 
-def it_should_have_recorded_the_issuer(self):
-    expect(self.uow.issues[0].reporter.name).to(equal(name))
-    expect(self.uow.issues[0].reporter.email).to(equal(email))
+<span class="n">def</span> <span class="n">it_should_have_recorded_the_issuer</span><span class="p">(</span><span class="k">self</span><span class="p">):</span>
+    <span class="n">expect</span><span class="p">(</span><span class="k">self</span><span class="p">.</span><span class="n">uow</span><span class="p">.</span><span class="n">issues</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">reporter</span><span class="p">.</span><span class="n">name</span><span class="p">).</span><span class="k">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+    <span class="n">expect</span><span class="p">(</span><span class="k">self</span><span class="p">.</span><span class="n">uow</span><span class="p">.</span><span class="n">issues</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">reporter</span><span class="p">.</span><span class="n">email</span><span class="p">).</span><span class="k">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">email</span><span class="p">))</span>
 
-def it_should_have_recorded_the_description(self):
-    expect(self.uow.issues[0].description).to(equal(desc))
+<span class="n">def</span> <span class="n">it_should_have_recorded_the_description</span><span class="p">(</span><span class="k">self</span><span class="p">):</span>
+    <span class="n">expect</span><span class="p">(</span><span class="k">self</span><span class="p">.</span><span class="n">uow</span><span class="p">.</span><span class="n">issues</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">description</span><span class="p">).</span><span class="k">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="k">desc</span><span class="p">))</span>
 
-def it_should_have_committed_the_unit_of_work(self):
-    expect(self.uow.was_committed).to(be_true)
-</code></pre>
+<span class="n">def</span> <span class="n">it_should_have_committed_the_unit_of_work</span><span class="p">(</span><span class="k">self</span><span class="p">):</span>
+    <span class="n">expect</span><span class="p">(</span><span class="k">self</span><span class="p">.</span><span class="n">uow</span><span class="p">.</span><span class="n">was_committed</span><span class="p">).</span><span class="k">to</span><span class="p">(</span><span class="n">be_true</span><span class="p">)</span>
+</code></pre></div>
+
+
 <p>Next time [https://io.made.com/blog/commands-and-queries-handlers-and-views] 
 we&rsquo;ll look at how to get data back out of the system.</p>
-  </div>
-</body>
+        </div>
+      </section>
+    </main>
+  </body>
 </html>

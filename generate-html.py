@@ -12,7 +12,7 @@ BASE_URL = "https://tonybaloney.github.io/"
 
 def main():
     posts = glob.glob("blog/*.md")
-    extensions = ['extra', 'smarty', 'meta']
+    extensions = ['extra', 'smarty', 'meta', 'codehilite']
     _md = markdown.Markdown(extensions=extensions, output_format='html5')
 
     loader = jinja2.FileSystemLoader(searchpath="./")
