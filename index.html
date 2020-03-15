@@ -25,43 +25,37 @@
 
       <section class="container">
         
-  <p># cosmic_python</p>
-<p><strong><em>simple patterns for building complex applications</em></strong></p>
-<hr>
-<p><em>(Because &ldquo;Cosmos&rdquo; is the <a href="https://www.goodreads.com/quotes/604655-cosmos-is-a-greek-word-for-the-order-of-the">opposite of Chaos</a>, you see)</em></p>
-<p><img src="images/cover.png" alt="Cover Image for Architecture Patterns with Python Book" style="float: right;" width="200" /></p>
-<h2>The Book</h2>
-<ul>
-<li>Read for free from the sources using Github previews:
-  <a href="https://github.com/cosmicpython/book#table-of-contents">github.com/cosmicpython/book</a></li>
-<li>Read in Early Release via O&rsquo;Reilly Learning (aka Safari) 
-  <a href="https://learning.oreilly.com/library/view/architecture-patterns-with/9781492052197/">learning.oreilly.com</a></li>
-<li>Preorder on <a href="https://amzn.to/37pR2DH">Amazon.com</a> or <a href="https://amzn.to/38CmFu1">Amazon.co.uk</a></li>
-</ul>
-<h2>Blog</h2>
-<h3>Recent posts</h3>
-<ul>
-  {% for post in site.posts reversed %}
-    {% assign year = post.date | date: "%Y" %}
-    {% if year != "2017" %}
-      <li>
-        <a href="{{ post.url }}">{{ post.date | date: "%Y-%m-%d" }} {{ post.title }}</a>
-      </li>
-    {% endif %}
-  {% endfor %}
-</ul>
+  <div class="row">
+    <div class="column">
+      <img src="https://www.jpl.nasa.gov/spaceimages/images/largesize/PIA13111_hires.jpg" />
+    </div>
+  </div>
+  <h1>Cosmic Python</h1>
+  <h2>Simple patterns for building complex applications</h2>
+  <p>
+    <em>
+      (Because "Cosmos" is the
+      <a href="https://www.goodreads.com/quotes/604655-cosmos-is-a-greek-word-for-the-order-of-the">opposite of Chaos</a>,
+      you see)
+    </em>
+  </p>
 
-<h3>Classic 2017 Episodes on Ports &amp; Adapters, by Bob</h3>
-<ul>
-  {% for post in site.posts reversed %}
-    {% assign year = post.date | date: "%Y" %}
-    {% if year == "2017" %}
-      <li>
-        <a href="{{ post.url }}">{{ post.date | date: "%Y-%m-%d" }} {{ post.title }}</a>
-      </li>
-    {% endif %}
-  {% endfor %}
-</ul>
+  <h1>The Book</h1>
+  <ul>
+    <li>
+      Read for free from the sources using Github previews:
+      <a href="https://github.com/cosmicpython/book#table-of-contents">github.com/cosmicpython/book</a>
+    </li>
+
+    <li>
+      Read in Early Release via O'Reilly Learning (aka Safari) 
+      <a href="https://learning.oreilly.com/library/view/architecture-patterns-with/9781492052197/">learning.oreilly.com</a>
+    </li>
+
+    <li>
+    Preorder on [Amazon.com](https://amzn.to/37pR2DH) or [Amazon.co.uk](https://amzn.to/38CmFu1)
+
+
 
       </section>
     </main>
