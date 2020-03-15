@@ -1,8 +1,8 @@
 {% extends "templates/base.html" %}
 
 {% block content_block %}
-  <h1> {{ blog_heading[0] }}</h1>
-  <p>by {{blog_author[0]}}, {{blog_publish_date[0]}}</p>
+  <h1> {{ post.title }}</h1>
+  <p>by {{ post.author }}, {{ post.date }}</p>
 
   <div class="content">
     {{content}}

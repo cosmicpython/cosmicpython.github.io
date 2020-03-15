@@ -1,5 +1,5 @@
-blog_author: Bob
-blog_heading: Commands, Handlers, Queries and Views
+title: Commands, Handlers, Queries and Views
+author: Bob
 
 ---
 

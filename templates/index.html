@@ -49,7 +49,7 @@
   {% for post in posts %}
     {% if post.date.year != 2017 %}
       <li>
-        <a href="{{ post.url }}">{{ post.date }} {{ post.title }}</a>
+        <a href="{{ post.html_path }}">{{ post.date }} {{ post.title }}</a>
       </li>
     {% endif %}
   {% endfor %}
@@ -62,7 +62,7 @@
   {% for post in posts %}
     {% if post.date.year == 2017 %}
       <li>
-        <a href="{{ post.link }}">{{ post.date }} {{ post.title }}</a>
+        <a href="{{ post.html_path }}">{{ post.date }} {{ post.title }}</a>
       </li>
     {% endif %}
   {% endfor %}

@@ -7,7 +7,7 @@
             Simple patterns for building complex apps
         </description>
         <link>https://cosmicpython.com</link>
-        <lastBuildDate>Sun, 15 Mar 2020 22:03:35 -0000</lastBuildDate>
+        <lastBuildDate>Sun, 15 Mar 2020 22:26:50 -0000</lastBuildDate>
         <pubDate>Sat, 4 Jan 2020 19:15:54 -0500</pubDate>
         <atom:link href="https://cosmicpython.com/rss.xml" rel="self" type="application/rss+xml" />
         
@@ -16,10 +16,10 @@
             <description>
                 
             </description>
-            <link>https://tonybaloney.github.io/posts/2020-01-25-testing_external_api_calls.html</link>
+            <link></link>
             <pubDate></pubDate>
             <dc:creator>Harry</dc:creator>
-            <guid>https://tonybaloney.github.io/posts/2020-01-25-testing_external_api_calls.html</guid>
+            <guid></guid>
         </item>
         
         <item>
@@ -27,10 +27,10 @@
             <description>
                 
             </description>
-            <link>https://tonybaloney.github.io/posts/2017-09-19-why-use-domain-events.html</link>
+            <link></link>
             <pubDate></pubDate>
             <dc:creator>Bob</dc:creator>
-            <guid>https://tonybaloney.github.io/posts/2017-09-19-why-use-domain-events.html</guid>
+            <guid></guid>
         </item>
         
         <item>
@@ -38,10 +38,10 @@
             <description>
                 
             </description>
-            <link>https://tonybaloney.github.io/posts/2017-09-13-commands-and-queries-handlers-and-views.html</link>
+            <link></link>
             <pubDate></pubDate>
             <dc:creator>Bob</dc:creator>
-            <guid>https://tonybaloney.github.io/posts/2017-09-13-commands-and-queries-handlers-and-views.html</guid>
+            <guid></guid>
         </item>
         
         <item>
@@ -49,10 +49,10 @@
             <description>
                 
             </description>
-            <link>https://tonybaloney.github.io/posts/2017-09-08-repository-and-unit-of-work-pattern-in-python.html</link>
+            <link></link>
             <pubDate></pubDate>
             <dc:creator>Bob</dc:creator>
-            <guid>https://tonybaloney.github.io/posts/2017-09-08-repository-and-unit-of-work-pattern-in-python.html</guid>
+            <guid></guid>
         </item>
         
         <item>
@@ -60,10 +60,10 @@
             <description>
                 
             </description>
-            <link>https://tonybaloney.github.io/posts/2017-09-07-introducing-command-handler.html</link>
+            <link></link>
             <pubDate></pubDate>
             <dc:creator>Bob</dc:creator>
-            <guid>https://tonybaloney.github.io/posts/2017-09-07-introducing-command-handler.html</guid>
+            <guid></guid>
         </item>
         
     </channel>

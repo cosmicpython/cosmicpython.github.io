@@ -1,5 +1,5 @@
-blog_heading: Writing tests for external API calls
-blog_author: Harry
+title: Writing tests for external API calls
+author: Harry
 
 ---
 

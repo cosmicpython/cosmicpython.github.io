@@ -1,5 +1,6 @@
-blog_heading: Introducing Command Handler
-blog_author: Bob
+title: Introducing Command Handler
+author: Bob
+
 ---
 
 The term DDD comes from the book by Eric Evans: ["Domain-Driven Design: Tackling

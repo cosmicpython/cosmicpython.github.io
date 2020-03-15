@@ -1,5 +1,5 @@
-blog_author: Bob
-blog_heading: Repository and Unit of Work Pattern
+title: Repository and Unit of Work Pattern
+author: Bob
 
 ---
 

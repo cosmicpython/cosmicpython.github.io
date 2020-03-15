@@ -12,13 +12,13 @@
         <atom:link href="https://cosmicpython.com/rss.xml" rel="self" type="application/rss+xml" />
         {% for item in posts %}
         <item>
-            <title>{{item.blog_heading[0]}}</title>
+            <title>{{ item.title }}</title>
             <description>
                 {{item.blog_subheading}}
             </description>
             <link>{{item.link}}</link>
             <pubDate>{{item.rfc2822_date}}</pubDate>
-            <dc:creator>{{item.blog_author[0]}}</dc:creator>
+            <dc:creator>{{ item.author }}</dc:creator>
             <guid>{{item.link}}</guid>
         </item>
         {% endfor %}

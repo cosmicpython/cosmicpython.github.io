@@ -1,5 +1,5 @@
-blog_heading: Why use domain events?
-blog_author: Bob
+title: Why use domain events?
+author: Bob
 
 ---
 
