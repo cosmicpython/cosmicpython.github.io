@@ -9,7 +9,7 @@ watch-build:
 
 update-book:
 	cd book && make html
-	./prep-book-html.py
-	rsync -a -v book/images _site/book/images/
+	./copy-and-fix-book-html.py
+	rsync -a -v book/images/ _site/book/images/
 
 
