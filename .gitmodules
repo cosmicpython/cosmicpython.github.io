@@ -1,3 +1,4 @@
 [submodule "book"]
 	path = book
 	url = https://github.com/cosmicpython/book.git
+	shallow = true
