@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="Harry Percival and Bob Gregory">
+		<meta name="description" content="">
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/milligram/1.3.0/milligram.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pygments-css@1.0.0/friendly.css">
+  </head>
+
+  <body>
+		<main class="wrapper">
+
+			<nav class="navigation">
+				<section class="container">
+					<a class="navigation-title" href="/">
+						<h1 class="title">Cosmic Python</h1>
+					</a>
+        </section>
+      </nav>
+
+      <section class="container">
+        
+  <h1> Why use domain events?</h1>
+  <p>by Bob, 2017-09-19</p>
+
+  <div class="content">
+    <hr>
+<p>Nota bene: this instalment in the Ports and Adapters with Command Handlers
+series is code-heavy, and isn&rsquo;t going to make much sense unless you&rsquo;ve read the
+previous parts:</p>
+<ul>
+<li><a href="{% post_url 2017-09-07-introducing-command-handler %}">Introducing Command Handler</a></li>
+<li><a href="{% post_url 2017-09-08-repository-and-unit-of-work-pattern-in-python %}">Repositories and Units of Work</a></li>
+<li><a href="{% post_url 2017-09-13-commands-and-queries-handlers-and-views %}">Commands and Queries, Handlers and Views</a></li>
+</ul>
+<p>Okay, so we have a basic skeleton for an application and we can add new issues
+into the database, then fetch them from a Flask API. So far, though, we don&rsquo;t
+have any domain logic at all. All we have is a whole bunch of complicated crap
+where we could just have a tiny Django app. Let&rsquo;s work through some more
+use-cases and start to flesh things out.</p>
+<p>Back to our domain expert:</p>
+<p>So when we&rsquo;ve added a reported issue to the issue log, what happens next?</p>
+<p>Well we need to triage the problem and decide how urgent it is. Then we might
+assign it to a particular engineer, or we might leave it on the queue to be
+picked up by anyone.</p>
+<p>Wait, the queue? I thought you had an issue log, are they the same thing, or is
+there a difference?</p>
+<p>Oh, yes. The issue log is just a record of all the issues we have received, but
+we work from the queue.</p>
+<p>I see, and how do things get into the queue?</p>
+<p>We triage the new items in the issue log to decide how urgent they are, and what
+categories they should be in. When we know how to categorise them, and how
+urgent they are, we treat the issues as a queue, and work through them in
+priority order.</p>
+<p>This is because users always set things to &ldquo;Extremely urgent&rdquo;?</p>
+<p>Yeah, it&rsquo;s just easier for us to triage the issues ourselves.</p>
+<p>And what does that actually mean, like, do you just read the ticket and say &ldquo;oh,
+this is 5 important, and it&rsquo;s in the broken mouse category&rdquo;?</p>
+<p>Mmmm&hellip; more or less, sometimes we need to ask more questions from the user so
+we&rsquo;ll email them, or call them. Most things are first-come, first-served, but
+occasionally someone needs a fix before they can go to a meeting or something.</p>
+<p>So you email the user to get more information, or you call them up, and then you
+use that information to assess the priority of the issue - sorry triage the
+issue, and work out what category it should go in&hellip; what do the categories 
+achieve? Why categorise?</p>
+<p>Partly for reporting, so we can see what stuff is taking up the most time, or if
+there are clusters of similar problems on a particular batch of laptops for
+example. Mostly because different engineers have different skills, like if you
+have a problem with the Active Directory domain, then you should send that to
+Barry, or if it&rsquo;s an Exchange problem, then George can sort it out, and Mike has
+the equipment log so he can give you a temporary laptop and so on, and so on.</p>
+<p>Okay, and where do I find this &ldquo;queue&rdquo;?</p>
+<p>Your customer grins and gestures at the wall where a large whiteboard is covered
+in post-its and stickers of different colours.</p>
+<p>Mapping our requirements to our domain
+How can we map these requirements back to our system? Looking back over our
+notes with the domain expert, there&rsquo;s a few obvious verbs that we should use to
+model our use cases. We can triage  an issue, which means we prioritise and
+categorise it; we can assign  a triaged issue to an engineer, or an engineer can
+ pick up  an unassigned issue. There&rsquo;s also a whole piece about asking
+questions, which we might do synchronously by making a phone call and filling
+out some more details, or asynchronously by sending an email. The Queue, with
+all of its stickers and sigils and swimlanes looks too complicated to handle
+today, so we&rsquo;ll dig deeper into that separately.</p>
+<p>Let&rsquo;s quickly flesh out the triage use cases. We&rsquo;ll start by updating the
+existing unit test for reporting an issue:</p>
+<p>class When_reporting_an_issue:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span><span class="w"> </span><span class="n">given_an_empty_unit_of_work</span><span class="p">(</span><span class="n">self</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">self</span><span class="p">.</span><span class="n">uow</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">FakeUnitOfWork</span><span class="p">()</span><span class="w"></span>
+
+<span class="n">def</span><span class="w"> </span><span class="n">because_we_report_a_new_issue</span><span class="p">(</span><span class="n">self</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">handler</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ReportIssueHandler</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">uow</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="n">cmd</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ReportIssueCommand</span><span class="p">(</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">email</span><span class="p">,</span><span class="w"> </span><span class="k">desc</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="n">handler</span><span class="p">.</span><span class="n">handle</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span><span class="w"></span>
+
+<span class="nv">@property</span><span class="w"></span>
+<span class="n">def</span><span class="w"> </span><span class="n">issue</span><span class="p">(</span><span class="n">self</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">uow</span><span class="p">.</span><span class="n">issues</span><span class="o">[</span><span class="n">0</span><span class="o">]</span><span class="w"></span>
+
+<span class="n">def</span><span class="w"> </span><span class="n">it_should_be_awaiting_triage</span><span class="p">(</span><span class="n">self</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">expect</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">issue</span><span class="p">.</span><span class="k">state</span><span class="p">).</span><span class="k">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">IssueState</span><span class="p">.</span><span class="n">AwaitingTriage</span><span class="p">))</span><span class="w"></span>
+</code></pre></div>
+
+
+<p>We&rsquo;re introducing a new concept - Issues now have a state, and a newly reported
+issue begins in the AwaitingTriage  state. We can quickly add a command and
+handler that allows us to triage an issue.</p>
+<p>class TriageIssueHandler:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">__init__</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">uowm</span><span class="p">:</span> <span class="n">UnitOfWorkManager</span><span class="p">):</span>
+    <span class="k">self</span><span class="p">.</span><span class="n">uowm</span> <span class="o">=</span> <span class="n">uowm</span>
+
+<span class="n">def</span> <span class="n">handle</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">):</span>
+    <span class="k">with</span> <span class="k">self</span><span class="p">.</span><span class="n">uowm</span><span class="p">.</span><span class="k">start</span><span class="p">()</span> <span class="k">as</span> <span class="n">uow</span><span class="p">:</span>
+        <span class="n">issue</span> <span class="o">=</span> <span class="n">uow</span><span class="p">.</span><span class="n">issues</span><span class="p">.</span><span class="k">get</span><span class="p">(</span><span class="n">cmd</span><span class="p">.</span><span class="n">issue_id</span><span class="p">)</span>
+        <span class="n">issue</span><span class="p">.</span><span class="n">triage</span><span class="p">(</span><span class="n">cmd</span><span class="p">.</span><span class="n">priority</span><span class="p">,</span> <span class="n">cmd</span><span class="p">.</span><span class="n">category</span><span class="p">)</span>
+        <span class="n">uow</span><span class="p">.</span><span class="k">commit</span><span class="p">()</span>
+</code></pre></div>
+
+
+<p>Triaging an issue, for now, is a matter of selecting a category and priority.
+We&rsquo;ll use a free string for category, and an enumeration for Priority. Once an
+issue is triaged, it enters the AwaitingAssignment  state. At some point we&rsquo;ll
+need to add some view builders to list issues that are waiting for triage or
+assignment, but for now let&rsquo;s quickly add a handler so that an engineer can Pick 
+ an issue from the queue.</p>
+<p>class PickIssueHandler:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">__init__</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">uowm</span><span class="p">:</span> <span class="n">UnitOfWorkManager</span><span class="p">):</span>
+    <span class="k">self</span><span class="p">.</span><span class="n">uowm</span> <span class="o">=</span> <span class="n">uowm</span>
+
+<span class="n">def</span> <span class="n">handle</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">):</span>
+    <span class="k">with</span> <span class="k">self</span><span class="p">.</span><span class="n">uowm</span><span class="p">.</span><span class="k">start</span><span class="p">()</span> <span class="k">as</span> <span class="n">uow</span><span class="p">:</span>
+        <span class="n">issue</span> <span class="o">=</span> <span class="n">uow</span><span class="p">.</span><span class="n">issues</span><span class="p">.</span><span class="k">get</span><span class="p">(</span><span class="n">cmd</span><span class="p">.</span><span class="n">issue_id</span><span class="p">)</span>
+        <span class="n">issue</span><span class="p">.</span><span class="n">assign_to</span><span class="p">(</span><span class="n">cmd</span><span class="p">.</span><span class="n">picked_by</span><span class="p">)</span>
+        <span class="n">uow</span><span class="p">.</span><span class="k">commit</span><span class="p">()</span>
+</code></pre></div>
+
+
+<p>At this point, the handlers are becoming a little boring. As I said way back in 
+the first part [https://io.made.com/blog/introducing-command-handler/], commands
+handlers are supposed to be boring glue-code, and every command handler has the
+same basic structure:</p>
+<ol>
+<li>Fetch current state.</li>
+<li>Mutate the state by calling a method on our domain model.</li>
+<li>Persist the new state.</li>
+<li>Notify other parts of the system that our state has changed.</li>
+</ol>
+<p>So far, though, we&rsquo;ve only seen steps 1, 2, and 3. Let&rsquo;s introduce a new
+requirement.</p>
+<p>When an issue is assigned to an engineer, can we send them an email to let them
+know?</p>
+<p>A brief discourse on SRP
+Let&rsquo;s try and implement this new requirement. Here&rsquo;s a first attempt:</p>
+<p>class AssignIssueHandler:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">__init__</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> 
+           <span class="n">uowm</span><span class="p">:</span> <span class="n">UnitOfWorkManager</span><span class="p">,</span>
+           <span class="n">email_builder</span><span class="p">:</span> <span class="n">EmailBuilder</span><span class="p">,</span>
+           <span class="n">email_sender</span><span class="p">:</span> <span class="n">EmailSender</span><span class="p">):</span>
+    <span class="k">self</span><span class="p">.</span><span class="n">uowm</span> <span class="o">=</span> <span class="n">uowm</span>
+    <span class="k">self</span><span class="p">.</span><span class="n">email_builder</span> <span class="o">=</span> <span class="n">email_builder</span>
+    <span class="k">self</span><span class="p">.</span><span class="n">email_sender</span> <span class="o">=</span> <span class="n">email_sender</span>
+
+<span class="n">def</span> <span class="n">handle</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">):</span>
+    <span class="o">#</span> <span class="n">Assign</span> <span class="n">Issue</span>
+    <span class="k">with</span> <span class="k">self</span><span class="p">.</span><span class="n">uowm</span><span class="p">.</span><span class="k">start</span><span class="p">()</span> <span class="k">as</span> <span class="n">uow</span><span class="p">:</span>
+        <span class="n">issue</span> <span class="o">=</span> <span class="n">uow</span><span class="p">.</span><span class="n">issues</span><span class="p">.</span><span class="k">get</span><span class="p">(</span><span class="n">cmd</span><span class="p">.</span><span class="n">issue_id</span><span class="p">)</span>
+        <span class="n">issue</span><span class="p">.</span><span class="n">assign_to</span><span class="p">(</span>
+            <span class="n">cmd</span><span class="p">.</span><span class="n">assigned_to</span><span class="p">,</span>
+            <span class="n">assigned_by</span><span class="o">=</span><span class="n">cmd</span><span class="p">.</span><span class="n">assigned_by</span>
+        <span class="p">)</span>
+        <span class="n">uow</span><span class="p">.</span><span class="k">commit</span><span class="p">()</span>
+
+    <span class="o">#</span> <span class="n">Send</span> <span class="n">Email</span>                
+    <span class="n">email</span> <span class="o">=</span> <span class="k">self</span><span class="p">.</span><span class="n">email_builder</span><span class="p">.</span><span class="n">build</span><span class="p">(</span>
+            <span class="n">cmd</span><span class="p">.</span><span class="n">assigned_to</span><span class="p">,</span> 
+            <span class="n">cmd</span><span class="p">.</span><span class="n">assigned_by</span><span class="p">,</span>
+            <span class="n">issue</span><span class="p">.</span><span class="n">problem_description</span><span class="p">)</span>
+    <span class="k">self</span><span class="p">.</span><span class="n">email_sender</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>Something here feels wrong, right? Our command-handler now has two very distinct
+responsibilities. Back at the beginning of this series we said we would stick
+with three principles:</p>
+<ol>
+<li>We will always define where our use-cases begin and end.</li>
+<li>We will depend on abstractions, and not on concrete implementations.</li>
+<li>We will treat glue code as distinct from business logic, and put it in an
+    appropriate place.</li>
+</ol>
+<p>The latter two are being maintained here, but the first principle feels a little
+more strained. At the very least we&rsquo;re violating the Single Responsibility
+Principle [https://en.wikipedia.org/wiki/Single_responsibility_principle]; my
+rule of thumb for the SRP is &ldquo;describe the behaviour of your class. If you use
+the word &lsquo;and&rsquo; or &lsquo;then&rsquo; you may be breaking the SRP&rdquo;. What does this class do?
+It assigns an issue to an engineer, AND THEN sends them an email. That&rsquo;s enough
+to get my refactoring senses tingling, but there&rsquo;s another, less theoretical,
+reason to split this method up, and it&rsquo;s to do with error handling.</p>
+<p>If I click a button marked &ldquo;Assign to engineer&rdquo;, and I can&rsquo;t assign the issue to
+that engineer, then I expect an error. The system can&rsquo;t execute the command I&rsquo;ve
+given to it, so I should retry, or choose a different engineer.</p>
+<p>If I click a button marked &ldquo;Assign to engineer&rdquo;, and the system succeeds, but
+then can&rsquo;t send a notification email, do I care? What action should I take in
+response? Should I assign the issue again? Should I assign it to someone else?
+What state will the system be in if I do?</p>
+<p>Looking at the problem in this way, it&rsquo;s clear that &ldquo;assigning the issue&rdquo; is the
+real boundary of our use case, and we should either do that successfully, or
+fail completely. &ldquo;Send the email&rdquo; is a secondary side effect. If that part fails
+I don&rsquo;t want to see an error - let the sysadmins clear it up later.</p>
+<p>What if we split out the notification to another class?</p>
+<p>class AssignIssueHandler:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">__init__</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">uowm</span><span class="p">:</span> <span class="n">UnitOfWorkManager</span><span class="p">):</span>
+    <span class="k">self</span><span class="p">.</span><span class="n">uowm</span> <span class="o">=</span> <span class="n">uowm</span>
+
+<span class="n">def</span> <span class="n">handle</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">):</span>
+    <span class="k">with</span> <span class="k">self</span><span class="p">.</span><span class="n">uowm</span><span class="p">.</span><span class="k">start</span><span class="p">()</span> <span class="k">as</span> <span class="n">uow</span><span class="p">:</span>
+        <span class="n">issue</span> <span class="o">=</span> <span class="n">uow</span><span class="p">.</span><span class="n">issues</span><span class="p">.</span><span class="k">get</span><span class="p">(</span><span class="n">cmd</span><span class="p">.</span><span class="n">issue_id</span><span class="p">)</span>
+        <span class="n">issue</span><span class="p">.</span><span class="n">assign_to</span><span class="p">(</span>
+            <span class="n">cmd</span><span class="p">.</span><span class="n">assignee_address</span><span class="p">,</span>
+            <span class="n">assigned_by</span><span class="o">=</span><span class="n">cmd</span><span class="p">.</span><span class="n">assigner_address</span>
+        <span class="p">)</span>
+        <span class="n">uow</span><span class="p">.</span><span class="k">commit</span><span class="p">()</span>
+</code></pre></div>
+
+
+<p>class SendAssignmentEmailHandler
+    def <strong>init</strong>(self, 
+               uowm: UnitOfWorkManager,
+               email_builder: EmailBuilder,
+               email_sender: EmailSender):
+        self.uowm = uowm
+        self.email_builder = email_builder
+        self.email_sender = email_sender</p>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">handle</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">):</span>
+    <span class="k">with</span> <span class="k">self</span><span class="p">.</span><span class="n">uowm</span><span class="p">.</span><span class="k">start</span><span class="p">()</span> <span class="k">as</span> <span class="n">uow</span><span class="p">:</span>
+        <span class="n">issue</span> <span class="o">=</span> <span class="n">uow</span><span class="p">.</span><span class="n">issues</span><span class="p">.</span><span class="k">get</span><span class="p">(</span><span class="n">cmd</span><span class="p">.</span><span class="n">issue_id</span><span class="p">)</span>
+
+        <span class="n">email</span> <span class="o">=</span> <span class="k">self</span><span class="p">.</span><span class="n">email_builder</span><span class="p">.</span><span class="n">build</span><span class="p">(</span>
+            <span class="n">cmd</span><span class="p">.</span><span class="n">assignee_address</span><span class="p">,</span> 
+            <span class="n">cmd</span><span class="p">.</span><span class="n">assigner_address</span><span class="p">,</span>
+            <span class="n">issue</span><span class="p">.</span><span class="n">problem_description</span><span class="p">)</span>
+        <span class="k">self</span><span class="p">.</span><span class="n">email_sender</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>We don&rsquo;t really need a unit of work here, because we&rsquo;re not making any
+persistent changes to the Issue state, so what if we use a view builder instead?</p>
+<p>class SendAssignmentEmailHandler
+    def <strong>init</strong>(self, 
+               view: IssueViewBuilder,
+               email_builder: EmailBuilder,
+               email_sender: EmailSender):
+        self.view = view
+        self.email_builder = email_builder
+        self.email_sender = email_sender</p>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">handle</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">):</span>
+    <span class="n">issue</span> <span class="o">=</span> <span class="k">self</span><span class="p">.</span><span class="k">view</span><span class="p">.</span><span class="k">fetch</span><span class="p">(</span><span class="n">cmd</span><span class="p">.</span><span class="n">issue_id</span><span class="p">)</span>
+
+    <span class="n">email</span> <span class="o">=</span> <span class="k">self</span><span class="p">.</span><span class="n">email_builder</span><span class="p">.</span><span class="n">build</span><span class="p">(</span>
+        <span class="n">cmd</span><span class="p">.</span><span class="n">assignee_address</span><span class="p">,</span> 
+        <span class="n">cmd</span><span class="p">.</span><span class="n">assigner_address</span><span class="p">,</span>
+        <span class="n">issue</span><span class="p">[</span><span class="s1">&#39;problem_description&#39;</span><span class="p">])</span>
+    <span class="k">self</span><span class="p">.</span><span class="n">email_sender</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>That seems better, but how should we invoke our new handler? Building a new
+command and handler from inside our AssignIssueHandler also sounds like a
+violation of SRP. Worse still, if we start calling handlers from handlers, we&rsquo;ll
+end up with our use cases coupled together again - and that&rsquo;s definitely  a
+violation of Principle #1.</p>
+<p>What we need is a way to signal between handlers - a way of saying &ldquo;I did my
+job, can you go do yours?&rdquo;</p>
+<p>All Aboard the Message Bus
+In this kind of system, we use Domain Events
+[http://verraes.net/2014/11/domain-events/]  to fill that need. Events are
+closely related to Commands, in that both commands and events are types of 
+message
+[http://www.enterpriseintegrationpatterns.com/patterns/messaging/Message.html] 
+- named chunks of data sent between entities. Commands and events differ only in
+their intent:</p>
+<ol>
+<li>Commands are named with the imperative tense (Do this thing), events are
+    named in the past tense (Thing was done).</li>
+<li>Commands must be handled by exactly one handler, events can be handled by 0
+    to N handlers.</li>
+<li>If an error occurs when processing a command, the entire request should
+    fail. If an error occurs while processing an event, we should fail
+    gracefully.</li>
+</ol>
+<p>We will often use domain events to signal that a command has been processed and
+to do any additional book-keeping. When should we use a domain event? Going back
+to our principle #1, we should use events to trigger workflows that fall outside
+of our immediate use-case boundary. In this instance, our use-case boundary is
+&ldquo;assign the issue&rdquo;, and there is a second requirement &ldquo;notify the assignee&rdquo; that
+should happen as a secondary result. Notifications, to humans or other systems,
+are one of the most common reasons to trigger events in this way, but they might
+also be used to clear a cache, or regenerate a view model, or execute some logic
+to make the system eventually consistent.</p>
+<p>Armed with this knowledge, we know what to do - we need to raise a domain event
+when we assign an issue to an engineer. We don&rsquo;t want to know about the
+subscribers to our event, though, or we&rsquo;ll remain coupled; what we need is a
+mediator, a piece of infrastructure that can route messages to the correct
+places. What we need is a message bus. A message bus is a simple piece of
+middleware that&rsquo;s responsible for getting messages to the right listeners. In
+our application we have two kinds of message, commands and events. These two
+types of message are in some sense symmetrical, so we&rsquo;ll use a single message
+bus for both.</p>
+<p>How do we start off writing a message bus? Well, it needs to look up subscribers
+based on the name of an event. That sounds like a dict to me:</p>
+<p>class MessageBus:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span><span class="w"> </span><span class="n">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<span class="w">    </span><span class="ss">&quot;&quot;&quot;Our message bus is just a mapping from message type</span>
+<span class="ss">       to a list of handlers&quot;&quot;&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="n">self</span><span class="p">.</span><span class="n">subscribers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">defaultdict</span><span class="p">(</span><span class="n">list</span><span class="p">)</span><span class="w"></span>
+
+<span class="n">def</span><span class="w"> </span><span class="n">handle</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">msg</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<span class="w">    </span><span class="ss">&quot;&quot;&quot;The handle method invokes each handler in turn</span>
+<span class="ss">       with our event&quot;&quot;&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="n">msg_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">type</span><span class="p">(</span><span class="n">msg</span><span class="p">).</span><span class="n">__name__</span><span class="w"></span>
+<span class="w">    </span><span class="n">subscribers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">subscribers</span><span class="o">[</span><span class="n">msg_name</span><span class="o">]</span><span class="w"></span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">subscriber</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nl">subscribers</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="n">subscriber</span><span class="p">.</span><span class="n">handle</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span><span class="w"></span>
+
+<span class="n">def</span><span class="w"> </span><span class="n">subscribe_to</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="n">handler</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<span class="w">    </span><span class="ss">&quot;&quot;&quot;Subscribe sets up a new mapping, we make sure not</span>
+<span class="ss">       to allow more than one handler for a command&quot;&quot;&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="n">subscribers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">[</span><span class="n">msg.__name__</span><span class="o">]</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">msg</span><span class="p">.</span><span class="n">is_cmd</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="nf">len</span><span class="p">(</span><span class="n">subscribers</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="err">:</span><span class="w"></span>
+<span class="w">       </span><span class="n">raise</span><span class="w"> </span><span class="n">CommandAlreadySubscribedException</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">__name__</span><span class="p">)</span><span class="w"> </span>
+<span class="w">    </span><span class="n">subscribers</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span><span class="w"></span>
+</code></pre></div>
+
+
+<h1>Example usage</h1>
+<p>bus = MessageBus()
+bus.subscribe_to(ReportIssueCommand, ReportIssueHandler(db.unit_of_work_manager))
+bus.handle(cmd)</p>
+<p>Here we have a bare-bones implementation of a message bus. It doesn&rsquo;t do
+anything fancy, but it will do the job for now. In a production system, the
+message bus is an excellent place to put cross-cutting concerns; for example, we
+might want to validate our commands before passing them to handlers, or we may
+want to perform some basic logging, or performance monitoring. I want to talk
+more about that in the next part, when we&rsquo;ll tackle the controversial subject of
+dependency injection and Inversion of Control containers.</p>
+<p>For now, let&rsquo;s look at how to hook this up. Firstly, we want to use it from our
+API handlers.</p>
+<p>@api.route(&lsquo;/issues&rsquo;, methods=[&lsquo;POST&rsquo;])
+def create_issue(self):
+    issue_id = uuid.uuid4()
+    cmd = ReportIssueCommand(issue_id=issue_id, **request.get_json())
+    bus.handle(cmd)
+    return &ldquo;&rdquo;, 201, {&ldquo;Location&rdquo;: &ldquo;/issues/&rdquo; + str(issue_id) }</p>
+<p>Not much has changed here - we&rsquo;re still building our command in the Flask
+adapter, but now we&rsquo;re passing it into a bus instead of directly constructing a
+handler for ourselves. What about when we need to raise an event? We&rsquo;ve got
+several options for doing this. Usually I raise events from my command handlers,
+like this:</p>
+<p>class AssignIssueHandler:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">handle</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">):</span>
+    <span class="k">with</span> <span class="k">self</span><span class="p">.</span><span class="n">uowm</span><span class="p">.</span><span class="k">start</span><span class="p">()</span> <span class="k">as</span> <span class="n">uow</span><span class="p">:</span>
+        <span class="n">issue</span> <span class="o">=</span> <span class="n">uow</span><span class="p">.</span><span class="n">issues</span><span class="p">.</span><span class="k">get</span><span class="p">(</span><span class="n">cmd</span><span class="p">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="n">issue</span><span class="p">.</span><span class="n">assign_to</span><span class="p">(</span><span class="n">cmd</span><span class="p">.</span><span class="n">assigned_to</span><span class="p">,</span> <span class="n">cmd</span><span class="p">.</span><span class="n">assigned_by</span><span class="p">)</span>
+        <span class="n">uow</span><span class="p">.</span><span class="k">commit</span><span class="p">()</span>
+
+    <span class="o">#</span> <span class="n">This</span> <span class="k">is</span> <span class="n">step</span> <span class="mi">4</span><span class="p">:</span> <span class="k">notify</span> <span class="n">other</span> <span class="n">parts</span> <span class="k">of</span> <span class="n">the</span> <span class="k">system</span> 
+    <span class="k">self</span><span class="p">.</span><span class="n">bus</span><span class="p">.</span><span class="n">raise</span><span class="p">(</span><span class="n">IssueAssignedToEngineer</span><span class="p">(</span>
+        <span class="n">cmd</span><span class="p">.</span><span class="n">issue_id</span><span class="p">,</span>
+        <span class="n">cmd</span><span class="p">.</span><span class="n">assigned_to</span><span class="p">,</span>
+        <span class="n">cmd</span><span class="p">.</span><span class="n">assigned_by</span><span class="p">))</span>
+</code></pre></div>
+
+
+<p>I usually think of this event-raising as a kind of glue - it&rsquo;s orchestration
+code. Raising events from your handlers this way makes the flow of messages
+explicit - you don&rsquo;t have to look anywhere else in the system to understand
+which events will flow from a command. It&rsquo;s also very simple in terms of
+plumbing. The counter argument is that this feels like we&rsquo;re violating SRP in
+exactly the same way as before - we&rsquo;re sending a notification about our
+workflow. Is this really any different to sending the email directly from the
+handler? Another option is to send events directly from our model objects, and
+treat them as part our domain model proper.</p>
+<p>class Issue:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">assign_to</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">assigned_to</span><span class="p">,</span> <span class="n">assigned_by</span><span class="p">):</span>
+    <span class="k">self</span><span class="p">.</span><span class="n">assigned_to</span> <span class="o">=</span> <span class="n">assigned_to</span>
+    <span class="k">self</span><span class="p">.</span><span class="n">assigned_by</span> <span class="o">=</span> <span class="n">assigned_by</span>
+
+    <span class="o">#</span> <span class="k">Add</span> <span class="n">our</span> <span class="k">new</span> <span class="n">event</span> <span class="k">to</span> <span class="n">a</span> <span class="n">list</span>
+    <span class="k">self</span><span class="p">.</span><span class="n">events</span><span class="p">.</span><span class="k">add</span><span class="p">(</span><span class="n">IssueAssignedToEngineer</span><span class="p">(</span><span class="k">self</span><span class="p">.</span><span class="n">id</span><span class="p">,</span> <span class="k">self</span><span class="p">.</span><span class="n">assigned_to</span><span class="p">,</span> <span class="k">self</span><span class="p">.</span><span class="n">assigned_by</span><span class="p">))</span>
+</code></pre></div>
+
+
+<p>There&rsquo;s a couple of benefits of doing this: firstly, it keeps our command
+handler simpler, but secondly it pushes the logic for deciding when to send an
+event into the model. For example, maybe we don&rsquo;t always  need to raise the
+event.</p>
+<p>class Issue:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">assign_to</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">assigned_to</span><span class="p">,</span> <span class="n">assigned_by</span><span class="p">):</span>
+    <span class="k">self</span><span class="p">.</span><span class="n">assigned_to</span> <span class="o">=</span> <span class="n">assigned_to</span>
+    <span class="k">self</span><span class="p">.</span><span class="n">assigned_by</span> <span class="o">=</span> <span class="n">assigned_by</span>
+
+    <span class="o">#</span> <span class="n">don</span><span class="err">&#39;</span><span class="n">t</span> <span class="n">raise</span> <span class="n">the</span> <span class="n">event</span> <span class="k">if</span> <span class="n">I</span> <span class="n">picked</span> <span class="n">the</span> <span class="n">issue</span> <span class="n">myself</span>
+    <span class="k">if</span> <span class="k">self</span><span class="p">.</span><span class="n">assigned_to</span> <span class="o">!=</span> <span class="k">self</span><span class="p">.</span><span class="n">assigned_by</span><span class="p">:</span>
+        <span class="k">self</span><span class="p">.</span><span class="n">events</span><span class="p">.</span><span class="k">add</span><span class="p">(</span><span class="n">IssueAssignedToEngineer</span><span class="p">(</span><span class="k">self</span><span class="p">.</span><span class="n">id</span><span class="p">,</span> <span class="k">self</span><span class="p">.</span><span class="n">assigned_to</span><span class="p">,</span> <span class="k">self</span><span class="p">.</span><span class="n">assigned_by</span><span class="p">))</span>
+</code></pre></div>
+
+
+<p>Now we&rsquo;ll only raise our event if the issue was assigned by another engineer.
+Cases like this are more like business logic than glue code, so today I&rsquo;m
+choosing to put them in my domain model. Updating our unit tests is trivial,
+because we&rsquo;re just exposing the events as a list on our model objects:</p>
+<p>class When_assigning_an_issue:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">issue_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">uuid</span><span class="p">.</span><span class="n">uuid4</span><span class="p">()</span><span class="w"></span>
+<span class="n">assigned_to</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;ashley@example.org&#39;</span><span class="w"></span>
+<span class="n">assigned_by</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;laura@example.org&#39;</span><span class="w"></span>
+
+<span class="n">def</span><span class="w"> </span><span class="n">given_a_new_issue</span><span class="p">(</span><span class="n">self</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">self</span><span class="p">.</span><span class="n">issue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Issue</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">issue_id</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;reporter@example.org&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;how do I even?&#39;</span><span class="p">)</span><span class="w"></span>
+
+<span class="n">def</span><span class="w"> </span><span class="n">because_we_assign_the_issue</span><span class="p">(</span><span class="n">self</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">self</span><span class="p">.</span><span class="n">issue</span><span class="p">.</span><span class="n">assign</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">assigned_to</span><span class="p">,</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">assigned_by</span><span class="p">)</span><span class="w"></span>
+
+<span class="n">def</span><span class="w"> </span><span class="n">we_should_raise_issue_assigned</span><span class="p">(</span><span class="n">self</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">expect</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">issue</span><span class="p">).</span><span class="k">to</span><span class="p">(</span><span class="n">have_raised</span><span class="p">(</span><span class="w"></span>
+<span class="w">        </span><span class="n">IssueAssignedToEngineer</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">issue_id</span><span class="p">,</span><span class="w"></span>
+<span class="w">                                </span><span class="n">self</span><span class="p">.</span><span class="n">assigned_to</span><span class="p">,</span><span class="w"></span>
+<span class="w">                                </span><span class="n">self</span><span class="p">.</span><span class="n">assigned_by</span><span class="p">)))</span><span class="w"></span>
+</code></pre></div>
+
+
+<p>The have_raised  function is a custom matcher I wrote that checks the events 
+attribute of our object to see if we raised the correct event. It&rsquo;s easy to test
+for the presence of events, because they&rsquo;re namedtuples, and have value
+equality.</p>
+<p>All that remains is to get the events off our model objects and into our message
+bus. What we need is a way to detect that we&rsquo;ve finished one use-case and are
+ready to flush our changes. Fortunately, we have a name for this already - it&rsquo;s
+a unit of work. In this system I&rsquo;m using SQLAlchemy&rsquo;s event hooks
+[http://docs.sqlalchemy.org/en/latest/orm/session_events.html]  to work out
+which objects have changed, and queue up their events. When the unit of work
+exits, we raise the events.</p>
+<p>class SqlAlchemyUnitOfWork(UnitOfWork):</p>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">__init__</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">sessionfactory</span><span class="p">,</span> <span class="n">bus</span><span class="p">):</span>
+    <span class="k">self</span><span class="p">.</span><span class="n">sessionfactory</span> <span class="o">=</span> <span class="n">sessionfactory</span>
+    <span class="k">self</span><span class="p">.</span><span class="n">bus</span> <span class="o">=</span> <span class="n">bus</span>
+    <span class="o">#</span> <span class="n">We</span> <span class="n">want</span> <span class="k">to</span> <span class="k">listen</span> <span class="k">to</span> <span class="n">flush</span> <span class="n">events</span> <span class="n">so</span> <span class="n">that</span> <span class="n">we</span> <span class="n">can</span> <span class="k">get</span> <span class="n">events</span>
+    <span class="o">#</span> <span class="k">from</span> <span class="n">our</span> <span class="n">model</span> <span class="n">objects</span>
+    <span class="n">event</span><span class="p">.</span><span class="k">listen</span><span class="p">(</span><span class="k">self</span><span class="p">.</span><span class="n">sessionfactory</span><span class="p">,</span> <span class="ss">&quot;after_flush&quot;</span><span class="p">,</span> <span class="k">self</span><span class="p">.</span><span class="n">gather_events</span><span class="p">)</span>
+
+<span class="n">def</span> <span class="n">__enter__</span><span class="p">(</span><span class="k">self</span><span class="p">):</span>
+    <span class="k">self</span><span class="p">.</span><span class="k">session</span> <span class="o">=</span> <span class="k">self</span><span class="p">.</span><span class="n">sessionfactory</span><span class="p">()</span>
+    <span class="o">#</span> <span class="k">When</span> <span class="n">we</span> <span class="k">first</span> <span class="k">start</span> <span class="n">a</span> <span class="n">unit</span> <span class="k">of</span> <span class="k">work</span><span class="p">,</span> <span class="k">create</span> <span class="n">a</span> <span class="n">list</span> <span class="k">of</span> <span class="n">events</span>
+    <span class="k">self</span><span class="p">.</span><span class="n">flushed_events</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">return</span> <span class="k">self</span>
+
+<span class="n">def</span> <span class="k">commit</span><span class="p">(</span><span class="k">self</span><span class="p">):</span>
+    <span class="k">self</span><span class="p">.</span><span class="k">session</span><span class="p">.</span><span class="n">flush</span><span class="p">()</span>
+    <span class="k">self</span><span class="p">.</span><span class="k">session</span><span class="p">.</span><span class="k">commit</span><span class="p">()</span>
+
+<span class="n">def</span> <span class="k">rollback</span><span class="p">(</span><span class="k">self</span><span class="p">):</span>
+    <span class="k">self</span><span class="p">.</span><span class="k">session</span><span class="p">.</span><span class="k">rollback</span><span class="p">()</span>
+    <span class="o">#</span> <span class="k">If</span> <span class="n">we</span> <span class="n">roll</span> <span class="n">back</span> <span class="n">our</span> <span class="n">changes</span> <span class="n">we</span> <span class="n">should</span> <span class="k">drop</span> <span class="k">all</span> <span class="n">the</span> <span class="n">events</span>
+    <span class="k">self</span><span class="p">.</span><span class="n">events</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="n">def</span> <span class="n">gather_events</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="k">session</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
+    <span class="o">#</span> <span class="k">When</span> <span class="n">we</span> <span class="n">flush</span> <span class="n">changes</span><span class="p">,</span> <span class="k">add</span> <span class="k">all</span> <span class="n">the</span> <span class="n">events</span> <span class="k">from</span> <span class="n">our</span> <span class="k">new</span> <span class="k">and</span> 
+    <span class="o">#</span> <span class="n">updated</span> <span class="n">entities</span> <span class="k">into</span> <span class="n">the</span> <span class="n">events</span> <span class="n">list</span>
+    <span class="n">flushed_objects</span> <span class="o">=</span> <span class="p">([</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="k">in</span> <span class="k">session</span><span class="p">.</span><span class="k">new</span><span class="p">]</span>
+                    <span class="o">+</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="k">in</span> <span class="k">session</span><span class="p">.</span><span class="n">dirty</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">e</span> <span class="k">in</span> <span class="n">flushed_objects</span><span class="p">:</span>
+        <span class="k">self</span><span class="p">.</span><span class="n">flushed_events</span> <span class="o">+=</span> <span class="n">e</span><span class="p">.</span><span class="n">events</span>
+
+<span class="n">def</span> <span class="n">publish_events</span><span class="p">(</span><span class="k">self</span><span class="p">):</span>
+    <span class="o">#</span> <span class="k">When</span> <span class="n">the</span> <span class="n">unit</span> <span class="k">of</span> <span class="k">work</span> <span class="n">completes</span>
+    <span class="o">#</span> <span class="n">raise</span> <span class="k">any</span> <span class="n">events</span> <span class="n">that</span> <span class="k">are</span> <span class="k">in</span> <span class="n">the</span> <span class="n">list</span>
+    <span class="k">for</span> <span class="n">e</span> <span class="k">in</span> <span class="k">self</span><span class="p">.</span><span class="n">flushed_events</span><span class="p">:</span>
+        <span class="k">self</span><span class="p">.</span><span class="n">bus</span><span class="p">.</span><span class="n">handle</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+<span class="n">def</span> <span class="n">__exit__</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="k">type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
+    <span class="k">self</span><span class="p">.</span><span class="k">session</span><span class="p">.</span><span class="k">close</span><span class="p">()</span>
+    <span class="k">self</span><span class="p">.</span><span class="n">publish_events</span><span class="p">()</span>
+</code></pre></div>
+
+
+<p>Okay, we&rsquo;ve covered a lot of ground here. We&rsquo;ve discussed why you might want to
+use domain events, how a message bus actually works in practice, and how we can
+get events out of our domain and into our subscribers. The newest code sample
+[https://github.com/bobthemighty/blog-code-samples/tree/master/ports-and-adapters/04] 
+ demonstrates these ideas, please do check it out, run it, open pull requests,
+open Github issues etc.</p>
+<p>Some people get nervous about the design of the message bus, or the unit of
+work, but this is just infrastructure - it can be ugly, so long as it works.
+We&rsquo;re unlikely to ever change this code after the first few user-stories. It&rsquo;s
+okay to have some crufty code here, so long as it&rsquo;s in our glue layers, safely
+away from our domain model. Remember, we&rsquo;re doing all of this so that our domain
+model can stay pure and be flexible when we need to refactor. Not all layers of
+the system are equal, glue code is just glue.</p>
+<p>Next time I want to talk about Dependency Injection, why it&rsquo;s great, and why
+it&rsquo;s nothing to be afraid of.</p>
+  </div>
+</section>
+
+      </section>
+    </main>
+  </body>
+</html>
