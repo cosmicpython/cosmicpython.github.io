@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="Harry Percival and Bob Gregory">
+		<meta name="description" content="">
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/milligram/1.3.0/milligram.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pygments-css@1.0.0/friendly.css">
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+
+  <body>
+		<main class="wrapper">
+
+			<nav class="navigation">
+				<section class="container">
+					<a class="navigation-title" href="/">
+						<h1 class="title">Cosmic Python</h1>
+					</a>
+        </section>
+      </nav>
+
+      <section class="container">
+        
+  <h1> Repository and Unit of Work Pattern</h1>
+  <p>by Bob, 2017-09-08</p>
+
+  <div class="content">
+    <hr>
+<p>In the previous part
+(<a href="{% post_url 2017-09-07-introducing-command-handler %}">Introducing Command Handler</a>)
+of this series we built a toy system that could add a new Issue to an IssueLog, but
+had no real behaviour of its own, and would lose its data every time the
+application restarted. We&rsquo;re going to extend it a little by introducing some
+patterns for persistent data access, and talk a little more about the ideas
+underlying ports and adapters architectures. To recap, we&rsquo;re abiding by three
+principles:</p>
+<ol>
+<li>Clearly define the boundaries of our use cases.</li>
+<li>Depend on abstractions, not on concrete implementation.</li>
+<li>Identify glue code as distinct from domain logic and put it into its own
+    layer.</li>
+</ol>
+<p>In our command handler, we wrote the following code:</p>
+<p>reporter = IssueReporter(cmd.reporter_name, cmd.reporter_email)
+issue = Issue(reporter, cmd.problem_description)
+issue_log.add(issue)</p>
+<p>The IssueLog is a term from our conversation with the domain expert. It&rsquo;s the
+place that they record the list of all issues. This is part of the jargon used
+by our customers, and so it clearly belongs in the domain, but it&rsquo;s also the
+ideal abstraction for a data store. How can we modify the code so that our newly
+created Issue will be persisted? We don&rsquo;t want our IssueLog to depend on the
+database, because that&rsquo;s a violation of principle #2. This is the question that
+leads us to the ports &amp; adapters architecture.</p>
+<p>In a ports and adapters architecture, we build a pure domain that exposes ports.
+A port is a way for data to get into, or out of, the domain model. In this
+system, the IssueLog is a port. Ports are connected to the external world by
+Adapters. In the previous code sample, the FakeIssueLog is an adapter: it
+provides a service to the system by implementing an interface.</p>
+<p>Let&rsquo;s use a real-world analogy. Imagine we have a circuit that detects current
+over some threshold. If the threshold is reached, the circuit outputs a signal.
+Into our circuit we attach two ports, one for current in, and one for current
+out. The input and output channels are part of our circuit: without them, the
+circuit is useless.</p>
+<p>class ThresholdDetectionCircuit:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">arbitrary_threshold</span> <span class="o">=</span> <span class="mi">4</span>
+
+<span class="n">def</span> <span class="n">__init__</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="k">input</span><span class="p">:</span> <span class="n">ReadablePort</span><span class="p">,</span> <span class="k">output</span><span class="p">:</span> <span class="n">WriteablePort</span><span class="p">):</span>
+    <span class="k">self</span><span class="p">.</span><span class="k">input</span> <span class="o">=</span> <span class="k">input</span>
+    <span class="k">self</span><span class="p">.</span><span class="k">output</span> <span class="o">=</span> <span class="k">output</span>
+
+<span class="n">def</span> <span class="n">read_from_input</span><span class="p">(</span><span class="k">self</span><span class="p">):</span>
+    <span class="n">next_value</span> <span class="o">=</span> <span class="k">self</span><span class="p">.</span><span class="k">input</span><span class="p">.</span><span class="k">read</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">next_value</span> <span class="o">&gt;</span> <span class="k">self</span><span class="p">.</span><span class="n">arbitrary_threshold</span><span class="p">:</span>
+        <span class="k">self</span><span class="p">.</span><span class="k">output</span><span class="p">.</span><span class="k">write</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>Because we had the great foresight to use standardised ports, we can plug any
+number of different devices into our circuit. For example, we could attach a
+light-detector to the input and a buzzer to the output, or we could attach a
+dial to the input, and a light to the output, and so on.</p>
+<p>class LightDetector(ReadablePort):
+    def read(self):
+        return self.get_light_amplitude()</p>
+<p>class Buzzer(WriteablePort):
+    def write(self, value):
+        if value &gt; 0:
+            self.make_infuriating_noise()</p>
+<p>class Dial(ReadablePort):
+    def read(self):
+        return self.current_value</p>
+<p>class Light(self):
+    def write(self, value):
+        if value &gt; 0:
+            self.on = True
+        else:
+            self.on = False</p>
+<p>Considered in isolation, this is just an example of good OO practice: we are
+extending our system through composition. What makes this a ports-and-adapters
+architecture is the idea that there is an internal world consisting of the
+domain model (our ThresholdDetectionCircuit), and an external world that drives
+the domain model through well-defined ports. How does all of this relate to
+databases?</p>
+<p>from SqlAlchemy import Session</p>
+<p>class SqlAlchemyIssueLog (IssueLog):</p>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">__init__</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="k">session</span><span class="p">:</span> <span class="k">Session</span><span class="p">):</span>
+    <span class="k">self</span><span class="p">.</span><span class="k">session</span> <span class="o">=</span> <span class="k">session</span>
+
+<span class="n">def</span> <span class="k">add</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">issue</span><span class="p">):</span>
+    <span class="k">self</span><span class="p">.</span><span class="k">session</span><span class="p">.</span><span class="k">add</span><span class="p">(</span><span class="n">issue</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>class TextFileIssueLog (IssueLog):</p>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">__init__</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="k">self</span><span class="p">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
+
+<span class="n">def</span> <span class="k">add</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">issue</span><span class="p">):</span>
+    <span class="k">with</span> <span class="k">open</span><span class="p">(</span><span class="k">self</span><span class="p">.</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">json</span><span class="p">.</span><span class="n">dump</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>By analogy to our circuit example, the IssueLog is a WriteablePort - it&rsquo;s a way
+for us to get data out of the system. SqlAlchemy and the file system are two
+types of adapter that we can plug in, just like the Buzzer or Light classes. In
+fact, the IssueLog is an instance of a common design pattern: it&rsquo;s a Repository
+[https://martinfowler.com/eaaCatalog/repository.html]. A repository is an object
+that hides the details of persistent storage by presenting us with an interface
+that looks like a collection. We should be able to add new things to the
+repository, and get things out of the repository, and that&rsquo;s essentially it.</p>
+<p>Let&rsquo;s look at a simple repository pattern.</p>
+<p>class FooRepository:
+    def <strong>init</strong>(self, db_session):
+        self.session = db_session</p>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">add_new_item</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+    <span class="k">self</span><span class="p">.</span><span class="n">db_session</span><span class="p">.</span><span class="k">add</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+<span class="n">def</span> <span class="n">get_item</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">id</span><span class="p">):</span>
+    <span class="k">return</span> <span class="k">self</span><span class="p">.</span><span class="n">db_session</span><span class="p">.</span><span class="k">get</span><span class="p">(</span><span class="n">Foo</span><span class="p">,</span> <span class="n">id</span><span class="p">)</span>
+
+<span class="n">def</span> <span class="n">find_foos_by_latitude</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">latitude</span><span class="p">):</span>
+    <span class="k">return</span> <span class="k">self</span><span class="p">.</span><span class="k">session</span><span class="p">.</span><span class="n">query</span><span class="p">(</span><span class="n">Foo</span><span class="p">).</span><span class="err">\</span>
+            <span class="n">filter</span><span class="p">(</span><span class="n">foo</span><span class="p">.</span><span class="n">latitude</span> <span class="o">==</span> <span class="n">latitude</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>We expose a few methods, one to add new items, one to get items by their id, and
+a third to find items by some criterion. This FooRepository is using a 
+SqlAlchemy session
+[http://docs.sqlalchemy.org/en/latest/orm/session_basics.html]  object, so it&rsquo;s
+part of our Adapter layer. We could define a different adapter for use in unit
+tests.</p>
+<p>class FooRepository:
+    def <strong>init</strong>(self, db_session):
+        self.items = []</p>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">add_new_item</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+    <span class="k">self</span><span class="p">.</span><span class="n">items</span><span class="p">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+<span class="n">def</span> <span class="n">get_item</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">id</span><span class="p">):</span>
+    <span class="k">return</span> <span class="k">next</span><span class="p">((</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="k">in</span> <span class="k">self</span><span class="p">.</span><span class="n">items</span> 
+                      <span class="k">if</span> <span class="n">item</span><span class="p">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">id</span><span class="p">))</span>
+
+<span class="n">def</span> <span class="n">find_foos_by_latitude</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">latitude</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="k">in</span> <span class="k">self</span><span class="p">.</span><span class="n">items</span>
+                 <span class="k">if</span> <span class="n">item</span><span class="p">.</span><span class="n">latitude</span> <span class="o">==</span> <span class="n">latitude</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>This adapter works just the same as the one backed by a real database, but does
+so without any external state. This allows us to test our code without resorting
+to Setup/Teardown scripts on our database, or monkey patching our ORM to return
+hard-coded values. We just plug a different adapter into the existing port. As
+with the ReadablePort and WriteablePort, the simplicity of this interface makes
+it simple for us to plug in different implementations.</p>
+<p>The repository gives us read/write access to objects in our data store, and is
+commonly used with another pattern, the Unit of Work
+[https://martinfowler.com/eaaCatalog/unitOfWork.html]. A unit of work represents
+a bunch of things that all have to happen together. It usually allows us to
+cache objects in memory for the lifetime of a request so that we don&rsquo;t need to
+make repeated calls to the database. A unit of work is responsible for doing
+dirty checks on our objects, and flushing any changes to state at the end of a
+request.</p>
+<p>What does a unit of work look like?</p>
+<p>class SqlAlchemyUnitOfWorkManager(UnitOfWorkManager):
+    &ldquo;&rdquo;&ldquo;The Unit of work manager returns a new unit of work. 
+       Our UOW is backed by a sql alchemy session whose 
+       lifetime can be scoped to a web request, or a 
+       long-lived background job.&rdquo;&ldquo;&rdquo;
+    def <strong>init</strong>(self, session_maker):
+        self.session_maker = session_maker</p>
+<div class="codehilite"><pre><span></span><code><span class="err">def start(self):</span>
+<span class="err">    return SqlAlchemyUnitOfWork(self.session_maker)</span>
+</code></pre></div>
+
+
+<p>class SqlAlchemyUnitOfWork(UnitOfWork):
+    &ldquo;&rdquo;&ldquo;The unit of work captures the idea of a set of things that
+       need to happen together. </p>
+<div class="codehilite"><pre><span></span><code><span class="w">   </span><span class="n">Usually</span><span class="p">,</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">relational</span><span class="w"> </span><span class="k">database</span><span class="p">,</span><span class="w"> </span>
+<span class="w">   </span><span class="n">one</span><span class="w"> </span><span class="n">unit</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="k">work</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">one</span><span class="w"> </span><span class="k">database</span><span class="w"> </span><span class="k">transaction</span><span class="p">.</span><span class="ss">&quot;&quot;</span><span class="err">&quot;</span><span class="w"></span>
+
+<span class="n">def</span><span class="w"> </span><span class="n">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">sessionfactory</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">self</span><span class="p">.</span><span class="n">sessionfactory</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sessionfactory</span><span class="w"></span>
+
+<span class="n">def</span><span class="w"> </span><span class="n">__enter__</span><span class="p">(</span><span class="n">self</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">self</span><span class="p">.</span><span class="k">session</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">sessionfactory</span><span class="p">()</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">self</span><span class="w"></span>
+
+<span class="n">def</span><span class="w"> </span><span class="n">__exit__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="n">type</span><span class="p">,</span><span class="w"> </span><span class="k">value</span><span class="p">,</span><span class="w"> </span><span class="n">traceback</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">self</span><span class="p">.</span><span class="k">session</span><span class="p">.</span><span class="k">close</span><span class="p">()</span><span class="w"></span>
+
+<span class="n">def</span><span class="w"> </span><span class="k">commit</span><span class="p">(</span><span class="n">self</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">self</span><span class="p">.</span><span class="k">session</span><span class="p">.</span><span class="k">commit</span><span class="p">()</span><span class="w"></span>
+
+<span class="n">def</span><span class="w"> </span><span class="k">rollback</span><span class="p">(</span><span class="n">self</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">self</span><span class="p">.</span><span class="k">session</span><span class="p">.</span><span class="k">rollback</span><span class="p">()</span><span class="w"></span>
+
+<span class="err">#</span><span class="w"> </span><span class="n">I</span><span class="w"> </span><span class="n">tend</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">put</span><span class="w"> </span><span class="n">my</span><span class="w"> </span><span class="n">repositories</span><span class="w"> </span><span class="n">onto</span><span class="w"> </span><span class="n">my</span><span class="w"> </span><span class="n">UOW</span><span class="w"></span>
+<span class="err">#</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">convenient</span><span class="w"> </span><span class="n">access</span><span class="p">.</span><span class="w"> </span>
+<span class="nv">@property</span><span class="w"></span>
+<span class="n">def</span><span class="w"> </span><span class="n">issues</span><span class="p">(</span><span class="n">self</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">IssueRepository</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="k">session</span><span class="p">)</span><span class="w"></span>
+</code></pre></div>
+
+
+<p>This code is taken from a current production system - the code to implement
+these patterns really isn&rsquo;t complex. The only thing missing here is some logging
+and error handling in the commit method. Our unit-of-work manager creates a new
+unit-of-work, or gives us an existing one depending on how we&rsquo;ve configured
+SqlAlchemy. The unit of work itself is just a thin layer over the top of
+SqlAlchemy that gives us explicit rollback and commit points. Let&rsquo;s revisit our
+first command handler and see how we might use these patterns together.</p>
+<p>class ReportIssueHandler:
+    def <strong>init</strong>(self, uowm:UnitOfWorkManager):
+        self.uowm = uowm</p>
+<div class="codehilite"><pre><span></span><code><span class="err">def handle(self, cmd):</span>
+<span class="err">    with self.uowm.start() as unit_of_work:</span>
+<span class="err">        reporter = IssueReporter(cmd.reporter_name, cmd.reporter_email)</span>
+<span class="err">        issue = Issue(reporter, cmd.problem_description)</span>
+<span class="err">        unit_of_work.issues.add(issue)</span>
+<span class="err">        unit_of_work.commit()</span>
+</code></pre></div>
+
+
+<p>Our command handler looks more or less the same, except that it&rsquo;s now
+responsible for starting a unit-of-work, and committing the unit-of-work when it
+has finished. This is in keeping with our rule #1 - we will clearly define the
+beginning and end of use cases. We know for a fact that only one object is being
+loaded and modified here, and our database transaction is kept short. Our
+handler depends on an abstraction - the UnitOfWorkManager, and doesn&rsquo;t care if
+that&rsquo;s a test-double or a SqlAlchemy session, so that&rsquo;s rule #2 covered. Lastly,
+this code is painfully  boring because it&rsquo;s just glue. We&rsquo;re moving all the dull
+glue out to the edges of our system so that we can write our domain model in any
+way that we like: rule #3 observed.</p>
+<p>The code sample for this part
+[https://github.com/bobthemighty/blog-code-samples/tree/master/ports-and-adapters/02] 
+ adds a couple of new packages - one for slow tests
+[http://pycon-2012-notes.readthedocs.io/en/latest/fast_tests_slow_tests.html] 
+(tests that go over a network, or to a real file system), and one for our
+adapters. We haven&rsquo;t added any new features yet, but we&rsquo;ve added a test that
+shows we can insert an Issue into a sqlite database through our command handler
+and unit of work. Notice that all of the ORM code is in one module
+(issues.adapters.orm) and that it depends on our domain model, not the other way
+around. Our domain objects don&rsquo;t inherit from SqlAlchemy&rsquo;s declarative base.
+We&rsquo;re beginning to get some sense of what it means to have the domain on the
+&ldquo;inside&rdquo; of a system, and the infrastructural code on the outside.</p>
+<p>Our unit test has been updated to use a unit of work, and we can now test that
+we insert an issue into our issue log, and commit the unit of work, without
+having a dependency on any actual implementation details. We could completely
+delete SqlAlchemy from our code base, and our unit tests would continue to work,
+because we have a pure domain model and we expose abstract ports from our
+service layer.</p>
+<p>class When_reporting_an_issue:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">given_an_empty_unit_of_work</span><span class="p">(</span><span class="k">self</span><span class="p">):</span>
+    <span class="k">self</span><span class="p">.</span><span class="n">uow</span> <span class="o">=</span> <span class="n">FakeUnitOfWork</span><span class="p">()</span>
+
+<span class="n">def</span> <span class="n">because_we_report_a_new_issue</span><span class="p">(</span><span class="k">self</span><span class="p">):</span>
+    <span class="k">handler</span> <span class="o">=</span> <span class="n">ReportIssueHandler</span><span class="p">(</span><span class="k">self</span><span class="p">.</span><span class="n">uow</span><span class="p">)</span>
+    <span class="n">cmd</span> <span class="o">=</span> <span class="n">ReportIssueCommand</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">email</span><span class="p">,</span> <span class="k">desc</span><span class="p">)</span>
+
+    <span class="k">handler</span><span class="p">.</span><span class="n">handle</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+
+<span class="n">def</span> <span class="n">the_handler_should_have_created_a_new_issue</span><span class="p">(</span><span class="k">self</span><span class="p">):</span>
+    <span class="n">expect</span><span class="p">(</span><span class="k">self</span><span class="p">.</span><span class="n">uow</span><span class="p">.</span><span class="n">issues</span><span class="p">).</span><span class="k">to</span><span class="p">(</span><span class="n">have_len</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+
+<span class="n">def</span> <span class="n">it_should_have_recorded_the_issuer</span><span class="p">(</span><span class="k">self</span><span class="p">):</span>
+    <span class="n">expect</span><span class="p">(</span><span class="k">self</span><span class="p">.</span><span class="n">uow</span><span class="p">.</span><span class="n">issues</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">reporter</span><span class="p">.</span><span class="n">name</span><span class="p">).</span><span class="k">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+    <span class="n">expect</span><span class="p">(</span><span class="k">self</span><span class="p">.</span><span class="n">uow</span><span class="p">.</span><span class="n">issues</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">reporter</span><span class="p">.</span><span class="n">email</span><span class="p">).</span><span class="k">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">email</span><span class="p">))</span>
+
+<span class="n">def</span> <span class="n">it_should_have_recorded_the_description</span><span class="p">(</span><span class="k">self</span><span class="p">):</span>
+    <span class="n">expect</span><span class="p">(</span><span class="k">self</span><span class="p">.</span><span class="n">uow</span><span class="p">.</span><span class="n">issues</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">description</span><span class="p">).</span><span class="k">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="k">desc</span><span class="p">))</span>
+
+<span class="n">def</span> <span class="n">it_should_have_committed_the_unit_of_work</span><span class="p">(</span><span class="k">self</span><span class="p">):</span>
+    <span class="n">expect</span><span class="p">(</span><span class="k">self</span><span class="p">.</span><span class="n">uow</span><span class="p">.</span><span class="n">was_committed</span><span class="p">).</span><span class="k">to</span><span class="p">(</span><span class="n">be_true</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>Next time [https://io.made.com/blog/commands-and-queries-handlers-and-views] 
+we&rsquo;ll look at how to get data back out of the system.</p>
+  </div>
+</section>
+
+      </section>
+    </main>
+  </body>
+</html>

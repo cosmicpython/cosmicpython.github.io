@@ -1,0 +1,1323 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<title>Domain Modeling</title>
+<style>
+/* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+
+@import url("//fonts.googleapis.com/css?family=Noto+Sans:300,600italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700");
+@import url(//asciidoctor.org/stylesheets/asciidoctor.css); /* Default asciidoc style framework - important */
+
+/* customisations by harry */
+
+/* hide inline ditaa/plantuml source listings for images */
+.image-source {
+    display: none
+}
+/* make formal codeblocks a bit nicer */
+.exampleblock > .content {
+    padding: 2px;
+    background-color: white;
+    border: 0;
+    margin-bottom: 2em;
+}
+
+.exampleblock .title {
+    text-align: right;
+}
+
+/* end customisations by harry */
+
+/* CUSTOMISATIONS */
+
+/* Change the values in root for quick customisation. If you want even more fine grain... venture further. */
+
+:root{
+--maincolor:#FFFFFF;
+--primarycolor:#2c3e50;
+--secondarycolor:#ba3925;
+--tertiarycolor: #186d7a;
+--sidebarbackground:#CCC;
+--linkcolor:#b71c1c;
+--linkcoloralternate:#f44336;
+--white:#FFFFFF;
+--black:#000000;
+}
+
+/* Text styles */
+h1{color:var(--primarycolor) !important;}
+h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+.title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
+p{font-family: "Noto Sans",sans-serif !important}
+
+/* Table styles */
+th{font-family: "Noto Sans",sans-serif !important}
+
+/* Responsiveness fixes */
+video {
+  max-width: 100%;
+}
+
+@media all and (max-width: 600px) {
+table {
+  width: 55vw!important;
+  font-size: 3vw;
+}
+
+</style>
+</head>
+<body class="article toc2 toc-left">
+<div id="buy_the_book" style="position: absolute; top: 0; right: 0; z-index:100">
+  <a href="/#buy_the_book">
+    <img src="/images/buy_the_book.svg" alt="buy the book ribbon">
+  </a>
+</div>
+<div id="header">
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="/book/preface.html">Preface</a></li>
+<li><a href="/book/introduction.html">Introduction</a></li>
+<li><a href="/book/part1.html">Building an Architecture to Support Domain Modeling</a></li>
+<li><a href="/book/chapter_01_domain_model.html">1. Domain Modeling</a></li>
+<li><a href="/book/chapter_02_repository.html">2. Repository Pattern</a></li>
+<li><a href="/book/chapter_03_abstractions.html">3. A Brief Interlude: On Coupling <span class="keep-together">and Abstractions</span></a></li>
+<li><a href="/book/chapter_04_service_layer.html">4. Our First Use Case: <span class="keep-together">Flask API and Service Layer</span></a></li>
+<li><a href="/book/chapter_05_high_gear_low_gear.html">5. TDD in High Gear and Low Gear</a></li>
+<li><a href="/book/chapter_06_uow.html">6. Unit of Work Pattern</a></li>
+<li><a href="/book/chapter_07_aggregate.html">7. Aggregates and Consistency Boundaries</a></li>
+<li><a href="/book/part2.html">Event-Driven Architecture</a></li>
+<li><a href="/book/chapter_08_events_and_message_bus.html">8. Events and the Message Bus</a></li>
+<li><a href="/book/chapter_09_all_messagebus.html">9. Going to Town on the Message Bus</a></li>
+<li><a href="/book/chapter_10_commands.html">10. Commands and Command Handler</a></li>
+<li><a href="/book/chapter_11_external_events.html">11. Event-Driven Architecture: Using Events to Integrate Microservices</a></li>
+<li><a href="/book/chapter_12_cqrs.html">12. Command-Query Responsibility Segregation (CQRS)</a></li>
+<li><a href="/book/chapter_13_dependency_injection.html">13. Dependency Injection (and Bootstrapping)</a></li>
+<li><a href="/book/epilogue_1_how_to_get_there_from_here.html">Appendix A: Epilogue</a></li>
+<li><a href="/book/appendix_ds1_table.html">Appendix B: Summary Diagram and Table</a></li>
+<li><a href="/book/appendix_project_structure.html">Appendix C: A Template Project Structure</a></li>
+<li><a href="/book/appendix_csvs.html">Appendix D: Swapping Out the Infrastructure: <span class="keep-together">Do Everything with CSVs</span></a></li>
+<li><a href="/book/appendix_django.html">Appendix E: Repository and Unit of Work <span class="keep-together">Patterns with Django</span></a></li>
+<li><a href="/book/appendix_validation.html">Appendix F: Validation</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="chapter_01_domain_model">Domain Modeling</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This chapter looks into how we can model business processes with code, in a way
+that&#8217;s highly compatible with TDD.  We&#8217;ll discuss <em>why</em> domain modeling
+matters, and we&#8217;ll look at a few key patterns for modeling domains: Entity,
+Value Object, and Domain Service.</p>
+</div>
+<div class="paragraph">
+<p><a href="#maps_chapter_01_notext">A placeholder illustration of our domain model</a> is a simple visual placeholder for our Domain
+Model pattern. We&#8217;ll fill in some details in this chapter, and as we move on to
+other chapters, we&#8217;ll build things around the domain model, but you should
+always be able to find these little shapes at the core.</p>
+</div>
+<div id="maps_chapter_01_notext" class="imageblock">
+<div class="content">
+<img src="images/apwp_0101.png" alt="apwp 0101">
+</div>
+<div class="title">Figure 1. A placeholder illustration of our domain model</div>
+</div>
+<div class="sect2 pagebreak-before less_space">
+<h3 id="_what_is_a_domain_model">What Is a Domain Model?</h3>
+<div class="paragraph">
+<p>In the <a href="/book/introduction.html">introduction</a>, we used the term <em>business logic layer</em> to describe the
+central layer of a three-layered architecture. For the rest of the book, we&#8217;re
+going to use the term <em>domain model</em> instead. This is a term from the DDD
+community that does a better job of capturing our intended meaning (see the
+next sidebar for more on DDD).</p>
+</div>
+<div class="paragraph">
+<p>The <em>domain</em> is a fancy way of saying <em>the problem you&#8217;re trying to solve.</em> Your
+authors currently work for an online retailer of furniture. Depending on which system
+you&#8217;re talking about, the domain might be purchasing and procurement, or product
+design, or logistics and delivery. Most programmers spend their days trying to
+improve or automate business processes; the domain is the set of activities
+that those processes support.</p>
+</div>
+<div class="paragraph">
+<p>A <em>model</em> is a map of a process or phenomenon that captures a useful property.
+Humans are exceptionally good at producing models of things in their heads. For
+example, when someone throws a ball toward you, you&#8217;re able to predict its
+movement almost unconsciously, because you have a model of the way objects move in
+space. Your model isn&#8217;t perfect by any means. Humans have terrible intuitions
+about how objects behave at near-light speeds or in a vacuum because our model
+was never designed to cover those cases. That doesn&#8217;t mean the model is wrong,
+but it does mean that some predictions fall outside of its domain.</p>
+</div>
+<div class="paragraph">
+<p>The domain model is the mental map that business owners have of their
+businesses. All business people have these mental maps&#8212;&#8203;they&#8217;re how humans think
+about complex processes.</p>
+</div>
+<div class="paragraph">
+<p>You can tell when they&#8217;re navigating these maps because they use business speak.
+Jargon arises naturally among people who are collaborating on complex systems.</p>
+</div>
+<div class="paragraph">
+<p>Imagine that you, our unfortunate reader, were suddenly transported light years
+away from Earth aboard an alien spaceship with your friends and family and had
+to figure out, from first principles, how to navigate home.</p>
+</div>
+<div class="paragraph">
+<p>In your first few days, you might just push buttons randomly, but soon you&#8217;d
+learn which buttons did what, so that you could give one another instructions.
+"Press the red button near the flashing doohickey and then throw that big
+lever over by the radar gizmo," you might say.</p>
+</div>
+<div class="paragraph">
+<p>Within a couple of weeks, you&#8217;d become more precise as you adopted words to
+describe the ship&#8217;s functions: "Increase oxygen levels in cargo bay three"
+or "turn on the little thrusters." After a few months, you&#8217;d have adopted
+language for entire complex processes: "Start landing sequence" or "prepare
+for warp." This process would happen quite naturally, without any formal effort
+to build a shared glossary.</p>
+</div>
+<div class="sidebarblock nobreakinside less_space">
+<div class="content">
+<div class="title">This Is Not a DDD Book. You Should Read a DDD Book.</div>
+<div class="paragraph">
+<p>Domain-driven design, or DDD, popularized the concept of domain modeling,<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup>
+and it&#8217;s been a hugely successful movement in transforming the way people
+design software by focusing on the core business domain. Many of the
+architecture patterns that we cover in this book&#8212;including Entity, Aggregate, Value Object (see <a href="/book/chapter_07_aggregate.html">[chapter_07_aggregate]</a>), and Repository (in
+<a href="/book/chapter_02_repository.html">the next chapter</a>)&#8212;come from the DDD tradition.</p>
+</div>
+<div class="paragraph">
+<p>In a nutshell, DDD says that the most important thing about software is that it
+provides a useful model of a problem.  If we get that model right, our
+software delivers value and makes new things possible.</p>
+</div>
+<div class="paragraph">
+<p>If we get the model wrong, it becomes an obstacle to be worked around. In this book,
+we can show the basics of building a domain model, and building an architecture
+around it that leaves the model as free as possible from external constraints,
+so that it&#8217;s easy to evolve and change.</p>
+</div>
+<div class="paragraph">
+<p>But there&#8217;s a lot more to DDD and to the processes, tools, and techniques for
+developing a domain model. We hope to give you a taste of it, though,
+and cannot encourage you enough to go on and read a proper DDD book:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The original "blue book," <em>Domain-Driven Design</em> by Eric Evans (Addison-Wesley Professional)</p>
+</li>
+<li>
+<p>The "red book," <em>Implementing Domain-Driven Design</em>
+by Vaughn Vernon (Addison-Wesley Professional)</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>So it is in the mundane world of business. The terminology used by business
+stakeholders represents a distilled understanding of the domain model, where
+complex ideas and processes are boiled down to a single word or phrase.</p>
+</div>
+<div class="paragraph">
+<p>When we hear our business stakeholders using unfamiliar words, or using terms
+in a specific way, we should listen to understand the deeper meaning and encode
+their hard-won experience into our software.</p>
+</div>
+<div class="paragraph">
+<p>We&#8217;re going to use a real-world domain model throughout this book, specifically
+a model from our current employment. MADE.com is a successful furniture
+retailer. We source our furniture from manufacturers all over the world and
+sell it across Europe.</p>
+</div>
+<div class="paragraph">
+<p>When you buy a sofa or a coffee table, we have to figure out how best
+to get your goods from Poland or China or Vietnam and into your living room.</p>
+</div>
+<div class="paragraph">
+<p>At a high level, we have separate systems that are responsible for buying
+stock, selling stock to customers, and shipping goods to customers. A
+system in the middle needs to coordinate the process by allocating stock
+to a customer&#8217;s orders; see <a href="#allocation_context_diagram">Context diagram for the allocation service</a>.</p>
+</div>
+<div id="allocation_context_diagram" class="imageblock">
+<div class="content">
+<img src="images/apwp_0102.png" alt="apwp 0102">
+</div>
+<div class="title">Figure 2. Context diagram for the allocation service</div>
+</div>
+<div class="listingblock image-source">
+<div class="content">
+<pre>[plantuml, apwp_0102]
+@startuml Allocation Context Diagram
+!include images/C4_Context.puml
+scale 2
+
+System(systema, "Allocation", "Allocates stock to customer orders")
+
+Person(customer, "Customer", "Wants to buy furniture")
+Person(buyer, "Buying Team", "Needs to purchase furniture from suppliers")
+
+System(procurement, "Purchasing", "Manages workflow for buying stock from suppliers")
+System(ecom, "Ecommerce", "Sells goods online")
+System(warehouse, "Warehouse", "Manages workflow for shipping goods to customers")
+
+Rel(buyer, procurement, "Uses")
+Rel(procurement, systema, "Notifies about shipments")
+Rel(customer, ecom, "Buys from")
+Rel(ecom, systema, "Asks for stock levels")
+Rel(ecom, systema, "Notifies about orders")
+Rel_R(systema, warehouse, "Sends instructions to")
+Rel_U(warehouse, customer, "Dispatches goods to")
+
+@enduml</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For the purposes of this book, we&#8217;re imagining that the business
+decides to implement an exciting new way of allocating stock.  Until now, the
+business has been presenting stock and lead times based on what is physically
+available in the warehouse.  If and when the warehouse runs out, a product is
+listed as "out of stock" until the next shipment arrives from the manufacturer.</p>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s the innovation: if we have a system that can keep track of all our shipments
+and when they&#8217;re due to arrive, we can treat the goods on those ships as
+real stock and part of our inventory, just with slightly longer lead times.
+Fewer goods will appear to be out of stock, we&#8217;ll sell more, and the business
+can save money by keeping lower inventory in the domestic warehouse.</p>
+</div>
+<div class="paragraph">
+<p>But allocating orders is no longer a trivial matter of decrementing a single
+quantity in the warehouse system. We need a more complex allocation mechanism.
+Time for some domain modeling.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_exploring_the_domain_language">Exploring the Domain Language</h3>
+<div class="paragraph">
+<p>Understanding the domain model takes time, and patience, and Post-it notes. We
+have an initial conversation with our business experts and agree on a glossary
+and some rules for the first minimal version of the domain model. Wherever
+possible, we ask for concrete examples to illustrate each rule.</p>
+</div>
+<div class="paragraph">
+<p>We make sure to express those rules in the business jargon (the <em>ubiquitous
+language</em> in DDD terminology). We choose memorable identifiers for our objects
+so that the examples are easier to talk about.</p>
+</div>
+<div class="paragraph">
+<p><a data-type="xref" href="#allocation_notes" data-xrefstyle="select:nopage">#allocation_notes</a> shows some notes we might have taken while having a
+conversation with our domain experts about allocation.</p>
+</div>
+<div id="allocation_notes" class="sidebarblock">
+<div class="content">
+<div class="title">Some Notes on Allocation</div>
+<div class="paragraph">
+<p>A <em>product</em> is identified by a <em>SKU</em>, pronounced "skew," which is short for <em>stock-keeping unit</em>. <em>Customers</em> place <em>orders</em>. An order is identified by an <em>order reference</em>
+and comprises multiple <em>order lines</em>, where each line has a <em>SKU</em> and a <em>quantity</em>. For example:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>10 units of RED-CHAIR</p>
+</li>
+<li>
+<p>1 unit of TASTELESS-LAMP</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The purchasing department orders small <em>batches</em> of stock. A <em>batch</em> of stock has a unique ID called a <em>reference</em>, a <em>SKU</em>, and a <em>quantity</em>.</p>
+</div>
+<div class="paragraph">
+<p>We need to <em>allocate</em> <em>order lines</em> to <em>batches</em>. When we&#8217;ve allocated an
+order line to a batch, we will send stock from that specific batch to the
+customer&#8217;s delivery address. When we allocate <em>x</em> units of stock to a batch, the <em>available quantity</em> is reduced by <em>x</em>. For example:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>We have a batch of 20 SMALL-TABLE, and we allocate an order line for 2 SMALL-TABLE.</p>
+</li>
+<li>
+<p>The batch should have 18 SMALL-TABLE remaining.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>We can&#8217;t allocate to a batch if the available quantity is less than the quantity of the order line. For example:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>We have a batch of 1 BLUE-CUSHION, and an order line for 2 BLUE-CUSHION.</p>
+</li>
+<li>
+<p>We should not be able to allocate the line to the batch.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>We can&#8217;t allocate the same line twice. For example:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>We have a batch of 10 BLUE-VASE, and we allocate an order line for 2 BLUE-VASE.</p>
+</li>
+<li>
+<p>If we allocate the order line again to the same batch, the batch should still
+have an available quantity of 8.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Batches have an <em>ETA</em> if they are currently shipping, or they may be in <em>warehouse stock</em>. We allocate to warehouse stock in preference to shipment batches. We allocate to shipment batches in order of which has the earliest ETA.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_unit_testing_domain_models">Unit Testing Domain Models</h3>
+<div class="paragraph">
+<p>We&#8217;re not going to show you how TDD works in this book, but we want to show you
+how we would construct a model from this business conversation.</p>
+</div>
+<div class="sidebarblock nobreakinside less_space">
+<div class="content">
+<div class="title">Exercise for the Reader</div>
+<div class="paragraph">
+<p>Why not have a go at solving this problem yourself? Write a few unit tests to
+see if you can capture the essence of these business rules in nice, clean
+code.</p>
+</div>
+<div class="paragraph">
+<p>You&#8217;ll find some <a href="https://github.com/cosmicpython/code/tree/chapter_01_domain_model_exercise">placeholder unit tests on GitHub</a>, but you could just start from
+scratch, or combine/rewrite them however you like.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s what one of our first tests might look like:</p>
+</div>
+<div id="first_test" class="exampleblock">
+<div class="title">A first test for allocation (test_batches.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_allocating_to_a_batch_reduces_the_available_quantity</span><span class="tok-p">():</span>
+    <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"batch-001"</span><span class="tok-p">,</span> <span class="tok-s2">"SMALL-TABLE"</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-o">=</span><span class="tok-mi">20</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-n">today</span><span class="tok-p">())</span>
+    <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s1">'order-ref'</span><span class="tok-p">,</span> <span class="tok-s2">"SMALL-TABLE"</span><span class="tok-p">,</span> <span class="tok-mi">2</span><span class="tok-p">)</span>
+
+    <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">)</span>
+
+    <span class="tok-k">assert</span> <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">==</span> <span class="tok-mi">18</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The name of our unit test describes the behavior that we want to see from the
+system, and the names of the classes and variables that we use are taken from the
+business jargon. We could show this code to our nontechnical coworkers, and
+they would agree that this correctly describes the behavior of the system.</p>
+</div>
+<div class="paragraph pagebreak-before">
+<p>And here is a domain model that meets our requirements:</p>
+</div>
+<div id="domain_model_1" class="exampleblock">
+<div class="title">First cut of a domain model for batches (model.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@dataclass</span><span class="tok-p">(</span><span class="tok-n">frozen</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">)</span>  #<b class="conum">(1)</b> <b class="conum">(2)</b>
+<span class="tok-k">class</span> <span class="tok-nc">OrderLine</span><span class="tok-p">:</span>
+    <span class="tok-n">orderid</span><span class="tok-p">:</span> <span class="tok-nb">str</span>
+    <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span>
+    <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span>
+
+
+<span class="tok-k">class</span> <span class="tok-nc">Batch</span><span class="tok-p">:</span>
+    <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span>
+        <span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">ref</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-p">:</span> <span class="tok-n">Optional</span><span class="tok-p">[</span><span class="tok-n">date</span><span class="tok-p">]</span>  #<b class="conum">(2)</b>
+    <span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">reference</span> <span class="tok-o">=</span> <span class="tok-n">ref</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">sku</span> <span class="tok-o">=</span> <span class="tok-n">sku</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">eta</span> <span class="tok-o">=</span> <span class="tok-n">eta</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">=</span> <span class="tok-n">qty</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">allocate</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">line</span><span class="tok-p">:</span> <span class="tok-n">OrderLine</span><span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">-=</span> <span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">qty</span>  #<b class="conum">(3)</b></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p><code>OrderLine</code> is an immutable dataclass
+with no behavior.<sup class="footnote">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup></p>
+</li>
+<li>
+<p>We&#8217;re not showing imports in most code listings, in an attempt to keep them
+clean. We&#8217;re hoping you can guess
+that this came via <code>from dataclasses import dataclass</code>; likewise,
+<code>typing.Optional</code> and <code>datetime.date</code>. If you want to double-check
+anything, you can see the full working code for each chapter in
+its branch (e.g.,
+<a href="https://github.com/python-leap/code/tree/chapter_01_domain_model">chapter_01_domain_model</a>).</p>
+</li>
+<li>
+<p>Type hints are still a matter of controversy in the Python world. For
+domain models, they can sometimes help to clarify or document what the
+expected arguments are, and people with IDEs are often grateful for them.
+You may decide the price paid in terms of readability is too high.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Our implementation here is trivial: a <code>Batch</code> just wraps an integer
+<code>available_quantity</code>, and we decrement that value on allocation. We&#8217;ve written
+quite a lot of code just to subtract one number from another, but we think that modeling our
+domain precisely will pay off.<sup class="footnote">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup>.]</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s write some new failing tests:</p>
+</div>
+<div id="test_can_allocate" class="exampleblock">
+<div class="title">Testing logic for what we can allocate (test_batches.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">make_batch_and_line</span><span class="tok-p">(</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">batch_qty</span><span class="tok-p">,</span> <span class="tok-n">line_qty</span><span class="tok-p">):</span>
+    <span class="tok-k">return</span> <span class="tok-p">(</span>
+        <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"batch-001"</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">batch_qty</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-n">today</span><span class="tok-p">()),</span>
+        <span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s2">"order-123"</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">line_qty</span><span class="tok-p">)</span>
+    <span class="tok-p">)</span>
+
+
+<span class="tok-k">def</span> <span class="tok-nf">test_can_allocate_if_available_greater_than_required</span><span class="tok-p">():</span>
+    <span class="tok-n">large_batch</span><span class="tok-p">,</span> <span class="tok-n">small_line</span> <span class="tok-o">=</span> <span class="tok-n">make_batch_and_line</span><span class="tok-p">(</span><span class="tok-s2">"ELEGANT-LAMP"</span><span class="tok-p">,</span> <span class="tok-mi">20</span><span class="tok-p">,</span> <span class="tok-mi">2</span><span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">large_batch</span><span class="tok-o">.</span><span class="tok-n">can_allocate</span><span class="tok-p">(</span><span class="tok-n">small_line</span><span class="tok-p">)</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">test_cannot_allocate_if_available_smaller_than_required</span><span class="tok-p">():</span>
+    <span class="tok-n">small_batch</span><span class="tok-p">,</span> <span class="tok-n">large_line</span> <span class="tok-o">=</span> <span class="tok-n">make_batch_and_line</span><span class="tok-p">(</span><span class="tok-s2">"ELEGANT-LAMP"</span><span class="tok-p">,</span> <span class="tok-mi">2</span><span class="tok-p">,</span> <span class="tok-mi">20</span><span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">small_batch</span><span class="tok-o">.</span><span class="tok-n">can_allocate</span><span class="tok-p">(</span><span class="tok-n">large_line</span><span class="tok-p">)</span> <span class="tok-ow">is</span> <span class="tok-bp">False</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">test_can_allocate_if_available_equal_to_required</span><span class="tok-p">():</span>
+    <span class="tok-n">batch</span><span class="tok-p">,</span> <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">make_batch_and_line</span><span class="tok-p">(</span><span class="tok-s2">"ELEGANT-LAMP"</span><span class="tok-p">,</span> <span class="tok-mi">2</span><span class="tok-p">,</span> <span class="tok-mi">2</span><span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">can_allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">)</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">test_cannot_allocate_if_skus_do_not_match</span><span class="tok-p">():</span>
+    <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"batch-001"</span><span class="tok-p">,</span> <span class="tok-s2">"UNCOMFORTABLE-CHAIR"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-bp">None</span><span class="tok-p">)</span>
+    <span class="tok-n">different_sku_line</span> <span class="tok-o">=</span> <span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s2">"order-123"</span><span class="tok-p">,</span> <span class="tok-s2">"EXPENSIVE-TOASTER"</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">can_allocate</span><span class="tok-p">(</span><span class="tok-n">different_sku_line</span><span class="tok-p">)</span> <span class="tok-ow">is</span> <span class="tok-bp">False</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>There&#8217;s nothing too unexpected here. We&#8217;ve refactored our test suite so that we
+don&#8217;t keep repeating the same lines of code to create a batch and a line for
+the same SKU; and we&#8217;ve written four simple tests for a new method
+<code>can_allocate</code>. Again, notice that the names we use mirror the language of our
+domain experts, and the examples we agreed upon are directly written into code.</p>
+</div>
+<div class="paragraph">
+<p>We can implement this straightforwardly, too, by writing the <code>can_allocate</code>
+method of <code>Batch</code>:</p>
+</div>
+<div id="can_allocate" class="exampleblock">
+<div class="title">A new method in the model (model.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span>    <span class="tok-k">def</span> <span class="tok-nf">can_allocate</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">line</span><span class="tok-p">:</span> <span class="tok-n">OrderLine</span><span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-nb">bool</span><span class="tok-p">:</span>
+        <span class="tok-k">return</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">sku</span> <span class="tok-o">==</span> <span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">sku</span> <span class="tok-ow">and</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">&gt;=</span> <span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">qty</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>So far, we can manage the implementation by just incrementing and decrementing
+<code>Batch.available_quantity</code>, but as we get into <code>deallocate()</code> tests, we&#8217;ll be
+forced into a more intelligent solution:</p>
+</div>
+<div id="test_deallocate_unallocated" class="exampleblock pagebreak-before">
+<div class="title">This test is going to require a smarter model (test_batches.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_can_only_deallocate_allocated_lines</span><span class="tok-p">():</span>
+    <span class="tok-n">batch</span><span class="tok-p">,</span> <span class="tok-n">unallocated_line</span> <span class="tok-o">=</span> <span class="tok-n">make_batch_and_line</span><span class="tok-p">(</span><span class="tok-s2">"DECORATIVE-TRINKET"</span><span class="tok-p">,</span> <span class="tok-mi">20</span><span class="tok-p">,</span> <span class="tok-mi">2</span><span class="tok-p">)</span>
+    <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">deallocate</span><span class="tok-p">(</span><span class="tok-n">unallocated_line</span><span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">==</span> <span class="tok-mi">20</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>In this test, we&#8217;re asserting that deallocating a line from a batch has no effect
+unless the batch previously allocated the line. For this to work, our <code>Batch</code>
+needs to understand which lines have been allocated. Let&#8217;s look at the
+implementation:</p>
+</div>
+<div id="domain_model_complete" class="exampleblock">
+<div class="title">The domain model now tracks allocations (model.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">Batch</span><span class="tok-p">:</span>
+    <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span>
+        <span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">ref</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-p">:</span> <span class="tok-n">Optional</span><span class="tok-p">[</span><span class="tok-n">date</span><span class="tok-p">]</span>
+    <span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">reference</span> <span class="tok-o">=</span> <span class="tok-n">ref</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">sku</span> <span class="tok-o">=</span> <span class="tok-n">sku</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">eta</span> <span class="tok-o">=</span> <span class="tok-n">eta</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_purchased_quantity</span> <span class="tok-o">=</span> <span class="tok-n">qty</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_allocations</span> <span class="tok-o">=</span> <span class="tok-nb">set</span><span class="tok-p">()</span>  <span class="tok-c1"># type: Set[OrderLine]</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">allocate</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">line</span><span class="tok-p">:</span> <span class="tok-n">OrderLine</span><span class="tok-p">):</span>
+        <span class="tok-k">if</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">can_allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">):</span>
+            <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_allocations</span><span class="tok-o">.</span><span class="tok-n">add</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">)</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">deallocate</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">line</span><span class="tok-p">:</span> <span class="tok-n">OrderLine</span><span class="tok-p">):</span>
+        <span class="tok-k">if</span> <span class="tok-n">line</span> <span class="tok-ow">in</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_allocations</span><span class="tok-p">:</span>
+            <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_allocations</span><span class="tok-o">.</span><span class="tok-n">remove</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">)</span>
+
+    <span class="tok-nd">@property</span>
+    <span class="tok-k">def</span> <span class="tok-nf">allocated_quantity</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-nb">int</span><span class="tok-p">:</span>
+        <span class="tok-k">return</span> <span class="tok-nb">sum</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">qty</span> <span class="tok-k">for</span> <span class="tok-n">line</span> <span class="tok-ow">in</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_allocations</span><span class="tok-p">)</span>
+
+    <span class="tok-nd">@property</span>
+    <span class="tok-k">def</span> <span class="tok-nf">available_quantity</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-nb">int</span><span class="tok-p">:</span>
+        <span class="tok-k">return</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_purchased_quantity</span> <span class="tok-o">-</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">allocated_quantity</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">can_allocate</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">line</span><span class="tok-p">:</span> <span class="tok-n">OrderLine</span><span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-nb">bool</span><span class="tok-p">:</span>
+        <span class="tok-k">return</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">sku</span> <span class="tok-o">==</span> <span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">sku</span> <span class="tok-ow">and</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">&gt;=</span> <span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">qty</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><a href="#model_diagram">Our model in UML</a> shows the model in UML.</p>
+</div>
+<div id="model_diagram" class="imageblock">
+<div class="content">
+<img src="images/apwp_0103.png" alt="apwp 0103">
+</div>
+<div class="title">Figure 3. Our model in UML</div>
+</div>
+<div class="listingblock image-source">
+<div class="content">
+<pre>[plantuml, apwp_0103, config=plantuml.cfg]
+@startuml
+scale 4
+
+left to right direction
+hide empty members
+
+class Batch {
+    reference
+    sku
+    eta
+    _purchased_quantity
+    _allocations
+}
+
+class OrderLine {
+    orderid
+    sku
+    qty
+}
+
+Batch::_allocations o-- OrderLine</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we&#8217;re getting somewhere! A batch now keeps track of a set of allocated
+<code>OrderLine</code> objects. When we allocate, if we have enough available quantity, we
+just add to the set. Our <code>available_quantity</code> is now a calculated property:
+purchased quantity minus allocated quantity.</p>
+</div>
+<div class="paragraph">
+<p>Yes, there&#8217;s plenty more we could do. It&#8217;s a little disconcerting that
+both <code>allocate()</code> and <code>deallocate()</code> can fail silently, but we have the
+basics.</p>
+</div>
+<div class="paragraph">
+<p>Incidentally, using a set for <code>._allocations</code> makes it simple for us
+to handle the last test, because items in a set are unique:</p>
+</div>
+<div id="last_test" class="exampleblock">
+<div class="title">Last batch test!  (test_batches.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_allocation_is_idempotent</span><span class="tok-p">():</span>
+    <span class="tok-n">batch</span><span class="tok-p">,</span> <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">make_batch_and_line</span><span class="tok-p">(</span><span class="tok-s2">"ANGULAR-DESK"</span><span class="tok-p">,</span> <span class="tok-mi">20</span><span class="tok-p">,</span> <span class="tok-mi">2</span><span class="tok-p">)</span>
+    <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">)</span>
+    <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">==</span> <span class="tok-mi">18</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>At the moment, it&#8217;s probably a valid criticism to say that the domain model is
+too trivial to bother with DDD (or even object orientation!). In real life,
+any number of business rules and edge cases crop up: customers can ask for
+delivery on specific future dates, which means we might not want to allocate
+them to the earliest batch. Some SKUs aren&#8217;t in batches, but ordered on
+demand directly from suppliers, so they have different logic. Depending on the
+customer&#8217;s location, we can allocate to only a subset of warehouses and shipments
+that are in their region&#8212;except for some SKUs we&#8217;re happy to deliver from a
+warehouse in a different region if we&#8217;re out of stock in the home region. And
+so on.  A real business in the real world knows how to pile on complexity faster
+than we can show on the page!</p>
+</div>
+<div class="paragraph">
+<p>But taking this simple domain model as a placeholder for something more complex, we&#8217;re going to extend our simple domain model in the rest of the book and
+plug it into the real world of APIs and databases and spreadsheets. We&#8217;ll
+see how sticking rigidly to our principles of encapsulation and careful
+layering will help us to avoid a ball of mud.</p>
+</div>
+<div class="sidebarblock nobreakinside">
+<div class="content">
+<div class="title">More Types for More Type Hints</div>
+<div class="paragraph">
+<p>If you really want to go to town with type hints, you could go so far as
+wrapping primitive types by using <code>typing.NewType</code>:</p>
+</div>
+<div id="too_many_types" class="exampleblock">
+<div class="title">Just taking it way too far, Bob</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">dataclasses</span> <span class="tok-kn">import</span> <span class="tok-n">dataclass</span>
+<span class="tok-kn">from</span> <span class="tok-nn">typing</span> <span class="tok-kn">import</span> <span class="tok-n">NewType</span>
+
+<span class="tok-n">Quantity</span> <span class="tok-o">=</span> <span class="tok-n">NewType</span><span class="tok-p">(</span><span class="tok-s2">"Quantity"</span><span class="tok-p">,</span> <span class="tok-nb">int</span><span class="tok-p">)</span>
+<span class="tok-n">Sku</span> <span class="tok-o">=</span> <span class="tok-n">NewType</span><span class="tok-p">(</span><span class="tok-s2">"Sku"</span><span class="tok-p">,</span> <span class="tok-nb">str</span><span class="tok-p">)</span>
+<span class="tok-n">Reference</span> <span class="tok-o">=</span> <span class="tok-n">NewType</span><span class="tok-p">(</span><span class="tok-s2">"Reference"</span><span class="tok-p">,</span> <span class="tok-nb">str</span><span class="tok-p">)</span>
+<span class="tok-o">...</span>
+
+<span class="tok-k">class</span> <span class="tok-nc">Batch</span><span class="tok-p">:</span>
+    <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">ref</span><span class="tok-p">:</span> <span class="tok-n">Reference</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-n">Sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-n">Quantity</span><span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">sku</span> <span class="tok-o">=</span> <span class="tok-n">sku</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">reference</span> <span class="tok-o">=</span> <span class="tok-n">ref</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_purchased_quantity</span> <span class="tok-o">=</span> <span class="tok-n">qty</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>That would allow our type checker to make sure that we don&#8217;t pass a <code>Sku</code> where a
+<code>Reference</code> is expected, for example.</p>
+</div>
+<div class="paragraph">
+<p>Whether you think this is wonderful or appalling is a matter of debate.<sup class="footnote">[<a id="_footnoteref_4" class="footnote" href="#_footnotedef_4" title="View footnote.">4</a>]</sup></p>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_dataclasses_are_great_for_value_objects">Dataclasses Are Great for Value Objects</h4>
+<div class="paragraph">
+<p>We&#8217;ve used <code>line</code> liberally in the previous code listings, but what is a
+line? In our business language, an <em>order</em> has multiple <em>line</em> items, where
+each line has a SKU and a quantity. We can imagine that a simple YAML file
+containing order information might look like this:</p>
+</div>
+<div id="yaml_order_example" class="exampleblock">
+<div class="title">Order info as YAML</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="yaml"><span></span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">Order_reference</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">12345</span>
+<span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">Lines</span><span class="tok-p tok-p-Indicator">:</span>
+  <span class="tok-p tok-p-Indicator">-</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">sku</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">RED-CHAIR</span>
+    <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">qty</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">25</span>
+  <span class="tok-p tok-p-Indicator">-</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">sku</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">BLU-CHAIR</span>
+    <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">qty</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">25</span>
+  <span class="tok-p tok-p-Indicator">-</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">sku</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">GRN-CHAIR</span>
+    <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">qty</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">25</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Notice that while an order has a <em>reference</em> that uniquely identifies it, a
+<em>line</em> does not. (Even if we add the order reference to the <code>OrderLine</code> class,
+it&#8217;s not something that uniquely identifies the line itself.)</p>
+</div>
+<div class="paragraph">
+<p>Whenever we have a business concept that has data but no identity, we
+often choose to represent it using the <em>Value Object</em> pattern. A <em>value object</em> is any
+domain object that is uniquely identified by the data it holds; we usually
+make them immutable:</p>
+</div>
+<div id="orderline_value_object" class="exampleblock">
+<div class="title">OrderLine is a value object</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@dataclass</span><span class="tok-p">(</span><span class="tok-n">frozen</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">)</span>
+<span class="tok-k">class</span> <span class="tok-nc">OrderLine</span><span class="tok-p">:</span>
+    <span class="tok-n">orderid</span><span class="tok-p">:</span> <span class="tok-n">OrderReference</span>
+    <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-n">ProductReference</span>
+    <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-n">Quantity</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>One of the nice things that dataclasses (or namedtuples) give us is <em>value
+equality</em>, which is the fancy way of saying, "Two lines with the same <code>orderid</code>,
+<code>sku</code>, and <code>qty</code> are equal."</p>
+</div>
+<div id="more_value_objects" class="exampleblock">
+<div class="title">More examples of value objects</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">dataclasses</span> <span class="tok-kn">import</span> <span class="tok-n">dataclass</span>
+<span class="tok-kn">from</span> <span class="tok-nn">typing</span> <span class="tok-kn">import</span> <span class="tok-n">NamedTuple</span>
+<span class="tok-kn">from</span> <span class="tok-nn">collections</span> <span class="tok-kn">import</span> <span class="tok-n">namedtuple</span>
+
+<span class="tok-nd">@dataclass</span><span class="tok-p">(</span><span class="tok-n">frozen</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">)</span>
+<span class="tok-k">class</span> <span class="tok-nc">Name</span><span class="tok-p">:</span>
+    <span class="tok-n">first_name</span><span class="tok-p">:</span> <span class="tok-nb">str</span>
+    <span class="tok-n">surname</span><span class="tok-p">:</span> <span class="tok-nb">str</span>
+
+<span class="tok-k">class</span> <span class="tok-nc">Money</span><span class="tok-p">(</span><span class="tok-n">NamedTuple</span><span class="tok-p">):</span>
+    <span class="tok-n">currency</span><span class="tok-p">:</span> <span class="tok-nb">str</span>
+    <span class="tok-n">value</span><span class="tok-p">:</span> <span class="tok-nb">int</span>
+
+<span class="tok-n">Line</span> <span class="tok-o">=</span> <span class="tok-n">namedtuple</span><span class="tok-p">(</span><span class="tok-s1">'Line'</span><span class="tok-p">,</span> <span class="tok-p">[</span><span class="tok-s1">'sku'</span><span class="tok-p">,</span> <span class="tok-s1">'qty'</span><span class="tok-p">])</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">test_equality</span><span class="tok-p">():</span>
+    <span class="tok-k">assert</span> <span class="tok-n">Money</span><span class="tok-p">(</span><span class="tok-s1">'gbp'</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-n">Money</span><span class="tok-p">(</span><span class="tok-s1">'gbp'</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">Name</span><span class="tok-p">(</span><span class="tok-s1">'Harry'</span><span class="tok-p">,</span> <span class="tok-s1">'Percival'</span><span class="tok-p">)</span> <span class="tok-o">!=</span> <span class="tok-n">Name</span><span class="tok-p">(</span><span class="tok-s1">'Bob'</span><span class="tok-p">,</span> <span class="tok-s1">'Gregory'</span><span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">Line</span><span class="tok-p">(</span><span class="tok-s1">'RED-CHAIR'</span><span class="tok-p">,</span> <span class="tok-mi">5</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-n">Line</span><span class="tok-p">(</span><span class="tok-s1">'RED-CHAIR'</span><span class="tok-p">,</span> <span class="tok-mi">5</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These value objects match our real-world intuition about how their values
+work. It doesn&#8217;t matter <em>which</em> &#163;10 note we&#8217;re talking about, because they all
+have the same value. Likewise, two names are equal if both the first and last
+names match; and two lines are equivalent if they have the same customer order,
+product code, and quantity. We can still have complex behavior on a value
+object, though. In fact, it&#8217;s common to support operations on values; for
+example, mathematical operators:</p>
+</div>
+<div id="value_object_maths" class="exampleblock">
+<div class="title">Math with value objects</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-n">fiver</span> <span class="tok-o">=</span> <span class="tok-n">Money</span><span class="tok-p">(</span><span class="tok-s1">'gbp'</span><span class="tok-p">,</span> <span class="tok-mi">5</span><span class="tok-p">)</span>
+<span class="tok-n">tenner</span> <span class="tok-o">=</span> <span class="tok-n">Money</span><span class="tok-p">(</span><span class="tok-s1">'gbp'</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">)</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">can_add_money_values_for_the_same_currency</span><span class="tok-p">():</span>
+    <span class="tok-k">assert</span> <span class="tok-n">fiver</span> <span class="tok-o">+</span> <span class="tok-n">fiver</span> <span class="tok-o">==</span> <span class="tok-n">tenner</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">can_subtract_money_values</span><span class="tok-p">():</span>
+    <span class="tok-k">assert</span> <span class="tok-n">tenner</span> <span class="tok-o">-</span> <span class="tok-n">fiver</span> <span class="tok-o">==</span> <span class="tok-n">fiver</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">adding_different_currencies_fails</span><span class="tok-p">():</span>
+    <span class="tok-k">with</span> <span class="tok-n">pytest</span><span class="tok-o">.</span><span class="tok-n">raises</span><span class="tok-p">(</span><span class="tok-ne">ValueError</span><span class="tok-p">):</span>
+        <span class="tok-n">Money</span><span class="tok-p">(</span><span class="tok-s1">'usd'</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">)</span> <span class="tok-o">+</span> <span class="tok-n">Money</span><span class="tok-p">(</span><span class="tok-s1">'gbp'</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">)</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">can_multiply_money_by_a_number</span><span class="tok-p">():</span>
+    <span class="tok-k">assert</span> <span class="tok-n">fiver</span> <span class="tok-o">*</span> <span class="tok-mi">5</span> <span class="tok-o">==</span> <span class="tok-n">Money</span><span class="tok-p">(</span><span class="tok-s1">'gbp'</span><span class="tok-p">,</span> <span class="tok-mi">25</span><span class="tok-p">)</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">multiplying_two_money_values_is_an_error</span><span class="tok-p">():</span>
+    <span class="tok-k">with</span> <span class="tok-n">pytest</span><span class="tok-o">.</span><span class="tok-n">raises</span><span class="tok-p">(</span><span class="tok-ne">TypeError</span><span class="tok-p">):</span>
+        <span class="tok-n">tenner</span> <span class="tok-o">*</span> <span class="tok-n">fiver</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_value_objects_and_entities">Value Objects and Entities</h4>
+<div class="paragraph">
+<p>An order line is uniquely identified by its order ID, SKU, and quantity; if we
+change one of those values, we now have a new line. That&#8217;s the definition of a
+value object: any object that is identified only by its data and doesn&#8217;t have a
+long-lived identity. What about a batch, though? That <em>is</em> identified by a
+reference.</p>
+</div>
+<div class="paragraph">
+<p>We use the term <em>entity</em> to describe a domain object that has long-lived
+identity. On the previous page, we introduced a <code>Name</code> class as a value object.
+If we take the name Harry Percival and change one letter, we have the new
+<code>Name</code> object Barry Percival.</p>
+</div>
+<div class="paragraph">
+<p>It should be clear that Harry Percival is not equal to Barry Percival:</p>
+</div>
+<div id="test_equality" class="exampleblock">
+<div class="title">A name itself cannot change&#8230;&#8203;</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_name_equality</span><span class="tok-p">():</span>
+    <span class="tok-k">assert</span> <span class="tok-n">Name</span><span class="tok-p">(</span><span class="tok-s2">"Harry"</span><span class="tok-p">,</span> <span class="tok-s2">"Percival"</span><span class="tok-p">)</span> <span class="tok-o">!=</span> <span class="tok-n">Name</span><span class="tok-p">(</span><span class="tok-s2">"Barry"</span><span class="tok-p">,</span> <span class="tok-s2">"Percival"</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>But what about Harry as a <em>person</em>? People do change their names, and their
+marital status, and even their gender, but we continue to recognize them as the
+same individual. That&#8217;s because humans, unlike names, have a persistent
+<em>identity</em>:</p>
+</div>
+<div id="person_identity" class="exampleblock">
+<div class="title">But a person can!</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">Person</span><span class="tok-p">:</span>
+
+    <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">name</span><span class="tok-p">:</span> <span class="tok-n">Name</span><span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">name</span> <span class="tok-o">=</span> <span class="tok-n">name</span>
+
+
+<span class="tok-k">def</span> <span class="tok-nf">test_barry_is_harry</span><span class="tok-p">():</span>
+    <span class="tok-n">harry</span> <span class="tok-o">=</span> <span class="tok-n">Person</span><span class="tok-p">(</span><span class="tok-n">Name</span><span class="tok-p">(</span><span class="tok-s2">"Harry"</span><span class="tok-p">,</span> <span class="tok-s2">"Percival"</span><span class="tok-p">))</span>
+    <span class="tok-n">barry</span> <span class="tok-o">=</span> <span class="tok-n">harry</span>
+
+    <span class="tok-n">barry</span><span class="tok-o">.</span><span class="tok-n">name</span> <span class="tok-o">=</span> <span class="tok-n">Name</span><span class="tok-p">(</span><span class="tok-s2">"Barry"</span><span class="tok-p">,</span> <span class="tok-s2">"Percival"</span><span class="tok-p">)</span>
+
+    <span class="tok-k">assert</span> <span class="tok-n">harry</span> <span class="tok-ow">is</span> <span class="tok-n">barry</span> <span class="tok-ow">and</span> <span class="tok-n">barry</span> <span class="tok-ow">is</span> <span class="tok-n">harry</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Entities, unlike values, have <em>identity equality</em>. We can change their values,
+and they are still recognizably the same thing. Batches, in our example, are
+entities. We can allocate lines to a batch, or change the date that we expect
+it to arrive, and it will still be the same entity.</p>
+</div>
+<div class="paragraph">
+<p>We usually make this explicit in code by implementing equality operators on
+entities:</p>
+</div>
+<div id="equality_on_batches" class="exampleblock">
+<div class="title">Implementing equality operators (model.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">Batch</span><span class="tok-p">:</span>
+    <span class="tok-o">...</span>
+
+    <span class="tok-k">def</span> <span class="tok-fm">__eq__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">other</span><span class="tok-p">):</span>
+        <span class="tok-k">if</span> <span class="tok-ow">not</span> <span class="tok-nb">isinstance</span><span class="tok-p">(</span><span class="tok-n">other</span><span class="tok-p">,</span> <span class="tok-n">Batch</span><span class="tok-p">):</span>
+            <span class="tok-k">return</span> <span class="tok-bp">False</span>
+        <span class="tok-k">return</span> <span class="tok-n">other</span><span class="tok-o">.</span><span class="tok-n">reference</span> <span class="tok-o">==</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">reference</span>
+
+    <span class="tok-k">def</span> <span class="tok-fm">__hash__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
+        <span class="tok-k">return</span> <span class="tok-nb">hash</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">reference</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Python&#8217;s <code>__eq__</code> magic method
+defines the behavior of the class for the <code>==</code> operator.<sup class="footnote">[<a id="_footnoteref_5" class="footnote" href="#_footnotedef_5" title="View footnote.">5</a>]</sup></p>
+</div>
+<div class="paragraph">
+<p>For both entity and value objects, it&#8217;s also worth thinking through how
+<code>__hash__</code> will work.  It&#8217;s the magic method Python uses to control the
+behavior of objects when you add them to sets or use them as dict keys;
+you can find more info <a href="https://oreil.ly/YUzg5">in the Python docs</a>.</p>
+</div>
+<div class="paragraph">
+<p>For value objects, the hash should be based on all the value attributes,
+and we should ensure that the objects are immutable.  We get this for
+free by specifying <code>@frozen=True</code> on the dataclass.</p>
+</div>
+<div class="paragraph">
+<p>For entities, the simplest option is to say that the hash is None, meaning
+that the object is not hashable and cannot, for example, be used in a set.
+If for some reason you decide you really do want to use set or dict operations
+with entities, the hash should be based on the attribute(s), such as
+<code>.reference</code>, that defines the entity&#8217;s unique identity over time. You should
+also try to somehow make <em>that</em> attribute read-only.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+This is tricky territory; you shouldn&#8217;t modify <code>__hash__</code> without
+    also modifying <code>__eq__</code>.  If you&#8217;re not sure what you&#8217;re doing,
+    further reading is suggested. <a href="https://oreil.ly/vxkgX">
+    "Python Hashes and Equality"</a> by our tech reviewer Hynek Schlawack is a good place to start.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_not_everything_has_to_be_an_object_a_domain_service_function">Not Everything Has to Be an Object: A Domain Service Function</h3>
+<div class="paragraph">
+<p>We&#8217;ve made a model to represent batches, but what we actually need
+to do is allocate order lines against a specific set of batches that
+represent all our stock.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>Sometimes, it just isn&#8217;t a thing.</p>
+</div>
+</blockquote>
+<div class="attribution">
+&#8212; Eric Evans<br>
+<cite>Domain-Driven Design</cite>
+</div>
+</div>
+<div class="paragraph">
+<p>Evans discusses the idea of Domain Service
+operations that don&#8217;t have a natural home in an entity or value object.<sup class="footnote">[<a id="_footnoteref_6" class="footnote" href="#_footnotedef_6" title="View footnote.">6</a>]</sup> A
+thing that allocates an order line, given a set of batches, sounds a lot like a
+function, and we can take advantage of the fact that Python is a multiparadigm
+language and just make it a function.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s see how we might test-drive such a function:</p>
+</div>
+<div id="test_allocate" class="exampleblock">
+<div class="title">Testing our domain service (test_allocate.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_prefers_current_stock_batches_to_shipments</span><span class="tok-p">():</span>
+    <span class="tok-n">in_stock_batch</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"in-stock-batch"</span><span class="tok-p">,</span> <span class="tok-s2">"RETRO-CLOCK"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-bp">None</span><span class="tok-p">)</span>
+    <span class="tok-n">shipment_batch</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"shipment-batch"</span><span class="tok-p">,</span> <span class="tok-s2">"RETRO-CLOCK"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-n">tomorrow</span><span class="tok-p">)</span>
+    <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s2">"oref"</span><span class="tok-p">,</span> <span class="tok-s2">"RETRO-CLOCK"</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">)</span>
+
+    <span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">,</span> <span class="tok-p">[</span><span class="tok-n">in_stock_batch</span><span class="tok-p">,</span> <span class="tok-n">shipment_batch</span><span class="tok-p">])</span>
+
+    <span class="tok-k">assert</span> <span class="tok-n">in_stock_batch</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">==</span> <span class="tok-mi">90</span>
+    <span class="tok-k">assert</span> <span class="tok-n">shipment_batch</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">==</span> <span class="tok-mi">100</span>
+
+
+<span class="tok-k">def</span> <span class="tok-nf">test_prefers_earlier_batches</span><span class="tok-p">():</span>
+    <span class="tok-n">earliest</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"speedy-batch"</span><span class="tok-p">,</span> <span class="tok-s2">"MINIMALIST-SPOON"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-n">today</span><span class="tok-p">)</span>
+    <span class="tok-n">medium</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"normal-batch"</span><span class="tok-p">,</span> <span class="tok-s2">"MINIMALIST-SPOON"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-n">tomorrow</span><span class="tok-p">)</span>
+    <span class="tok-n">latest</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"slow-batch"</span><span class="tok-p">,</span> <span class="tok-s2">"MINIMALIST-SPOON"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-n">later</span><span class="tok-p">)</span>
+    <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s2">"order1"</span><span class="tok-p">,</span> <span class="tok-s2">"MINIMALIST-SPOON"</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">)</span>
+
+    <span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">,</span> <span class="tok-p">[</span><span class="tok-n">medium</span><span class="tok-p">,</span> <span class="tok-n">earliest</span><span class="tok-p">,</span> <span class="tok-n">latest</span><span class="tok-p">])</span>
+
+    <span class="tok-k">assert</span> <span class="tok-n">earliest</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">==</span> <span class="tok-mi">90</span>
+    <span class="tok-k">assert</span> <span class="tok-n">medium</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">==</span> <span class="tok-mi">100</span>
+    <span class="tok-k">assert</span> <span class="tok-n">latest</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">==</span> <span class="tok-mi">100</span>
+
+
+<span class="tok-k">def</span> <span class="tok-nf">test_returns_allocated_batch_ref</span><span class="tok-p">():</span>
+    <span class="tok-n">in_stock_batch</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"in-stock-batch-ref"</span><span class="tok-p">,</span> <span class="tok-s2">"HIGHBROW-POSTER"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-bp">None</span><span class="tok-p">)</span>
+    <span class="tok-n">shipment_batch</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"shipment-batch-ref"</span><span class="tok-p">,</span> <span class="tok-s2">"HIGHBROW-POSTER"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-n">tomorrow</span><span class="tok-p">)</span>
+    <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s2">"oref"</span><span class="tok-p">,</span> <span class="tok-s2">"HIGHBROW-POSTER"</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">)</span>
+    <span class="tok-n">allocation</span> <span class="tok-o">=</span> <span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">,</span> <span class="tok-p">[</span><span class="tok-n">in_stock_batch</span><span class="tok-p">,</span> <span class="tok-n">shipment_batch</span><span class="tok-p">])</span>
+    <span class="tok-k">assert</span> <span class="tok-n">allocation</span> <span class="tok-o">==</span> <span class="tok-n">in_stock_batch</span><span class="tok-o">.</span><span class="tok-n">reference</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>And our service might look like this:</p>
+</div>
+<div id="domain_service" class="exampleblock">
+<div class="title">A standalone function for our domain service (model.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">:</span> <span class="tok-n">OrderLine</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">:</span> <span class="tok-n">List</span><span class="tok-p">[</span><span class="tok-n">Batch</span><span class="tok-p">])</span> <span class="tok-o">-&gt;</span> <span class="tok-nb">str</span><span class="tok-p">:</span>
+    <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-nb">next</span><span class="tok-p">(</span>
+        <span class="tok-n">b</span> <span class="tok-k">for</span> <span class="tok-n">b</span> <span class="tok-ow">in</span> <span class="tok-nb">sorted</span><span class="tok-p">(</span><span class="tok-n">batches</span><span class="tok-p">)</span> <span class="tok-k">if</span> <span class="tok-n">b</span><span class="tok-o">.</span><span class="tok-n">can_allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">)</span>
+    <span class="tok-p">)</span>
+    <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">)</span>
+    <span class="tok-k">return</span> <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">reference</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_pythons_magic_methods_let_us_use_our_models_with_idiomatic_python">Python&#8217;s Magic Methods Let Us Use Our Models with Idiomatic Python</h4>
+<div class="paragraph">
+<p>You may or may not like the use of <code>next()</code> in the preceding code, but we&#8217;re pretty
+sure you&#8217;ll agree that being able to use <code>sorted()</code> on our list of
+batches is nice, idiomatic Python.</p>
+</div>
+<div class="paragraph">
+<p>To make it work, we implement <code>__gt__</code> on our domain model:</p>
+</div>
+<div id="dunder_gt" class="exampleblock">
+<div class="title">Magic methods can express domain semantics (model.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">Batch</span><span class="tok-p">:</span>
+    <span class="tok-o">...</span>
+
+    <span class="tok-k">def</span> <span class="tok-fm">__gt__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">other</span><span class="tok-p">):</span>
+        <span class="tok-k">if</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">eta</span> <span class="tok-ow">is</span> <span class="tok-bp">None</span><span class="tok-p">:</span>
+            <span class="tok-k">return</span> <span class="tok-bp">False</span>
+        <span class="tok-k">if</span> <span class="tok-n">other</span><span class="tok-o">.</span><span class="tok-n">eta</span> <span class="tok-ow">is</span> <span class="tok-bp">None</span><span class="tok-p">:</span>
+            <span class="tok-k">return</span> <span class="tok-bp">True</span>
+        <span class="tok-k">return</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">eta</span> <span class="tok-o">&gt;</span> <span class="tok-n">other</span><span class="tok-o">.</span><span class="tok-n">eta</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>That&#8217;s lovely.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_exceptions_can_express_domain_concepts_too">Exceptions Can Express Domain Concepts Too</h4>
+<div class="paragraph">
+<p>We have one final concept to cover: exceptions
+can be used to express domain concepts too. In our conversations
+with domain experts, we&#8217;ve learned about the possibility that
+an order cannot be allocated because we are <em>out of stock</em>, and
+we can capture that by using a <em>domain exception</em>:</p>
+</div>
+<div id="test_out_of_stock" class="exampleblock">
+<div class="title">Testing out-of-stock exception (test_allocate.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_raises_out_of_stock_exception_if_cannot_allocate</span><span class="tok-p">():</span>
+    <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s1">'batch1'</span><span class="tok-p">,</span> <span class="tok-s1">'SMALL-FORK'</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-n">today</span><span class="tok-p">)</span>
+    <span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s1">'order1'</span><span class="tok-p">,</span> <span class="tok-s1">'SMALL-FORK'</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">),</span> <span class="tok-p">[</span><span class="tok-n">batch</span><span class="tok-p">])</span>
+
+    <span class="tok-k">with</span> <span class="tok-n">pytest</span><span class="tok-o">.</span><span class="tok-n">raises</span><span class="tok-p">(</span><span class="tok-n">OutOfStock</span><span class="tok-p">,</span> <span class="tok-n">match</span><span class="tok-o">=</span><span class="tok-s1">'SMALL-FORK'</span><span class="tok-p">):</span>
+        <span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s1">'order2'</span><span class="tok-p">,</span> <span class="tok-s1">'SMALL-FORK'</span><span class="tok-p">,</span> <span class="tok-mi">1</span><span class="tok-p">),</span> <span class="tok-p">[</span><span class="tok-n">batch</span><span class="tok-p">])</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sidebarblock nobreakinside">
+<div class="content">
+<div class="title">Domain Modeling Recap</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Domain modeling</dt>
+<dd>
+<p>This is the part of your code that is closest to the business,
+the most likely to change, and the place where you deliver the
+most value to the business. Make it easy to understand and modify.</p>
+</dd>
+<dt class="hdlist1">Distinguish entities from value objects</dt>
+<dd>
+<p>A value object is defined by its attributes. It&#8217;s usually best
+implemented as an immutable type. If you change an attribute on
+a Value Object, it represents a different object. In contrast,
+an entity has attributes that may vary over time and it will still be the
+same entity. It&#8217;s important to define what <em>does</em> uniquely identify
+an entity (usually some sort of name or reference field).</p>
+</dd>
+<dt class="hdlist1">Not everything has to be an object</dt>
+<dd>
+<p>Python is a multiparadigm language, so let the "verbs" in your
+code be functions. For every <code>FooManager</code>, <code>BarBuilder</code>, or <code>BazFactory</code>,
+there&#8217;s often a more expressive and readable <code>manage_foo()</code>, <code>build_bar()</code>,
+or <code>get_baz()</code> waiting to happen.</p>
+</dd>
+<dt class="hdlist1">This is the time to apply your best OO design principles</dt>
+<dd>
+<p>Revisit the SOLID principles and all the other good heuristics like "has a versus is-a,"
+"prefer composition over inheritance," and so on.</p>
+</dd>
+<dt class="hdlist1">You&#8217;ll also want to think about consistency boundaries and aggregates</dt>
+<dd>
+<p>But that&#8217;s a topic for <a href="/book/chapter_07_aggregate.html">[chapter_07_aggregate]</a>.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>We won&#8217;t bore you too much with the implementation, but the main thing
+to note is that we take care in naming our exceptions in the ubiquitous
+language, just as we do our entities, value objects, and services:</p>
+</div>
+<div id="out_of_stock" class="exampleblock">
+<div class="title">Raising a domain exception (model.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">OutOfStock</span><span class="tok-p">(</span><span class="tok-ne">Exception</span><span class="tok-p">):</span>
+    <span class="tok-k">pass</span>
+
+
+<span class="tok-k">def</span> <span class="tok-nf">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">:</span> <span class="tok-n">OrderLine</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">:</span> <span class="tok-n">List</span><span class="tok-p">[</span><span class="tok-n">Batch</span><span class="tok-p">])</span> <span class="tok-o">-&gt;</span> <span class="tok-nb">str</span><span class="tok-p">:</span>
+    <span class="tok-k">try</span><span class="tok-p">:</span>
+        <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-nb">next</span><span class="tok-p">(</span>
+        <span class="tok-o">...</span>
+    <span class="tok-k">except</span> <span class="tok-ne">StopIteration</span><span class="tok-p">:</span>
+        <span class="tok-k">raise</span> <span class="tok-n">OutOfStock</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'Out of stock for sku {line.sku}'</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><a href="#maps_chapter_01_withtext">Our domain model at the end of the chapter</a> is a visual representation of where we&#8217;ve ended up.</p>
+</div>
+<div id="maps_chapter_01_withtext" class="imageblock">
+<div class="content">
+<img src="images/apwp_0104.png" alt="apwp 0104">
+</div>
+<div class="title">Figure 4. Our domain model at the end of the chapter</div>
+</div>
+<div class="paragraph">
+<p>That&#8217;ll probably do for now! We have a domain service that we can use for our
+first use case. But first we&#8217;ll need a database&#8230;&#8203;</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<hr>
+<div class="footnote" id="_footnotedef_1">
+<a href="#_footnoteref_1">1</a>. DDD did not originate domain modeling. Eric Evans refers to the 2002 book <em>Object Design</em> by Rebecca Wirfs-Brock and Alan McKean  (Addison-Wesley Professional), which introduced responsibility-driven design, of which DDD is a special case dealing with the domain. But even that is too late, and OO enthusiasts will tell you to look further back to Ivar Jacobson and Grady Booch; the term has been around since the mid-1980s.
+</div>
+<div class="footnote" id="_footnotedef_2">
+<a href="#_footnoteref_2">2</a>. In previous Python versions, we might have used a namedtuple. You could also check out Hynek Schlawack&#8217;s excellent <a href="https://pypi.org/project/attrs">attrs</a>.
+</div>
+<div class="footnote" id="_footnotedef_3">
+<a href="#_footnoteref_3">3</a>. Or perhaps you think there&#8217;s not enough code?  What about some sort of check that the SKU in the <code>OrderLine</code> matches <code>Batch.sku</code>?  We saved some thoughts on validation for <a href="/book/appendix_validation.html">[appendix_validation
+</a></div>
+<div class="footnote" id="_footnotedef_4">
+<a href="#_footnoteref_4">4</a>. It is appalling. Please, please don&#8217;t do this. &#8212;Harry
+</div>
+<div class="footnote" id="_footnotedef_5">
+<a href="#_footnoteref_5">5</a>. The <code>__eq__</code> method is pronounced "dunder-EQ." By some, at least.
+</div>
+<div class="footnote" id="_footnotedef_6">
+<a href="#_footnoteref_6">6</a>. Domain services are not the same thing as the services from the <a href="/book/chapter_04_service_layer.html">service layer</a>, although they are often closely related. A domain service represents a business concept or process, whereas a service-layer service represents a use case for your application. Often the service layer will call a domain service.
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2020-03-16 11:03:29 UTC
+</div>
+</div>
+<style>
+pre.pygments .hll { background-color: #ffffcc }
+pre.pygments  { background: #f0f0f0; }
+pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
+pre.pygments .tok-err { border: 1px solid #FF0000 } /* Error */
+pre.pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
+pre.pygments .tok-o { color: #666666 } /* Operator */
+pre.pygments .tok-ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
+pre.pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
+pre.pygments .tok-cp { color: #007020 } /* Comment.Preproc */
+pre.pygments .tok-cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
+pre.pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
+pre.pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
+pre.pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
+pre.pygments .tok-ge { font-style: italic } /* Generic.Emph */
+pre.pygments .tok-gr { color: #FF0000 } /* Generic.Error */
+pre.pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
+pre.pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
+pre.pygments .tok-go { color: #888888 } /* Generic.Output */
+pre.pygments .tok-gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+pre.pygments .tok-gs { font-weight: bold } /* Generic.Strong */
+pre.pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+pre.pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
+pre.pygments .tok-kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+pre.pygments .tok-kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+pre.pygments .tok-kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+pre.pygments .tok-kp { color: #007020 } /* Keyword.Pseudo */
+pre.pygments .tok-kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+pre.pygments .tok-kt { color: #902000 } /* Keyword.Type */
+pre.pygments .tok-m { color: #40a070 } /* Literal.Number */
+pre.pygments .tok-s { color: #4070a0 } /* Literal.String */
+pre.pygments .tok-na { color: #4070a0 } /* Name.Attribute */
+pre.pygments .tok-nb { color: #007020 } /* Name.Builtin */
+pre.pygments .tok-nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+pre.pygments .tok-no { color: #60add5 } /* Name.Constant */
+pre.pygments .tok-nd { color: #555555; font-weight: bold } /* Name.Decorator */
+pre.pygments .tok-ni { color: #d55537; font-weight: bold } /* Name.Entity */
+pre.pygments .tok-ne { color: #007020 } /* Name.Exception */
+pre.pygments .tok-nf { color: #06287e } /* Name.Function */
+pre.pygments .tok-nl { color: #002070; font-weight: bold } /* Name.Label */
+pre.pygments .tok-nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+pre.pygments .tok-nt { color: #062873; font-weight: bold } /* Name.Tag */
+pre.pygments .tok-nv { color: #bb60d5 } /* Name.Variable */
+pre.pygments .tok-ow { color: #007020; font-weight: bold } /* Operator.Word */
+pre.pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
+pre.pygments .tok-mb { color: #40a070 } /* Literal.Number.Bin */
+pre.pygments .tok-mf { color: #40a070 } /* Literal.Number.Float */
+pre.pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
+pre.pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
+pre.pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
+pre.pygments .tok-sa { color: #4070a0 } /* Literal.String.Affix */
+pre.pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
+pre.pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
+pre.pygments .tok-dl { color: #4070a0 } /* Literal.String.Delimiter */
+pre.pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+pre.pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
+pre.pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+pre.pygments .tok-sh { color: #4070a0 } /* Literal.String.Heredoc */
+pre.pygments .tok-si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+pre.pygments .tok-sx { color: #c65d09 } /* Literal.String.Other */
+pre.pygments .tok-sr { color: #235388 } /* Literal.String.Regex */
+pre.pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
+pre.pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
+pre.pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
+pre.pygments .tok-fm { color: #06287e } /* Name.Function.Magic */
+pre.pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
+pre.pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
+pre.pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
+pre.pygments .tok-vm { color: #bb60d5 } /* Name.Variable.Magic */
+pre.pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
+</style>
+<div><div id="disqus_thread" style="margin: 10px"></div>
+<script>
+
+var disqus_config = function () {
+this.page.url = 'https://cosmicpython.com';
+this.page.identifier = 'chapter_01_domain_model';
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = 'https://cosmic-python.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div><html><head><script async src="https://www.googletagmanager.com/gtag/js?id=UA-40928035-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-40928035-3');
+</script>
+</head></html></body>
+</html>

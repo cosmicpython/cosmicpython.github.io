@@ -1,0 +1,79 @@
+{% extends "templates/base.html" %}
+
+{% block content_block %}
+  <div class="row">
+    <div class="column">
+      <div class="banner-image-container">
+        <img src="https://www.jpl.nasa.gov/spaceimages/images/largesize/PIA13111_hires.jpg" />
+        <div class="banner-text">
+          <h1>cosmic_python</h1>
+          <h2>Simple patterns for building complex applications</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p>
+    <em class="align-right">
+      (Because "Cosmos" is the
+      <a href="https://www.goodreads.com/quotes/604655-cosmos-is-a-greek-word-for-the-order-of-the">opposite of Chaos</a>,
+      you see)
+    </em>
+  </p>
+
+  <h1 id="buy_the_book">The Book</h1>
+  <p>
+    There are lots of ways you can read the book. Some of them even involve us,
+    the authors, receiving a small amount of money!
+  </p>
+
+  <ul>
+    <li>
+      Read in online on O'Reilly Learning (aka Safari)
+      <a href="https://learning.oreilly.com/library/view/architecture-patterns-with/9781492052197/">learning.oreilly.com</a>
+    </li>
+
+    <li>
+      Preorder print books on
+      <a href="https://amzn.to/37pR2DH">Amazon.com</a>
+      or
+      <a href="https://amzn.to/38CmFu1">Amazon.co.uk</a>.
+    </li>
+    <li>
+      Buy a DRM-free ebook at
+      <a href="https://www.ebooks.com/en-us/book/209971850/architecture-patterns-with-python/harry-percival/">ebooks.com</a>
+    </li>
+    <li>
+      Or
+      <a href="book/preface.html">read it for free on this site</a> (license: CC-By-NC-ND).
+    </li>
+
+  </ul>
+
+  <h1>Blog</h1>
+
+  <h3>Recent posts</h3>
+
+<ul>
+  {% for post in posts %}
+    {% if post.date.year != 2017 %}
+      <li>
+        <a href="{{ post.url }}">{{ post.date }} {{ post.title }}</a>
+      </li>
+    {% endif %}
+  {% endfor %}
+</ul>
+
+<h3>Classic 2017 Episodes on Ports & Adapters, by Bob</h3>
+
+
+<ul>
+  {% for post in posts %}
+    {% if post.date.year == 2017 %}
+      <li>
+        <a href="{{ post.url }}">{{ post.date }} {{ post.title }}</a>
+      </li>
+    {% endif %}
+  {% endfor %}
+</ul>
+
+{% endblock %}

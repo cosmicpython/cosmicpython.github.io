@@ -1,0 +1,514 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<title>Swapping Out the Infrastructure: Do Everything with CSVs</title>
+<style>
+/* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+
+@import url("//fonts.googleapis.com/css?family=Noto+Sans:300,600italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700");
+@import url(//asciidoctor.org/stylesheets/asciidoctor.css); /* Default asciidoc style framework - important */
+
+/* customisations by harry */
+
+/* hide inline ditaa/plantuml source listings for images */
+.image-source {
+    display: none
+}
+/* make formal codeblocks a bit nicer */
+.exampleblock > .content {
+    padding: 2px;
+    background-color: white;
+    border: 0;
+    margin-bottom: 2em;
+}
+
+.exampleblock .title {
+    text-align: right;
+}
+
+/* end customisations by harry */
+
+/* CUSTOMISATIONS */
+
+/* Change the values in root for quick customisation. If you want even more fine grain... venture further. */
+
+:root{
+--maincolor:#FFFFFF;
+--primarycolor:#2c3e50;
+--secondarycolor:#ba3925;
+--tertiarycolor: #186d7a;
+--sidebarbackground:#CCC;
+--linkcolor:#b71c1c;
+--linkcoloralternate:#f44336;
+--white:#FFFFFF;
+--black:#000000;
+}
+
+/* Text styles */
+h1{color:var(--primarycolor) !important;}
+h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+.title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
+p{font-family: "Noto Sans",sans-serif !important}
+
+/* Table styles */
+th{font-family: "Noto Sans",sans-serif !important}
+
+/* Responsiveness fixes */
+video {
+  max-width: 100%;
+}
+
+@media all and (max-width: 600px) {
+table {
+  width: 55vw!important;
+  font-size: 3vw;
+}
+
+</style>
+</head>
+<body class="article toc2 toc-left">
+<div id="buy_the_book" style="position: absolute; top: 0; right: 0; z-index:100">
+  <a href="/#buy_the_book">
+    <img src="/images/buy_the_book.svg" alt="buy the book ribbon">
+  </a>
+</div>
+<div id="header">
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="/book/preface.html">Preface</a></li>
+<li><a href="/book/introduction.html">Introduction</a></li>
+<li><a href="/book/part1.html">Building an Architecture to Support Domain Modeling</a></li>
+<li><a href="/book/chapter_01_domain_model.html">1. Domain Modeling</a></li>
+<li><a href="/book/chapter_02_repository.html">2. Repository Pattern</a></li>
+<li><a href="/book/chapter_03_abstractions.html">3. A Brief Interlude: On Coupling <span class="keep-together">and Abstractions</span></a></li>
+<li><a href="/book/chapter_04_service_layer.html">4. Our First Use Case: <span class="keep-together">Flask API and Service Layer</span></a></li>
+<li><a href="/book/chapter_05_high_gear_low_gear.html">5. TDD in High Gear and Low Gear</a></li>
+<li><a href="/book/chapter_06_uow.html">6. Unit of Work Pattern</a></li>
+<li><a href="/book/chapter_07_aggregate.html">7. Aggregates and Consistency Boundaries</a></li>
+<li><a href="/book/part2.html">Event-Driven Architecture</a></li>
+<li><a href="/book/chapter_08_events_and_message_bus.html">8. Events and the Message Bus</a></li>
+<li><a href="/book/chapter_09_all_messagebus.html">9. Going to Town on the Message Bus</a></li>
+<li><a href="/book/chapter_10_commands.html">10. Commands and Command Handler</a></li>
+<li><a href="/book/chapter_11_external_events.html">11. Event-Driven Architecture: Using Events to Integrate Microservices</a></li>
+<li><a href="/book/chapter_12_cqrs.html">12. Command-Query Responsibility Segregation (CQRS)</a></li>
+<li><a href="/book/chapter_13_dependency_injection.html">13. Dependency Injection (and Bootstrapping)</a></li>
+<li><a href="/book/epilogue_1_how_to_get_there_from_here.html">Appendix A: Epilogue</a></li>
+<li><a href="/book/appendix_ds1_table.html">Appendix B: Summary Diagram and Table</a></li>
+<li><a href="/book/appendix_project_structure.html">Appendix C: A Template Project Structure</a></li>
+<li><a href="/book/appendix_csvs.html">Appendix D: Swapping Out the Infrastructure: <span class="keep-together">Do Everything with CSVs</span></a></li>
+<li><a href="/book/appendix_django.html">Appendix E: Repository and Unit of Work <span class="keep-together">Patterns with Django</span></a></li>
+<li><a href="/book/appendix_validation.html">Appendix F: Validation</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="appendix_csvs">Appendix C: Swapping Out the Infrastructure: Do Everything with CSVs<span class="keep-together">Do Everything with CSVs</span></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This appendix is intended as a little illustration of the benefits of the
+Repository, Unit of Work, and Service Layer patterns. It&#8217;s intended to
+follow from <a href="/book/chapter_06_uow.html">[chapter_06_uow]</a>.</p>
+</div>
+<div class="paragraph">
+<p>Just as we finish building out our Flask API and getting it ready for release,
+the business comes to us apologetically, saying they&#8217;re not ready to use our API
+and asking if we could build a thing that reads just batches and orders from a couple of
+CSVs and outputs a third CSV with allocations.</p>
+</div>
+<div class="paragraph">
+<p>Ordinarily this is the kind of thing that might have a team cursing and spitting
+and making notes for their memoirs.  But not us!  Oh no, we&#8217;ve ensured that
+our infrastructure concerns are nicely decoupled from our domain model and
+service layer.  Switching to CSVs will be a simple matter of writing a couple
+of new <code>Repository</code> and <code>UnitOfWork</code> classes, and then we&#8217;ll be able to reuse
+<em>all</em> of our logic from the domain layer and the service layer.</p>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s an E2E test to show you how the CSVs flow in and out:</p>
+</div>
+<div id="first_csv_test" class="exampleblock">
+<div class="title">A first CSV test (tests/e2e/test_csv.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_cli_app_reads_csvs_with_batches_and_orders_and_outputs_allocations</span><span class="tok-p">(</span>
+        <span class="tok-n">make_csv</span>
+<span class="tok-p">):</span>
+    <span class="tok-n">sku1</span><span class="tok-p">,</span> <span class="tok-n">sku2</span> <span class="tok-o">=</span> <span class="tok-n">random_ref</span><span class="tok-p">(</span><span class="tok-s1">'s1'</span><span class="tok-p">),</span> <span class="tok-n">random_ref</span><span class="tok-p">(</span><span class="tok-s1">'s2'</span><span class="tok-p">)</span>
+    <span class="tok-n">batch1</span><span class="tok-p">,</span> <span class="tok-n">batch2</span><span class="tok-p">,</span> <span class="tok-n">batch3</span> <span class="tok-o">=</span> <span class="tok-n">random_ref</span><span class="tok-p">(</span><span class="tok-s1">'b1'</span><span class="tok-p">),</span> <span class="tok-n">random_ref</span><span class="tok-p">(</span><span class="tok-s1">'b2'</span><span class="tok-p">),</span> <span class="tok-n">random_ref</span><span class="tok-p">(</span><span class="tok-s1">'b3'</span><span class="tok-p">)</span>
+    <span class="tok-n">order_ref</span> <span class="tok-o">=</span> <span class="tok-n">random_ref</span><span class="tok-p">(</span><span class="tok-s1">'o'</span><span class="tok-p">)</span>
+    <span class="tok-n">make_csv</span><span class="tok-p">(</span><span class="tok-s1">'batches.csv'</span><span class="tok-p">,</span> <span class="tok-p">[</span>
+        <span class="tok-p">[</span><span class="tok-s1">'ref'</span><span class="tok-p">,</span> <span class="tok-s1">'sku'</span><span class="tok-p">,</span> <span class="tok-s1">'qty'</span><span class="tok-p">,</span> <span class="tok-s1">'eta'</span><span class="tok-p">],</span>
+        <span class="tok-p">[</span><span class="tok-n">batch1</span><span class="tok-p">,</span> <span class="tok-n">sku1</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-s1">''</span><span class="tok-p">],</span>
+        <span class="tok-p">[</span><span class="tok-n">batch2</span><span class="tok-p">,</span> <span class="tok-n">sku2</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-s1">'2011-01-01'</span><span class="tok-p">],</span>
+        <span class="tok-p">[</span><span class="tok-n">batch3</span><span class="tok-p">,</span> <span class="tok-n">sku2</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-s1">'2011-01-02'</span><span class="tok-p">],</span>
+    <span class="tok-p">])</span>
+    <span class="tok-n">orders_csv</span> <span class="tok-o">=</span> <span class="tok-n">make_csv</span><span class="tok-p">(</span><span class="tok-s1">'orders.csv'</span><span class="tok-p">,</span> <span class="tok-p">[</span>
+        <span class="tok-p">[</span><span class="tok-s1">'orderid'</span><span class="tok-p">,</span> <span class="tok-s1">'sku'</span><span class="tok-p">,</span> <span class="tok-s1">'qty'</span><span class="tok-p">],</span>
+        <span class="tok-p">[</span><span class="tok-n">order_ref</span><span class="tok-p">,</span> <span class="tok-n">sku1</span><span class="tok-p">,</span> <span class="tok-mi">3</span><span class="tok-p">],</span>
+        <span class="tok-p">[</span><span class="tok-n">order_ref</span><span class="tok-p">,</span> <span class="tok-n">sku2</span><span class="tok-p">,</span> <span class="tok-mi">12</span><span class="tok-p">],</span>
+    <span class="tok-p">])</span>
+
+    <span class="tok-n">run_cli_script</span><span class="tok-p">(</span><span class="tok-n">orders_csv</span><span class="tok-o">.</span><span class="tok-n">parent</span><span class="tok-p">)</span>
+
+    <span class="tok-n">expected_output_csv</span> <span class="tok-o">=</span> <span class="tok-n">orders_csv</span><span class="tok-o">.</span><span class="tok-n">parent</span> <span class="tok-o">/</span> <span class="tok-s1">'allocations.csv'</span>
+    <span class="tok-k">with</span> <span class="tok-nb">open</span><span class="tok-p">(</span><span class="tok-n">expected_output_csv</span><span class="tok-p">)</span> <span class="tok-k">as</span> <span class="tok-n">f</span><span class="tok-p">:</span>
+        <span class="tok-n">rows</span> <span class="tok-o">=</span> <span class="tok-nb">list</span><span class="tok-p">(</span><span class="tok-n">csv</span><span class="tok-o">.</span><span class="tok-n">reader</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-p">))</span>
+    <span class="tok-k">assert</span> <span class="tok-n">rows</span> <span class="tok-o">==</span> <span class="tok-p">[</span>
+        <span class="tok-p">[</span><span class="tok-s1">'orderid'</span><span class="tok-p">,</span> <span class="tok-s1">'sku'</span><span class="tok-p">,</span> <span class="tok-s1">'qty'</span><span class="tok-p">,</span> <span class="tok-s1">'batchref'</span><span class="tok-p">],</span>
+        <span class="tok-p">[</span><span class="tok-n">order_ref</span><span class="tok-p">,</span> <span class="tok-n">sku1</span><span class="tok-p">,</span> <span class="tok-s1">'3'</span><span class="tok-p">,</span> <span class="tok-n">batch1</span><span class="tok-p">],</span>
+        <span class="tok-p">[</span><span class="tok-n">order_ref</span><span class="tok-p">,</span> <span class="tok-n">sku2</span><span class="tok-p">,</span> <span class="tok-s1">'12'</span><span class="tok-p">,</span> <span class="tok-n">batch2</span><span class="tok-p">],</span>
+    <span class="tok-p">]</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Diving in and implementing without thinking about repositories and all
+that jazz, you might start with something like this:</p>
+</div>
+<div id="first_cut_csvs" class="exampleblock">
+<div class="title">A first cut of our CSV reader/writer (src/bin/allocate-from-csv)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-ch">#!/usr/bin/env python</span>
+<span class="tok-kn">import</span> <span class="tok-nn">csv</span>
+<span class="tok-kn">import</span> <span class="tok-nn">sys</span>
+<span class="tok-kn">from</span> <span class="tok-nn">datetime</span> <span class="tok-kn">import</span> <span class="tok-n">datetime</span>
+<span class="tok-kn">from</span> <span class="tok-nn">pathlib</span> <span class="tok-kn">import</span> <span class="tok-n">Path</span>
+
+<span class="tok-kn">from</span> <span class="tok-nn">allocation</span> <span class="tok-kn">import</span> <span class="tok-n">model</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">load_batches</span><span class="tok-p">(</span><span class="tok-n">batches_path</span><span class="tok-p">):</span>
+    <span class="tok-n">batches</span> <span class="tok-o">=</span> <span class="tok-p">[]</span>
+    <span class="tok-k">with</span> <span class="tok-n">batches_path</span><span class="tok-o">.</span><span class="tok-n">open</span><span class="tok-p">()</span> <span class="tok-k">as</span> <span class="tok-n">inf</span><span class="tok-p">:</span>
+        <span class="tok-n">reader</span> <span class="tok-o">=</span> <span class="tok-n">csv</span><span class="tok-o">.</span><span class="tok-n">DictReader</span><span class="tok-p">(</span><span class="tok-n">inf</span><span class="tok-p">)</span>
+        <span class="tok-k">for</span> <span class="tok-n">row</span> <span class="tok-ow">in</span> <span class="tok-n">reader</span><span class="tok-p">:</span>
+            <span class="tok-k">if</span> <span class="tok-n">row</span><span class="tok-p">[</span><span class="tok-s1">'eta'</span><span class="tok-p">]:</span>
+                <span class="tok-n">eta</span> <span class="tok-o">=</span> <span class="tok-n">datetime</span><span class="tok-o">.</span><span class="tok-n">strptime</span><span class="tok-p">(</span><span class="tok-n">row</span><span class="tok-p">[</span><span class="tok-s1">'eta'</span><span class="tok-p">],</span> <span class="tok-s1">'%Y-%m-</span><span class="tok-si">%d</span><span class="tok-s1">'</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">date</span><span class="tok-p">()</span>
+            <span class="tok-k">else</span><span class="tok-p">:</span>
+                <span class="tok-n">eta</span> <span class="tok-o">=</span> <span class="tok-bp">None</span>
+            <span class="tok-n">batches</span><span class="tok-o">.</span><span class="tok-n">append</span><span class="tok-p">(</span><span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-p">(</span>
+                <span class="tok-n">ref</span><span class="tok-o">=</span><span class="tok-n">row</span><span class="tok-p">[</span><span class="tok-s1">'ref'</span><span class="tok-p">],</span>
+                <span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-n">row</span><span class="tok-p">[</span><span class="tok-s1">'sku'</span><span class="tok-p">],</span>
+                <span class="tok-n">qty</span><span class="tok-o">=</span><span class="tok-nb">int</span><span class="tok-p">(</span><span class="tok-n">row</span><span class="tok-p">[</span><span class="tok-s1">'qty'</span><span class="tok-p">]),</span>
+                <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-n">eta</span>
+            <span class="tok-p">))</span>
+    <span class="tok-k">return</span> <span class="tok-n">batches</span>
+
+
+
+<span class="tok-k">def</span> <span class="tok-nf">main</span><span class="tok-p">(</span><span class="tok-n">folder</span><span class="tok-p">):</span>
+    <span class="tok-n">batches_path</span> <span class="tok-o">=</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">folder</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-s1">'batches.csv'</span>
+    <span class="tok-n">orders_path</span> <span class="tok-o">=</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">folder</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-s1">'orders.csv'</span>
+    <span class="tok-n">allocations_path</span> <span class="tok-o">=</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">folder</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-s1">'allocations.csv'</span>
+
+    <span class="tok-n">batches</span> <span class="tok-o">=</span> <span class="tok-n">load_batches</span><span class="tok-p">(</span><span class="tok-n">batches_path</span><span class="tok-p">)</span>
+
+    <span class="tok-k">with</span> <span class="tok-n">orders_path</span><span class="tok-o">.</span><span class="tok-n">open</span><span class="tok-p">()</span> <span class="tok-k">as</span> <span class="tok-n">inf</span><span class="tok-p">,</span> <span class="tok-n">allocations_path</span><span class="tok-o">.</span><span class="tok-n">open</span><span class="tok-p">(</span><span class="tok-s1">'w'</span><span class="tok-p">)</span> <span class="tok-k">as</span> <span class="tok-n">outf</span><span class="tok-p">:</span>
+        <span class="tok-n">reader</span> <span class="tok-o">=</span> <span class="tok-n">csv</span><span class="tok-o">.</span><span class="tok-n">DictReader</span><span class="tok-p">(</span><span class="tok-n">inf</span><span class="tok-p">)</span>
+        <span class="tok-n">writer</span> <span class="tok-o">=</span> <span class="tok-n">csv</span><span class="tok-o">.</span><span class="tok-n">writer</span><span class="tok-p">(</span><span class="tok-n">outf</span><span class="tok-p">)</span>
+        <span class="tok-n">writer</span><span class="tok-o">.</span><span class="tok-n">writerow</span><span class="tok-p">([</span><span class="tok-s1">'orderid'</span><span class="tok-p">,</span> <span class="tok-s1">'sku'</span><span class="tok-p">,</span> <span class="tok-s1">'batchref'</span><span class="tok-p">])</span>
+        <span class="tok-k">for</span> <span class="tok-n">row</span> <span class="tok-ow">in</span> <span class="tok-n">reader</span><span class="tok-p">:</span>
+            <span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span> <span class="tok-o">=</span> <span class="tok-n">row</span><span class="tok-p">[</span><span class="tok-s1">'orderid'</span><span class="tok-p">],</span> <span class="tok-n">row</span><span class="tok-p">[</span><span class="tok-s1">'sku'</span><span class="tok-p">]</span>
+            <span class="tok-n">qty</span> <span class="tok-o">=</span> <span class="tok-nb">int</span><span class="tok-p">(</span><span class="tok-n">row</span><span class="tok-p">[</span><span class="tok-s1">'qty'</span><span class="tok-p">])</span>
+            <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">)</span>
+            <span class="tok-n">batchref</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">)</span>
+            <span class="tok-n">writer</span><span class="tok-o">.</span><span class="tok-n">writerow</span><span class="tok-p">([</span><span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">batchref</span><span class="tok-p">])</span>
+
+
+
+<span class="tok-k">if</span> <span class="tok-vm">__name__</span> <span class="tok-o">==</span> <span class="tok-s1">'__main__'</span><span class="tok-p">:</span>
+    <span class="tok-n">main</span><span class="tok-p">(</span><span class="tok-n">sys</span><span class="tok-o">.</span><span class="tok-n">argv</span><span class="tok-p">[</span><span class="tok-mi">1</span><span class="tok-p">])</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>It&#8217;s not looking too bad! And we&#8217;re reusing our domain model objects
+and our domain service.</p>
+</div>
+<div class="paragraph">
+<p>But it&#8217;s not going to work. Existing allocations need to also be part
+of our permanent CSV storage. We can write a second test to force us to improve
+things:</p>
+</div>
+<div id="second_csv_test" class="exampleblock">
+<div class="title">And another one, with existing allocations (tests/e2e/test_csv.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_cli_app_also_reads_existing_allocations_and_can_append_to_them</span><span class="tok-p">(</span>
+        <span class="tok-n">make_csv</span>
+<span class="tok-p">):</span>
+    <span class="tok-n">sku</span> <span class="tok-o">=</span> <span class="tok-n">random_ref</span><span class="tok-p">(</span><span class="tok-s1">'s'</span><span class="tok-p">)</span>
+    <span class="tok-n">batch1</span><span class="tok-p">,</span> <span class="tok-n">batch2</span> <span class="tok-o">=</span> <span class="tok-n">random_ref</span><span class="tok-p">(</span><span class="tok-s1">'b1'</span><span class="tok-p">),</span> <span class="tok-n">random_ref</span><span class="tok-p">(</span><span class="tok-s1">'b2'</span><span class="tok-p">)</span>
+    <span class="tok-n">old_order</span><span class="tok-p">,</span> <span class="tok-n">new_order</span> <span class="tok-o">=</span> <span class="tok-n">random_ref</span><span class="tok-p">(</span><span class="tok-s1">'o1'</span><span class="tok-p">),</span> <span class="tok-n">random_ref</span><span class="tok-p">(</span><span class="tok-s1">'o2'</span><span class="tok-p">)</span>
+    <span class="tok-n">make_csv</span><span class="tok-p">(</span><span class="tok-s1">'batches.csv'</span><span class="tok-p">,</span> <span class="tok-p">[</span>
+        <span class="tok-p">[</span><span class="tok-s1">'ref'</span><span class="tok-p">,</span> <span class="tok-s1">'sku'</span><span class="tok-p">,</span> <span class="tok-s1">'qty'</span><span class="tok-p">,</span> <span class="tok-s1">'eta'</span><span class="tok-p">],</span>
+        <span class="tok-p">[</span><span class="tok-n">batch1</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">,</span> <span class="tok-s1">'2011-01-01'</span><span class="tok-p">],</span>
+        <span class="tok-p">[</span><span class="tok-n">batch2</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">,</span> <span class="tok-s1">'2011-01-02'</span><span class="tok-p">],</span>
+    <span class="tok-p">])</span>
+    <span class="tok-n">make_csv</span><span class="tok-p">(</span><span class="tok-s1">'allocations.csv'</span><span class="tok-p">,</span> <span class="tok-p">[</span>
+        <span class="tok-p">[</span><span class="tok-s1">'orderid'</span><span class="tok-p">,</span> <span class="tok-s1">'sku'</span><span class="tok-p">,</span> <span class="tok-s1">'qty'</span><span class="tok-p">,</span> <span class="tok-s1">'batchref'</span><span class="tok-p">],</span>
+        <span class="tok-p">[</span><span class="tok-n">old_order</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">,</span> <span class="tok-n">batch1</span><span class="tok-p">],</span>
+    <span class="tok-p">])</span>
+    <span class="tok-n">orders_csv</span> <span class="tok-o">=</span> <span class="tok-n">make_csv</span><span class="tok-p">(</span><span class="tok-s1">'orders.csv'</span><span class="tok-p">,</span> <span class="tok-p">[</span>
+        <span class="tok-p">[</span><span class="tok-s1">'orderid'</span><span class="tok-p">,</span> <span class="tok-s1">'sku'</span><span class="tok-p">,</span> <span class="tok-s1">'qty'</span><span class="tok-p">],</span>
+        <span class="tok-p">[</span><span class="tok-n">new_order</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">7</span><span class="tok-p">],</span>
+    <span class="tok-p">])</span>
+
+    <span class="tok-n">run_cli_script</span><span class="tok-p">(</span><span class="tok-n">orders_csv</span><span class="tok-o">.</span><span class="tok-n">parent</span><span class="tok-p">)</span>
+
+    <span class="tok-n">expected_output_csv</span> <span class="tok-o">=</span> <span class="tok-n">orders_csv</span><span class="tok-o">.</span><span class="tok-n">parent</span> <span class="tok-o">/</span> <span class="tok-s1">'allocations.csv'</span>
+    <span class="tok-k">with</span> <span class="tok-nb">open</span><span class="tok-p">(</span><span class="tok-n">expected_output_csv</span><span class="tok-p">)</span> <span class="tok-k">as</span> <span class="tok-n">f</span><span class="tok-p">:</span>
+        <span class="tok-n">rows</span> <span class="tok-o">=</span> <span class="tok-nb">list</span><span class="tok-p">(</span><span class="tok-n">csv</span><span class="tok-o">.</span><span class="tok-n">reader</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-p">))</span>
+    <span class="tok-k">assert</span> <span class="tok-n">rows</span> <span class="tok-o">==</span> <span class="tok-p">[</span>
+        <span class="tok-p">[</span><span class="tok-s1">'orderid'</span><span class="tok-p">,</span> <span class="tok-s1">'sku'</span><span class="tok-p">,</span> <span class="tok-s1">'qty'</span><span class="tok-p">,</span> <span class="tok-s1">'batchref'</span><span class="tok-p">],</span>
+        <span class="tok-p">[</span><span class="tok-n">old_order</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-s1">'10'</span><span class="tok-p">,</span> <span class="tok-n">batch1</span><span class="tok-p">],</span>
+        <span class="tok-p">[</span><span class="tok-n">new_order</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-s1">'7'</span><span class="tok-p">,</span> <span class="tok-n">batch2</span><span class="tok-p">],</span>
+    <span class="tok-p">]</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>And we could keep hacking about and adding extra lines to that <code>load_batches</code> function,
+and some sort of way of tracking and saving new allocations&#8212;but we already have a model for doing that! It&#8217;s called our Repository and Unit of Work patterns.</p>
+</div>
+<div class="paragraph">
+<p>All we need to do ("all we need to do") is reimplement those same abstractions, but
+with CSVs underlying them instead of a database. And as you&#8217;ll see, it really is relatively straightforward.</p>
+</div>
+<div class="sect2">
+<h3 id="_implementing_a_repository_and_unit_of_work_for_csvs">Implementing a Repository and Unit of Work for CSVs</h3>
+<div class="paragraph">
+<p>Here&#8217;s what a CSV-based repository could look like.  It abstracts away all the
+logic for reading CSVs from disk, including the fact that it has to read <em>two
+different CSVs</em> (one for batches and one for allocations), and it gives us just
+the familiar <code>.list()</code> API, which provides the illusion of an in-memory
+collection of domain objects:</p>
+</div>
+<div id="csv_repository" class="exampleblock">
+<div class="title">A repository that uses CSV as its storage mechanism (src/allocation/service_layer/csv_uow.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">CsvRepository</span><span class="tok-p">(</span><span class="tok-n">repository</span><span class="tok-o">.</span><span class="tok-n">AbstractRepository</span><span class="tok-p">):</span>
+
+    <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">folder</span><span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_batches_path</span> <span class="tok-o">=</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">folder</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-s1">'batches.csv'</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_allocations_path</span> <span class="tok-o">=</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">folder</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-s1">'allocations.csv'</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_batches</span> <span class="tok-o">=</span> <span class="tok-p">{}</span>  <span class="tok-c1"># type: Dict[str, model.Batch]</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_load</span><span class="tok-p">()</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">get</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">reference</span><span class="tok-p">):</span>
+        <span class="tok-k">return</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_batches</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">reference</span><span class="tok-p">)</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">add</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">batch</span><span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_batches</span><span class="tok-p">[</span><span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">reference</span><span class="tok-p">]</span> <span class="tok-o">=</span> <span class="tok-n">batch</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">_load</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
+        <span class="tok-k">with</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_batches_path</span><span class="tok-o">.</span><span class="tok-n">open</span><span class="tok-p">()</span> <span class="tok-k">as</span> <span class="tok-n">f</span><span class="tok-p">:</span>
+            <span class="tok-n">reader</span> <span class="tok-o">=</span> <span class="tok-n">csv</span><span class="tok-o">.</span><span class="tok-n">DictReader</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-p">)</span>
+            <span class="tok-k">for</span> <span class="tok-n">row</span> <span class="tok-ow">in</span> <span class="tok-n">reader</span><span class="tok-p">:</span>
+                <span class="tok-n">ref</span><span class="tok-p">,</span> <span class="tok-n">sku</span> <span class="tok-o">=</span> <span class="tok-n">row</span><span class="tok-p">[</span><span class="tok-s1">'ref'</span><span class="tok-p">],</span> <span class="tok-n">row</span><span class="tok-p">[</span><span class="tok-s1">'sku'</span><span class="tok-p">]</span>
+                <span class="tok-n">qty</span> <span class="tok-o">=</span> <span class="tok-nb">int</span><span class="tok-p">(</span><span class="tok-n">row</span><span class="tok-p">[</span><span class="tok-s1">'qty'</span><span class="tok-p">])</span>
+                <span class="tok-k">if</span> <span class="tok-n">row</span><span class="tok-p">[</span><span class="tok-s1">'eta'</span><span class="tok-p">]:</span>
+                    <span class="tok-n">eta</span> <span class="tok-o">=</span> <span class="tok-n">datetime</span><span class="tok-o">.</span><span class="tok-n">strptime</span><span class="tok-p">(</span><span class="tok-n">row</span><span class="tok-p">[</span><span class="tok-s1">'eta'</span><span class="tok-p">],</span> <span class="tok-s1">'%Y-%m-</span><span class="tok-si">%d</span><span class="tok-s1">'</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">date</span><span class="tok-p">()</span>
+                <span class="tok-k">else</span><span class="tok-p">:</span>
+                    <span class="tok-n">eta</span> <span class="tok-o">=</span> <span class="tok-bp">None</span>
+                <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_batches</span><span class="tok-p">[</span><span class="tok-n">ref</span><span class="tok-p">]</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-p">(</span>
+                    <span class="tok-n">ref</span><span class="tok-o">=</span><span class="tok-n">ref</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-o">=</span><span class="tok-n">qty</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-n">eta</span>
+                <span class="tok-p">)</span>
+        <span class="tok-k">if</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_allocations_path</span><span class="tok-o">.</span><span class="tok-n">exists</span><span class="tok-p">()</span> <span class="tok-ow">is</span> <span class="tok-bp">False</span><span class="tok-p">:</span>
+            <span class="tok-k">return</span>
+        <span class="tok-k">with</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_allocations_path</span><span class="tok-o">.</span><span class="tok-n">open</span><span class="tok-p">()</span> <span class="tok-k">as</span> <span class="tok-n">f</span><span class="tok-p">:</span>
+            <span class="tok-n">reader</span> <span class="tok-o">=</span> <span class="tok-n">csv</span><span class="tok-o">.</span><span class="tok-n">DictReader</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-p">)</span>
+            <span class="tok-k">for</span> <span class="tok-n">row</span> <span class="tok-ow">in</span> <span class="tok-n">reader</span><span class="tok-p">:</span>
+                <span class="tok-n">batchref</span><span class="tok-p">,</span> <span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span> <span class="tok-o">=</span> <span class="tok-n">row</span><span class="tok-p">[</span><span class="tok-s1">'batchref'</span><span class="tok-p">],</span> <span class="tok-n">row</span><span class="tok-p">[</span><span class="tok-s1">'orderid'</span><span class="tok-p">],</span> <span class="tok-n">row</span><span class="tok-p">[</span><span class="tok-s1">'sku'</span><span class="tok-p">]</span>
+                <span class="tok-n">qty</span> <span class="tok-o">=</span> <span class="tok-nb">int</span><span class="tok-p">(</span><span class="tok-n">row</span><span class="tok-p">[</span><span class="tok-s1">'qty'</span><span class="tok-p">])</span>
+                <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">)</span>
+                <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_batches</span><span class="tok-p">[</span><span class="tok-n">batchref</span><span class="tok-p">]</span>
+                <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">_allocations</span><span class="tok-o">.</span><span class="tok-n">add</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">)</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">list</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
+        <span class="tok-k">return</span> <span class="tok-nb">list</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_batches</span><span class="tok-o">.</span><span class="tok-n">values</span><span class="tok-p">())</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>And here&#8217;s what a UoW for CSVs would look like:</p>
+</div>
+<div id="csvs_uow" class="exampleblock">
+<div class="title">A UoW for CSVs: commit = csv.writer (src/allocation/service_layer/csv_uow.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">CsvUnitOfWork</span><span class="tok-p">(</span><span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">):</span>
+
+    <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">folder</span><span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">batches</span> <span class="tok-o">=</span> <span class="tok-n">CsvRepository</span><span class="tok-p">(</span><span class="tok-n">folder</span><span class="tok-p">)</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">commit</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
+        <span class="tok-k">with</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-o">.</span><span class="tok-n">_allocations_path</span><span class="tok-o">.</span><span class="tok-n">open</span><span class="tok-p">(</span><span class="tok-s1">'w'</span><span class="tok-p">)</span> <span class="tok-k">as</span> <span class="tok-n">f</span><span class="tok-p">:</span>
+            <span class="tok-n">writer</span> <span class="tok-o">=</span> <span class="tok-n">csv</span><span class="tok-o">.</span><span class="tok-n">writer</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-p">)</span>
+            <span class="tok-n">writer</span><span class="tok-o">.</span><span class="tok-n">writerow</span><span class="tok-p">([</span><span class="tok-s1">'orderid'</span><span class="tok-p">,</span> <span class="tok-s1">'sku'</span><span class="tok-p">,</span> <span class="tok-s1">'qty'</span><span class="tok-p">,</span> <span class="tok-s1">'batchref'</span><span class="tok-p">])</span>
+            <span class="tok-k">for</span> <span class="tok-n">batch</span> <span class="tok-ow">in</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-o">.</span><span class="tok-n">list</span><span class="tok-p">():</span>
+                <span class="tok-k">for</span> <span class="tok-n">line</span> <span class="tok-ow">in</span> <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">_allocations</span><span class="tok-p">:</span>
+                    <span class="tok-n">writer</span><span class="tok-o">.</span><span class="tok-n">writerow</span><span class="tok-p">(</span>
+                        <span class="tok-p">[</span><span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">qty</span><span class="tok-p">,</span> <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">reference</span><span class="tok-p">]</span>
+                    <span class="tok-p">)</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">rollback</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
+        <span class="tok-k">pass</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>And once we have that, our CLI app for reading and writing batches
+and allocations to CSV is pared down to what it should be&#8212;a bit
+of code for reading order lines, and a bit of code that invokes our
+<em>existing</em> service layer:</p>
+</div>
+<div id="final_cli" class="exampleblock nobreakinside less_space">
+<div class="title">Allocation with CSVs in nine lines (src/bin/allocate-from-csv)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">main</span><span class="tok-p">(</span><span class="tok-n">folder</span><span class="tok-p">):</span>
+    <span class="tok-n">orders_path</span> <span class="tok-o">=</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">folder</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-s1">'orders.csv'</span>
+    <span class="tok-n">uow</span> <span class="tok-o">=</span> <span class="tok-n">csv_uow</span><span class="tok-o">.</span><span class="tok-n">CsvUnitOfWork</span><span class="tok-p">(</span><span class="tok-n">folder</span><span class="tok-p">)</span>
+    <span class="tok-k">with</span> <span class="tok-n">orders_path</span><span class="tok-o">.</span><span class="tok-n">open</span><span class="tok-p">()</span> <span class="tok-k">as</span> <span class="tok-n">f</span><span class="tok-p">:</span>
+        <span class="tok-n">reader</span> <span class="tok-o">=</span> <span class="tok-n">csv</span><span class="tok-o">.</span><span class="tok-n">DictReader</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-p">)</span>
+        <span class="tok-k">for</span> <span class="tok-n">row</span> <span class="tok-ow">in</span> <span class="tok-n">reader</span><span class="tok-p">:</span>
+            <span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span> <span class="tok-o">=</span> <span class="tok-n">row</span><span class="tok-p">[</span><span class="tok-s1">'orderid'</span><span class="tok-p">],</span> <span class="tok-n">row</span><span class="tok-p">[</span><span class="tok-s1">'sku'</span><span class="tok-p">]</span>
+            <span class="tok-n">qty</span> <span class="tok-o">=</span> <span class="tok-nb">int</span><span class="tok-p">(</span><span class="tok-n">row</span><span class="tok-p">[</span><span class="tok-s1">'qty'</span><span class="tok-p">])</span>
+            <span class="tok-n">services</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Ta-da! <em>Now are y&#8217;all impressed or what</em>?</p>
+</div>
+<div class="paragraph">
+<p>Much love,</p>
+</div>
+<div class="paragraph">
+<p>Bob and Harry</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2020-03-16 11:03:29 UTC
+</div>
+</div>
+<style>
+pre.pygments .hll { background-color: #ffffcc }
+pre.pygments  { background: #f0f0f0; }
+pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
+pre.pygments .tok-err { border: 1px solid #FF0000 } /* Error */
+pre.pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
+pre.pygments .tok-o { color: #666666 } /* Operator */
+pre.pygments .tok-ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
+pre.pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
+pre.pygments .tok-cp { color: #007020 } /* Comment.Preproc */
+pre.pygments .tok-cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
+pre.pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
+pre.pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
+pre.pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
+pre.pygments .tok-ge { font-style: italic } /* Generic.Emph */
+pre.pygments .tok-gr { color: #FF0000 } /* Generic.Error */
+pre.pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
+pre.pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
+pre.pygments .tok-go { color: #888888 } /* Generic.Output */
+pre.pygments .tok-gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+pre.pygments .tok-gs { font-weight: bold } /* Generic.Strong */
+pre.pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+pre.pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
+pre.pygments .tok-kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+pre.pygments .tok-kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+pre.pygments .tok-kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+pre.pygments .tok-kp { color: #007020 } /* Keyword.Pseudo */
+pre.pygments .tok-kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+pre.pygments .tok-kt { color: #902000 } /* Keyword.Type */
+pre.pygments .tok-m { color: #40a070 } /* Literal.Number */
+pre.pygments .tok-s { color: #4070a0 } /* Literal.String */
+pre.pygments .tok-na { color: #4070a0 } /* Name.Attribute */
+pre.pygments .tok-nb { color: #007020 } /* Name.Builtin */
+pre.pygments .tok-nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+pre.pygments .tok-no { color: #60add5 } /* Name.Constant */
+pre.pygments .tok-nd { color: #555555; font-weight: bold } /* Name.Decorator */
+pre.pygments .tok-ni { color: #d55537; font-weight: bold } /* Name.Entity */
+pre.pygments .tok-ne { color: #007020 } /* Name.Exception */
+pre.pygments .tok-nf { color: #06287e } /* Name.Function */
+pre.pygments .tok-nl { color: #002070; font-weight: bold } /* Name.Label */
+pre.pygments .tok-nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+pre.pygments .tok-nt { color: #062873; font-weight: bold } /* Name.Tag */
+pre.pygments .tok-nv { color: #bb60d5 } /* Name.Variable */
+pre.pygments .tok-ow { color: #007020; font-weight: bold } /* Operator.Word */
+pre.pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
+pre.pygments .tok-mb { color: #40a070 } /* Literal.Number.Bin */
+pre.pygments .tok-mf { color: #40a070 } /* Literal.Number.Float */
+pre.pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
+pre.pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
+pre.pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
+pre.pygments .tok-sa { color: #4070a0 } /* Literal.String.Affix */
+pre.pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
+pre.pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
+pre.pygments .tok-dl { color: #4070a0 } /* Literal.String.Delimiter */
+pre.pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+pre.pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
+pre.pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+pre.pygments .tok-sh { color: #4070a0 } /* Literal.String.Heredoc */
+pre.pygments .tok-si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+pre.pygments .tok-sx { color: #c65d09 } /* Literal.String.Other */
+pre.pygments .tok-sr { color: #235388 } /* Literal.String.Regex */
+pre.pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
+pre.pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
+pre.pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
+pre.pygments .tok-fm { color: #06287e } /* Name.Function.Magic */
+pre.pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
+pre.pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
+pre.pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
+pre.pygments .tok-vm { color: #bb60d5 } /* Name.Variable.Magic */
+pre.pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
+</style>
+<div><div id="disqus_thread" style="margin: 10px"></div>
+<script>
+
+var disqus_config = function () {
+this.page.url = 'https://cosmicpython.com';
+this.page.identifier = 'appendix_csvs';
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = 'https://cosmic-python.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div><html><head><script async src="https://www.googletagmanager.com/gtag/js?id=UA-40928035-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-40928035-3');
+</script>
+</head></html></body>
+</html>

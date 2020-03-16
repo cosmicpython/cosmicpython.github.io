@@ -1,0 +1,1101 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<title>A Brief Interlude: On Coupling and Abstractions</title>
+<style>
+/* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+
+@import url("//fonts.googleapis.com/css?family=Noto+Sans:300,600italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700");
+@import url(//asciidoctor.org/stylesheets/asciidoctor.css); /* Default asciidoc style framework - important */
+
+/* customisations by harry */
+
+/* hide inline ditaa/plantuml source listings for images */
+.image-source {
+    display: none
+}
+/* make formal codeblocks a bit nicer */
+.exampleblock > .content {
+    padding: 2px;
+    background-color: white;
+    border: 0;
+    margin-bottom: 2em;
+}
+
+.exampleblock .title {
+    text-align: right;
+}
+
+/* end customisations by harry */
+
+/* CUSTOMISATIONS */
+
+/* Change the values in root for quick customisation. If you want even more fine grain... venture further. */
+
+:root{
+--maincolor:#FFFFFF;
+--primarycolor:#2c3e50;
+--secondarycolor:#ba3925;
+--tertiarycolor: #186d7a;
+--sidebarbackground:#CCC;
+--linkcolor:#b71c1c;
+--linkcoloralternate:#f44336;
+--white:#FFFFFF;
+--black:#000000;
+}
+
+/* Text styles */
+h1{color:var(--primarycolor) !important;}
+h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+.title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
+p{font-family: "Noto Sans",sans-serif !important}
+
+/* Table styles */
+th{font-family: "Noto Sans",sans-serif !important}
+
+/* Responsiveness fixes */
+video {
+  max-width: 100%;
+}
+
+@media all and (max-width: 600px) {
+table {
+  width: 55vw!important;
+  font-size: 3vw;
+}
+
+</style>
+</head>
+<body class="article toc2 toc-left">
+<div id="buy_the_book" style="position: absolute; top: 0; right: 0; z-index:100">
+  <a href="/#buy_the_book">
+    <img src="/images/buy_the_book.svg" alt="buy the book ribbon">
+  </a>
+</div>
+<div id="header">
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="/book/preface.html">Preface</a></li>
+<li><a href="/book/introduction.html">Introduction</a></li>
+<li><a href="/book/part1.html">Building an Architecture to Support Domain Modeling</a></li>
+<li><a href="/book/chapter_01_domain_model.html">1. Domain Modeling</a></li>
+<li><a href="/book/chapter_02_repository.html">2. Repository Pattern</a></li>
+<li><a href="/book/chapter_03_abstractions.html">3. A Brief Interlude: On Coupling <span class="keep-together">and Abstractions</span></a></li>
+<li><a href="/book/chapter_04_service_layer.html">4. Our First Use Case: <span class="keep-together">Flask API and Service Layer</span></a></li>
+<li><a href="/book/chapter_05_high_gear_low_gear.html">5. TDD in High Gear and Low Gear</a></li>
+<li><a href="/book/chapter_06_uow.html">6. Unit of Work Pattern</a></li>
+<li><a href="/book/chapter_07_aggregate.html">7. Aggregates and Consistency Boundaries</a></li>
+<li><a href="/book/part2.html">Event-Driven Architecture</a></li>
+<li><a href="/book/chapter_08_events_and_message_bus.html">8. Events and the Message Bus</a></li>
+<li><a href="/book/chapter_09_all_messagebus.html">9. Going to Town on the Message Bus</a></li>
+<li><a href="/book/chapter_10_commands.html">10. Commands and Command Handler</a></li>
+<li><a href="/book/chapter_11_external_events.html">11. Event-Driven Architecture: Using Events to Integrate Microservices</a></li>
+<li><a href="/book/chapter_12_cqrs.html">12. Command-Query Responsibility Segregation (CQRS)</a></li>
+<li><a href="/book/chapter_13_dependency_injection.html">13. Dependency Injection (and Bootstrapping)</a></li>
+<li><a href="/book/epilogue_1_how_to_get_there_from_here.html">Appendix A: Epilogue</a></li>
+<li><a href="/book/appendix_ds1_table.html">Appendix B: Summary Diagram and Table</a></li>
+<li><a href="/book/appendix_project_structure.html">Appendix C: A Template Project Structure</a></li>
+<li><a href="/book/appendix_csvs.html">Appendix D: Swapping Out the Infrastructure: <span class="keep-together">Do Everything with CSVs</span></a></li>
+<li><a href="/book/appendix_django.html">Appendix E: Repository and Unit of Work <span class="keep-together">Patterns with Django</span></a></li>
+<li><a href="/book/appendix_validation.html">Appendix F: Validation</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="chapter_03_abstractions">A Brief Interlude: On Coupling <span class="keep-together">and Abstractions</span></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Allow us a brief digression on the subject of abstractions, dear reader.
+We&#8217;ve talked about <em>abstractions</em> quite a lot. The Repository pattern is an
+abstraction over permanent storage, for example. But what makes a good
+abstraction?  What do we want from abstractions?  And how do they relate to testing?</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The code for this chapter is in the
+chapter_03_abstractions branch <a href="https://oreil.ly/k6MmV">on GitHub</a>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>git clone https://github.com/cosmicpython/code.git
+git checkout chapter_03_abstractions</pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>A key theme in this book, hidden among the fancy patterns, is that we can use
+simple abstractions to hide messy details. When we&#8217;re writing code for fun, or
+in a kata,<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup>
+we get to play with ideas freely, hammering things out and refactoring
+aggressively. In a large-scale system, though, we become constrained by the
+decisions made elsewhere in the system.</p>
+</div>
+<div class="paragraph">
+<p>When we&#8217;re unable to change component A for fear of breaking component B, we say
+that the components have become <em>coupled</em>. Locally, coupling is a good thing: it&#8217;s
+a sign that our code is working together, each component supporting the others, all of them
+fitting in place like the gears of a watch. In jargon, we say this works when
+there is high <em>cohesion</em> between the coupled elements.</p>
+</div>
+<div class="paragraph">
+<p>Globally, coupling is a nuisance: it increases the risk and the cost of changing
+our code, sometimes to the point where we feel unable to make any changes at
+all. This is the problem with the Ball of Mud pattern: as the application grows,
+if we&#8217;re unable to prevent coupling between elements that have no cohesion, that
+coupling increases superlinearly until we are no longer able to effectively
+change our systems.</p>
+</div>
+<div class="paragraph">
+<p>We can reduce the degree of coupling within a system
+(<a href="#coupling_illustration1">Lots of coupling</a>) by abstracting away the details
+(<a href="#coupling_illustration2">Less coupling</a>).</p>
+</div>
+<div id="coupling_illustration1" class="imageblock width-50">
+<div class="content">
+<img src="images/apwp_0301.png" alt="apwp 0301">
+</div>
+<div class="title">Figure 1. Lots of coupling</div>
+</div>
+<div class="listingblock image-source">
+<div class="content">
+<pre>[ditaa, apwp_0301]
++--------+      +--------+
+| System | ---&gt; | System |
+|   A    | ---&gt; |   B    |
+|        | ---&gt; |        |
+|        | ---&gt; |        |
+|        | ---&gt; |        |
++--------+      +--------+</pre>
+</div>
+</div>
+<div id="coupling_illustration2" class="imageblock width-90">
+<div class="content">
+<img src="images/apwp_0302.png" alt="apwp 0302">
+</div>
+<div class="title">Figure 2. Less coupling</div>
+</div>
+<div class="listingblock image-source">
+<div class="content">
+<pre>[ditaa, apwp_0302]
++--------+                           +--------+
+| System |      /-------------\      | System |
+|   A    | ---&gt; |             | ---&gt; |   B    |
+|        | ---&gt; | Abstraction | ---&gt; |        |
+|        |      |             | ---&gt; |        |
+|        |      \-------------/      |        |
++--------+                           +--------+</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In both diagrams, we have a pair of subsystems, with one dependent on
+the other. In <a href="#coupling_illustration1">Lots of coupling</a>, there is a high degree of coupling between the
+two; the number of arrows indicates lots of kinds of dependencies
+between the two. If we need to change system B, there&#8217;s a good chance that the
+change will ripple through to system A.</p>
+</div>
+<div class="paragraph">
+<p>In <a href="#coupling_illustration2">Less coupling</a>, though, we have reduced the degree of coupling by inserting a
+new, simpler abstraction. Because it is simpler, system A has fewer
+kinds of dependencies on the abstraction. The abstraction serves to
+protect us from change by hiding away the complex details of whatever system B
+does&#8212;we can change the arrows on the right without changing the ones on the left.</p>
+</div>
+<div class="sect2 pagebreak-before less_space">
+<h3 id="_abstracting_state_aids_testability">Abstracting State Aids Testability</h3>
+<div class="paragraph">
+<p>Let&#8217;s see an example. Imagine we want to write code for synchronizing two
+file directories, which we&#8217;ll call the <em>source</em> and the <em>destination</em>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>If a file exists in the source but not in the destination, copy the file over.</p>
+</li>
+<li>
+<p>If a file exists in the source, but it has a different name than in the destination,
+rename the destination file to match.</p>
+</li>
+<li>
+<p>If a file exists in the destination but not in the source, remove it.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Our first and third requirements are simple enough: we can just compare two
+lists of paths. Our second is trickier, though. To detect renames,
+we&#8217;ll have to inspect the content of files. For this, we can use a hashing
+function like MD5 or SHA-1. The code to generate a SHA-1 hash from a file is simple
+enough:</p>
+</div>
+<div id="hash_file" class="exampleblock">
+<div class="title">Hashing a file (sync.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-n">BLOCKSIZE</span> <span class="tok-o">=</span> <span class="tok-mi">65536</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">hash_file</span><span class="tok-p">(</span><span class="tok-n">path</span><span class="tok-p">):</span>
+    <span class="tok-n">hasher</span> <span class="tok-o">=</span> <span class="tok-n">hashlib</span><span class="tok-o">.</span><span class="tok-n">sha1</span><span class="tok-p">()</span>
+    <span class="tok-k">with</span> <span class="tok-n">path</span><span class="tok-o">.</span><span class="tok-n">open</span><span class="tok-p">(</span><span class="tok-s2">"rb"</span><span class="tok-p">)</span> <span class="tok-k">as</span> <span class="tok-nb">file</span><span class="tok-p">:</span>
+        <span class="tok-n">buf</span> <span class="tok-o">=</span> <span class="tok-nb">file</span><span class="tok-o">.</span><span class="tok-n">read</span><span class="tok-p">(</span><span class="tok-n">BLOCKSIZE</span><span class="tok-p">)</span>
+        <span class="tok-k">while</span> <span class="tok-n">buf</span><span class="tok-p">:</span>
+            <span class="tok-n">hasher</span><span class="tok-o">.</span><span class="tok-n">update</span><span class="tok-p">(</span><span class="tok-n">buf</span><span class="tok-p">)</span>
+            <span class="tok-n">buf</span> <span class="tok-o">=</span> <span class="tok-nb">file</span><span class="tok-o">.</span><span class="tok-n">read</span><span class="tok-p">(</span><span class="tok-n">BLOCKSIZE</span><span class="tok-p">)</span>
+    <span class="tok-k">return</span> <span class="tok-n">hasher</span><span class="tok-o">.</span><span class="tok-n">hexdigest</span><span class="tok-p">()</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we need to write the bit that makes decisions about what to do&#8212;the business
+logic, if you will.</p>
+</div>
+<div class="paragraph">
+<p>When we have to tackle a problem from first principles, we usually try to write
+a simple implementation and then refactor toward better design. We&#8217;ll use
+this approach throughout the book, because it&#8217;s how we write code in the real
+world: start with a solution to the smallest part of the problem, and then
+iteratively make the solution richer and better designed.</p>
+</div>
+<div class="paragraph">
+<p>Our first hackish approach looks something like this:</p>
+</div>
+<div id="sync_first_cut" class="exampleblock">
+<div class="title">Basic sync algorithm (sync.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">import</span> <span class="tok-nn">hashlib</span>
+<span class="tok-kn">import</span> <span class="tok-nn">os</span>
+<span class="tok-kn">import</span> <span class="tok-nn">shutil</span>
+<span class="tok-kn">from</span> <span class="tok-nn">pathlib</span> <span class="tok-kn">import</span> <span class="tok-n">Path</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">sync</span><span class="tok-p">(</span><span class="tok-n">source</span><span class="tok-p">,</span> <span class="tok-n">dest</span><span class="tok-p">):</span>
+    <span class="tok-c1"># Walk the source folder and build a dict of filenames and their hashes</span>
+    <span class="tok-n">source_hashes</span> <span class="tok-o">=</span> <span class="tok-p">{}</span>
+    <span class="tok-k">for</span> <span class="tok-n">folder</span><span class="tok-p">,</span> <span class="tok-n">_</span><span class="tok-p">,</span> <span class="tok-n">files</span> <span class="tok-ow">in</span> <span class="tok-n">os</span><span class="tok-o">.</span><span class="tok-n">walk</span><span class="tok-p">(</span><span class="tok-n">source</span><span class="tok-p">):</span>
+        <span class="tok-k">for</span> <span class="tok-n">fn</span> <span class="tok-ow">in</span> <span class="tok-n">files</span><span class="tok-p">:</span>
+            <span class="tok-n">source_hashes</span><span class="tok-p">[</span><span class="tok-n">hash_file</span><span class="tok-p">(</span><span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">folder</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-n">fn</span><span class="tok-p">)]</span> <span class="tok-o">=</span> <span class="tok-n">fn</span>
+
+    <span class="tok-n">seen</span> <span class="tok-o">=</span> <span class="tok-nb">set</span><span class="tok-p">()</span>  <span class="tok-c1"># Keep track of the files we've found in the target</span>
+
+    <span class="tok-c1"># Walk the target folder and get the filenames and hashes</span>
+    <span class="tok-k">for</span> <span class="tok-n">folder</span><span class="tok-p">,</span> <span class="tok-n">_</span><span class="tok-p">,</span> <span class="tok-n">files</span> <span class="tok-ow">in</span> <span class="tok-n">os</span><span class="tok-o">.</span><span class="tok-n">walk</span><span class="tok-p">(</span><span class="tok-n">dest</span><span class="tok-p">):</span>
+        <span class="tok-k">for</span> <span class="tok-n">fn</span> <span class="tok-ow">in</span> <span class="tok-n">files</span><span class="tok-p">:</span>
+            <span class="tok-n">dest_path</span> <span class="tok-o">=</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">folder</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-n">fn</span>
+            <span class="tok-n">dest_hash</span> <span class="tok-o">=</span> <span class="tok-n">hash_file</span><span class="tok-p">(</span><span class="tok-n">dest_path</span><span class="tok-p">)</span>
+            <span class="tok-n">seen</span><span class="tok-o">.</span><span class="tok-n">add</span><span class="tok-p">(</span><span class="tok-n">dest_hash</span><span class="tok-p">)</span>
+
+            <span class="tok-c1"># if there's a file in target that's not in source, delete it</span>
+            <span class="tok-k">if</span> <span class="tok-n">dest_hash</span> <span class="tok-ow">not</span> <span class="tok-ow">in</span> <span class="tok-n">source_hashes</span><span class="tok-p">:</span>
+                <span class="tok-n">dest_path</span><span class="tok-o">.</span><span class="tok-n">remove</span><span class="tok-p">()</span>
+
+            <span class="tok-c1"># if there's a file in target that has a different path in source,</span>
+            <span class="tok-c1"># move it to the correct path</span>
+            <span class="tok-k">elif</span> <span class="tok-n">dest_hash</span> <span class="tok-ow">in</span> <span class="tok-n">source_hashes</span> <span class="tok-ow">and</span> <span class="tok-n">fn</span> <span class="tok-o">!=</span> <span class="tok-n">source_hashes</span><span class="tok-p">[</span><span class="tok-n">dest_hash</span><span class="tok-p">]:</span>
+                <span class="tok-n">shutil</span><span class="tok-o">.</span><span class="tok-n">move</span><span class="tok-p">(</span><span class="tok-n">dest_path</span><span class="tok-p">,</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">folder</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-n">source_hashes</span><span class="tok-p">[</span><span class="tok-n">dest_hash</span><span class="tok-p">])</span>
+
+    <span class="tok-c1"># for every file that appears in source but not target, copy the file to</span>
+    <span class="tok-c1"># the target</span>
+    <span class="tok-k">for</span> <span class="tok-n">src_hash</span><span class="tok-p">,</span> <span class="tok-n">fn</span> <span class="tok-ow">in</span> <span class="tok-n">source_hashes</span><span class="tok-o">.</span><span class="tok-n">items</span><span class="tok-p">():</span>
+        <span class="tok-k">if</span> <span class="tok-n">src_hash</span> <span class="tok-ow">not</span> <span class="tok-ow">in</span> <span class="tok-n">seen</span><span class="tok-p">:</span>
+            <span class="tok-n">shutil</span><span class="tok-o">.</span><span class="tok-n">copy</span><span class="tok-p">(</span><span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">source</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-n">fn</span><span class="tok-p">,</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">dest</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-n">fn</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Fantastic! We have some code and it <em>looks</em> OK, but before we run it on our
+hard drive, maybe we should test it. How do we go about testing this sort of thing?</p>
+</div>
+<div id="ugly_sync_tests" class="exampleblock">
+<div class="title">Some end-to-end tests (test_sync.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_when_a_file_exists_in_the_source_but_not_the_destination</span><span class="tok-p">():</span>
+    <span class="tok-k">try</span><span class="tok-p">:</span>
+        <span class="tok-n">source</span> <span class="tok-o">=</span> <span class="tok-n">tempfile</span><span class="tok-o">.</span><span class="tok-n">mkdtemp</span><span class="tok-p">()</span>
+        <span class="tok-n">dest</span> <span class="tok-o">=</span> <span class="tok-n">tempfile</span><span class="tok-o">.</span><span class="tok-n">mkdtemp</span><span class="tok-p">()</span>
+
+        <span class="tok-n">content</span> <span class="tok-o">=</span> <span class="tok-s2">"I am a very useful file"</span>
+        <span class="tok-p">(</span><span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">source</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-s1">'my-file'</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">write_text</span><span class="tok-p">(</span><span class="tok-n">content</span><span class="tok-p">)</span>
+
+        <span class="tok-n">sync</span><span class="tok-p">(</span><span class="tok-n">source</span><span class="tok-p">,</span> <span class="tok-n">dest</span><span class="tok-p">)</span>
+
+        <span class="tok-n">expected_path</span> <span class="tok-o">=</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">dest</span><span class="tok-p">)</span> <span class="tok-o">/</span>  <span class="tok-s1">'my-file'</span>
+        <span class="tok-k">assert</span> <span class="tok-n">expected_path</span><span class="tok-o">.</span><span class="tok-n">exists</span><span class="tok-p">()</span>
+        <span class="tok-k">assert</span> <span class="tok-n">expected_path</span><span class="tok-o">.</span><span class="tok-n">read_text</span><span class="tok-p">()</span> <span class="tok-o">==</span> <span class="tok-n">content</span>
+
+    <span class="tok-k">finally</span><span class="tok-p">:</span>
+        <span class="tok-n">shutil</span><span class="tok-o">.</span><span class="tok-n">rmtree</span><span class="tok-p">(</span><span class="tok-n">source</span><span class="tok-p">)</span>
+        <span class="tok-n">shutil</span><span class="tok-o">.</span><span class="tok-n">rmtree</span><span class="tok-p">(</span><span class="tok-n">dest</span><span class="tok-p">)</span>
+
+
+<span class="tok-k">def</span> <span class="tok-nf">test_when_a_file_has_been_renamed_in_the_source</span><span class="tok-p">():</span>
+    <span class="tok-k">try</span><span class="tok-p">:</span>
+        <span class="tok-n">source</span> <span class="tok-o">=</span> <span class="tok-n">tempfile</span><span class="tok-o">.</span><span class="tok-n">mkdtemp</span><span class="tok-p">()</span>
+        <span class="tok-n">dest</span> <span class="tok-o">=</span> <span class="tok-n">tempfile</span><span class="tok-o">.</span><span class="tok-n">mkdtemp</span><span class="tok-p">()</span>
+
+        <span class="tok-n">content</span> <span class="tok-o">=</span> <span class="tok-s2">"I am a file that was renamed"</span>
+        <span class="tok-n">source_path</span> <span class="tok-o">=</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">source</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-s1">'source-filename'</span>
+        <span class="tok-n">old_dest_path</span> <span class="tok-o">=</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">dest</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-s1">'dest-filename'</span>
+        <span class="tok-n">expected_dest_path</span> <span class="tok-o">=</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">dest</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-s1">'source-filename'</span>
+        <span class="tok-n">source_path</span><span class="tok-o">.</span><span class="tok-n">write_text</span><span class="tok-p">(</span><span class="tok-n">content</span><span class="tok-p">)</span>
+        <span class="tok-n">old_dest_path</span><span class="tok-o">.</span><span class="tok-n">write_text</span><span class="tok-p">(</span><span class="tok-n">content</span><span class="tok-p">)</span>
+
+        <span class="tok-n">sync</span><span class="tok-p">(</span><span class="tok-n">source</span><span class="tok-p">,</span> <span class="tok-n">dest</span><span class="tok-p">)</span>
+
+        <span class="tok-k">assert</span> <span class="tok-n">old_dest_path</span><span class="tok-o">.</span><span class="tok-n">exists</span><span class="tok-p">()</span> <span class="tok-ow">is</span> <span class="tok-bp">False</span>
+        <span class="tok-k">assert</span> <span class="tok-n">expected_dest_path</span><span class="tok-o">.</span><span class="tok-n">read_text</span><span class="tok-p">()</span> <span class="tok-o">==</span> <span class="tok-n">content</span>
+
+
+    <span class="tok-k">finally</span><span class="tok-p">:</span>
+        <span class="tok-n">shutil</span><span class="tok-o">.</span><span class="tok-n">rmtree</span><span class="tok-p">(</span><span class="tok-n">source</span><span class="tok-p">)</span>
+        <span class="tok-n">shutil</span><span class="tok-o">.</span><span class="tok-n">rmtree</span><span class="tok-p">(</span><span class="tok-n">dest</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Wowsers, that&#8217;s a lot of setup for two simple cases! The problem is that
+our domain logic, "figure out the difference between two directories," is tightly
+coupled to the I/O code. We can&#8217;t run our difference algorithm without calling
+the <code>pathlib</code>, <code>shutil</code>, and <code>hashlib</code> modules.</p>
+</div>
+<div class="paragraph">
+<p>And the trouble is, even with our current requirements, we haven&#8217;t written
+enough tests: the current implementation has several bugs (the
+<code>shutil.move()</code> is wrong, for example).  Getting decent coverage and revealing
+these bugs means writing more tests, but if they&#8217;re all as unwieldy as the preceding
+ones, that&#8217;s going to get real painful real quickly.</p>
+</div>
+<div class="paragraph">
+<p>On top of that, our code isn&#8217;t very extensible. Imagine trying to implement
+a <code>--dry-run</code> flag that gets our code to just print out what it&#8217;s going to
+do, rather than actually do it.  Or what if we wanted to sync to a remote server,
+or to cloud storage?</p>
+</div>
+<div class="paragraph">
+<p>Our high-level code is coupled to low-level details, and it&#8217;s making life hard.
+As the scenarios we consider get more complex, our tests will get more unwieldy.
+We can definitely refactor these tests (some of the cleanup could go into pytest
+fixtures, for example) but as long as we&#8217;re doing filesystem operations, they&#8217;re
+going to stay slow and be hard to read and write.</p>
+</div>
+</div>
+<div class="sect2 pagebreak-before less_space">
+<h3 id="_choosing_the_right_abstractions">Choosing the Right Abstraction(s)</h3>
+<div class="paragraph">
+<p>What could we do to rewrite our code to make it more testable?</p>
+</div>
+<div class="paragraph">
+<p>First, we need to think about what our code needs from the filesystem.
+Reading through the code, we can see that three distinct things are happening.
+We can think of these as three distinct <em>responsibilities</em> that the code has:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>We interrogate the filesystem by using <code>os.walk</code> and determine hashes for a
+series of paths. This is similar in both the source and the
+destination cases.</p>
+</li>
+<li>
+<p>We decide whether a file is new, renamed, or redundant.</p>
+</li>
+<li>
+<p>We copy, move, or delete files to match the source.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Remember that we want to find <em>simplifying abstractions</em> for each of these
+responsibilities. That will let us hide the messy details so we can
+focus on the interesting logic.<sup class="footnote">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup></p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+In this chapter, we&#8217;re refactoring some gnarly code into a more testable
+    structure by identifying the separate tasks that need to be done and giving
+    each task to a clearly defined actor, along similar lines to <a href="/book/introduction.html#ddg_example">the <code>duckduckgo</code>
+    example</a>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>For steps 1 and 2, we&#8217;ve already intuitively started using an abstraction, a
+dictionary of hashes to paths. You may already have been thinking, "Why not build up a dictionary for the destination folder as well as the source, and
+then we just compare two dicts?" That seems like a nice way to abstract
+the current state of the filesystem:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>source_files = {'hash1': 'path1', 'hash2': 'path2'}
+dest_files = {'hash1': 'path1', 'hash2': 'pathX'}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>What about moving from step 2 to step 3?  How can we abstract out the
+actual move/copy/delete filesystem interaction?</p>
+</div>
+<div class="paragraph">
+<p>We&#8217;ll apply a trick here that we&#8217;ll employ on a grand scale later in
+the book. We&#8217;re going to separate <em>what</em> we want to do from <em>how</em> to do it.
+We&#8217;re going to make our program output a list of commands that look like this:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>("COPY", "sourcepath", "destpath"),
+("MOVE", "old", "new"),</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now we could write tests that just use two filesystem dicts as inputs, and we would
+expect lists of tuples of strings representing actions as outputs.</p>
+</div>
+<div class="paragraph">
+<p>Instead of saying, "Given this actual filesystem, when I run my function,
+check what actions have happened," we say, "Given this <em>abstraction</em> of a filesystem,
+what <em>abstraction</em> of filesystem actions will happen?"</p>
+</div>
+<div id="better_tests" class="exampleblock">
+<div class="title">Simplified inputs and outputs in our tests (test_sync.py)</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span>    <span class="tok-k">def</span> <span class="tok-nf">test_when_a_file_exists_in_the_source_but_not_the_destination</span><span class="tok-p">():</span>
+        <span class="tok-n">src_hashes</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s1">'hash1'</span><span class="tok-p">:</span> <span class="tok-s1">'fn1'</span><span class="tok-p">}</span>
+        <span class="tok-n">dst_hashes</span> <span class="tok-o">=</span> <span class="tok-p">{}</span>
+        <span class="tok-n">expected_actions</span> <span class="tok-o">=</span> <span class="tok-p">[(</span><span class="tok-s1">'COPY'</span><span class="tok-p">,</span> <span class="tok-s1">'/src/fn1'</span><span class="tok-p">,</span> <span class="tok-s1">'/dst/fn1'</span><span class="tok-p">)]</span>
+        <span class="tok-o">...</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">test_when_a_file_has_been_renamed_in_the_source</span><span class="tok-p">():</span>
+        <span class="tok-n">src_hashes</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s1">'hash1'</span><span class="tok-p">:</span> <span class="tok-s1">'fn1'</span><span class="tok-p">}</span>
+        <span class="tok-n">dst_hashes</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s1">'hash1'</span><span class="tok-p">:</span> <span class="tok-s1">'fn2'</span><span class="tok-p">}</span>
+        <span class="tok-n">expected_actions</span> <span class="tok-o">==</span> <span class="tok-p">[(</span><span class="tok-s1">'MOVE'</span><span class="tok-p">,</span> <span class="tok-s1">'/dst/fn2'</span><span class="tok-p">,</span> <span class="tok-s1">'/dst/fn1'</span><span class="tok-p">)]</span>
+        <span class="tok-o">...</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_implementing_our_chosen_abstractions">Implementing Our Chosen Abstractions</h3>
+<div class="paragraph">
+<p>That&#8217;s all very well, but how do we <em>actually</em> write those new
+tests, and how do we change our implementation to make it all work?</p>
+</div>
+<div class="paragraph">
+<p>Our goal is to isolate the clever part of our system, and to be able to test it
+thoroughly without needing to set up a real filesystem. We&#8217;ll create a "core"
+of code that has no dependencies on external state and then see how it responds
+when we give it input from the outside world (this kind of approach was characterized
+by Gary Bernhardt as
+<a href="https://oreil.ly/wnad4">Functional
+Core, Imperative Shell</a>, or FCIS).</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s start off by splitting the code to separate the stateful parts from
+the logic.</p>
+</div>
+<div class="paragraph">
+<p>And our top-level function will contain almost no logic at all; it&#8217;s just an
+imperative series of steps: gather inputs, call our logic, apply outputs:</p>
+</div>
+<div id="three_parts" class="exampleblock">
+<div class="title">Split our code into three  (sync.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">sync</span><span class="tok-p">(</span><span class="tok-n">source</span><span class="tok-p">,</span> <span class="tok-n">dest</span><span class="tok-p">):</span>
+    <span class="tok-c1"># imperative shell step 1, gather inputs</span>
+    <span class="tok-n">source_hashes</span> <span class="tok-o">=</span> <span class="tok-n">read_paths_and_hashes</span><span class="tok-p">(</span><span class="tok-n">source</span><span class="tok-p">)</span>  #<b class="conum">(1)</b>
+    <span class="tok-n">dest_hashes</span> <span class="tok-o">=</span> <span class="tok-n">read_paths_and_hashes</span><span class="tok-p">(</span><span class="tok-n">dest</span><span class="tok-p">)</span>  #<b class="conum">(1)</b>
+
+    <span class="tok-c1"># step 2: call functional core</span>
+    <span class="tok-n">actions</span> <span class="tok-o">=</span> <span class="tok-n">determine_actions</span><span class="tok-p">(</span><span class="tok-n">source_hashes</span><span class="tok-p">,</span> <span class="tok-n">dest_hashes</span><span class="tok-p">,</span> <span class="tok-n">source</span><span class="tok-p">,</span> <span class="tok-n">dest</span><span class="tok-p">)</span>  #<b class="conum">(2)</b>
+
+    <span class="tok-c1"># imperative shell step 3, apply outputs</span>
+    <span class="tok-k">for</span> <span class="tok-n">action</span><span class="tok-p">,</span> <span class="tok-o">*</span><span class="tok-n">paths</span> <span class="tok-ow">in</span> <span class="tok-n">actions</span><span class="tok-p">:</span>
+        <span class="tok-k">if</span> <span class="tok-n">action</span> <span class="tok-o">==</span> <span class="tok-s1">'copy'</span><span class="tok-p">:</span>
+            <span class="tok-n">shutil</span><span class="tok-o">.</span><span class="tok-n">copyfile</span><span class="tok-p">(</span><span class="tok-o">*</span><span class="tok-n">paths</span><span class="tok-p">)</span>
+        <span class="tok-k">if</span> <span class="tok-n">action</span> <span class="tok-o">==</span> <span class="tok-s1">'move'</span><span class="tok-p">:</span>
+            <span class="tok-n">shutil</span><span class="tok-o">.</span><span class="tok-n">move</span><span class="tok-p">(</span><span class="tok-o">*</span><span class="tok-n">paths</span><span class="tok-p">)</span>
+        <span class="tok-k">if</span> <span class="tok-n">action</span> <span class="tok-o">==</span> <span class="tok-s1">'delete'</span><span class="tok-p">:</span>
+            <span class="tok-n">os</span><span class="tok-o">.</span><span class="tok-n">remove</span><span class="tok-p">(</span><span class="tok-n">paths</span><span class="tok-p">[</span><span class="tok-mi">0</span><span class="tok-p">])</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Here&#8217;s the first function we factor out, <code>read_paths_and_hashes()</code>, which
+isolates the I/O part of our application.</p>
+</li>
+<li>
+<p>Here is where carve out the functional core, the business logic.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The code to build up the dictionary of paths and hashes is now trivially easy
+to write:</p>
+</div>
+<div id="read_paths_and_hashes" class="exampleblock">
+<div class="title">A function that just does I/O (sync.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">read_paths_and_hashes</span><span class="tok-p">(</span><span class="tok-n">root</span><span class="tok-p">):</span>
+    <span class="tok-n">hashes</span> <span class="tok-o">=</span> <span class="tok-p">{}</span>
+    <span class="tok-k">for</span> <span class="tok-n">folder</span><span class="tok-p">,</span> <span class="tok-n">_</span><span class="tok-p">,</span> <span class="tok-n">files</span> <span class="tok-ow">in</span> <span class="tok-n">os</span><span class="tok-o">.</span><span class="tok-n">walk</span><span class="tok-p">(</span><span class="tok-n">root</span><span class="tok-p">):</span>
+        <span class="tok-k">for</span> <span class="tok-n">fn</span> <span class="tok-ow">in</span> <span class="tok-n">files</span><span class="tok-p">:</span>
+            <span class="tok-n">hashes</span><span class="tok-p">[</span><span class="tok-n">hash_file</span><span class="tok-p">(</span><span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">folder</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-n">fn</span><span class="tok-p">)]</span> <span class="tok-o">=</span> <span class="tok-n">fn</span>
+    <span class="tok-k">return</span> <span class="tok-n">hashes</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>determine_actions()</code> function will be the core of our business logic,
+which says, "Given these two sets of hashes and filenames, what should we
+copy/move/delete?".  It takes simple data structures and returns simple data
+structures:</p>
+</div>
+<div id="determine_actions" class="exampleblock">
+<div class="title">A function that just does business logic (sync.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">determine_actions</span><span class="tok-p">(</span><span class="tok-n">src_hashes</span><span class="tok-p">,</span> <span class="tok-n">dst_hashes</span><span class="tok-p">,</span> <span class="tok-n">src_folder</span><span class="tok-p">,</span> <span class="tok-n">dst_folder</span><span class="tok-p">):</span>
+    <span class="tok-k">for</span> <span class="tok-n">sha</span><span class="tok-p">,</span> <span class="tok-n">filename</span> <span class="tok-ow">in</span> <span class="tok-n">src_hashes</span><span class="tok-o">.</span><span class="tok-n">items</span><span class="tok-p">():</span>
+        <span class="tok-k">if</span> <span class="tok-n">sha</span> <span class="tok-ow">not</span> <span class="tok-ow">in</span> <span class="tok-n">dst_hashes</span><span class="tok-p">:</span>
+            <span class="tok-n">sourcepath</span> <span class="tok-o">=</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">src_folder</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-n">filename</span>
+            <span class="tok-n">destpath</span> <span class="tok-o">=</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">dst_folder</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-n">filename</span>
+            <span class="tok-k">yield</span> <span class="tok-s1">'copy'</span><span class="tok-p">,</span> <span class="tok-n">sourcepath</span><span class="tok-p">,</span> <span class="tok-n">destpath</span>
+
+        <span class="tok-k">elif</span> <span class="tok-n">dst_hashes</span><span class="tok-p">[</span><span class="tok-n">sha</span><span class="tok-p">]</span> <span class="tok-o">!=</span> <span class="tok-n">filename</span><span class="tok-p">:</span>
+            <span class="tok-n">olddestpath</span> <span class="tok-o">=</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">dst_folder</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-n">dst_hashes</span><span class="tok-p">[</span><span class="tok-n">sha</span><span class="tok-p">]</span>
+            <span class="tok-n">newdestpath</span> <span class="tok-o">=</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">dst_folder</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-n">filename</span>
+            <span class="tok-k">yield</span> <span class="tok-s1">'move'</span><span class="tok-p">,</span> <span class="tok-n">olddestpath</span><span class="tok-p">,</span> <span class="tok-n">newdestpath</span>
+
+    <span class="tok-k">for</span> <span class="tok-n">sha</span><span class="tok-p">,</span> <span class="tok-n">filename</span> <span class="tok-ow">in</span> <span class="tok-n">dst_hashes</span><span class="tok-o">.</span><span class="tok-n">items</span><span class="tok-p">():</span>
+        <span class="tok-k">if</span> <span class="tok-n">sha</span> <span class="tok-ow">not</span> <span class="tok-ow">in</span> <span class="tok-n">src_hashes</span><span class="tok-p">:</span>
+            <span class="tok-k">yield</span> <span class="tok-s1">'delete'</span><span class="tok-p">,</span> <span class="tok-n">dst_folder</span> <span class="tok-o">/</span> <span class="tok-n">filename</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Our tests now act directly on the <code>determine_actions()</code> function:</p>
+</div>
+<div id="harry_tests" class="exampleblock">
+<div class="title">Nicer-looking tests (test_sync.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_when_a_file_exists_in_the_source_but_not_the_destination</span><span class="tok-p">():</span>
+    <span class="tok-n">src_hashes</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s1">'hash1'</span><span class="tok-p">:</span> <span class="tok-s1">'fn1'</span><span class="tok-p">}</span>
+    <span class="tok-n">dst_hashes</span> <span class="tok-o">=</span> <span class="tok-p">{}</span>
+    <span class="tok-n">actions</span> <span class="tok-o">=</span> <span class="tok-n">determine_actions</span><span class="tok-p">(</span><span class="tok-n">src_hashes</span><span class="tok-p">,</span> <span class="tok-n">dst_hashes</span><span class="tok-p">,</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-s1">'/src'</span><span class="tok-p">),</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-s1">'/dst'</span><span class="tok-p">))</span>
+    <span class="tok-k">assert</span> <span class="tok-nb">list</span><span class="tok-p">(</span><span class="tok-n">actions</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-p">[(</span><span class="tok-s1">'copy'</span><span class="tok-p">,</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-s1">'/src/fn1'</span><span class="tok-p">),</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-s1">'/dst/fn1'</span><span class="tok-p">))]</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">test_when_a_file_has_been_renamed_in_the_source</span><span class="tok-p">():</span>
+    <span class="tok-n">src_hashes</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s1">'hash1'</span><span class="tok-p">:</span> <span class="tok-s1">'fn1'</span><span class="tok-p">}</span>
+    <span class="tok-n">dst_hashes</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s1">'hash1'</span><span class="tok-p">:</span> <span class="tok-s1">'fn2'</span><span class="tok-p">}</span>
+    <span class="tok-n">actions</span> <span class="tok-o">=</span> <span class="tok-n">determine_actions</span><span class="tok-p">(</span><span class="tok-n">src_hashes</span><span class="tok-p">,</span> <span class="tok-n">dst_hashes</span><span class="tok-p">,</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-s1">'/src'</span><span class="tok-p">),</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-s1">'/dst'</span><span class="tok-p">))</span>
+    <span class="tok-k">assert</span> <span class="tok-nb">list</span><span class="tok-p">(</span><span class="tok-n">actions</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-p">[(</span><span class="tok-s1">'move'</span><span class="tok-p">,</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-s1">'/dst/fn2'</span><span class="tok-p">),</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-s1">'/dst/fn1'</span><span class="tok-p">))]</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Because we&#8217;ve disentangled the logic of our program&#8212;&#8203;the code for identifying
+changes&#8212;&#8203;from the low-level details of I/O, we can easily test the core of our code.</p>
+</div>
+<div class="paragraph">
+<p>With this approach, we&#8217;ve switched from testing our main entrypoint function,
+<code>sync()</code>, to testing a lower-level function, <code>determine_actions()</code>. You might
+decide that&#8217;s fine because <code>sync()</code> is now so simple. Or you might decide to
+keep some integration/acceptance tests to test that <code>sync()</code>. But there&#8217;s
+another option, which is to modify the <code>sync()</code> function so it can
+be unit tested <em>and</em> end-to-end tested; it&#8217;s an approach Bob calls
+<em>edge-to-edge testing</em>.</p>
+</div>
+<div class="sect3">
+<h4 id="_testing_edge_to_edge_with_fakes_and_dependency_injection">Testing Edge to Edge with Fakes and Dependency Injection</h4>
+<div class="paragraph">
+<p>When we start writing a new system, we often focus on the core logic first,
+driving it with direct unit tests. At some point, though, we want to test bigger
+chunks of the system together.</p>
+</div>
+<div class="paragraph">
+<p>We <em>could</em> return to our end-to-end tests, but those are still as tricky to
+write and maintain as before. Instead, we often write tests that invoke a whole
+system together but fake the I/O, sort of <em>edge to edge</em>:</p>
+</div>
+<div id="di_version" class="exampleblock">
+<div class="title">Explicit dependencies (sync.py)</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">sync</span><span class="tok-p">(</span><span class="tok-n">reader</span><span class="tok-p">,</span> <span class="tok-n">filesystem</span><span class="tok-p">,</span> <span class="tok-n">source_root</span><span class="tok-p">,</span> <span class="tok-n">dest_root</span><span class="tok-p">):</span> #<b class="conum">(1)</b>
+
+    <span class="tok-n">source_hashes</span> <span class="tok-o">=</span> <span class="tok-n">reader</span><span class="tok-p">(</span><span class="tok-n">source_root</span><span class="tok-p">)</span> #<b class="conum">(2)</b>
+    <span class="tok-n">dest_hashes</span> <span class="tok-o">=</span> <span class="tok-n">reader</span><span class="tok-p">(</span><span class="tok-n">dest_root</span><span class="tok-p">)</span>
+
+    <span class="tok-k">for</span> <span class="tok-n">sha</span><span class="tok-p">,</span> <span class="tok-n">filename</span> <span class="tok-ow">in</span> <span class="tok-n">src_hashes</span><span class="tok-o">.</span><span class="tok-n">items</span><span class="tok-p">():</span>
+        <span class="tok-k">if</span> <span class="tok-n">sha</span> <span class="tok-ow">not</span> <span class="tok-ow">in</span> <span class="tok-n">dest_hashes</span><span class="tok-p">:</span>
+            <span class="tok-n">sourcepath</span> <span class="tok-o">=</span> <span class="tok-n">source_root</span> <span class="tok-o">/</span> <span class="tok-n">filename</span>
+            <span class="tok-n">destpath</span> <span class="tok-o">=</span> <span class="tok-n">dest_root</span> <span class="tok-o">/</span> <span class="tok-n">filename</span>
+            <span class="tok-n">filesystem</span><span class="tok-o">.</span><span class="tok-n">copy</span><span class="tok-p">(</span><span class="tok-n">destpath</span><span class="tok-p">,</span> <span class="tok-n">sourcepath</span><span class="tok-p">)</span> #<b class="conum">(3)</b>
+
+        <span class="tok-k">elif</span> <span class="tok-n">dest_hashes</span><span class="tok-p">[</span><span class="tok-n">sha</span><span class="tok-p">]</span> <span class="tok-o">!=</span> <span class="tok-n">filename</span><span class="tok-p">:</span>
+            <span class="tok-n">olddestpath</span> <span class="tok-o">=</span> <span class="tok-n">dest_root</span> <span class="tok-o">/</span> <span class="tok-n">dest_hashes</span><span class="tok-p">[</span><span class="tok-n">sha</span><span class="tok-p">]</span>
+            <span class="tok-n">newdestpath</span> <span class="tok-o">=</span> <span class="tok-n">dest_root</span> <span class="tok-o">/</span> <span class="tok-n">filename</span>
+            <span class="tok-n">filesystem</span><span class="tok-o">.</span><span class="tok-n">move</span><span class="tok-p">(</span><span class="tok-n">olddestpath</span><span class="tok-p">,</span> <span class="tok-n">newdestpath</span><span class="tok-p">)</span>
+
+    <span class="tok-k">for</span> <span class="tok-n">sha</span><span class="tok-p">,</span> <span class="tok-n">filename</span> <span class="tok-ow">in</span> <span class="tok-n">dst_hashes</span><span class="tok-o">.</span><span class="tok-n">items</span><span class="tok-p">():</span>
+        <span class="tok-k">if</span> <span class="tok-n">sha</span> <span class="tok-ow">not</span> <span class="tok-ow">in</span> <span class="tok-n">source_hashes</span><span class="tok-p">:</span>
+            <span class="tok-n">filesystem</span><span class="tok-o">.</span><span class="tok-n">delete</span><span class="tok-p">(</span><span class="tok-n">dest_root</span><span class="tok-o">/</span><span class="tok-n">filename</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Our top-level function now exposes two new dependencies, a <code>reader</code> and a
+<code>filesystem</code>.</p>
+</li>
+<li>
+<p>We invoke the <code>reader</code> to produce our files dict.</p>
+</li>
+<li>
+<p>We invoke the <code>filesystem</code> to apply the changes we detect.</p>
+</li>
+</ol>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+Although we&#8217;re using dependency injection, there is no need
+    to define an abstract base class or any kind of explicit interface. In this
+    book, we often show ABCs because we hope they help you understand what the
+    abstraction is, but they&#8217;re not necessary. Python&#8217;s dynamic nature means
+    we can always rely on duck typing.
+</td>
+</tr>
+</table>
+</div>
+<div id="bob_tests" class="exampleblock">
+<div class="title">Tests using DI</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">FakeFileSystem</span><span class="tok-p">(</span><span class="tok-nb">list</span><span class="tok-p">):</span> #<b class="conum">(1)</b>
+
+    <span class="tok-k">def</span> <span class="tok-nf">copy</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">src</span><span class="tok-p">,</span> <span class="tok-n">dest</span><span class="tok-p">):</span> #<b class="conum">(2)</b>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">append</span><span class="tok-p">((</span><span class="tok-s1">'COPY'</span><span class="tok-p">,</span> <span class="tok-n">src</span><span class="tok-p">,</span> <span class="tok-n">dest</span><span class="tok-p">))</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">move</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">src</span><span class="tok-p">,</span> <span class="tok-n">dest</span><span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">append</span><span class="tok-p">((</span><span class="tok-s1">'MOVE'</span><span class="tok-p">,</span> <span class="tok-n">src</span><span class="tok-p">,</span> <span class="tok-n">dest</span><span class="tok-p">))</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">delete</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">dest</span><span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">append</span><span class="tok-p">((</span><span class="tok-s1">'DELETE'</span><span class="tok-p">,</span> <span class="tok-n">src</span><span class="tok-p">,</span> <span class="tok-n">dest</span><span class="tok-p">))</span>
+
+
+<span class="tok-k">def</span> <span class="tok-nf">test_when_a_file_exists_in_the_source_but_not_the_destination</span><span class="tok-p">():</span>
+    <span class="tok-n">source</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s2">"sha1"</span><span class="tok-p">:</span> <span class="tok-s2">"my-file"</span> <span class="tok-p">}</span>
+    <span class="tok-n">dest</span> <span class="tok-o">=</span> <span class="tok-p">{}</span>
+    <span class="tok-n">filesystem</span> <span class="tok-o">=</span> <span class="tok-n">FakeFileSystem</span><span class="tok-p">()</span>
+
+    <span class="tok-n">reader</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s2">"/source"</span><span class="tok-p">:</span> <span class="tok-n">source</span><span class="tok-p">,</span> <span class="tok-s2">"/dest"</span><span class="tok-p">:</span> <span class="tok-n">dest</span><span class="tok-p">}</span>
+    <span class="tok-n">synchronise_dirs</span><span class="tok-p">(</span><span class="tok-n">reader</span><span class="tok-o">.</span><span class="tok-n">pop</span><span class="tok-p">,</span> <span class="tok-n">filesystem</span><span class="tok-p">,</span> <span class="tok-s2">"/source"</span><span class="tok-p">,</span> <span class="tok-s2">"/dest"</span><span class="tok-p">)</span>
+
+    <span class="tok-k">assert</span> <span class="tok-n">filesystem</span> <span class="tok-o">==</span> <span class="tok-p">[(</span><span class="tok-s2">"COPY"</span><span class="tok-p">,</span> <span class="tok-s2">"/source/my-file"</span><span class="tok-p">,</span> <span class="tok-s2">"/dest/my-file"</span><span class="tok-p">)]</span>
+
+
+<span class="tok-k">def</span> <span class="tok-nf">test_when_a_file_has_been_renamed_in_the_source</span><span class="tok-p">():</span>
+    <span class="tok-n">source</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s2">"sha1"</span><span class="tok-p">:</span> <span class="tok-s2">"renamed-file"</span> <span class="tok-p">}</span>
+    <span class="tok-n">dest</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s2">"sha1"</span><span class="tok-p">:</span> <span class="tok-s2">"original-file"</span> <span class="tok-p">}</span>
+    <span class="tok-n">filesystem</span> <span class="tok-o">=</span> <span class="tok-n">FakeFileSystem</span><span class="tok-p">()</span>
+
+    <span class="tok-n">reader</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s2">"/source"</span><span class="tok-p">:</span> <span class="tok-n">source</span><span class="tok-p">,</span> <span class="tok-s2">"/dest"</span><span class="tok-p">:</span> <span class="tok-n">dest</span><span class="tok-p">}</span>
+    <span class="tok-n">synchronise_dirs</span><span class="tok-p">(</span><span class="tok-n">reader</span><span class="tok-o">.</span><span class="tok-n">pop</span><span class="tok-p">,</span> <span class="tok-n">filesystem</span><span class="tok-p">,</span> <span class="tok-s2">"/source"</span><span class="tok-p">,</span> <span class="tok-s2">"/dest"</span><span class="tok-p">)</span>
+
+    <span class="tok-k">assert</span> <span class="tok-n">filesystem</span> <span class="tok-o">==</span> <span class="tok-p">[(</span><span class="tok-s2">"MOVE"</span><span class="tok-p">,</span> <span class="tok-s2">"/dest/original-file"</span><span class="tok-p">,</span> <span class="tok-s2">"/dest/renamed-file"</span><span class="tok-p">)]</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Bob <em>loves</em> using lists to build simple test doubles, even though his
+coworkers get mad. It means we can write tests like
+assert 'foo' not in database.</p>
+</li>
+<li>
+<p>Each method in our <code>FakeFileSystem</code> just appends something to the list so we
+can inspect it later. This is an example of a spy object.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The advantage of this approach is that our tests act on the exact same function
+that&#8217;s used by our production code. The disadvantage is that we have to make
+our stateful components explicit and pass them around.
+David Heinemeier Hansson, the creator of Ruby on Rails, famously described this
+as "test-induced design damage."</p>
+</div>
+<div class="paragraph">
+<p>In either case, we can now work on fixing all the bugs in our implementation;
+enumerating tests for all the edge cases is now much easier.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_why_not_just_patch_it_out">Why Not Just Patch It Out?</h4>
+<div class="paragraph">
+<p>At this point you may be scratching your head and thinking,
+"Why don&#8217;t you just use <code>mock.patch</code> and save yourself the effort?""</p>
+</div>
+<div class="paragraph">
+<p>We avoid using mocks in this book and in our production code too. We&#8217;re not
+going to enter into a Holy War, but our instinct is that mocking frameworks,
+particularly monkeypatching, are a code smell.</p>
+</div>
+<div class="paragraph">
+<p>Instead, we like to clearly identify the responsibilities in our codebase, and to
+separate those responsibilities into small, focused objects that are easy to
+replace with a test double.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+You can see an example in <a href="/book/chapter_08_events_and_message_bus.html">[chapter_08_events_and_message_bus]</a>,
+    where we <code>mock.patch()</code> out an email-sending module, but eventually we
+    replace that with an explicit bit of dependency injection in
+    <a href="/book/chapter_13_dependency_injection.html">[chapter_13_dependency_injection]</a>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>We have three closely related reasons for our preference:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Patching out the dependency you&#8217;re using makes it possible to unit test the
+code, but it does nothing to improve the design. Using <code>mock.patch</code> won&#8217;t let your
+code work with a <code>--dry-run</code> flag, nor will it help you run against an FTP
+server. For that, you&#8217;ll need to introduce abstractions.</p>
+</li>
+<li>
+<p>Tests that use mocks <em>tend</em> to be more coupled to the implementation details
+of the codebase. That&#8217;s because mock tests verify the interactions between
+things: did we call <code>shutil.copy</code> with the right arguments? This coupling between
+code and test <em>tends</em> to make tests more brittle, in our experience.</p>
+</li>
+<li>
+<p>Overuse of mocks leads to complicated test suites that fail to explain the
+code.</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Designing for testability really means designing for
+    extensibility. We trade off a little more complexity for a cleaner design
+    that admits novel use cases.
+</td>
+</tr>
+</table>
+</div>
+<div class="sidebarblock nobreakinside less_space">
+<div class="content">
+<div class="title">Mocks Versus Fakes; Classic-Style Versus London-School TDD</div>
+<div class="paragraph">
+<p>Here&#8217;s a short and somewhat simplistic definition of the difference between
+mocks and fakes:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Mocks are used to verify <em>how</em> something gets used;  they have methods
+like <code>assert_called_once_with()</code>. They&#8217;re associated with London-school
+TDD.</p>
+</li>
+<li>
+<p>Fakes are working implementations of the thing they&#8217;re replacing, but
+  they&#8217;re designed for use only in tests. They wouldn&#8217;t work "in real life";
+our in-memory repository is a good example. But you can use them to make assertions about
+  the end state of a system rather than the behaviors along the way, so
+  they&#8217;re associated with classic-style TDD.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>We&#8217;re slightly conflating mocks with spies and fakes with stubs here, and you
+can read the long, correct answer in Martin Fowler&#8217;s classic essay on the subject
+called <a href="https://oreil.ly/yYjBN">"Mocks Aren&#8217;t Stubs"</a>.</p>
+</div>
+<div class="paragraph">
+<p>It also probably doesn&#8217;t help that the <code>MagicMock</code> objects provided by
+<code>unittest.mock</code> aren&#8217;t, strictly speaking, mocks; they&#8217;re spies, if anything.
+But they&#8217;re also often used as stubs or dummies. There, we promise we&#8217;re done with
+the test double terminology nitpicks now.</p>
+</div>
+<div class="paragraph">
+<p>What about London-school versus classic-style TDD? You can read more about those
+two in Martin Fowler&#8217;s article that we just cited, as well as on the
+<a href="https://oreil.ly/H2im_">Software Engineering Stack Exchange site</a>,
+but in this book we&#8217;re pretty firmly in the classicist camp.  We like to
+build our tests around state both in setup and in assertions, and we like
+to work at the highest level of abstraction possible rather than doing
+checks on the behavior of intermediary collaborators.<sup class="footnote">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup></p>
+</div>
+<div class="paragraph">
+<p>Read more on this in <a href="/book/chapter_05_high_gear_low_gear.html#kinds_of_tests">[kinds_of_tests]</a>.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>We view TDD as a design practice first and a testing practice second. The tests
+act as a record of our design choices and serve to explain the system to us
+when we return to the code after a long absence.</p>
+</div>
+<div class="paragraph">
+<p>Tests that use too many mocks get overwhelmed with setup code that hides the
+story we care about.</p>
+</div>
+<div class="paragraph">
+<p>Steve Freeman has a great example of overmocked tests in his talk
+<a href="https://oreil.ly/jAmtr">"Test-Driven Development"</a>.
+You should also check out this PyCon talk, <a href="https://oreil.ly/s3e05">"Mocking and Patching Pitfalls"</a>,
+by our esteemed tech reviewer, Ed Jung, which also addresses mocking and its
+alternatives. And while we&#8217;re recommending talks, don&#8217;t miss Brandon Rhodes talking about
+<a href="https://oreil.ly/oiXJM">"Hoisting Your I/O"</a>,
+which really nicely covers the issues we&#8217;re talking about, using another simple example.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+In this chapter, we&#8217;ve spent a lot of time replacing end-to-end tests with
+    unit tests. That doesn&#8217;t mean we think you should never use E2E tests!
+    In this book we&#8217;re showing techniques to get you to a decent test
+    pyramid with as many unit tests as possible, and with the minimum number of E2E
+    tests you need to feel confident. Read on to <a href="/book/chapter_05_high_gear_low_gear.html#types_of_test_rules_of_thumb">[types_of_test_rules_of_thumb]</a>
+    for more details.
+</td>
+</tr>
+</table>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">So Which Do We Use In This Book? Functional or Object-Oriented Composition?</div>
+<div class="paragraph">
+<p>Both. Our domain model is entirely free of dependencies and side effects,
+so that&#8217;s our functional core. The service layer that we build around it
+(in <a href="/book/chapter_04_service_layer.html">[chapter_04_service_layer]</a>) allows us to drive the system edge to edge,
+and we use dependency injection to provide those services with stateful
+components, so we can still unit test them.</p>
+</div>
+<div class="paragraph">
+<p>See <a href="/book/chapter_13_dependency_injection.html">[chapter_13_dependency_injection]</a> for more exploration of making our
+dependency injection more explicit and centralized.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_wrap_up">Wrap-Up</h3>
+<div class="paragraph">
+<p>We&#8217;ll see this idea come up again and again in the book: we can make our
+systems easier to test and maintain by simplifying the interface between our
+business logic and messy I/O. Finding the right abstraction is tricky, but here are
+a few heuristics and questions to ask yourself:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Can I choose a familiar Python data structure to represent the state of the
+messy system and then try to imagine a single function that can return that
+state?</p>
+</li>
+<li>
+<p>Where can I draw a line between my systems, where can I carve out a
+<a href="https://oreil.ly/zNUGG">seam</a>
+to stick that abstraction in?</p>
+</li>
+<li>
+<p>What is a sensible way of dividing things into components with different
+responsibilities?  What implicit concepts can I make explicit?</p>
+</li>
+<li>
+<p>What are the dependencies, and what is the core business logic?</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Practice makes less imperfect! And now back to our regular programming&#8230;&#8203;</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<hr>
+<div class="footnote" id="_footnotedef_1">
+<a href="#_footnoteref_1">1</a>. A code kata is a small, contained programming challenge often used to practice TDD. See <a href="https://oreil.ly/vhjju">"Kata&#8212;The Only Way to Learn TDD"</a> by Peter Provost.
+</div>
+<div class="footnote" id="_footnotedef_2">
+<a href="#_footnoteref_2">2</a>. If you&#8217;re used to thinking in terms of interfaces, that&#8217;s what we&#8217;re trying to define here.
+</div>
+<div class="footnote" id="_footnotedef_3">
+<a href="#_footnoteref_3">3</a>. Which is not to say that we think the London school people are wrong. Some insanely smart people work that way. It&#8217;s just not what we&#8217;re used to.
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2020-03-16 11:03:29 UTC
+</div>
+</div>
+<style>
+pre.pygments .hll { background-color: #ffffcc }
+pre.pygments  { background: #f0f0f0; }
+pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
+pre.pygments .tok-err { border: 1px solid #FF0000 } /* Error */
+pre.pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
+pre.pygments .tok-o { color: #666666 } /* Operator */
+pre.pygments .tok-ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
+pre.pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
+pre.pygments .tok-cp { color: #007020 } /* Comment.Preproc */
+pre.pygments .tok-cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
+pre.pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
+pre.pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
+pre.pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
+pre.pygments .tok-ge { font-style: italic } /* Generic.Emph */
+pre.pygments .tok-gr { color: #FF0000 } /* Generic.Error */
+pre.pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
+pre.pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
+pre.pygments .tok-go { color: #888888 } /* Generic.Output */
+pre.pygments .tok-gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+pre.pygments .tok-gs { font-weight: bold } /* Generic.Strong */
+pre.pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+pre.pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
+pre.pygments .tok-kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+pre.pygments .tok-kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+pre.pygments .tok-kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+pre.pygments .tok-kp { color: #007020 } /* Keyword.Pseudo */
+pre.pygments .tok-kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+pre.pygments .tok-kt { color: #902000 } /* Keyword.Type */
+pre.pygments .tok-m { color: #40a070 } /* Literal.Number */
+pre.pygments .tok-s { color: #4070a0 } /* Literal.String */
+pre.pygments .tok-na { color: #4070a0 } /* Name.Attribute */
+pre.pygments .tok-nb { color: #007020 } /* Name.Builtin */
+pre.pygments .tok-nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+pre.pygments .tok-no { color: #60add5 } /* Name.Constant */
+pre.pygments .tok-nd { color: #555555; font-weight: bold } /* Name.Decorator */
+pre.pygments .tok-ni { color: #d55537; font-weight: bold } /* Name.Entity */
+pre.pygments .tok-ne { color: #007020 } /* Name.Exception */
+pre.pygments .tok-nf { color: #06287e } /* Name.Function */
+pre.pygments .tok-nl { color: #002070; font-weight: bold } /* Name.Label */
+pre.pygments .tok-nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+pre.pygments .tok-nt { color: #062873; font-weight: bold } /* Name.Tag */
+pre.pygments .tok-nv { color: #bb60d5 } /* Name.Variable */
+pre.pygments .tok-ow { color: #007020; font-weight: bold } /* Operator.Word */
+pre.pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
+pre.pygments .tok-mb { color: #40a070 } /* Literal.Number.Bin */
+pre.pygments .tok-mf { color: #40a070 } /* Literal.Number.Float */
+pre.pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
+pre.pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
+pre.pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
+pre.pygments .tok-sa { color: #4070a0 } /* Literal.String.Affix */
+pre.pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
+pre.pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
+pre.pygments .tok-dl { color: #4070a0 } /* Literal.String.Delimiter */
+pre.pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+pre.pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
+pre.pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+pre.pygments .tok-sh { color: #4070a0 } /* Literal.String.Heredoc */
+pre.pygments .tok-si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+pre.pygments .tok-sx { color: #c65d09 } /* Literal.String.Other */
+pre.pygments .tok-sr { color: #235388 } /* Literal.String.Regex */
+pre.pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
+pre.pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
+pre.pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
+pre.pygments .tok-fm { color: #06287e } /* Name.Function.Magic */
+pre.pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
+pre.pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
+pre.pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
+pre.pygments .tok-vm { color: #bb60d5 } /* Name.Variable.Magic */
+pre.pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
+</style>
+<div><div id="disqus_thread" style="margin: 10px"></div>
+<script>
+
+var disqus_config = function () {
+this.page.url = 'https://cosmicpython.com';
+this.page.identifier = 'chapter_03_abstractions';
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = 'https://cosmic-python.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div><html><head><script async src="https://www.googletagmanager.com/gtag/js?id=UA-40928035-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-40928035-3');
+</script>
+</head></html></body>
+</html>

@@ -1,0 +1,1271 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<title>Command-Query Responsibility Segregation (CQRS)</title>
+<style>
+/* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+
+@import url("//fonts.googleapis.com/css?family=Noto+Sans:300,600italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700");
+@import url(//asciidoctor.org/stylesheets/asciidoctor.css); /* Default asciidoc style framework - important */
+
+/* customisations by harry */
+
+/* hide inline ditaa/plantuml source listings for images */
+.image-source {
+    display: none
+}
+/* make formal codeblocks a bit nicer */
+.exampleblock > .content {
+    padding: 2px;
+    background-color: white;
+    border: 0;
+    margin-bottom: 2em;
+}
+
+.exampleblock .title {
+    text-align: right;
+}
+
+/* end customisations by harry */
+
+/* CUSTOMISATIONS */
+
+/* Change the values in root for quick customisation. If you want even more fine grain... venture further. */
+
+:root{
+--maincolor:#FFFFFF;
+--primarycolor:#2c3e50;
+--secondarycolor:#ba3925;
+--tertiarycolor: #186d7a;
+--sidebarbackground:#CCC;
+--linkcolor:#b71c1c;
+--linkcoloralternate:#f44336;
+--white:#FFFFFF;
+--black:#000000;
+}
+
+/* Text styles */
+h1{color:var(--primarycolor) !important;}
+h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+.title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
+p{font-family: "Noto Sans",sans-serif !important}
+
+/* Table styles */
+th{font-family: "Noto Sans",sans-serif !important}
+
+/* Responsiveness fixes */
+video {
+  max-width: 100%;
+}
+
+@media all and (max-width: 600px) {
+table {
+  width: 55vw!important;
+  font-size: 3vw;
+}
+
+</style>
+</head>
+<body class="article toc2 toc-left">
+<div id="buy_the_book" style="position: absolute; top: 0; right: 0; z-index:100">
+  <a href="/#buy_the_book">
+    <img src="/images/buy_the_book.svg" alt="buy the book ribbon">
+  </a>
+</div>
+<div id="header">
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="/book/preface.html">Preface</a></li>
+<li><a href="/book/introduction.html">Introduction</a></li>
+<li><a href="/book/part1.html">Building an Architecture to Support Domain Modeling</a></li>
+<li><a href="/book/chapter_01_domain_model.html">1. Domain Modeling</a></li>
+<li><a href="/book/chapter_02_repository.html">2. Repository Pattern</a></li>
+<li><a href="/book/chapter_03_abstractions.html">3. A Brief Interlude: On Coupling <span class="keep-together">and Abstractions</span></a></li>
+<li><a href="/book/chapter_04_service_layer.html">4. Our First Use Case: <span class="keep-together">Flask API and Service Layer</span></a></li>
+<li><a href="/book/chapter_05_high_gear_low_gear.html">5. TDD in High Gear and Low Gear</a></li>
+<li><a href="/book/chapter_06_uow.html">6. Unit of Work Pattern</a></li>
+<li><a href="/book/chapter_07_aggregate.html">7. Aggregates and Consistency Boundaries</a></li>
+<li><a href="/book/part2.html">Event-Driven Architecture</a></li>
+<li><a href="/book/chapter_08_events_and_message_bus.html">8. Events and the Message Bus</a></li>
+<li><a href="/book/chapter_09_all_messagebus.html">9. Going to Town on the Message Bus</a></li>
+<li><a href="/book/chapter_10_commands.html">10. Commands and Command Handler</a></li>
+<li><a href="/book/chapter_11_external_events.html">11. Event-Driven Architecture: Using Events to Integrate Microservices</a></li>
+<li><a href="/book/chapter_12_cqrs.html">12. Command-Query Responsibility Segregation (CQRS)</a></li>
+<li><a href="/book/chapter_13_dependency_injection.html">13. Dependency Injection (and Bootstrapping)</a></li>
+<li><a href="/book/epilogue_1_how_to_get_there_from_here.html">Appendix A: Epilogue</a></li>
+<li><a href="/book/appendix_ds1_table.html">Appendix B: Summary Diagram and Table</a></li>
+<li><a href="/book/appendix_project_structure.html">Appendix C: A Template Project Structure</a></li>
+<li><a href="/book/appendix_csvs.html">Appendix D: Swapping Out the Infrastructure: <span class="keep-together">Do Everything with CSVs</span></a></li>
+<li><a href="/book/appendix_django.html">Appendix E: Repository and Unit of Work <span class="keep-together">Patterns with Django</span></a></li>
+<li><a href="/book/appendix_validation.html">Appendix F: Validation</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="chapter_12_cqrs">Command-Query Responsibility Segregation (CQRS)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this chapter, we&#8217;re going to start with a fairly uncontroversial insight:
+reads (queries) and writes (commands) are different, so they
+should be treated differently (or have their responsibilities segregated, if you will). Then we&#8217;re going to push that insight as far
+as we can.</p>
+</div>
+<div class="paragraph">
+<p>If you&#8217;re anything like Harry, this will all seem extreme at first,
+but hopefully we can make the argument that it&#8217;s not <em>totally</em> unreasonable.</p>
+</div>
+<div class="paragraph">
+<p><a href="#maps_chapter_11">Separating reads from writes</a> shows where we might end up.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The code for this chapter is in the
+chapter_12_cqrs branch <a href="https://oreil.ly/YbWGT">on <span class="keep-together">GitHub</span></a>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>git clone https://github.com/cosmicpython/code.git
+cd code
+git checkout chapter_12_cqrs
+# or to code along, checkout the previous chapter:
+git checkout chapter_11_external_events</pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>First, though, why bother?</p>
+</div>
+<div id="maps_chapter_11" class="imageblock">
+<div class="content">
+<img src="images/apwp_1201.png" alt="apwp 1201">
+</div>
+<div class="title">Figure 1. Separating reads from writes</div>
+</div>
+<div class="sect2">
+<h3 id="_domain_models_are_for_writing">Domain Models Are for Writing</h3>
+<div class="paragraph">
+<p>We&#8217;ve spent a lot of time in this book talking about how to build software that
+enforces the rules of our domain. These rules, or constraints, will be different
+for every application, and they make up the interesting core of our systems.</p>
+</div>
+<div class="paragraph">
+<p>In this book, we&#8217;ve set explicit constraints like "You can&#8217;t allocate more stock
+than is available," as well as implicit constraints like "Each order line is
+allocated to a single batch."</p>
+</div>
+<div class="paragraph">
+<p>We wrote down these rules as unit tests at the beginning of the book:</p>
+</div>
+<div id="domain_tests" class="exampleblock pagebreak-before">
+<div class="title">Our basic domain tests (tests/unit/test_batches.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_allocating_to_a_batch_reduces_the_available_quantity</span><span class="tok-p">():</span>
+    <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"batch-001"</span><span class="tok-p">,</span> <span class="tok-s2">"SMALL-TABLE"</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-o">=</span><span class="tok-mi">20</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-n">today</span><span class="tok-p">())</span>
+    <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s1">'order-ref'</span><span class="tok-p">,</span> <span class="tok-s2">"SMALL-TABLE"</span><span class="tok-p">,</span> <span class="tok-mi">2</span><span class="tok-p">)</span>
+
+    <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">)</span>
+
+    <span class="tok-k">assert</span> <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">==</span> <span class="tok-mi">18</span>
+
+<span class="tok-o">...</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">test_cannot_allocate_if_available_smaller_than_required</span><span class="tok-p">():</span>
+    <span class="tok-n">small_batch</span><span class="tok-p">,</span> <span class="tok-n">large_line</span> <span class="tok-o">=</span> <span class="tok-n">make_batch_and_line</span><span class="tok-p">(</span><span class="tok-s2">"ELEGANT-LAMP"</span><span class="tok-p">,</span> <span class="tok-mi">2</span><span class="tok-p">,</span> <span class="tok-mi">20</span><span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">small_batch</span><span class="tok-o">.</span><span class="tok-n">can_allocate</span><span class="tok-p">(</span><span class="tok-n">large_line</span><span class="tok-p">)</span> <span class="tok-ow">is</span> <span class="tok-bp">False</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>To apply these rules properly, we needed to ensure that operations
+were consistent, and so we introduced patterns like <em>Unit of Work</em> and <em>Aggregate</em>
+that help us commit small chunks of work.</p>
+</div>
+<div class="paragraph">
+<p>To communicate changes between those small chunks, we introduced the Domain Events pattern
+so we can write rules like "When stock is damaged or lost, adjust the
+available quantity on the batch, and reallocate orders if necessary."</p>
+</div>
+<div class="paragraph">
+<p>All of this complexity exists so we can enforce rules when we change the
+state of our system. We&#8217;ve built a flexible set of tools for writing data.</p>
+</div>
+<div class="paragraph">
+<p>What about reads, though?</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_most_users_arent_going_to_buy_your_furniture">Most Users Aren&#8217;t Going to Buy Your Furniture</h3>
+<div class="paragraph">
+<p>At MADE.com, we have a system very like the allocation service. In a busy day, we
+might process one hundred orders in an hour, and we have a big gnarly system for
+allocating stock to those orders.</p>
+</div>
+<div class="paragraph">
+<p>In that same busy day, though, we might have one hundred product views per <em>second</em>.
+Each time somebody visits a product page, or a product listing page, we need
+to figure out whether the product is still in stock and how long it will take
+us to deliver it.</p>
+</div>
+<div class="paragraph">
+<p>The <em>domain</em> is the same&#8212;&#8203;we&#8217;re concerned with batches of stock, and their
+arrival date, and the amount that&#8217;s still available&#8212;&#8203;but the access pattern
+is very different. For example, our customers won&#8217;t notice if the query
+is a few seconds out of date, but if our allocate service is inconsistent,
+we&#8217;ll make a mess of their orders. We can take advantage of this difference by
+making our reads <em>eventually consistent</em> in order to make them perform better.</p>
+</div>
+<div class="sidebarblock nobreakinside less_space">
+<div class="content">
+<div class="title">Is Read Consistency Truly Attainable?</div>
+<div class="paragraph">
+<p>This idea of trading consistency against performance makes a lot of developers
+<span class="keep-together">nervous</span> at first, so let&#8217;s talk quickly about that.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s imagine that our "Get Available Stock" query is 30 seconds out of date
+when Bob visits the page for <code>ASYMMETRICAL-DRESSER</code>.
+Meanwhile, though, Harry has already bought the last item. When we try to
+allocate Bob&#8217;s order, we&#8217;ll get a failure, and we&#8217;ll need to either cancel his
+order or buy more stock and delay his delivery.</p>
+</div>
+<div class="paragraph">
+<p>People who&#8217;ve worked only with relational data stores get <em>really</em> nervous
+about this problem, but it&#8217;s worth considering two other scenarios to gain some
+perspective.</p>
+</div>
+<div class="paragraph">
+<p>First, let&#8217;s imagine that Bob and Harry both visit the page at <em>the same
+time</em>. Harry goes off to make coffee, and by the time he returns, Bob has
+already bought the last dresser. When Harry places his order, we send it to
+the allocation service, and because there&#8217;s not enough stock, we have to refund
+his payment or buy more stock and delay his delivery.</p>
+</div>
+<div class="paragraph">
+<p>As soon as we render the product page, the data is already stale. This insight
+is key to understanding why reads can be safely inconsistent: we&#8217;ll always need
+to check the current state of our system when we come to allocate, because all
+distributed systems are inconsistent. As soon as you have a web server and two
+customers, you have the potential for stale data.</p>
+</div>
+<div class="paragraph">
+<p>OK, let&#8217;s assume we solve that problem somehow: we magically build a totally
+consistent web application where nobody ever sees stale data. This time Harry
+gets to the page first and buys his dresser.</p>
+</div>
+<div class="paragraph">
+<p>Unfortunately for him, when the warehouse staff tries to dispatch his furniture,
+it falls off the forklift and smashes into a zillion pieces. Now what?</p>
+</div>
+<div class="paragraph">
+<p>The only options are to either call Harry and refund his order or buy more
+stock and delay delivery.</p>
+</div>
+<div class="paragraph">
+<p>No matter what we do, we&#8217;re always going to find that our software systems are
+inconsistent with reality, and so we&#8217;ll always need business processes to cope
+with these edge cases. It&#8217;s OK to trade performance for consistency on the
+read side, because stale data is essentially unavoidable.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>We can think of these requirements as forming two halves of a system:
+the read side and the write side, shown in <a href="#read_and_write_table">Read versus write</a>.</p>
+</div>
+<div class="paragraph">
+<p>For the write side, our fancy domain architectural patterns help us to evolve
+our system over time, but the complexity we&#8217;ve built so far doesn&#8217;t buy
+anything for reading data. The service layer, the unit of work,  and the clever
+domain model are just bloat.</p>
+</div>
+<table id="read_and_write_table" class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. Read versus write</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top"></th>
+<th class="tableblock halign-left valign-top">Read side</th>
+<th class="tableblock halign-left valign-top">Write side</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Behavior</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Simple read</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Complex business logic</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Cacheability</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Highly cacheable</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Uncacheable</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Consistency</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Can be stale</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Must be transactionally consistent</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_postredirectget_and_cqs">Post/Redirect/Get and CQS</h3>
+<div class="paragraph">
+<p>If you do web development, you&#8217;re probably familiar with the
+Post/Redirect/Get pattern. In this technique, a web endpoint accepts an
+HTTP POST and responds with a redirect to see the result. For example, we might
+accept a POST to <em>/batches</em> to create a new batch and redirect the user to
+<em>/batches/123</em> to see their newly created batch.</p>
+</div>
+<div class="paragraph">
+<p>This approach fixes the problems that arise when users refresh the results page
+in their browser or try to bookmark a results page. In the case of a refresh,
+it can lead to our users double-submitting data and thus buying two sofas when they
+needed only one. In the case of a bookmark, our hapless customers will end up
+with a broken page when they try to GET a POST endpoint.</p>
+</div>
+<div class="paragraph">
+<p>Both these problems happen because we&#8217;re returning data in response to a write
+operation. Post/Redirect/Get sidesteps the issue by separating the read and
+write phases of our operation.</p>
+</div>
+<div class="paragraph">
+<p>This technique is a simple example of command-query separation (CQS). In CQS we
+follow one simple rule: functions should either modify state or answer
+questions, but never both. This makes software easier to reason about: we should
+always be able to ask, "Are the lights on?" without flicking the light switch.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+When building APIs, we can apply the same design technique by returning a
+    201 Created, or a 202 Accepted, with a Location header containing the URI
+    of our new resources. What&#8217;s important here isn&#8217;t the status code we use
+    but the logical separation of work into a write phase and a query phase.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>As you&#8217;ll see, we can use the CQS principle to make our systems faster and more
+scalable, but first, let&#8217;s fix the CQS violation in our existing code. Ages ago, we introduced an <code>allocate</code> endpoint that takes an order and
+calls our service layer to allocate some stock. At the end of the call, we
+return a 200 OK and the batch ID. That&#8217;s led to some ugly design flaws so that
+we can get the data we need. Let&#8217;s change it to return a simple OK message and
+instead provide a new read-only endpoint to retrieve allocation state:</p>
+</div>
+<div id="api_test_does_get_after_post" class="exampleblock">
+<div class="title">API test does a GET after the POST (tests/e2e/test_api.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@pytest.mark.usefixtures</span><span class="tok-p">(</span><span class="tok-s1">'postgres_db'</span><span class="tok-p">)</span>
+<span class="tok-nd">@pytest.mark.usefixtures</span><span class="tok-p">(</span><span class="tok-s1">'restart_api'</span><span class="tok-p">)</span>
+<span class="tok-k">def</span> <span class="tok-nf">test_happy_path_returns_202_and_batch_is_allocated</span><span class="tok-p">():</span>
+    <span class="tok-n">orderid</span> <span class="tok-o">=</span> <span class="tok-n">random_orderid</span><span class="tok-p">()</span>
+    <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">othersku</span> <span class="tok-o">=</span> <span class="tok-n">random_sku</span><span class="tok-p">(),</span> <span class="tok-n">random_sku</span><span class="tok-p">(</span><span class="tok-s1">'other'</span><span class="tok-p">)</span>
+    <span class="tok-n">earlybatch</span> <span class="tok-o">=</span> <span class="tok-n">random_batchref</span><span class="tok-p">(</span><span class="tok-mi">1</span><span class="tok-p">)</span>
+    <span class="tok-n">laterbatch</span> <span class="tok-o">=</span> <span class="tok-n">random_batchref</span><span class="tok-p">(</span><span class="tok-mi">2</span><span class="tok-p">)</span>
+    <span class="tok-n">otherbatch</span> <span class="tok-o">=</span> <span class="tok-n">random_batchref</span><span class="tok-p">(</span><span class="tok-mi">3</span><span class="tok-p">)</span>
+    <span class="tok-n">api_client</span><span class="tok-o">.</span><span class="tok-n">post_to_add_batch</span><span class="tok-p">(</span><span class="tok-n">laterbatch</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-s1">'2011-01-02'</span><span class="tok-p">)</span>
+    <span class="tok-n">api_client</span><span class="tok-o">.</span><span class="tok-n">post_to_add_batch</span><span class="tok-p">(</span><span class="tok-n">earlybatch</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-s1">'2011-01-01'</span><span class="tok-p">)</span>
+    <span class="tok-n">api_client</span><span class="tok-o">.</span><span class="tok-n">post_to_add_batch</span><span class="tok-p">(</span><span class="tok-n">otherbatch</span><span class="tok-p">,</span> <span class="tok-n">othersku</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">)</span>
+
+    <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">api_client</span><span class="tok-o">.</span><span class="tok-n">post_to_allocate</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-o">=</span><span class="tok-mi">3</span><span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">status_code</span> <span class="tok-o">==</span> <span class="tok-mi">202</span>
+
+    <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">api_client</span><span class="tok-o">.</span><span class="tok-n">get_allocation</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">ok</span>
+    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()</span> <span class="tok-o">==</span> <span class="tok-p">[</span>
+        <span class="tok-p">{</span><span class="tok-s1">'sku'</span><span class="tok-p">:</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-s1">'batchref'</span><span class="tok-p">:</span> <span class="tok-n">earlybatch</span><span class="tok-p">},</span>
+    <span class="tok-p">]</span>
+
+
+<span class="tok-nd">@pytest.mark.usefixtures</span><span class="tok-p">(</span><span class="tok-s1">'postgres_db'</span><span class="tok-p">)</span>
+<span class="tok-nd">@pytest.mark.usefixtures</span><span class="tok-p">(</span><span class="tok-s1">'restart_api'</span><span class="tok-p">)</span>
+<span class="tok-k">def</span> <span class="tok-nf">test_unhappy_path_returns_400_and_error_message</span><span class="tok-p">():</span>
+    <span class="tok-n">unknown_sku</span><span class="tok-p">,</span> <span class="tok-n">orderid</span> <span class="tok-o">=</span> <span class="tok-n">random_sku</span><span class="tok-p">(),</span> <span class="tok-n">random_orderid</span><span class="tok-p">()</span>
+    <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">api_client</span><span class="tok-o">.</span><span class="tok-n">post_to_allocate</span><span class="tok-p">(</span>
+        <span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">unknown_sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-o">=</span><span class="tok-mi">20</span><span class="tok-p">,</span> <span class="tok-n">expect_success</span><span class="tok-o">=</span><span class="tok-bp">False</span><span class="tok-p">,</span>
+    <span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">status_code</span> <span class="tok-o">==</span> <span class="tok-mi">400</span>
+    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()[</span><span class="tok-s1">'message'</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-n">f</span><span class="tok-s1">'Invalid sku {unknown_sku}'</span>
+
+    <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">api_client</span><span class="tok-o">.</span><span class="tok-n">get_allocation</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">status_code</span> <span class="tok-o">==</span> <span class="tok-mi">404</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>OK, what might the Flask app look like?</p>
+</div>
+<div id="flask_app_calls_view" class="exampleblock">
+<div class="title">Endpoint for viewing allocations (src/allocation/entrypoints/flask_app.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">allocation</span> <span class="tok-kn">import</span> <span class="tok-n">views</span>
+<span class="tok-o">...</span>
+
+<span class="tok-nd">@app.route</span><span class="tok-p">(</span><span class="tok-s2">"/allocations/&lt;orderid&gt;"</span><span class="tok-p">,</span> <span class="tok-n">methods</span><span class="tok-o">=</span><span class="tok-p">[</span><span class="tok-s1">'GET'</span><span class="tok-p">])</span>
+<span class="tok-k">def</span> <span class="tok-nf">allocations_view_endpoint</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">):</span>
+    <span class="tok-n">uow</span> <span class="tok-o">=</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyUnitOfWork</span><span class="tok-p">()</span>
+    <span class="tok-n">result</span> <span class="tok-o">=</span> <span class="tok-n">views</span><span class="tok-o">.</span><span class="tok-n">allocations</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">)</span>  #<b class="conum">(1)</b>
+    <span class="tok-k">if</span> <span class="tok-ow">not</span> <span class="tok-n">result</span><span class="tok-p">:</span>
+        <span class="tok-k">return</span> <span class="tok-s1">'not found'</span><span class="tok-p">,</span> <span class="tok-mi">404</span>
+    <span class="tok-k">return</span> <span class="tok-n">jsonify</span><span class="tok-p">(</span><span class="tok-n">result</span><span class="tok-p">),</span> <span class="tok-mi">200</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>All right, a <em>views.py</em>, fair enough; we can keep read-only stuff in there,
+and it&#8217;ll be a real <em>views.py</em>, not like Django&#8217;s, something that knows how
+to build read-only views of our data&#8230;&#8203;</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="hold-on-ch12">Hold On to Your Lunch, Folks</h3>
+<div class="paragraph">
+<p>Hmm, so we can probably just add a list method to our existing repository
+object:</p>
+</div>
+<div id="views_dot_py" class="exampleblock">
+<div class="title">Views do&#8230;&#8203;raw SQL? (src/allocation/views.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">allocation.service_layer</span> <span class="tok-kn">import</span> <span class="tok-n">unit_of_work</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">allocations</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyUnitOfWork</span><span class="tok-p">):</span>
+    <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
+        <span class="tok-n">results</span> <span class="tok-o">=</span> <span class="tok-nb">list</span><span class="tok-p">(</span><span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>
+            <span class="tok-s1">'SELECT ol.sku, b.reference'</span>
+            <span class="tok-s1">' FROM allocations AS a'</span>
+            <span class="tok-s1">' JOIN batches AS b ON a.batch_id = b.id'</span>
+            <span class="tok-s1">' JOIN order_lines AS ol ON a.orderline_id = ol.id'</span>
+            <span class="tok-s1">' WHERE ol.orderid = :orderid'</span><span class="tok-p">,</span>
+            <span class="tok-nb">dict</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-o">=</span><span class="tok-n">orderid</span><span class="tok-p">)</span>
+        <span class="tok-p">))</span>
+    <span class="tok-k">return</span> <span class="tok-p">[{</span><span class="tok-s1">'sku'</span><span class="tok-p">:</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-s1">'batchref'</span><span class="tok-p">:</span> <span class="tok-n">batchref</span><span class="tok-p">}</span> <span class="tok-k">for</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">batchref</span> <span class="tok-ow">in</span> <span class="tok-n">results</span><span class="tok-p">]</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><em>Excuse me?  Raw SQL?</em></p>
+</div>
+<div class="paragraph">
+<p>If you&#8217;re anything like Harry encountering this pattern for the first time,
+you&#8217;ll be wondering what on earth Bob has been smoking. We&#8217;re hand-rolling our
+own SQL now, and converting database rows directly to dicts? After all the
+effort we put into building a nice domain model? And what about the Repository
+pattern? Isn&#8217;t that meant to be our abstraction around the database? Why don&#8217;t
+we reuse that?</p>
+</div>
+<div class="paragraph">
+<p>Well, let&#8217;s explore that seemingly simpler alternative first, and see what it
+looks like in practice.</p>
+</div>
+<div class="paragraph">
+<p>We&#8217;ll still keep our view in a separate <em>views.py</em> module; enforcing a clear
+distinction between reads and writes in your application is still a good idea.
+We apply command-query separation, and it&#8217;s easy to see which code modifies
+state (the event handlers) and which code just retrieves read-only state (the views).</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+Splitting out your read-only views from your state-modifying
+    command and event handlers is probably a good idea, even if you
+    don&#8217;t want to go to full-blown CQRS.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_testing_cqrs_views">Testing CQRS Views</h3>
+<div class="paragraph">
+<p>Before we get into exploring various options, let&#8217;s talk about testing.
+Whichever approaches you decide to go for, you&#8217;re probably going to need
+at least one integration test.  Something like this:</p>
+</div>
+<div id="integration_testing_views" class="exampleblock">
+<div class="title">An integration test for a view (tests/integration/test_views.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_allocations_view</span><span class="tok-p">(</span><span class="tok-n">sqlite_session_factory</span><span class="tok-p">):</span>
+    <span class="tok-n">uow</span> <span class="tok-o">=</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyUnitOfWork</span><span class="tok-p">(</span><span class="tok-n">sqlite_session_factory</span><span class="tok-p">)</span>
+    <span class="tok-n">messagebus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">CreateBatch</span><span class="tok-p">(</span><span class="tok-s1">'sku1batch'</span><span class="tok-p">,</span> <span class="tok-s1">'sku1'</span><span class="tok-p">,</span> <span class="tok-mi">50</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">),</span> <span class="tok-n">uow</span><span class="tok-p">)</span>  #<b class="conum">(1)</b>
+    <span class="tok-n">messagebus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">CreateBatch</span><span class="tok-p">(</span><span class="tok-s1">'sku2batch'</span><span class="tok-p">,</span> <span class="tok-s1">'sku2'</span><span class="tok-p">,</span> <span class="tok-mi">50</span><span class="tok-p">,</span> <span class="tok-n">today</span><span class="tok-p">),</span> <span class="tok-n">uow</span><span class="tok-p">)</span>
+    <span class="tok-n">messagebus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">Allocate</span><span class="tok-p">(</span><span class="tok-s1">'order1'</span><span class="tok-p">,</span> <span class="tok-s1">'sku1'</span><span class="tok-p">,</span> <span class="tok-mi">20</span><span class="tok-p">),</span> <span class="tok-n">uow</span><span class="tok-p">)</span>
+    <span class="tok-n">messagebus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">Allocate</span><span class="tok-p">(</span><span class="tok-s1">'order1'</span><span class="tok-p">,</span> <span class="tok-s1">'sku2'</span><span class="tok-p">,</span> <span class="tok-mi">20</span><span class="tok-p">),</span> <span class="tok-n">uow</span><span class="tok-p">)</span>
+    <span class="tok-c1"># add a spurious batch and order to make sure we're getting the right ones</span>
+    <span class="tok-n">messagebus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">CreateBatch</span><span class="tok-p">(</span><span class="tok-s1">'sku1batch-later'</span><span class="tok-p">,</span> <span class="tok-s1">'sku1'</span><span class="tok-p">,</span> <span class="tok-mi">50</span><span class="tok-p">,</span> <span class="tok-n">today</span><span class="tok-p">),</span> <span class="tok-n">uow</span><span class="tok-p">)</span>
+    <span class="tok-n">messagebus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">Allocate</span><span class="tok-p">(</span><span class="tok-s1">'otherorder'</span><span class="tok-p">,</span> <span class="tok-s1">'sku1'</span><span class="tok-p">,</span> <span class="tok-mi">30</span><span class="tok-p">),</span> <span class="tok-n">uow</span><span class="tok-p">)</span>
+    <span class="tok-n">messagebus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">Allocate</span><span class="tok-p">(</span><span class="tok-s1">'otherorder'</span><span class="tok-p">,</span> <span class="tok-s1">'sku2'</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">),</span> <span class="tok-n">uow</span><span class="tok-p">)</span>
+
+    <span class="tok-k">assert</span> <span class="tok-n">views</span><span class="tok-o">.</span><span class="tok-n">allocations</span><span class="tok-p">(</span><span class="tok-s1">'order1'</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-p">[</span>
+        <span class="tok-p">{</span><span class="tok-s1">'sku'</span><span class="tok-p">:</span> <span class="tok-s1">'sku1'</span><span class="tok-p">,</span> <span class="tok-s1">'batchref'</span><span class="tok-p">:</span> <span class="tok-s1">'sku1batch'</span><span class="tok-p">},</span>
+        <span class="tok-p">{</span><span class="tok-s1">'sku'</span><span class="tok-p">:</span> <span class="tok-s1">'sku2'</span><span class="tok-p">,</span> <span class="tok-s1">'batchref'</span><span class="tok-p">:</span> <span class="tok-s1">'sku2batch'</span><span class="tok-p">},</span>
+    <span class="tok-p">]</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>We do the setup for the integration test by using the public entrypoint to
+our application, the message bus. That keeps our tests decoupled from
+any implementation/infrastructure details about how things get stored.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_obvious_alternative_1_using_the_existing_repository">"Obvious" Alternative 1: Using the Existing Repository</h3>
+<div class="paragraph">
+<p>How about adding a helper method to our <code>products</code> repository?</p>
+</div>
+<div id="view_using_repo" class="exampleblock">
+<div class="title">A simple view that uses the repository (src/allocation/views.py)</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">allocation</span> <span class="tok-kn">import</span> <span class="tok-n">unit_of_work</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">allocations</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">):</span>
+    <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
+        <span class="tok-n">products</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">products</span><span class="tok-o">.</span><span class="tok-n">for_order</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-o">=</span><span class="tok-n">orderid</span><span class="tok-p">)</span>  #<b class="conum">(1)</b>
+        <span class="tok-n">batches</span> <span class="tok-o">=</span> <span class="tok-p">[</span><span class="tok-n">b</span> <span class="tok-k">for</span> <span class="tok-n">p</span> <span class="tok-ow">in</span> <span class="tok-n">products</span> <span class="tok-k">for</span> <span class="tok-n">b</span> <span class="tok-ow">in</span> <span class="tok-n">p</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-p">]</span>  #<b class="conum">(2)</b>
+        <span class="tok-k">return</span> <span class="tok-p">[</span>
+            <span class="tok-p">{</span><span class="tok-s1">'sku'</span><span class="tok-p">:</span> <span class="tok-n">b</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-s1">'batchref'</span><span class="tok-p">:</span> <span class="tok-n">b</span><span class="tok-o">.</span><span class="tok-n">reference</span><span class="tok-p">}</span>
+            <span class="tok-k">for</span> <span class="tok-n">b</span> <span class="tok-ow">in</span> <span class="tok-n">batches</span>
+            <span class="tok-k">if</span> <span class="tok-n">orderid</span> <span class="tok-ow">in</span> <span class="tok-n">b</span><span class="tok-o">.</span><span class="tok-n">orderids</span>  #<b class="conum">(3)</b>
+        <span class="tok-p">]</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Our repository returns <code>Product</code> objects, and we need to find all the
+products for the SKUs in a given order, so we&#8217;ll build a new helper method
+called <code>.for_order()</code> on the repository.</p>
+</li>
+<li>
+<p>Now we have products but we actually want batch references, so we
+get all the possible batches with a list comprehension.</p>
+</li>
+<li>
+<p>We filter <em>again</em> to get just the batches for our specific
+order. That, in turn, relies on our <code>Batch</code> objects being able to tell us
+which order IDs it has allocated.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>We implement that last using a <code>.orderid</code> property:</p>
+</div>
+<div id="orderids_on_batch" class="exampleblock">
+<div class="title">An arguably unnecessary property on our model (src/allocation/domain/model.py)</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">Batch</span><span class="tok-p">:</span>
+    <span class="tok-o">...</span>
+
+    <span class="tok-nd">@property</span>
+    <span class="tok-k">def</span> <span class="tok-nf">orderids</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
+        <span class="tok-k">return</span> <span class="tok-p">{</span><span class="tok-n">l</span><span class="tok-o">.</span><span class="tok-n">orderid</span> <span class="tok-k">for</span> <span class="tok-n">l</span> <span class="tok-ow">in</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_allocations</span><span class="tok-p">}</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>You can start to see that reusing our existing repository and domain model classes
+is not as straightforward as you might have assumed.  We&#8217;ve had to add new helper
+methods to both, and we&#8217;re doing a bunch of looping and filtering in Python, which
+is work that would be done much more efficiently by the database.</p>
+</div>
+<div class="paragraph">
+<p>So yes, on the plus side we&#8217;re reusing our existing abstractions, but on the
+downside, it all feels quite clunky.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_your_domain_model_is_not_optimized_for_read_operations">Your Domain Model Is Not Optimized for Read Operations</h3>
+<div class="paragraph">
+<p>What we&#8217;re seeing here are the effects of having a domain model that
+is designed primarily for write operations, while our requirements for
+reads are often conceptually quite different.</p>
+</div>
+<div class="paragraph">
+<p>This is the chin-stroking-architect&#8217;s justification for CQRS.  As we&#8217;ve said before,
+a domain model is not a data model&#8212;&#8203;we&#8217;re trying to capture the way the
+business works: workflow, rules around state changes, messages exchanged;
+concerns about how the system reacts to external events and user input.
+<em>Most of this stuff is totally irrelevant for read-only operations</em>.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+This justification for CQRS is related to the justification for the Domain
+    Model pattern. If you&#8217;re building a simple CRUD app, reads and writes are
+    going to be closely related, so you don&#8217;t need a domain model or CQRS. But
+    the more complex your domain, the more likely you are to need both.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>To make a facile point, your domain classes will have multiple methods for
+modifying state, and you won&#8217;t need any of them for read-only operations.</p>
+</div>
+<div class="paragraph">
+<p>As the complexity of your domain model grows, you will find yourself making
+more and more choices about how to structure that model, which make it more and
+more awkward to use for read operations.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_obvious_alternative_2_using_the_orm">"Obvious" Alternative 2: Using the ORM</h3>
+<div class="paragraph">
+<p>You may be thinking, OK, if our repository is clunky, and working with
+<code>Products</code> is clunky, then I can at least  use my ORM and work with <code>Batches</code>.
+That&#8217;s what it&#8217;s for!</p>
+</div>
+<div id="view_using_orm" class="exampleblock">
+<div class="title">A simple view that uses the ORM (src/allocation/views.py)</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">allocation</span> <span class="tok-kn">import</span> <span class="tok-n">unit_of_work</span><span class="tok-p">,</span> <span class="tok-n">model</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">allocations</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">):</span>
+    <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
+        <span class="tok-n">batches</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">query</span><span class="tok-p">(</span><span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">join</span><span class="tok-p">(</span>
+            <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">,</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-o">.</span><span class="tok-n">_allocations</span>
+        <span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">filter</span><span class="tok-p">(</span>
+            <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-o">.</span><span class="tok-n">orderid</span> <span class="tok-o">==</span> <span class="tok-n">orderid</span>
+        <span class="tok-p">)</span>
+        <span class="tok-k">return</span> <span class="tok-p">[</span>
+            <span class="tok-p">{</span><span class="tok-s1">'sku'</span><span class="tok-p">:</span> <span class="tok-n">b</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-s1">'batchref'</span><span class="tok-p">:</span> <span class="tok-n">b</span><span class="tok-o">.</span><span class="tok-n">batchref</span><span class="tok-p">}</span>
+            <span class="tok-k">for</span> <span class="tok-n">b</span> <span class="tok-ow">in</span> <span class="tok-n">batches</span>
+        <span class="tok-p">]</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>But is that <em>actually</em> any easier to write or understand than the raw SQL
+version from the code example in <a href="#hold-on-ch12">Hold On to Your Lunch, Folks</a>? It may not look too bad up there, but we
+can tell you it took several attempts, and plenty of digging through the
+SQLAlchemy docs. SQL is just SQL.</p>
+</div>
+<div class="paragraph">
+<p>But the ORM can also expose us to performance problems.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_select_n1_and_other_performance_considerations">SELECT N+1 and Other Performance Considerations</h3>
+<div class="paragraph">
+<p>The so-called
+<a href="https://oreil.ly/OkBOS"><code>SELECT N+1</code></a>
+problem is a common performance problem with ORMs: when retrieving a list of
+objects, your ORM will often perform an initial query to, say, get all the IDs
+of the objects it needs, and then issue individual queries for each object to
+retrieve their attributes. This is especially likely if there are any foreign-key relationships on your objects.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+In all fairness, we should say that SQLAlchemy is quite good at avoiding
+    the <code>SELECT N+1</code> problem. It doesn&#8217;t display it in the preceding example, and
+    you can request
+    <a href="https://oreil.ly/XKDDm">eager loading</a>
+    explicitly to avoid it when dealing with joined objects.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Beyond <code>SELECT N+1</code>, you may have other reasons for wanting to decouple the
+way you persist state changes from the way that you retrieve current state.
+A set of fully normalized relational tables is a good way to make sure that
+write operations never cause data corruption. But retrieving data using lots
+of joins can be slow. It&#8217;s common in such cases to add some denormalized views,
+build read replicas, or even add caching layers.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_time_to_completely_jump_the_shark">Time to Completely Jump the Shark</h3>
+<div class="paragraph">
+<p>On that note: have we convinced you that our raw SQL version isn&#8217;t so weird as
+it first seemed? Perhaps we were exaggerating for effect? Just you wait.</p>
+</div>
+<div class="paragraph">
+<p>So, reasonable or not, that hardcoded SQL query is pretty ugly, right? What if
+we made it nicer&#8230;&#8203;</p>
+</div>
+<div id="much_nicer_query" class="exampleblock">
+<div class="title">A much nicer query (src/allocation/views.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">allocations</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyUnitOfWork</span><span class="tok-p">):</span>
+    <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
+        <span class="tok-n">results</span> <span class="tok-o">=</span> <span class="tok-nb">list</span><span class="tok-p">(</span><span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>
+            <span class="tok-s1">'SELECT sku, batchref FROM allocations_view WHERE orderid = :orderid'</span><span class="tok-p">,</span>
+            <span class="tok-nb">dict</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-o">=</span><span class="tok-n">orderid</span><span class="tok-p">)</span>
+        <span class="tok-p">))</span>
+        <span class="tok-o">...</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>&#8230;&#8203;by <em>keeping a totally separate, denormalized data store for our view model</em>?</p>
+</div>
+<div id="new_table" class="exampleblock">
+<div class="title">Hee hee hee, no foreign keys, just strings, YOLO (src/allocation/adapters/orm.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-n">allocations_view</span> <span class="tok-o">=</span> <span class="tok-n">Table</span><span class="tok-p">(</span>
+    <span class="tok-s1">'allocations_view'</span><span class="tok-p">,</span> <span class="tok-n">metadata</span><span class="tok-p">,</span>
+    <span class="tok-n">Column</span><span class="tok-p">(</span><span class="tok-s1">'orderid'</span><span class="tok-p">,</span> <span class="tok-n">String</span><span class="tok-p">(</span><span class="tok-mi">255</span><span class="tok-p">)),</span>
+    <span class="tok-n">Column</span><span class="tok-p">(</span><span class="tok-s1">'sku'</span><span class="tok-p">,</span> <span class="tok-n">String</span><span class="tok-p">(</span><span class="tok-mi">255</span><span class="tok-p">)),</span>
+    <span class="tok-n">Column</span><span class="tok-p">(</span><span class="tok-s1">'batchref'</span><span class="tok-p">,</span> <span class="tok-n">String</span><span class="tok-p">(</span><span class="tok-mi">255</span><span class="tok-p">)),</span>
+<span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>OK, nicer-looking SQL queries wouldn&#8217;t be a justification for anything really,
+but building a denormalized copy of your data that&#8217;s optimized for read operations
+isn&#8217;t uncommon, once you&#8217;ve reached the limits of what you can do with indexes.</p>
+</div>
+<div class="paragraph">
+<p>Even with well-tuned indexes, a relational database uses a lot of CPU to perform
+joins. The fastest queries will always be <code>SELECT * from <em>mytable</em> WHERE <em>key</em> = :<em>value</em></code>.</p>
+</div>
+<div class="paragraph">
+<p>More than raw speed, though, this approach buys us scale. When we&#8217;re writing
+data to a relational database, we need to make sure that we get a lock over the
+rows we&#8217;re changing so we don&#8217;t run into consistency problems.</p>
+</div>
+<div class="paragraph">
+<p>If multiple clients are changing data at the same time, we&#8217;ll have weird race
+conditions. When we&#8217;re <em>reading</em> data, though, there&#8217;s no limit to the number
+of clients that can concurrently execute. For this reason, read-only stores can
+be horizontally scaled out.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+Because read replicas can be inconsistent, there&#8217;s no limit to how many we
+    can have. If you&#8217;re struggling to scale a system with a complex data store,
+    ask whether you could build a simpler read model.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Keeping the read model up to date is the challenge!  Database views
+(materialized or otherwise) and triggers are a common solution, but that limits
+you to your database. We&#8217;d like to show you how to reuse our event-driven
+architecture instead.</p>
+</div>
+<div class="sect3">
+<h4 id="_updating_a_read_model_table_using_an_event_handler">Updating a Read Model Table Using an Event Handler</h4>
+<div class="paragraph">
+<p>We add a second handler to the <code>Allocated</code> event:</p>
+</div>
+<div id="new_handler_for_allocated" class="exampleblock">
+<div class="title">Allocated event gets a new handler (src/allocation/service_layer/messagebus.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-n">EVENT_HANDLERS</span> <span class="tok-o">=</span> <span class="tok-p">{</span>
+    <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">Allocated</span><span class="tok-p">:</span> <span class="tok-p">[</span>
+        <span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">publish_allocated_event</span><span class="tok-p">,</span>
+        <span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">add_allocation_to_read_model</span>
+    <span class="tok-p">],</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s what our update-view-model code looks like:</p>
+</div>
+<div id="update_view_model_1" class="exampleblock">
+<div class="title">Update on allocation (src/allocation/service_layer/handlers.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span>
+<span class="tok-k">def</span> <span class="tok-nf">add_allocation_to_read_model</span><span class="tok-p">(</span>
+        <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">Allocated</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyUnitOfWork</span><span class="tok-p">,</span>
+<span class="tok-p">):</span>
+    <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
+        <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>
+            <span class="tok-s1">'INSERT INTO allocations_view (orderid, sku, batchref)'</span>
+            <span class="tok-s1">' VALUES (:orderid, :sku, :batchref)'</span><span class="tok-p">,</span>
+            <span class="tok-nb">dict</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-o">=</span><span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">batchref</span><span class="tok-o">=</span><span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">batchref</span><span class="tok-p">)</span>
+        <span class="tok-p">)</span>
+        <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Believe it or not, that will pretty much work!  <em>And it will work
+against the exact same integration tests as the rest of our options.</em></p>
+</div>
+<div class="paragraph">
+<p>OK, you&#8217;ll also need to handle <code>Deallocated</code>:</p>
+</div>
+<div id="handle_deallocated_too" class="exampleblock">
+<div class="title">A second listener for read model updates</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">Deallocated</span><span class="tok-p">:</span> <span class="tok-p">[</span>
+    <span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">remove_allocation_from_read_model</span><span class="tok-p">,</span>
+    <span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">reallocate</span>
+<span class="tok-p">],</span>
+
+<span class="tok-o">...</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">remove_allocation_from_read_model</span><span class="tok-p">(</span>
+        <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">Deallocated</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyUnitOfWork</span><span class="tok-p">,</span>
+<span class="tok-p">):</span>
+    <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
+        <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>
+            <span class="tok-s1">'DELETE FROM allocations_view '</span>
+            <span class="tok-s1">' WHERE orderid = :orderid AND sku = :sku'</span><span class="tok-p">,</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p><a href="#read_model_sequence_diagram">Sequence diagram for read model</a> shows the flow across the two requests.</p>
+</div>
+<div id="read_model_sequence_diagram" class="imageblock">
+<div class="content">
+<img src="images/apwp_1202.png" alt="apwp 1202">
+</div>
+<div class="title">Figure 2. Sequence diagram for read model</div>
+</div>
+<div class="listingblock image-source">
+<div class="content">
+<pre>[plantuml, apwp_1202, config=plantuml.cfg]
+@startuml
+scale 4
+!pragma teoz true
+
+actor User order 1
+boundary Flask order 2
+participant MessageBus order 3
+participant "Domain Model" as Domain order 4
+participant View order 9
+database DB order 10
+
+User -&gt; Flask: POST to allocate Endpoint
+Flask -&gt; MessageBus : Allocate Command
+
+group UoW/transaction 1
+    MessageBus -&gt; Domain : allocate()
+    MessageBus -&gt; DB: commit write model
+end
+
+group UoW/transaction 2
+    Domain -&gt; MessageBus : raise Allocated event(s)
+    MessageBus -&gt; DB : update view model
+end
+
+Flask -&gt; User: 202 OK
+
+User -&gt; Flask: GET allocations endpoint
+Flask -&gt; View: get allocations
+View -&gt; DB: SELECT on view model
+DB -&gt; View: some allocations
+&amp; View -&gt; Flask: some allocations
+&amp; Flask -&gt; User: some allocations
+
+@enduml</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In <a href="#read_model_sequence_diagram">Sequence diagram for read model</a>, you can see two
+transactions in the POST/write operation, one to update the write model and one
+to update the read model, which the GET/read operation can use.</p>
+</div>
+<div class="sidebarblock nobreakinside less_space">
+<div class="content">
+<div class="title">Rebuilding from Scratch</div>
+<div class="paragraph">
+<p>"What happens when it breaks?" should be the first question we ask as engineers.</p>
+</div>
+<div class="paragraph">
+<p>How do we deal with a view model that hasn&#8217;t been updated because of a bug or
+temporary outage? Well, this is just another case where events and commands can
+fail independently.</p>
+</div>
+<div class="paragraph">
+<p>If we <em>never</em> updated the view model, and the <code>ASYMMETRICAL-DRESSER</code> was forever in
+stock, that would be annoying for customers, but the <code>allocate</code> service would
+still fail, and we&#8217;d take action to fix the problem.</p>
+</div>
+<div class="paragraph">
+<p>Rebuilding a view model is easy, though. Since we&#8217;re using a service layer to
+update our view model, we can write a tool that does the following:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Queries the current state of the write side to work out what&#8217;s currently
+allocated</p>
+</li>
+<li>
+<p>Calls the <code>add_allocate_to_read_model</code> handler for each allocated item</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>We can use this technique to create entirely new read models from historical
+data.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_changing_our_read_model_implementation_is_easy">Changing Our Read Model Implementation Is Easy</h3>
+<div class="paragraph">
+<p>Let&#8217;s see the flexibility that our event-driven model buys us in action,
+by seeing what happens if we ever decide we want to implement a read model by
+using a totally separate storage engine, Redis.</p>
+</div>
+<div class="paragraph">
+<p>Just watch:</p>
+</div>
+<div id="redis_readmodel_handlers" class="exampleblock">
+<div class="title">Handlers update a Redis read model (src/allocation/service_layer/handlers.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">add_allocation_to_read_model</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">Allocated</span><span class="tok-p">,</span> <span class="tok-n">_</span><span class="tok-p">):</span>
+    <span class="tok-n">redis_eventpublisher</span><span class="tok-o">.</span><span class="tok-n">update_readmodel</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">batchref</span><span class="tok-p">)</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">remove_allocation_from_read_model</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">Deallocated</span><span class="tok-p">,</span> <span class="tok-n">_</span><span class="tok-p">):</span>
+    <span class="tok-n">redis_eventpublisher</span><span class="tok-o">.</span><span class="tok-n">update_readmodel</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The helpers in our Redis module are one-liners:</p>
+</div>
+<div id="redis_readmodel_client" class="exampleblock">
+<div class="title">Redis read model read and update (src/allocation/adapters/redis_eventpublisher.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">update_readmodel</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">batchref</span><span class="tok-p">):</span>
+    <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">hset</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">batchref</span><span class="tok-p">)</span>
+
+
+<span class="tok-k">def</span> <span class="tok-nf">get_readmodel</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">):</span>
+    <span class="tok-k">return</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">hgetall</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>(Maybe the name <em>redis_eventpublisher.py</em> is a misnomer now, but you get the idea.)</p>
+</div>
+<div class="paragraph">
+<p>And the view itself changes very slightly to adapt to its new backend:</p>
+</div>
+<div id="redis_readmodel_view" class="exampleblock">
+<div class="title">View adapted to Redis (src/allocation/views.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">allocations</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">):</span>
+    <span class="tok-n">batches</span> <span class="tok-o">=</span> <span class="tok-n">redis_eventpublisher</span><span class="tok-o">.</span><span class="tok-n">get_readmodel</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">)</span>
+    <span class="tok-k">return</span> <span class="tok-p">[</span>
+        <span class="tok-p">{</span><span class="tok-s1">'batchref'</span><span class="tok-p">:</span> <span class="tok-n">b</span><span class="tok-o">.</span><span class="tok-n">decode</span><span class="tok-p">(),</span> <span class="tok-s1">'sku'</span><span class="tok-p">:</span> <span class="tok-n">s</span><span class="tok-o">.</span><span class="tok-n">decode</span><span class="tok-p">()}</span>
+        <span class="tok-k">for</span> <span class="tok-n">s</span><span class="tok-p">,</span> <span class="tok-n">b</span> <span class="tok-ow">in</span> <span class="tok-n">batches</span><span class="tok-o">.</span><span class="tok-n">items</span><span class="tok-p">()</span>
+    <span class="tok-p">]</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>And the <em>exact same</em> integration tests that we had before still pass,
+because they are written at a level of abstraction that&#8217;s decoupled from the
+implementation: setup puts messages on the message bus, and the assertions
+are against our view.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+Event handlers are a great way to manage updates to a read model,
+    if you decide you need one.  They also make it easy to change the
+    implementation of that read model at a later date.
+</td>
+</tr>
+</table>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Exercise for the Reader</div>
+<div class="paragraph">
+<p>Implement another view, this time to show the allocation for a single
+order line.</p>
+</div>
+<div class="paragraph">
+<p>Here the trade-offs between using hardcoded SQL versus going via a repository
+should be much more blurry.  Try a few versions (maybe including going
+to Redis), and see which you prefer.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_wrap_up">Wrap-Up</h3>
+<div class="paragraph">
+<p><a href="#view_model_tradeoffs">Trade-offs of various view model options</a> proposes some pros and cons for each of our options.</p>
+</div>
+<div class="paragraph">
+<p>As it happens, the allocation service at MADE.com does use "full-blown" CQRS,
+with a read model stored in Redis, and even a second layer of cache provided
+by Varnish. But its use cases are quite a bit different from what
+we&#8217;ve shown here. For the kind of allocation service we&#8217;re building, it seems
+unlikely that you&#8217;d need to use a separate read model and event handlers for
+updating it.</p>
+</div>
+<div class="paragraph">
+<p>But as your domain model becomes richer and more complex, a simplified read
+model become ever more compelling.</p>
+</div>
+<table id="view_model_tradeoffs" class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 2. Trade-offs of various view model options</caption>
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Option</th>
+<th class="tableblock halign-left valign-top">Pros</th>
+<th class="tableblock halign-left valign-top">Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Just use repositories</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Simple, consistent approach.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Expect performance issues with complex query patterns.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Use custom queries with your ORM</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Allows reuse of DB configuration and model definitions.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Adds another query language with its own quirks and syntax.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Use hand-rolled SQL</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Offers fine control over performance with a standard query syntax.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Changes to DB schema have to be made to your hand-rolled queries <em>and</em> your
+  ORM definitions. Highly normalized schemas may still have performance
+  limitations.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Create separate read stores with events</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Read-only copies are easy to scale out. Views can be constructed when data
+  changes so that queries are as simple as possible.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Complex technique. Harry will be forever suspicious of your tastes and
+  motives.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>Often, your read operations will be acting on the same conceptual objects as your
+write model, so using the ORM, adding some read methods to your repositories,
+and using domain model classes for your read operations is <em>just fine</em>.</p>
+</div>
+<div class="paragraph">
+<p>In our book example, the read operations act on quite different conceptual
+entities to our domain model. The allocation service thinks in terms of
+<code>Batches</code> for a single SKU, but users care about allocations for a whole order,
+with multiple SKUs, so using the ORM ends up being a little awkward. We&#8217;d be
+quite tempted to go with the raw-SQL view we showed right at the beginning of
+the chapter.</p>
+</div>
+<div class="paragraph">
+<p>On that note, let&#8217;s sally forth into our final chapter.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2020-03-16 11:03:29 UTC
+</div>
+</div>
+<style>
+pre.pygments .hll { background-color: #ffffcc }
+pre.pygments  { background: #f0f0f0; }
+pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
+pre.pygments .tok-err { border: 1px solid #FF0000 } /* Error */
+pre.pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
+pre.pygments .tok-o { color: #666666 } /* Operator */
+pre.pygments .tok-ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
+pre.pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
+pre.pygments .tok-cp { color: #007020 } /* Comment.Preproc */
+pre.pygments .tok-cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
+pre.pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
+pre.pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
+pre.pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
+pre.pygments .tok-ge { font-style: italic } /* Generic.Emph */
+pre.pygments .tok-gr { color: #FF0000 } /* Generic.Error */
+pre.pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
+pre.pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
+pre.pygments .tok-go { color: #888888 } /* Generic.Output */
+pre.pygments .tok-gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+pre.pygments .tok-gs { font-weight: bold } /* Generic.Strong */
+pre.pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+pre.pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
+pre.pygments .tok-kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+pre.pygments .tok-kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+pre.pygments .tok-kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+pre.pygments .tok-kp { color: #007020 } /* Keyword.Pseudo */
+pre.pygments .tok-kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+pre.pygments .tok-kt { color: #902000 } /* Keyword.Type */
+pre.pygments .tok-m { color: #40a070 } /* Literal.Number */
+pre.pygments .tok-s { color: #4070a0 } /* Literal.String */
+pre.pygments .tok-na { color: #4070a0 } /* Name.Attribute */
+pre.pygments .tok-nb { color: #007020 } /* Name.Builtin */
+pre.pygments .tok-nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+pre.pygments .tok-no { color: #60add5 } /* Name.Constant */
+pre.pygments .tok-nd { color: #555555; font-weight: bold } /* Name.Decorator */
+pre.pygments .tok-ni { color: #d55537; font-weight: bold } /* Name.Entity */
+pre.pygments .tok-ne { color: #007020 } /* Name.Exception */
+pre.pygments .tok-nf { color: #06287e } /* Name.Function */
+pre.pygments .tok-nl { color: #002070; font-weight: bold } /* Name.Label */
+pre.pygments .tok-nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+pre.pygments .tok-nt { color: #062873; font-weight: bold } /* Name.Tag */
+pre.pygments .tok-nv { color: #bb60d5 } /* Name.Variable */
+pre.pygments .tok-ow { color: #007020; font-weight: bold } /* Operator.Word */
+pre.pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
+pre.pygments .tok-mb { color: #40a070 } /* Literal.Number.Bin */
+pre.pygments .tok-mf { color: #40a070 } /* Literal.Number.Float */
+pre.pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
+pre.pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
+pre.pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
+pre.pygments .tok-sa { color: #4070a0 } /* Literal.String.Affix */
+pre.pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
+pre.pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
+pre.pygments .tok-dl { color: #4070a0 } /* Literal.String.Delimiter */
+pre.pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+pre.pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
+pre.pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+pre.pygments .tok-sh { color: #4070a0 } /* Literal.String.Heredoc */
+pre.pygments .tok-si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+pre.pygments .tok-sx { color: #c65d09 } /* Literal.String.Other */
+pre.pygments .tok-sr { color: #235388 } /* Literal.String.Regex */
+pre.pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
+pre.pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
+pre.pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
+pre.pygments .tok-fm { color: #06287e } /* Name.Function.Magic */
+pre.pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
+pre.pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
+pre.pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
+pre.pygments .tok-vm { color: #bb60d5 } /* Name.Variable.Magic */
+pre.pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
+</style>
+<div><div id="disqus_thread" style="margin: 10px"></div>
+<script>
+
+var disqus_config = function () {
+this.page.url = 'https://cosmicpython.com';
+this.page.identifier = 'chapter_12_cqrs';
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = 'https://cosmic-python.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div><html><head><script async src="https://www.googletagmanager.com/gtag/js?id=UA-40928035-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-40928035-3');
+</script>
+</head></html></body>
+</html>

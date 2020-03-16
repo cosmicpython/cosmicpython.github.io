@@ -1,0 +1,26 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title>
+            Cosmic Python
+        </title>
+        <description>
+            Simple patterns for building complex apps
+        </description>
+        <link>https://cosmicpython.com</link>
+        <lastBuildDate>{{date}}</lastBuildDate>
+        <pubDate>Sat, 4 Jan 2020 19:15:54 -0500</pubDate>
+        <atom:link href="https://cosmicpython.com/rss.xml" rel="self" type="application/rss+xml" />
+        {% for item in posts %}
+        <item>
+            <title>{{ item.title }}</title>
+            <description>
+                {{item.blog_subheading}}
+            </description>
+            <link>{{item.link}}</link>
+            <pubDate>{{item.rfc2822_date}}</pubDate>
+            <dc:creator>{{ item.author }}</dc:creator>
+            <guid>{{item.link}}</guid>
+        </item>
+        {% endfor %}
+    </channel>
+</rss>

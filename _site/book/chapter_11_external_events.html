@@ -1,0 +1,964 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<title>Event-Driven Architecture: Using Events to Integrate Microservices</title>
+<style>
+/* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+
+@import url("//fonts.googleapis.com/css?family=Noto+Sans:300,600italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700");
+@import url(//asciidoctor.org/stylesheets/asciidoctor.css); /* Default asciidoc style framework - important */
+
+/* customisations by harry */
+
+/* hide inline ditaa/plantuml source listings for images */
+.image-source {
+    display: none
+}
+/* make formal codeblocks a bit nicer */
+.exampleblock > .content {
+    padding: 2px;
+    background-color: white;
+    border: 0;
+    margin-bottom: 2em;
+}
+
+.exampleblock .title {
+    text-align: right;
+}
+
+/* end customisations by harry */
+
+/* CUSTOMISATIONS */
+
+/* Change the values in root for quick customisation. If you want even more fine grain... venture further. */
+
+:root{
+--maincolor:#FFFFFF;
+--primarycolor:#2c3e50;
+--secondarycolor:#ba3925;
+--tertiarycolor: #186d7a;
+--sidebarbackground:#CCC;
+--linkcolor:#b71c1c;
+--linkcoloralternate:#f44336;
+--white:#FFFFFF;
+--black:#000000;
+}
+
+/* Text styles */
+h1{color:var(--primarycolor) !important;}
+h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+.title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
+p{font-family: "Noto Sans",sans-serif !important}
+
+/* Table styles */
+th{font-family: "Noto Sans",sans-serif !important}
+
+/* Responsiveness fixes */
+video {
+  max-width: 100%;
+}
+
+@media all and (max-width: 600px) {
+table {
+  width: 55vw!important;
+  font-size: 3vw;
+}
+
+</style>
+</head>
+<body class="article toc2 toc-left">
+<div id="buy_the_book" style="position: absolute; top: 0; right: 0; z-index:100">
+  <a href="/#buy_the_book">
+    <img src="/images/buy_the_book.svg" alt="buy the book ribbon">
+  </a>
+</div>
+<div id="header">
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="/book/preface.html">Preface</a></li>
+<li><a href="/book/introduction.html">Introduction</a></li>
+<li><a href="/book/part1.html">Building an Architecture to Support Domain Modeling</a></li>
+<li><a href="/book/chapter_01_domain_model.html">1. Domain Modeling</a></li>
+<li><a href="/book/chapter_02_repository.html">2. Repository Pattern</a></li>
+<li><a href="/book/chapter_03_abstractions.html">3. A Brief Interlude: On Coupling <span class="keep-together">and Abstractions</span></a></li>
+<li><a href="/book/chapter_04_service_layer.html">4. Our First Use Case: <span class="keep-together">Flask API and Service Layer</span></a></li>
+<li><a href="/book/chapter_05_high_gear_low_gear.html">5. TDD in High Gear and Low Gear</a></li>
+<li><a href="/book/chapter_06_uow.html">6. Unit of Work Pattern</a></li>
+<li><a href="/book/chapter_07_aggregate.html">7. Aggregates and Consistency Boundaries</a></li>
+<li><a href="/book/part2.html">Event-Driven Architecture</a></li>
+<li><a href="/book/chapter_08_events_and_message_bus.html">8. Events and the Message Bus</a></li>
+<li><a href="/book/chapter_09_all_messagebus.html">9. Going to Town on the Message Bus</a></li>
+<li><a href="/book/chapter_10_commands.html">10. Commands and Command Handler</a></li>
+<li><a href="/book/chapter_11_external_events.html">11. Event-Driven Architecture: Using Events to Integrate Microservices</a></li>
+<li><a href="/book/chapter_12_cqrs.html">12. Command-Query Responsibility Segregation (CQRS)</a></li>
+<li><a href="/book/chapter_13_dependency_injection.html">13. Dependency Injection (and Bootstrapping)</a></li>
+<li><a href="/book/epilogue_1_how_to_get_there_from_here.html">Appendix A: Epilogue</a></li>
+<li><a href="/book/appendix_ds1_table.html">Appendix B: Summary Diagram and Table</a></li>
+<li><a href="/book/appendix_project_structure.html">Appendix C: A Template Project Structure</a></li>
+<li><a href="/book/appendix_csvs.html">Appendix D: Swapping Out the Infrastructure: <span class="keep-together">Do Everything with CSVs</span></a></li>
+<li><a href="/book/appendix_django.html">Appendix E: Repository and Unit of Work <span class="keep-together">Patterns with Django</span></a></li>
+<li><a href="/book/appendix_validation.html">Appendix F: Validation</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="chapter_11_external_events">Event-Driven Architecture: Using Events to Integrate Microservices</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In the preceding chapter, we never actually spoke about <em>how</em> we would receive
+the "batch quantity changed" events, or indeed, how we might notify the
+outside world about reallocations.</p>
+</div>
+<div class="paragraph">
+<p>We have a microservice with a web API, but what about other ways of talking
+to other systems?  How will we know if, say, a shipment is delayed or the
+quantity is amended? How will we tell the warehouse system that an order has
+been allocated and needs to be sent to a customer?</p>
+</div>
+<div class="paragraph">
+<p>In this chapter, we&#8217;d like to show how the events metaphor can be extended
+to encompass the way that we handle incoming and outgoing messages from the
+system. Internally, the core of our application is now a message processor.
+Let&#8217;s follow through on that so it becomes a message processor <em>externally</em> as
+well. As shown in <a href="#message_processor_diagram">Our application is a message processor</a>, our application will receive
+events from external sources via an external message bus (we&#8217;ll use Redis pub/sub
+queues as an example) and publish its outputs, in the form of events, back
+there as well.</p>
+</div>
+<div id="message_processor_diagram" class="imageblock">
+<div class="content">
+<img src="images/apwp_1101.png" alt="apwp 1101">
+</div>
+<div class="title">Figure 1. Our application is a message processor</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The code for this chapter is in the
+chapter_11_external_events branch <a href="https://oreil.ly/UiwRS">on GitHub</a>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>git clone https://github.com/cosmicpython/code.git
+cd code
+git checkout chapter_11_external_events
+# or to code along, checkout the previous chapter:
+git checkout chapter_10_commands</pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_distributed_ball_of_mud_and_thinking_in_nouns">Distributed Ball of Mud, and Thinking in Nouns</h3>
+<div class="paragraph">
+<p>Before we get into that, let&#8217;s talk about the alternatives. We regularly talk to
+engineers who are trying to build out a microservices architecture. Often they
+are migrating from an existing application, and their first instinct is to
+split their system into <em>nouns</em>.</p>
+</div>
+<div class="paragraph">
+<p>What nouns have we introduced so far in our system? Well, we have batches of
+stock, orders, products, and customers. So a naive attempt at breaking
+up the system might have looked like <a href="#batches_context_diagram">Context diagram with noun-based services</a> (notice that
+we&#8217;ve named our system after a noun, <em>Batches</em>, instead of <em>Allocation</em>).</p>
+</div>
+<div id="batches_context_diagram" class="imageblock">
+<div class="content">
+<img src="images/apwp_1102.png" alt="apwp 1102">
+</div>
+<div class="title">Figure 2. Context diagram with noun-based services</div>
+</div>
+<div class="listingblock image-source">
+<div class="content">
+<pre>[plantuml, apwp_1102, config=plantuml.cfg]
+@startuml Batches Context Diagram
+!include images/C4_Context.puml
+
+System(batches, "Batches", "Knows about available stock")
+Person(customer, "Customer", "Wants to buy furniture")
+System(orders, "Orders", "Knows about customer orders")
+System(warehouse, "Warehouse", "Knows about shipping instructions")
+
+Rel_R(customer, orders, "Places order with")
+Rel_D(orders, batches, "Reserves stock with")
+Rel_D(batches, warehouse, "Sends instructions to")
+
+@enduml</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Each "thing" in our system has an associated service, which exposes an HTTP API.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s work through an example happy-path flow in <a href="#command_flow_diagram_1">Command flow 1</a>:
+our users visit a website and can choose from products that are in stock. When
+they add an item to their basket, we will reserve some stock for them. When an
+order is complete, we confirm the reservation, which causes us to send dispatch
+instructions to the warehouse. Let&#8217;s also say, if this is the customer&#8217;s third
+order, we want to update the customer record to flag them as a VIP.</p>
+</div>
+<div id="command_flow_diagram_1" class="imageblock width-80">
+<div class="content">
+<img src="images/apwp_1103.png" alt="apwp 1103">
+</div>
+<div class="title">Figure 3. Command flow 1</div>
+</div>
+<div class="listingblock image-source">
+<div class="content">
+<pre>[plantuml, apwp_1103, config=plantuml.cfg]
+@startuml
+scale 4
+
+actor Customer
+entity Orders
+entity Batches
+entity Warehouse
+database CRM
+
+
+== Reservation ==
+
+  Customer -&gt; Orders: Add product to basket
+  Orders -&gt; Batches: Reserve stock
+
+== Purchase ==
+
+  Customer -&gt; Orders: Place order
+  activate Orders
+  Orders -&gt; Batches: Confirm reservation
+  Batches -&gt; Warehouse: Dispatch goods
+  Orders -&gt; CRM: Update customer record
+  deactivate Orders
+
+
+@enduml</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can think of each of these steps as a command in our system: <code>ReserveStock</code>,
+<span class="keep-together"><code>ConfirmReservation</code></span>, <code>DispatchGoods</code>, <code>MakeCustomerVIP</code>, and so forth.</p>
+</div>
+<div class="paragraph">
+<p>This style of architecture, where we create a microservice per database table
+and treat our HTTP APIs as CRUD interfaces to anemic models, is the most common
+initial way for people to approach service-oriented design.</p>
+</div>
+<div class="paragraph">
+<p>This works <em>fine</em> for systems that are very simple, but it can quickly degrade into
+a distributed ball of mud.</p>
+</div>
+<div class="paragraph">
+<p>To see why, let&#8217;s consider another case. Sometimes, when stock arrives at the
+warehouse, we discover that items have been water damaged during transit. We
+can&#8217;t sell water-damaged sofas, so we have to throw them away and request more
+stock from our partners. We also need to update our stock model, and that
+might mean we need to reallocate a customer&#8217;s order.</p>
+</div>
+<div class="paragraph">
+<p>Where does this logic go?</p>
+</div>
+<div class="paragraph">
+<p>Well, the Warehouse system knows that the stock has been damaged, so maybe it
+should own this process, as shown in <a href="#command_flow_diagram_2">Command flow 2</a>.</p>
+</div>
+<div id="command_flow_diagram_2" class="imageblock">
+<div class="content">
+<img src="images/apwp_1104.png" alt="apwp 1104">
+</div>
+<div class="title">Figure 4. Command flow 2</div>
+</div>
+<div class="listingblock image-source">
+<div class="content">
+<pre>[plantuml, apwp_1104, config=plantuml.cfg]
+@startuml
+scale 4
+
+actor w as "Warehouse worker"
+entity Warehouse
+entity Batches
+entity Orders
+database CRM
+
+
+  w -&gt; Warehouse: Report stock damage
+  activate Warehouse
+  Warehouse -&gt; Batches: Decrease available stock
+  Batches -&gt; Batches: Reallocate orders
+  Batches -&gt; Orders: Update order status
+  Orders -&gt; CRM: Update order history
+  deactivate Warehouse
+
+@enduml</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This sort of works too, but now our dependency graph is a mess. To
+allocate stock, the Orders service drives the Batches system, which drives
+Warehouse; but in order to handle problems at the warehouse, our Warehouse
+system drives Batches, which drives Orders.</p>
+</div>
+<div class="paragraph">
+<p>Multiply this by all the other workflows we need to provide, and you can see
+how services quickly get tangled up.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_error_handling_in_distributed_systems">Error Handling in Distributed Systems</h3>
+<div class="paragraph">
+<p>"Things break" is a universal law of software engineering. What happens in our
+system when one of our requests fails? Let&#8217;s say that a network error happens
+right after we take a user&#8217;s order for three <code>MISBEGOTTEN-RUG</code>, as shown in
+<a href="#command_flow_diagram_with_error">Command flow with error</a>.</p>
+</div>
+<div class="paragraph">
+<p>We have two options here: we can place the order anyway and leave it
+unallocated, or we can refuse to take the order because the allocation can&#8217;t be
+guaranteed. The failure state of our batches service has bubbled up and is
+affecting the reliability of our order service.</p>
+</div>
+<div class="paragraph">
+<p>When two things have to be changed together, we say that they are <em>coupled</em>. We
+can think of this failure cascade as a kind of <em>temporal coupling</em>: every part
+of the system has to work at the same time for any part of it to work. As the
+system gets bigger, there is an exponentially increasing probability that some
+part is degraded.</p>
+</div>
+<div id="command_flow_diagram_with_error" class="imageblock">
+<div class="content">
+<img src="images/apwp_1105.png" alt="apwp 1105">
+</div>
+<div class="title">Figure 5. Command flow with error</div>
+</div>
+<div class="listingblock image-source">
+<div class="content">
+<pre>[plantuml, apwp_1105, config=plantuml.cfg]
+@startuml
+scale 4
+
+actor Customer
+entity Orders
+entity Batches
+
+Customer -&gt; Orders: Place order
+Orders -[#red]x Batches: Confirm reservation
+hnote right: network error
+Orders --&gt; Customer: ???
+
+@enduml</pre>
+</div>
+</div>
+<div id="connascence_sidebar" class="sidebarblock nobreakinside less_space">
+<div class="content">
+<div class="title">Connascence</div>
+<div class="paragraph">
+<p>We&#8217;re using the term <em>coupling</em> here, but there&#8217;s another way to describe
+the relationships between our systems. <em>Connascence</em> is a term used by some
+authors to describe the different types of coupling.</p>
+</div>
+<div class="paragraph">
+<p>Connascence isn&#8217;t <em>bad</em>, but some types of connascence are <em>stronger</em> than
+others. We want to have strong connascence locally, as when two classes are
+closely related, but weak connascence at a distance.</p>
+</div>
+<div class="paragraph">
+<p>In our first example of a distributed ball of mud, we see Connascence of
+Execution: multiple components need to know the correct order of work for an
+operation to be successful.</p>
+</div>
+<div class="paragraph">
+<p>When thinking about error conditions here, we&#8217;re talking about Connascence of
+Timing: multiple things have to happen, one after another, for the operation to
+work.</p>
+</div>
+<div class="paragraph">
+<p>When we replace our RPC-style system with events, we replace both of these types
+of connascence with a <em>weaker</em> type. That&#8217;s Connascence of Name: multiple
+components need to agree only on the name of an event and the names of fields
+it carries.</p>
+</div>
+<div class="paragraph">
+<p>We can never completely avoid coupling, except by having our software not talk
+to any other software. What we want is to avoid <em>inappropriate</em> coupling.
+Connascence provides a mental model for understanding the strength and type of
+coupling inherent in different architectural styles. Read all about it at
+<a href="http://www.connascence.io">connascence.io</a>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_the_alternative_temporal_decoupling_using_asynchronous_messaging">The Alternative: Temporal Decoupling Using Asynchronous Messaging</h3>
+<div class="paragraph">
+<p>How do we get appropriate coupling? We&#8217;ve already seen part of the answer, which is that we should think in
+terms of verbs, not nouns. Our domain model is about modeling a business
+process. It&#8217;s not a static data model about a thing; it&#8217;s a model of a verb.</p>
+</div>
+<div class="paragraph">
+<p>So instead of thinking about a system for orders and a system for batches,
+we think about a system for <em>ordering</em> and a system for <em>allocating</em>, and
+so on.</p>
+</div>
+<div class="paragraph">
+<p>When we separate things this way, it&#8217;s a little easier to see which system
+should be responsible for what.  When thinking about <em>ordering</em>, really we want
+to make sure that when we place an order, the order is placed. Everything else
+can happen <em>later</em>, so long as it happens.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+If this sounds familiar, it should!  Segregating responsibilities is
+    the same process we went through when designing our aggregates and commands.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Like aggregates, microservices should be <em>consistency boundaries</em>. Between two
+services, we can accept eventual consistency, and that means we don&#8217;t need to
+rely on synchronous calls. Each service accepts commands from the outside world
+and raises events to record the result. Other services can listen to those
+events to trigger the next steps in the workflow.</p>
+</div>
+<div class="paragraph">
+<p>To avoid the Distributed Ball of Mud anti-pattern, instead of temporally coupled HTTP
+API calls, we want to use asynchronous messaging to integrate our systems. We
+want our <code>BatchQuantityChanged</code> messages to come in as external messages from
+upstream systems, and we want our system to publish <code>Allocated</code> events for
+downstream systems to listen to.</p>
+</div>
+<div class="paragraph">
+<p>Why is this better? First, because things can fail independently, it&#8217;s easier
+to handle degraded behavior: we can still take orders if the allocation system
+is having a bad day.</p>
+</div>
+<div class="paragraph">
+<p>Second, we&#8217;re reducing the strength of coupling between our systems. If we
+need to change the order of operations or to introduce new steps in the process,
+we can do that locally.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_using_a_redis_pubsub_channel_for_integration">Using a Redis Pub/Sub Channel for Integration</h3>
+<div class="paragraph">
+<p>Let&#8217;s see how it will all work concretely. We&#8217;ll need some way of getting
+events out of one system and into another, like our message bus, but for
+services. This piece of infrastructure is often called a <em>message broker</em>. The
+role of a message broker is to take messages from publishers and deliver them
+to subscribers.</p>
+</div>
+<div class="paragraph">
+<p>At MADE.com, we use <a href="https://eventstore.org">Event Store</a>; Kafka or RabbitMQ
+are valid alternatives. A lightweight solution based on Redis
+<a href="https://redis.io/topics/pubsub">pub/sub channels</a> can also work just fine, and because
+Redis is much more generally familiar to people, we thought we&#8217;d use it for this
+book.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+We&#8217;re glossing over the complexity involved in choosing the right messaging
+    platform. Concerns like message ordering, failure handling, and idempotency
+    all need to be thought through. For a few pointers, see
+    <a href="/book/epilogue_1_how_to_get_there_from_here.html#footguns">[footguns]</a>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Our new flow will look like <a href="#reallocation_sequence_diagram_with_redis">Sequence diagram for reallocation flow</a>:
+Redis provides the <code>BatchQuantityChanged</code> event that kicks off the whole process, and our <code>Allocated</code> event is published back out to Redis again at the
+end.</p>
+</div>
+<div id="reallocation_sequence_diagram_with_redis" class="imageblock width-75">
+<div class="content">
+<img src="images/apwp_1106.png" alt="apwp 1106">
+</div>
+<div class="title">Figure 6. Sequence diagram for reallocation flow</div>
+</div>
+<div class="listingblock image-source">
+<div class="content">
+<pre>[plantuml, apwp_1106, config=plantuml.cfg]
+@startuml
+scale 4
+
+Redis -&gt; MessageBus : BatchQuantityChanged event
+
+group BatchQuantityChanged Handler + Unit of Work 1
+    MessageBus -&gt; Domain_Model : change batch quantity
+    Domain_Model -&gt; MessageBus : emit Allocate command(s)
+end
+
+
+group Allocate Handler + Unit of Work 2 (or more)
+    MessageBus -&gt; Domain_Model : allocate
+    Domain_Model -&gt; MessageBus : emit Allocated event(s)
+end
+
+MessageBus -&gt; Redis : publish to line_allocated channel
+@enduml</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_test_driving_it_all_using_an_end_to_end_test">Test-Driving It All Using an End-to-End Test</h3>
+<div class="paragraph">
+<p>Here&#8217;s how we might start with an end-to-end test.  We can use our existing
+API to create batches, and then we&#8217;ll test both inbound and outbound messages:</p>
+</div>
+<div id="redis_e2e_test" class="exampleblock">
+<div class="title">An end-to-end test for our pub/sub model (tests/e2e/test_external_events.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_change_batch_quantity_leading_to_reallocation</span><span class="tok-p">():</span>
+    <span class="tok-c1"># start with two batches and an order allocated to one of them  </span>#<b class="conum">(1)</b>
+    <span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span> <span class="tok-o">=</span> <span class="tok-n">random_orderid</span><span class="tok-p">(),</span> <span class="tok-n">random_sku</span><span class="tok-p">()</span>
+    <span class="tok-n">earlier_batch</span><span class="tok-p">,</span> <span class="tok-n">later_batch</span> <span class="tok-o">=</span> <span class="tok-n">random_batchref</span><span class="tok-p">(</span><span class="tok-s1">'old'</span><span class="tok-p">),</span> <span class="tok-n">random_batchref</span><span class="tok-p">(</span><span class="tok-s1">'newer'</span><span class="tok-p">)</span>
+    <span class="tok-n">api_client</span><span class="tok-o">.</span><span class="tok-n">post_to_add_batch</span><span class="tok-p">(</span><span class="tok-n">earlier_batch</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-o">=</span><span class="tok-mi">10</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-s1">'2011-01-02'</span><span class="tok-p">)</span>  #<b class="conum">(2)</b>
+    <span class="tok-n">api_client</span><span class="tok-o">.</span><span class="tok-n">post_to_add_batch</span><span class="tok-p">(</span><span class="tok-n">later_batch</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-o">=</span><span class="tok-mi">10</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-s1">'2011-01-02'</span><span class="tok-p">)</span>
+    <span class="tok-n">response</span> <span class="tok-o">=</span> <span class="tok-n">api_client</span><span class="tok-o">.</span><span class="tok-n">post_to_allocate</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">)</span>  #<b class="conum">(2)</b>
+    <span class="tok-k">assert</span> <span class="tok-n">response</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()[</span><span class="tok-s1">'batchref'</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-n">earlier_batch</span>
+
+    <span class="tok-n">subscription</span> <span class="tok-o">=</span> <span class="tok-n">redis_client</span><span class="tok-o">.</span><span class="tok-n">subscribe_to</span><span class="tok-p">(</span><span class="tok-s1">'line_allocated'</span><span class="tok-p">)</span>  #<b class="conum">(3)</b>
+
+    <span class="tok-c1"># change quantity on allocated batch so it's less than our order  </span>#<b class="conum">(1)</b>
+    <span class="tok-n">redis_client</span><span class="tok-o">.</span><span class="tok-n">publish_message</span><span class="tok-p">(</span><span class="tok-s1">'change_batch_quantity'</span><span class="tok-p">,</span> <span class="tok-p">{</span>  #<b class="conum">(3)</b>
+        <span class="tok-s1">'batchref'</span><span class="tok-p">:</span> <span class="tok-n">earlier_batch</span><span class="tok-p">,</span> <span class="tok-s1">'qty'</span><span class="tok-p">:</span> <span class="tok-mi">5</span>
+    <span class="tok-p">})</span>
+
+    <span class="tok-c1"># wait until we see a message saying the order has been reallocated  </span>#<b class="conum">(1)</b>
+    <span class="tok-n">messages</span> <span class="tok-o">=</span> <span class="tok-p">[]</span>
+    <span class="tok-k">for</span> <span class="tok-n">attempt</span> <span class="tok-ow">in</span> <span class="tok-n">Retrying</span><span class="tok-p">(</span><span class="tok-n">stop</span><span class="tok-o">=</span><span class="tok-n">stop_after_delay</span><span class="tok-p">(</span><span class="tok-mi">3</span><span class="tok-p">),</span> <span class="tok-n">reraise</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">):</span>  #<b class="conum">(4)</b>
+        <span class="tok-k">with</span> <span class="tok-n">attempt</span><span class="tok-p">:</span>
+            <span class="tok-n">message</span> <span class="tok-o">=</span> <span class="tok-n">subscription</span><span class="tok-o">.</span><span class="tok-n">get_message</span><span class="tok-p">(</span><span class="tok-n">timeout</span><span class="tok-o">=</span><span class="tok-mi">1</span><span class="tok-p">)</span>
+            <span class="tok-k">if</span> <span class="tok-n">message</span><span class="tok-p">:</span>
+                <span class="tok-n">messages</span><span class="tok-o">.</span><span class="tok-n">append</span><span class="tok-p">(</span><span class="tok-n">message</span><span class="tok-p">)</span>
+                <span class="tok-k">print</span><span class="tok-p">(</span><span class="tok-n">messages</span><span class="tok-p">)</span>
+            <span class="tok-n">data</span> <span class="tok-o">=</span> <span class="tok-n">json</span><span class="tok-o">.</span><span class="tok-n">loads</span><span class="tok-p">(</span><span class="tok-n">messages</span><span class="tok-p">[</span><span class="tok-o">-</span><span class="tok-mi">1</span><span class="tok-p">][</span><span class="tok-s1">'data'</span><span class="tok-p">])</span>
+            <span class="tok-k">assert</span> <span class="tok-n">data</span><span class="tok-p">[</span><span class="tok-s1">'orderid'</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-n">orderid</span>
+            <span class="tok-k">assert</span> <span class="tok-n">data</span><span class="tok-p">[</span><span class="tok-s1">'batchref'</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-n">later_batch</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>You can read the story of what&#8217;s going on in this test from the comments:
+we want to send an event into the system that causes an order line to be
+reallocated, and we see that reallocation come out as an event in Redis too.</p>
+</li>
+<li>
+<p><code>api_client</code> is a little helper that we refactored out to share between
+our two test types; it wraps our calls to <code>requests.post</code>.</p>
+</li>
+<li>
+<p><code>redis_client</code> is another little test helper, the details of which
+don&#8217;t really matter; its job is to be able to send and receive messages
+from various Redis channels. We&#8217;ll use a channel called
+<code>change_batch_quantity</code> to send in our request to change the quantity for a
+batch, and we&#8217;ll listen to another channel called <code>line_allocated</code> to
+look out for the expected reallocation.</p>
+</li>
+<li>
+<p>Because of the asynchronous nature of the system under test, we need to use
+the <code>tenacity</code> library again to add a retry loop&#8212;first, because it may
+take some time for our new <code>line_allocated</code> message to arrive, but also
+because it won&#8217;t be the only message on that channel.</p>
+</li>
+</ol>
+</div>
+<div class="sect3">
+<h4 id="_redis_is_another_thin_adapter_around_our_message_bus">Redis Is Another Thin Adapter Around Our Message Bus</h4>
+<div class="paragraph">
+<p>Our Redis pub/sub listener (we call it an <em>event consumer</em>) is very much like
+Flask: it translates from the outside world to our events:</p>
+</div>
+<div id="redis_eventconsumer_first_cut" class="exampleblock">
+<div class="title">Simple Redis message listener (src/allocation/entrypoints/redis_eventconsumer.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">redis</span><span class="tok-o">.</span><span class="tok-n">Redis</span><span class="tok-p">(</span><span class="tok-o">**</span><span class="tok-n">config</span><span class="tok-o">.</span><span class="tok-n">get_redis_host_and_port</span><span class="tok-p">())</span>
+
+
+<span class="tok-k">def</span> <span class="tok-nf">main</span><span class="tok-p">():</span>
+    <span class="tok-n">orm</span><span class="tok-o">.</span><span class="tok-n">start_mappers</span><span class="tok-p">()</span>
+    <span class="tok-n">pubsub</span> <span class="tok-o">=</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">pubsub</span><span class="tok-p">(</span><span class="tok-n">ignore_subscribe_messages</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">)</span>
+    <span class="tok-n">pubsub</span><span class="tok-o">.</span><span class="tok-n">subscribe</span><span class="tok-p">(</span><span class="tok-s1">'change_batch_quantity'</span><span class="tok-p">)</span>  #<b class="conum">(1)</b>
+
+    <span class="tok-k">for</span> <span class="tok-n">m</span> <span class="tok-ow">in</span> <span class="tok-n">pubsub</span><span class="tok-o">.</span><span class="tok-n">listen</span><span class="tok-p">():</span>
+        <span class="tok-n">handle_change_batch_quantity</span><span class="tok-p">(</span><span class="tok-n">m</span><span class="tok-p">)</span>
+
+
+<span class="tok-k">def</span> <span class="tok-nf">handle_change_batch_quantity</span><span class="tok-p">(</span><span class="tok-n">m</span><span class="tok-p">):</span>
+    <span class="tok-n">logging</span><span class="tok-o">.</span><span class="tok-n">debug</span><span class="tok-p">(</span><span class="tok-s1">'handling </span><span class="tok-si">%s</span><span class="tok-s1">'</span><span class="tok-p">,</span> <span class="tok-n">m</span><span class="tok-p">)</span>
+    <span class="tok-n">data</span> <span class="tok-o">=</span> <span class="tok-n">json</span><span class="tok-o">.</span><span class="tok-n">loads</span><span class="tok-p">(</span><span class="tok-n">m</span><span class="tok-p">[</span><span class="tok-s1">'data'</span><span class="tok-p">])</span>  #<b class="conum">(2)</b>
+    <span class="tok-n">cmd</span> <span class="tok-o">=</span> <span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">ChangeBatchQuantity</span><span class="tok-p">(</span><span class="tok-n">ref</span><span class="tok-o">=</span><span class="tok-n">data</span><span class="tok-p">[</span><span class="tok-s1">'batchref'</span><span class="tok-p">],</span> <span class="tok-n">qty</span><span class="tok-o">=</span><span class="tok-n">data</span><span class="tok-p">[</span><span class="tok-s1">'qty'</span><span class="tok-p">])</span>  #<b class="conum">(2)</b>
+    <span class="tok-n">messagebus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">cmd</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-o">=</span><span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyUnitOfWork</span><span class="tok-p">())</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p><code>main()</code> subscribes us to the <code>change_batch_quantity</code> channel on load.</p>
+</li>
+<li>
+<p>Our main job as an entrypoint to the system is to deserialize JSON,
+convert it to a <code>Command</code>, and pass it to the service layer&#8212;&#8203;much as the
+Flask adapter does.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>We also build a new downstream adapter to do the opposite job&#8212;converting
+ domain events to public events:</p>
+</div>
+<div id="redis_eventpubisher_first_cut" class="exampleblock">
+<div class="title">Simple Redis message publisher (src/allocation/adapters/redis_eventpublisher.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">redis</span><span class="tok-o">.</span><span class="tok-n">Redis</span><span class="tok-p">(</span><span class="tok-o">**</span><span class="tok-n">config</span><span class="tok-o">.</span><span class="tok-n">get_redis_host_and_port</span><span class="tok-p">())</span>
+
+
+<span class="tok-k">def</span> <span class="tok-nf">publish</span><span class="tok-p">(</span><span class="tok-n">channel</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">Event</span><span class="tok-p">):</span>  #<b class="conum">(1)</b>
+    <span class="tok-n">logging</span><span class="tok-o">.</span><span class="tok-n">debug</span><span class="tok-p">(</span><span class="tok-s1">'publishing: channel=</span><span class="tok-si">%s</span><span class="tok-s1">, event=</span><span class="tok-si">%s</span><span class="tok-s1">'</span><span class="tok-p">,</span> <span class="tok-n">channel</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">)</span>
+    <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">publish</span><span class="tok-p">(</span><span class="tok-n">channel</span><span class="tok-p">,</span> <span class="tok-n">json</span><span class="tok-o">.</span><span class="tok-n">dumps</span><span class="tok-p">(</span><span class="tok-n">asdict</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">)))</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>We take a hardcoded channel here, but you could also store
+a mapping between event classes/names and the appropriate channel,
+allowing one or more message types to go to different channels.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_our_new_outgoing_event">Our New Outgoing Event</h4>
+<div class="paragraph">
+<p>Here&#8217;s what the <code>Allocated</code> event will look like:</p>
+</div>
+<div id="allocated_event" class="exampleblock">
+<div class="title">New event (src/allocation/domain/events.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@dataclass</span>
+<span class="tok-k">class</span> <span class="tok-nc">Allocated</span><span class="tok-p">(</span><span class="tok-n">Event</span><span class="tok-p">):</span>
+    <span class="tok-n">orderid</span><span class="tok-p">:</span> <span class="tok-nb">str</span>
+    <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span>
+    <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span>
+    <span class="tok-n">batchref</span><span class="tok-p">:</span> <span class="tok-nb">str</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>It captures everything we need to know about an allocation: the details of the
+order line, and which batch it was allocated to.</p>
+</div>
+<div class="paragraph">
+<p>We add it into our model&#8217;s <code>allocate()</code> method (having added a test
+first, naturally):</p>
+</div>
+<div id="model_emits_allocated_event" class="exampleblock">
+<div class="title">Product.allocate() emits new event to record what happened (src/allocation/domain/model.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">Product</span><span class="tok-p">:</span>
+    <span class="tok-o">...</span>
+    <span class="tok-k">def</span> <span class="tok-nf">allocate</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">line</span><span class="tok-p">:</span> <span class="tok-n">OrderLine</span><span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-nb">str</span><span class="tok-p">:</span>
+        <span class="tok-o">...</span>
+
+            <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">)</span>
+            <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">version_number</span> <span class="tok-o">+=</span> <span class="tok-mi">1</span>
+            <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">append</span><span class="tok-p">(</span><span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">Allocated</span><span class="tok-p">(</span>
+                <span class="tok-n">orderid</span><span class="tok-o">=</span><span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-o">=</span><span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">qty</span><span class="tok-p">,</span>
+                <span class="tok-n">batchref</span><span class="tok-o">=</span><span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">reference</span><span class="tok-p">,</span>
+            <span class="tok-p">))</span>
+            <span class="tok-k">return</span> <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">reference</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The handler for <code>ChangeBatchQuantity</code> already exists, so all we need to add
+is a handler that publishes the outgoing event:</p>
+</div>
+<div id="another_handler" class="exampleblock">
+<div class="title">The message bus grows (src/allocation/service_layer/messagebus.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-n">HANDLERS</span> <span class="tok-o">=</span> <span class="tok-p">{</span>
+<span class="hll">    <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">Allocated</span><span class="tok-p">:</span> <span class="tok-p">[</span><span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">publish_allocated_event</span><span class="tok-p">],</span>
+</span>    <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">OutOfStock</span><span class="tok-p">:</span> <span class="tok-p">[</span><span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">send_out_of_stock_notification</span><span class="tok-p">],</span>
+<span class="tok-p">}</span>  <span class="tok-c1"># type: Dict[Type[events.Event], List[Callable]]</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Publishing the event uses our helper function from the Redis wrapper:</p>
+</div>
+<div id="publish_event_handler" class="exampleblock">
+<div class="title">Publish to Redis (src/allocation/service_layer/handlers.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">publish_allocated_event</span><span class="tok-p">(</span>
+        <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">Allocated</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>
+<span class="tok-p">):</span>
+    <span class="tok-n">redis_eventpublisher</span><span class="tok-o">.</span><span class="tok-n">publish</span><span class="tok-p">(</span><span class="tok-s1">'line_allocated'</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_internal_versus_external_events">Internal Versus External Events</h3>
+<div class="paragraph">
+<p>It&#8217;s a good idea to keep the distinction between internal and external events
+clear.  Some events may come from the outside, and some events may get upgraded
+and published externally, but not all of them will.  This is particularly important
+if you get into
+<a href="https://oreil.ly/FXVil">event sourcing</a>
+(very much a topic for another book, though).</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+Outbound events are one of the places it&#8217;s important to apply validation.
+    See <a href="/book/appendix_validation.html">[appendix_validation]</a> for some validation philosophy and <span class="keep-together">examples</span>.
+</td>
+</tr>
+</table>
+</div>
+<div class="sidebarblock nobreakinside less_space">
+<div class="content">
+<div class="title">Exercise for the Reader</div>
+<div class="paragraph">
+<p>A nice simple one for this chapter: make it so that the main <code>allocate()</code> use
+case can also be invoked by an event on a Redis channel, as well as (or instead of)
+via the API.</p>
+</div>
+<div class="paragraph">
+<p>You will likely want to add a new E2E test and feed through some changes into
+<span class="keep-together"><code>redis_eventconsumer.py</code></span>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_wrap_up">Wrap-Up</h3>
+<div class="paragraph">
+<p>Events can come <em>from</em> the outside, but they can also be published
+externally&#8212;&#8203;our <code>publish</code> handler converts an event to a message on a Redis
+channel. We use events to talk to the outside world.  This kind of temporal
+decoupling buys us a lot of flexibility in our application integrations, but
+as always, it comes at a cost.</p>
+</div>
+<blockquote>
+
+<p>
+Event notification is nice because it implies a low level of coupling, and is
+pretty simple to set up. It can become problematic, however, if there really is
+a logical flow that runs over various event notifications...It can be hard to
+see such a flow as it's not explicit in any program text....This can make it hard to debug
+and modify.
+</p>
+
+<p data-type="attribution">Martin Fowler, <a href="https://oreil.ly/uaPNt"><span class="roman">"What do you mean by 'Event-Driven'"</span></a></p>
+
+</blockquote>
+<div class="paragraph">
+<p><a href="#chapter_11_external_events_tradeoffs">Event-based microservices integration: the trade-offs</a> shows some trade-offs to think about.</p>
+</div>
+<table id="chapter_11_external_events_tradeoffs" class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. Event-based microservices integration: the trade-offs</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Pros</th>
+<th class="tableblock halign-left valign-top">Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="ulist">
+<ul>
+<li>
+<p>Avoids the distributed big ball of mud.</p>
+</li>
+<li>
+<p>Services are decoupled: it&#8217;s easier to change individual services and add
+new ones.</p>
+</li>
+</ul>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="ulist">
+<ul>
+<li>
+<p>The overall flows of information are harder to see.</p>
+</li>
+<li>
+<p>Eventual consistency is a new concept to deal with.</p>
+</li>
+<li>
+<p>Message reliability and choices around at-least-once versus at-most-once delivery
+need thinking through.</p>
+</li>
+</ul>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>More generally, if you&#8217;re moving from a model of synchronous messaging to an
+async one, you also open up a whole host of problems having to do with message
+reliability and eventual consistency. Read on to <a href="/book/epilogue_1_how_to_get_there_from_here.html#footguns">[footguns]</a>.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2020-03-16 11:03:29 UTC
+</div>
+</div>
+<style>
+pre.pygments .hll { background-color: #ffffcc }
+pre.pygments  { background: #f0f0f0; }
+pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
+pre.pygments .tok-err { border: 1px solid #FF0000 } /* Error */
+pre.pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
+pre.pygments .tok-o { color: #666666 } /* Operator */
+pre.pygments .tok-ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
+pre.pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
+pre.pygments .tok-cp { color: #007020 } /* Comment.Preproc */
+pre.pygments .tok-cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
+pre.pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
+pre.pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
+pre.pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
+pre.pygments .tok-ge { font-style: italic } /* Generic.Emph */
+pre.pygments .tok-gr { color: #FF0000 } /* Generic.Error */
+pre.pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
+pre.pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
+pre.pygments .tok-go { color: #888888 } /* Generic.Output */
+pre.pygments .tok-gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+pre.pygments .tok-gs { font-weight: bold } /* Generic.Strong */
+pre.pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+pre.pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
+pre.pygments .tok-kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+pre.pygments .tok-kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+pre.pygments .tok-kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+pre.pygments .tok-kp { color: #007020 } /* Keyword.Pseudo */
+pre.pygments .tok-kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+pre.pygments .tok-kt { color: #902000 } /* Keyword.Type */
+pre.pygments .tok-m { color: #40a070 } /* Literal.Number */
+pre.pygments .tok-s { color: #4070a0 } /* Literal.String */
+pre.pygments .tok-na { color: #4070a0 } /* Name.Attribute */
+pre.pygments .tok-nb { color: #007020 } /* Name.Builtin */
+pre.pygments .tok-nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+pre.pygments .tok-no { color: #60add5 } /* Name.Constant */
+pre.pygments .tok-nd { color: #555555; font-weight: bold } /* Name.Decorator */
+pre.pygments .tok-ni { color: #d55537; font-weight: bold } /* Name.Entity */
+pre.pygments .tok-ne { color: #007020 } /* Name.Exception */
+pre.pygments .tok-nf { color: #06287e } /* Name.Function */
+pre.pygments .tok-nl { color: #002070; font-weight: bold } /* Name.Label */
+pre.pygments .tok-nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+pre.pygments .tok-nt { color: #062873; font-weight: bold } /* Name.Tag */
+pre.pygments .tok-nv { color: #bb60d5 } /* Name.Variable */
+pre.pygments .tok-ow { color: #007020; font-weight: bold } /* Operator.Word */
+pre.pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
+pre.pygments .tok-mb { color: #40a070 } /* Literal.Number.Bin */
+pre.pygments .tok-mf { color: #40a070 } /* Literal.Number.Float */
+pre.pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
+pre.pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
+pre.pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
+pre.pygments .tok-sa { color: #4070a0 } /* Literal.String.Affix */
+pre.pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
+pre.pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
+pre.pygments .tok-dl { color: #4070a0 } /* Literal.String.Delimiter */
+pre.pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+pre.pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
+pre.pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+pre.pygments .tok-sh { color: #4070a0 } /* Literal.String.Heredoc */
+pre.pygments .tok-si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+pre.pygments .tok-sx { color: #c65d09 } /* Literal.String.Other */
+pre.pygments .tok-sr { color: #235388 } /* Literal.String.Regex */
+pre.pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
+pre.pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
+pre.pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
+pre.pygments .tok-fm { color: #06287e } /* Name.Function.Magic */
+pre.pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
+pre.pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
+pre.pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
+pre.pygments .tok-vm { color: #bb60d5 } /* Name.Variable.Magic */
+pre.pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
+</style>
+<div><div id="disqus_thread" style="margin: 10px"></div>
+<script>
+
+var disqus_config = function () {
+this.page.url = 'https://cosmicpython.com';
+this.page.identifier = 'chapter_11_external_events';
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = 'https://cosmic-python.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div><html><head><script async src="https://www.googletagmanager.com/gtag/js?id=UA-40928035-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-40928035-3');
+</script>
+</head></html></body>
+</html>

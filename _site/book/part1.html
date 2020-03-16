@@ -1,0 +1,241 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<title>Building an Architecture to Support Domain Modeling</title>
+<style>
+/* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+
+@import url("//fonts.googleapis.com/css?family=Noto+Sans:300,600italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700");
+@import url(//asciidoctor.org/stylesheets/asciidoctor.css); /* Default asciidoc style framework - important */
+
+/* customisations by harry */
+
+/* hide inline ditaa/plantuml source listings for images */
+.image-source {
+    display: none
+}
+/* make formal codeblocks a bit nicer */
+.exampleblock > .content {
+    padding: 2px;
+    background-color: white;
+    border: 0;
+    margin-bottom: 2em;
+}
+
+.exampleblock .title {
+    text-align: right;
+}
+
+/* end customisations by harry */
+
+/* CUSTOMISATIONS */
+
+/* Change the values in root for quick customisation. If you want even more fine grain... venture further. */
+
+:root{
+--maincolor:#FFFFFF;
+--primarycolor:#2c3e50;
+--secondarycolor:#ba3925;
+--tertiarycolor: #186d7a;
+--sidebarbackground:#CCC;
+--linkcolor:#b71c1c;
+--linkcoloralternate:#f44336;
+--white:#FFFFFF;
+--black:#000000;
+}
+
+/* Text styles */
+h1{color:var(--primarycolor) !important;}
+h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+.title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
+p{font-family: "Noto Sans",sans-serif !important}
+
+/* Table styles */
+th{font-family: "Noto Sans",sans-serif !important}
+
+/* Responsiveness fixes */
+video {
+  max-width: 100%;
+}
+
+@media all and (max-width: 600px) {
+table {
+  width: 55vw!important;
+  font-size: 3vw;
+}
+
+</style>
+</head>
+<body class="article toc2 toc-left">
+<div id="buy_the_book" style="position: absolute; top: 0; right: 0; z-index:100">
+  <a href="/#buy_the_book">
+    <img src="/images/buy_the_book.svg" alt="buy the book ribbon">
+  </a>
+</div>
+<div id="header">
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="/book/preface.html">Preface</a></li>
+<li><a href="/book/introduction.html">Introduction</a></li>
+<li><a href="/book/part1.html">Building an Architecture to Support Domain Modeling</a></li>
+<li><a href="/book/chapter_01_domain_model.html">1. Domain Modeling</a></li>
+<li><a href="/book/chapter_02_repository.html">2. Repository Pattern</a></li>
+<li><a href="/book/chapter_03_abstractions.html">3. A Brief Interlude: On Coupling <span class="keep-together">and Abstractions</span></a></li>
+<li><a href="/book/chapter_04_service_layer.html">4. Our First Use Case: <span class="keep-together">Flask API and Service Layer</span></a></li>
+<li><a href="/book/chapter_05_high_gear_low_gear.html">5. TDD in High Gear and Low Gear</a></li>
+<li><a href="/book/chapter_06_uow.html">6. Unit of Work Pattern</a></li>
+<li><a href="/book/chapter_07_aggregate.html">7. Aggregates and Consistency Boundaries</a></li>
+<li><a href="/book/part2.html">Event-Driven Architecture</a></li>
+<li><a href="/book/chapter_08_events_and_message_bus.html">8. Events and the Message Bus</a></li>
+<li><a href="/book/chapter_09_all_messagebus.html">9. Going to Town on the Message Bus</a></li>
+<li><a href="/book/chapter_10_commands.html">10. Commands and Command Handler</a></li>
+<li><a href="/book/chapter_11_external_events.html">11. Event-Driven Architecture: Using Events to Integrate Microservices</a></li>
+<li><a href="/book/chapter_12_cqrs.html">12. Command-Query Responsibility Segregation (CQRS)</a></li>
+<li><a href="/book/chapter_13_dependency_injection.html">13. Dependency Injection (and Bootstrapping)</a></li>
+<li><a href="/book/epilogue_1_how_to_get_there_from_here.html">Appendix A: Epilogue</a></li>
+<li><a href="/book/appendix_ds1_table.html">Appendix B: Summary Diagram and Table</a></li>
+<li><a href="/book/appendix_project_structure.html">Appendix C: A Template Project Structure</a></li>
+<li><a href="/book/appendix_csvs.html">Appendix D: Swapping Out the Infrastructure: <span class="keep-together">Do Everything with CSVs</span></a></li>
+<li><a href="/book/appendix_django.html">Appendix E: Repository and Unit of Work <span class="keep-together">Patterns with Django</span></a></li>
+<li><a href="/book/appendix_validation.html">Appendix F: Validation</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1 pagenumrestart">
+<h2 id="part1">Building an Architecture to Support Domain Modeling</h2>
+<div class="sectionbody">
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>Most developers have never seen a domain model, only a data model.</p>
+</div>
+</blockquote>
+<div class="attribution">
+&#8212; Cyrille Martraire<br>
+<cite>DDD EU 2017</cite>
+</div>
+</div>
+<div class="paragraph">
+<p>Most developers we talk to about architecture have a nagging sense that
+things could be better. They are often trying to rescue a system that has gone
+wrong somehow, and are trying to put some structure back into a ball of mud.
+They know that their business logic shouldn&#8217;t be spread all over the place,
+but they have no idea how to fix it.</p>
+</div>
+<div class="paragraph">
+<p>We&#8217;ve found that many developers, when asked to design a new system, will
+immediately start to build a database schema, with the object model treated
+as an afterthought. This is where it all starts to go wrong. Instead, <em>behavior
+should come first and drive our storage requirements.</em> After all, our customers don&#8217;t care about the data model. They care about what
+the system <em>does</em>; otherwise they&#8217;d just use a spreadsheet.</p>
+</div>
+<div class="paragraph">
+<p>The first part of the book looks at how to build a rich object model
+through TDD (in <a href="/book/chapter_01_domain_model.html">[chapter_01_domain_model]</a>), and then we&#8217;ll show how
+to keep that model decoupled from technical concerns. We show how to build
+persistence-ignorant code and how to create stable APIs around our domain so
+that we can refactor aggressively.</p>
+</div>
+<div class="paragraph">
+<p>To do that, we present four key design patterns:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The <a href="/book/chapter_02_repository.html">Repository pattern</a>, an abstraction over the
+idea of persistent storage</p>
+</li>
+<li>
+<p>The <a href="/book/chapter_04_service_layer.html">Service Layer</a> pattern to clearly define where our
+use cases begin and end</p>
+</li>
+</ul>
+</div>
+<div class="ulist pagebreak-before">
+<ul>
+<li>
+<p>The <a href="/book/chapter_06_uow.html">Unit of Work pattern</a> to provide atomic operations</p>
+</li>
+<li>
+<p>The <a href="/book/chapter_07_aggregate.html">Aggregate pattern</a> to enforce the integrity
+of our data</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If you&#8217;d like a picture of where we&#8217;re going, take a look at
+<a href="#part1_components_diagram">A component diagram for our app at the end of </a><a href="#part1">Building an Architecture to Support Domain Modeling</a>, but don&#8217;t worry if none of it makes sense
+yet!  We introduce each box in the figure, one by one, throughout this part of the book.</p>
+</div>
+<div id="part1_components_diagram" class="imageblock width-90">
+<div class="content">
+<img src="images/apwp_p101.png" alt="apwp p101">
+</div>
+<div class="title">Figure 1. A component diagram for our app at the end of <a href="#part1">Building an Architecture to Support Domain Modeling</a></div>
+</div>
+<div class="paragraph">
+<p>We also take a little time out to talk about
+<a href="/book/chapter_03_abstractions.html">coupling and abstractions</a>, illustrating it with a simple example that shows how and why we choose our
+abstractions.</p>
+</div>
+<div class="paragraph">
+<p>Three appendices are further explorations of the content from Part I:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="/book/appendix_project_structure.html">[appendix_project_structure]</a> is a write-up of the infrastructure for our example
+code: how we build and run the Docker images, where we manage configuration
+info, and how we run different types of tests.</p>
+</li>
+<li>
+<p><a href="/book/appendix_csvs.html">[appendix_csvs]</a> is a "proof is in the pudding" kind of content, showing
+how easy it is to swap out our entire infrastructure&#8212;&#8203;the Flask API, the
+ORM, and Postgres&#8212;for a totally different I/O model involving a CLI and
+CSVs.</p>
+</li>
+<li>
+<p>Finally, <a href="/book/appendix_django.html">[appendix_django]</a> may be of interest if you&#8217;re wondering how these
+patterns might look if using Django instead of Flask and SQLAlchemy.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2020-03-16 11:03:29 UTC
+</div>
+</div>
+<div><div id="disqus_thread" style="margin: 10px"></div>
+<script>
+
+var disqus_config = function () {
+this.page.url = 'https://cosmicpython.com';
+this.page.identifier = 'part1';
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = 'https://cosmic-python.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div><html><head><script async src="https://www.googletagmanager.com/gtag/js?id=UA-40928035-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-40928035-3');
+</script>
+</head></html></body>
+</html>

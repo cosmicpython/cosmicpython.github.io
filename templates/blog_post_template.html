@@ -1,0 +1,11 @@
+{% extends "templates/base.html" %}
+
+{% block content_block %}
+  <h1> {{ post.title }}</h1>
+  <p>by {{ post.author }}, {{ post.date }}</p>
+
+  <div class="content">
+    {{content}}
+  </div>
+</section>
+{% endblock %}

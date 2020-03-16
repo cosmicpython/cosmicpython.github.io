@@ -1,0 +1,567 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<title>Introduction</title>
+<style>
+/* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+
+@import url("//fonts.googleapis.com/css?family=Noto+Sans:300,600italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700");
+@import url(//asciidoctor.org/stylesheets/asciidoctor.css); /* Default asciidoc style framework - important */
+
+/* customisations by harry */
+
+/* hide inline ditaa/plantuml source listings for images */
+.image-source {
+    display: none
+}
+/* make formal codeblocks a bit nicer */
+.exampleblock > .content {
+    padding: 2px;
+    background-color: white;
+    border: 0;
+    margin-bottom: 2em;
+}
+
+.exampleblock .title {
+    text-align: right;
+}
+
+/* end customisations by harry */
+
+/* CUSTOMISATIONS */
+
+/* Change the values in root for quick customisation. If you want even more fine grain... venture further. */
+
+:root{
+--maincolor:#FFFFFF;
+--primarycolor:#2c3e50;
+--secondarycolor:#ba3925;
+--tertiarycolor: #186d7a;
+--sidebarbackground:#CCC;
+--linkcolor:#b71c1c;
+--linkcoloralternate:#f44336;
+--white:#FFFFFF;
+--black:#000000;
+}
+
+/* Text styles */
+h1{color:var(--primarycolor) !important;}
+h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+.title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
+p{font-family: "Noto Sans",sans-serif !important}
+
+/* Table styles */
+th{font-family: "Noto Sans",sans-serif !important}
+
+/* Responsiveness fixes */
+video {
+  max-width: 100%;
+}
+
+@media all and (max-width: 600px) {
+table {
+  width: 55vw!important;
+  font-size: 3vw;
+}
+
+</style>
+</head>
+<body class="article toc2 toc-left">
+<div id="buy_the_book" style="position: absolute; top: 0; right: 0; z-index:100">
+  <a href="/#buy_the_book">
+    <img src="/images/buy_the_book.svg" alt="buy the book ribbon">
+  </a>
+</div>
+<div id="header">
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="/book/preface.html">Preface</a></li>
+<li><a href="/book/introduction.html">Introduction</a></li>
+<li><a href="/book/part1.html">Building an Architecture to Support Domain Modeling</a></li>
+<li><a href="/book/chapter_01_domain_model.html">1. Domain Modeling</a></li>
+<li><a href="/book/chapter_02_repository.html">2. Repository Pattern</a></li>
+<li><a href="/book/chapter_03_abstractions.html">3. A Brief Interlude: On Coupling <span class="keep-together">and Abstractions</span></a></li>
+<li><a href="/book/chapter_04_service_layer.html">4. Our First Use Case: <span class="keep-together">Flask API and Service Layer</span></a></li>
+<li><a href="/book/chapter_05_high_gear_low_gear.html">5. TDD in High Gear and Low Gear</a></li>
+<li><a href="/book/chapter_06_uow.html">6. Unit of Work Pattern</a></li>
+<li><a href="/book/chapter_07_aggregate.html">7. Aggregates and Consistency Boundaries</a></li>
+<li><a href="/book/part2.html">Event-Driven Architecture</a></li>
+<li><a href="/book/chapter_08_events_and_message_bus.html">8. Events and the Message Bus</a></li>
+<li><a href="/book/chapter_09_all_messagebus.html">9. Going to Town on the Message Bus</a></li>
+<li><a href="/book/chapter_10_commands.html">10. Commands and Command Handler</a></li>
+<li><a href="/book/chapter_11_external_events.html">11. Event-Driven Architecture: Using Events to Integrate Microservices</a></li>
+<li><a href="/book/chapter_12_cqrs.html">12. Command-Query Responsibility Segregation (CQRS)</a></li>
+<li><a href="/book/chapter_13_dependency_injection.html">13. Dependency Injection (and Bootstrapping)</a></li>
+<li><a href="/book/epilogue_1_how_to_get_there_from_here.html">Appendix A: Epilogue</a></li>
+<li><a href="/book/appendix_ds1_table.html">Appendix B: Summary Diagram and Table</a></li>
+<li><a href="/book/appendix_project_structure.html">Appendix C: A Template Project Structure</a></li>
+<li><a href="/book/appendix_csvs.html">Appendix D: Swapping Out the Infrastructure: <span class="keep-together">Do Everything with CSVs</span></a></li>
+<li><a href="/book/appendix_django.html">Appendix E: Repository and Unit of Work <span class="keep-together">Patterns with Django</span></a></li>
+<li><a href="/book/appendix_validation.html">Appendix F: Validation</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="introduction">Introduction</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_why_do_our_designs_go_wrong">Why Do Our Designs Go Wrong?</h3>
+<div class="paragraph">
+<p>What comes to mind when you hear the word <em>chaos?</em> Perhaps you think of a noisy
+stock exchange, or your kitchen in the morning&#8212;&#8203;everything confused and
+jumbled. When you think of the word <em>order</em>, perhaps you think of an empty room,
+serene and calm. For scientists, though, chaos is characterized by homogeneity
+(sameness), and order by complexity (difference).</p>
+</div>
+<div class="paragraph">
+<p>For example, a well-tended garden is a highly ordered system. Gardeners define
+boundaries with paths and fences, and they mark out flower beds or vegetable
+patches. Over time, the garden evolves, growing richer and thicker; but without
+deliberate effort, the garden will run wild. Weeds and grasses will choke out
+other plants, covering over the paths, until eventually every part looks the
+same again&#8212;&#8203;wild and unmanaged.</p>
+</div>
+<div class="paragraph">
+<p>Software systems, too, tend toward chaos. When we first start building a new
+system, we have grand ideas that our code will be clean and well ordered, but
+over time we find that it gathers cruft and edge cases and ends up a confusing
+morass of manager classes and util modules. We find that our sensibly layered
+architecture has collapsed into itself like an oversoggy trifle. Chaotic
+software systems are characterized by a sameness of function: API handlers that
+have domain knowledge and send email and perform logging; "business logic"
+classes that perform no calculations but do perform I/O; and everything coupled
+to everything else so that changing any part of the system becomes fraught with
+danger. This is so common that software engineers have their own term for
+chaos: the Big Ball of Mud anti-pattern (<a href="#bbom_image">A real-life dependency diagram (source: </a><a href="https://oreil.ly/dbGTW">"Enterprise Dependency: Big Ball of Yarn"</a> by Alex Papadimoulis)).</p>
+</div>
+<div id="bbom_image" class="imageblock">
+<div class="content">
+<img src="images/apwp_0001.png" alt="apwp 0001">
+</div>
+<div class="title">Figure 1. A real-life dependency diagram (source: <a href="https://oreil.ly/dbGTW">"Enterprise Dependency: Big Ball of Yarn"</a> by Alex Papadimoulis)</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+A big ball of mud is the natural state of software in the same way that wilderness
+    is the natural state of your garden. It takes energy and direction to
+    prevent the collapse.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Fortunately, the techniques to avoid creating a big ball of mud aren&#8217;t complex.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_encapsulation_and_abstractions">Encapsulation and Abstractions</h3>
+<div class="paragraph">
+<p>Encapsulation and abstraction are tools that we all instinctively reach for
+as programmers, even if we don&#8217;t all use these exact words.  Allow us to dwell
+on them for a moment, since they are a recurring background theme of the book.</p>
+</div>
+<div class="paragraph">
+<p>The term <em>encapsulation</em> covers two closely related ideas: simplifying
+behavior and hiding data. In this discussion, we&#8217;re using the first sense. We
+encapsulate behavior by identifying a task that needs to be done in our code
+and giving that task to a well-defined object or function. We call that object or function an
+<em>abstraction</em>.</p>
+</div>
+<div class="paragraph">
+<p>Take a look at the following two snippets of Python code:</p>
+</div>
+<div id="urllib_example" class="exampleblock">
+<div class="title">Do a search with urllib</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">import</span> <span class="tok-nn">json</span>
+<span class="tok-kn">from</span> <span class="tok-nn">urllib.request</span> <span class="tok-kn">import</span> <span class="tok-n">urlopen</span>
+<span class="tok-kn">from</span> <span class="tok-nn">urllib.parse</span> <span class="tok-kn">import</span> <span class="tok-n">urlencode</span>
+
+<span class="tok-n">params</span> <span class="tok-o">=</span> <span class="tok-nb">dict</span><span class="tok-p">(</span><span class="tok-n">q</span><span class="tok-o">=</span><span class="tok-s1">'Sausages'</span><span class="tok-p">,</span> <span class="tok-n">format</span><span class="tok-o">=</span><span class="tok-s1">'json'</span><span class="tok-p">)</span>
+<span class="tok-n">handle</span> <span class="tok-o">=</span> <span class="tok-n">urlopen</span><span class="tok-p">(</span><span class="tok-s1">'http://api.duckduckgo.com'</span> <span class="tok-o">+</span> <span class="tok-s1">'?'</span> <span class="tok-o">+</span> <span class="tok-n">urlencode</span><span class="tok-p">(</span><span class="tok-n">params</span><span class="tok-p">))</span>
+<span class="tok-n">raw_text</span> <span class="tok-o">=</span> <span class="tok-n">handle</span><span class="tok-o">.</span><span class="tok-n">read</span><span class="tok-p">()</span><span class="tok-o">.</span><span class="tok-n">decode</span><span class="tok-p">(</span><span class="tok-s1">'utf8'</span><span class="tok-p">)</span>
+<span class="tok-n">parsed</span> <span class="tok-o">=</span> <span class="tok-n">json</span><span class="tok-o">.</span><span class="tok-n">loads</span><span class="tok-p">(</span><span class="tok-n">raw_text</span><span class="tok-p">)</span>
+
+<span class="tok-n">results</span> <span class="tok-o">=</span> <span class="tok-n">parsed</span><span class="tok-p">[</span><span class="tok-s1">'RelatedTopics'</span><span class="tok-p">]</span>
+<span class="tok-k">for</span> <span class="tok-n">r</span> <span class="tok-ow">in</span> <span class="tok-n">results</span><span class="tok-p">:</span>
+    <span class="tok-k">if</span> <span class="tok-s1">'Text'</span> <span class="tok-ow">in</span> <span class="tok-n">r</span><span class="tok-p">:</span>
+        <span class="tok-k">print</span><span class="tok-p">(</span><span class="tok-n">r</span><span class="tok-p">[</span><span class="tok-s1">'FirstURL'</span><span class="tok-p">]</span> <span class="tok-o">+</span> <span class="tok-s1">' - '</span> <span class="tok-o">+</span> <span class="tok-n">r</span><span class="tok-p">[</span><span class="tok-s1">'Text'</span><span class="tok-p">])</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div id="requests_example" class="exampleblock">
+<div class="title">Do a search with requests</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">import</span> <span class="tok-nn">requests</span>
+
+<span class="tok-n">params</span> <span class="tok-o">=</span> <span class="tok-nb">dict</span><span class="tok-p">(</span><span class="tok-n">q</span><span class="tok-o">=</span><span class="tok-s1">'Sausages'</span><span class="tok-p">,</span> <span class="tok-n">format</span><span class="tok-o">=</span><span class="tok-s1">'json'</span><span class="tok-p">)</span>
+<span class="tok-n">parsed</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s1">'http://api.duckduckgo.com/'</span><span class="tok-p">,</span> <span class="tok-n">params</span><span class="tok-o">=</span><span class="tok-n">params</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()</span>
+
+<span class="tok-n">results</span> <span class="tok-o">=</span> <span class="tok-n">parsed</span><span class="tok-p">[</span><span class="tok-s1">'RelatedTopics'</span><span class="tok-p">]</span>
+<span class="tok-k">for</span> <span class="tok-n">r</span> <span class="tok-ow">in</span> <span class="tok-n">results</span><span class="tok-p">:</span>
+    <span class="tok-k">if</span> <span class="tok-s1">'Text'</span> <span class="tok-ow">in</span> <span class="tok-n">r</span><span class="tok-p">:</span>
+        <span class="tok-k">print</span><span class="tok-p">(</span><span class="tok-n">r</span><span class="tok-p">[</span><span class="tok-s1">'FirstURL'</span><span class="tok-p">]</span> <span class="tok-o">+</span> <span class="tok-s1">' - '</span> <span class="tok-o">+</span> <span class="tok-n">r</span><span class="tok-p">[</span><span class="tok-s1">'Text'</span><span class="tok-p">])</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Both code listings do the same thing: they submit form-encoded values
+to a URL in order to use a search engine API. But the second is simpler to read
+and understand because it operates at a higher level of abstraction.</p>
+</div>
+<div class="paragraph">
+<p>We can take this one step further still by identifying and naming the task we
+want the code to perform for us and using an even higher-level abstraction to make
+it explicit:</p>
+</div>
+<div id="ddg_example" class="exampleblock">
+<div class="title">Do a search with the duckduckgo module</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">import</span> <span class="tok-nn">duckduckgo</span>
+<span class="tok-k">for</span> <span class="tok-n">r</span> <span class="tok-ow">in</span> <span class="tok-n">duckduckgo</span><span class="tok-o">.</span><span class="tok-n">query</span><span class="tok-p">(</span><span class="tok-s1">'Sausages'</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">results</span><span class="tok-p">:</span>
+    <span class="tok-k">print</span><span class="tok-p">(</span><span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">url</span> <span class="tok-o">+</span> <span class="tok-s1">' - '</span> <span class="tok-o">+</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">text</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Encapsulating behavior by using abstractions is a powerful tool for making
+code more expressive, more testable, and easier to maintain.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+In the literature of the object-oriented (OO) world, one of the classic
+    characterizations of this approach is called
+    <a href="http://www.wirfs-brock.com/Design.html"><em>responsibility-driven design</em></a>;
+    it uses the words <em>roles</em> and <em>responsibilities</em> rather than <em>tasks</em>.
+    The main point is to think about code in terms of behavior, rather than
+    in terms of data or algorithms.<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup>
+</td>
+</tr>
+</table>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Abstractions and ABCs</div>
+<div class="paragraph">
+<p>In a traditional OO language like Java or C#, you might use an abstract base
+class (ABC) or an interface to define an abstraction. In Python you can (and we
+sometimes do) use ABCs, but you can also happily rely on duck typing.</p>
+</div>
+<div class="paragraph">
+<p>The abstraction can just mean "the public API of the thing you&#8217;re using"&#8212;a
+function name plus some arguments, for example.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Most of the patterns in this book involve choosing an abstraction, so you&#8217;ll
+see plenty of examples in each chapter. In addition,
+<a href="/book/chapter_03_abstractions.html">[chapter_03_abstractions]</a> specifically discusses some general heuristics
+for choosing abstractions.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_layering">Layering</h3>
+<div class="paragraph">
+<p>Encapsulation and abstraction help us by hiding details and protecting the
+consistency of our data, but we also need to pay attention to the interactions
+between our objects and functions. When one function, module, or object uses
+another, we say that the one <em>depends on</em> the other. These dependencies form a
+kind of network or graph.</p>
+</div>
+<div class="paragraph">
+<p>In a big ball of mud, the dependencies are out of control (as you saw in
+<a href="#bbom_image">A real-life dependency diagram (source: </a><a href="https://oreil.ly/dbGTW">"Enterprise Dependency: Big Ball of Yarn"</a> by Alex Papadimoulis)). Changing one node of the graph becomes difficult because it
+has the potential to affect many other parts of the system. Layered
+architectures are one way of tackling this problem. In a layered architecture,
+we divide our code into discrete categories or roles, and we introduce rules
+about which categories of code can call each other.</p>
+</div>
+<div class="paragraph">
+<p>One of the most common examples is the <em>three-layered architecture</em> shown in
+<a href="#layered_architecture1">Layered architecture</a>.</p>
+</div>
+<div id="layered_architecture1" class="imageblock width-75">
+<div class="content">
+<img src="images/apwp_0002.png" alt="apwp 0002">
+</div>
+<div class="title">Figure 2. Layered architecture</div>
+</div>
+<div class="listingblock image-source">
+<div class="content">
+<pre>[ditaa, apwp_0002]
++----------------------------------------------------+
+|                Presentation Layer                  |
++----------------------------------------------------+
+                          |
+                          V
++----------------------------------------------------+
+|                 Business Logic                     |
++----------------------------------------------------+
+                          |
+                          V
++----------------------------------------------------+
+|                  Database Layer                    |
++----------------------------------------------------+</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Layered architecture is perhaps the most common pattern for building business
+software. In this model we have user-interface components, which could be a web
+page, an API, or a command line; these user-interface components communicate
+with a business logic layer that contains our business rules and our workflows;
+and finally, we have a database layer that&#8217;s responsible for storing and retrieving
+data.</p>
+</div>
+<div class="paragraph">
+<p>For the rest of this book, we&#8217;re going to be systematically turning this
+model inside out by obeying one simple principle.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="dip">The Dependency Inversion Principle</h3>
+<div class="paragraph">
+<p>You might be familiar with the <em>dependency inversion principle</em> (DIP) already, because
+it&#8217;s the <em>D</em> in SOLID.<sup class="footnote">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup></p>
+</div>
+<div class="paragraph">
+<p>Unfortunately, we can&#8217;t illustrate the DIP by using three tiny code listings as
+we did for encapsulation. However, the whole of <a href="/book/part1.html">[part1]</a> is essentially a worked
+example of implementing the DIP throughout an application, so you&#8217;ll get
+your fill of concrete examples.</p>
+</div>
+<div class="paragraph">
+<p>In the meantime, we can talk about DIP&#8217;s formal definition:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>High-level modules should not depend on low-level modules. Both should
+depend on abstractions.</p>
+</li>
+<li>
+<p>Abstractions should not depend on details. Instead, details should depend on
+abstractions.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>But what does this mean? Let&#8217;s take it bit by bit.</p>
+</div>
+<div class="paragraph">
+<p><em>High-level modules</em> are the code that your organization really cares about.
+Perhaps you work for a pharmaceutical company, and your high-level modules deal
+with patients and trials. Perhaps you work for a bank, and your high-level
+modules manage trades and exchanges. The high-level modules of a software
+system are the functions, classes, and packages that deal with our real-world
+concepts.</p>
+</div>
+<div class="paragraph">
+<p>By contrast, <em>low-level modules</em> are the code that your organization doesn&#8217;t
+care about. It&#8217;s unlikely that your HR department gets excited about filesystems or network sockets. It&#8217;s not often that you discuss SMTP, HTTP,
+or AMQP with your finance team. For our nontechnical stakeholders, these
+low-level concepts aren&#8217;t interesting or relevant. All they care about is
+whether the high-level concepts work correctly. If payroll runs on time, your
+business is unlikely to care whether that&#8217;s a cron job or a transient function
+running on Kubernetes.</p>
+</div>
+<div class="paragraph">
+<p><em>Depends on</em> doesn&#8217;t mean <em>imports</em> or <em>calls</em>, necessarily, but rather a more
+general idea that one module <em>knows about</em> or <em>needs</em> another module.</p>
+</div>
+<div class="paragraph">
+<p>And we&#8217;ve mentioned <em>abstractions</em> already: they&#8217;re simplified interfaces that
+encapsulate behavior, in the way that our duckduckgo module encapsulated a
+search engine&#8217;s API.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>All problems in computer science can be solved by adding another level of
+indirection.</p>
+</div>
+</blockquote>
+<div class="attribution">
+&#8212; David Wheeler
+</div>
+</div>
+<div class="paragraph">
+<p>So the first part of the DIP says that our business code shouldn&#8217;t depend on
+technical details; instead, both should use abstractions.</p>
+</div>
+<div class="paragraph">
+<p>Why? Broadly, because we want to be able to change them independently of each
+other. High-level modules should be easy to change in response to business
+needs. Low-level modules (details) are often, in practice, harder to
+change: think about refactoring to change a function name versus defining, testing,
+and deploying a database migration to change a column name. We don&#8217;t
+want business logic changes to slow down because they are closely coupled
+to low-level infrastructure details. But, similarly, it is important to <em>be
+able</em> to change your infrastructure details when you need to (think about
+sharding a database, for example), without needing to make changes to your
+business layer. Adding an abstraction between them (the famous extra
+layer of indirection) allows the two to change (more) independently of each
+other.</p>
+</div>
+<div class="paragraph">
+<p>The second part is even more mysterious. "Abstractions should not depend on
+details" seems clear enough, but "Details should depend on abstractions" is
+hard to imagine. How can we have an abstraction that doesn&#8217;t depend on the
+details it&#8217;s abstracting? By the time we get to <a href="/book/chapter_04_service_layer.html">[chapter_04_service_layer]</a>,
+we&#8217;ll have a concrete example that should make this all a bit clearer.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_a_place_for_all_our_business_logic_the_domain_model">A Place for All Our Business Logic: The Domain Model</h3>
+<div class="paragraph">
+<p>But before we can turn our three-layered architecture inside out, we need to
+talk more about that middle layer: the high-level modules or business
+logic. One of the most common reasons that our designs go wrong is that
+business logic becomes spread throughout the layers of our application,
+making it hard to identify, understand, and change.</p>
+</div>
+<div class="paragraph">
+<p><a href="/book/chapter_01_domain_model.html">[chapter_01_domain_model]</a> shows how to build a business
+layer with a <em>Domain Model</em> pattern. The rest of the patterns in <a href="/book/part1.html">[part1]</a> show
+how we can keep the domain model easy to change and free of low-level concerns
+by choosing the right abstractions and continuously applying the DIP.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<hr>
+<div class="footnote" id="_footnotedef_1">
+<a href="#_footnoteref_1">1</a>. If you&#8217;ve come across     class-responsibility-collaborator (CRC) cards, they&#8217;re     driving at the same thing: thinking about <em>responsibilities</em> helps you decide how to split things up.
+</div>
+<div class="footnote" id="_footnotedef_2">
+<a href="#_footnoteref_2">2</a>. SOLID is an acronym for Robert C. Martin&#8217;s five principles of object-oriented design: single responsibility, open for extension but closed for modification, Liskov substitution, interface segregation, and dependency inversion. See <a href="https://oreil.ly/UFM7U">"S.O.L.I.D: The First 5 Principles of Object-Oriented Design"</a> by Samuel Oloruntoba.
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2020-03-16 11:03:29 UTC
+</div>
+</div>
+<style>
+pre.pygments .hll { background-color: #ffffcc }
+pre.pygments  { background: #f0f0f0; }
+pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
+pre.pygments .tok-err { border: 1px solid #FF0000 } /* Error */
+pre.pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
+pre.pygments .tok-o { color: #666666 } /* Operator */
+pre.pygments .tok-ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
+pre.pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
+pre.pygments .tok-cp { color: #007020 } /* Comment.Preproc */
+pre.pygments .tok-cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
+pre.pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
+pre.pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
+pre.pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
+pre.pygments .tok-ge { font-style: italic } /* Generic.Emph */
+pre.pygments .tok-gr { color: #FF0000 } /* Generic.Error */
+pre.pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
+pre.pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
+pre.pygments .tok-go { color: #888888 } /* Generic.Output */
+pre.pygments .tok-gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+pre.pygments .tok-gs { font-weight: bold } /* Generic.Strong */
+pre.pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+pre.pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
+pre.pygments .tok-kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+pre.pygments .tok-kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+pre.pygments .tok-kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+pre.pygments .tok-kp { color: #007020 } /* Keyword.Pseudo */
+pre.pygments .tok-kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+pre.pygments .tok-kt { color: #902000 } /* Keyword.Type */
+pre.pygments .tok-m { color: #40a070 } /* Literal.Number */
+pre.pygments .tok-s { color: #4070a0 } /* Literal.String */
+pre.pygments .tok-na { color: #4070a0 } /* Name.Attribute */
+pre.pygments .tok-nb { color: #007020 } /* Name.Builtin */
+pre.pygments .tok-nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+pre.pygments .tok-no { color: #60add5 } /* Name.Constant */
+pre.pygments .tok-nd { color: #555555; font-weight: bold } /* Name.Decorator */
+pre.pygments .tok-ni { color: #d55537; font-weight: bold } /* Name.Entity */
+pre.pygments .tok-ne { color: #007020 } /* Name.Exception */
+pre.pygments .tok-nf { color: #06287e } /* Name.Function */
+pre.pygments .tok-nl { color: #002070; font-weight: bold } /* Name.Label */
+pre.pygments .tok-nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+pre.pygments .tok-nt { color: #062873; font-weight: bold } /* Name.Tag */
+pre.pygments .tok-nv { color: #bb60d5 } /* Name.Variable */
+pre.pygments .tok-ow { color: #007020; font-weight: bold } /* Operator.Word */
+pre.pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
+pre.pygments .tok-mb { color: #40a070 } /* Literal.Number.Bin */
+pre.pygments .tok-mf { color: #40a070 } /* Literal.Number.Float */
+pre.pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
+pre.pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
+pre.pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
+pre.pygments .tok-sa { color: #4070a0 } /* Literal.String.Affix */
+pre.pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
+pre.pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
+pre.pygments .tok-dl { color: #4070a0 } /* Literal.String.Delimiter */
+pre.pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+pre.pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
+pre.pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+pre.pygments .tok-sh { color: #4070a0 } /* Literal.String.Heredoc */
+pre.pygments .tok-si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+pre.pygments .tok-sx { color: #c65d09 } /* Literal.String.Other */
+pre.pygments .tok-sr { color: #235388 } /* Literal.String.Regex */
+pre.pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
+pre.pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
+pre.pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
+pre.pygments .tok-fm { color: #06287e } /* Name.Function.Magic */
+pre.pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
+pre.pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
+pre.pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
+pre.pygments .tok-vm { color: #bb60d5 } /* Name.Variable.Magic */
+pre.pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
+</style>
+<div><div id="disqus_thread" style="margin: 10px"></div>
+<script>
+
+var disqus_config = function () {
+this.page.url = 'https://cosmicpython.com';
+this.page.identifier = 'introduction';
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = 'https://cosmic-python.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div><html><head><script async src="https://www.googletagmanager.com/gtag/js?id=UA-40928035-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-40928035-3');
+</script>
+</head></html></body>
+</html>

@@ -1,0 +1,1312 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<title>Epilogue</title>
+<style>
+/* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+
+@import url("//fonts.googleapis.com/css?family=Noto+Sans:300,600italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700");
+@import url(//asciidoctor.org/stylesheets/asciidoctor.css); /* Default asciidoc style framework - important */
+
+/* customisations by harry */
+
+/* hide inline ditaa/plantuml source listings for images */
+.image-source {
+    display: none
+}
+/* make formal codeblocks a bit nicer */
+.exampleblock > .content {
+    padding: 2px;
+    background-color: white;
+    border: 0;
+    margin-bottom: 2em;
+}
+
+.exampleblock .title {
+    text-align: right;
+}
+
+/* end customisations by harry */
+
+/* CUSTOMISATIONS */
+
+/* Change the values in root for quick customisation. If you want even more fine grain... venture further. */
+
+:root{
+--maincolor:#FFFFFF;
+--primarycolor:#2c3e50;
+--secondarycolor:#ba3925;
+--tertiarycolor: #186d7a;
+--sidebarbackground:#CCC;
+--linkcolor:#b71c1c;
+--linkcoloralternate:#f44336;
+--white:#FFFFFF;
+--black:#000000;
+}
+
+/* Text styles */
+h1{color:var(--primarycolor) !important;}
+h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+.title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
+p{font-family: "Noto Sans",sans-serif !important}
+
+/* Table styles */
+th{font-family: "Noto Sans",sans-serif !important}
+
+/* Responsiveness fixes */
+video {
+  max-width: 100%;
+}
+
+@media all and (max-width: 600px) {
+table {
+  width: 55vw!important;
+  font-size: 3vw;
+}
+
+</style>
+</head>
+<body class="article toc2 toc-left">
+<div id="buy_the_book" style="position: absolute; top: 0; right: 0; z-index:100">
+  <a href="/#buy_the_book">
+    <img src="/images/buy_the_book.svg" alt="buy the book ribbon">
+  </a>
+</div>
+<div id="header">
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="/book/preface.html">Preface</a></li>
+<li><a href="/book/introduction.html">Introduction</a></li>
+<li><a href="/book/part1.html">Building an Architecture to Support Domain Modeling</a></li>
+<li><a href="/book/chapter_01_domain_model.html">1. Domain Modeling</a></li>
+<li><a href="/book/chapter_02_repository.html">2. Repository Pattern</a></li>
+<li><a href="/book/chapter_03_abstractions.html">3. A Brief Interlude: On Coupling <span class="keep-together">and Abstractions</span></a></li>
+<li><a href="/book/chapter_04_service_layer.html">4. Our First Use Case: <span class="keep-together">Flask API and Service Layer</span></a></li>
+<li><a href="/book/chapter_05_high_gear_low_gear.html">5. TDD in High Gear and Low Gear</a></li>
+<li><a href="/book/chapter_06_uow.html">6. Unit of Work Pattern</a></li>
+<li><a href="/book/chapter_07_aggregate.html">7. Aggregates and Consistency Boundaries</a></li>
+<li><a href="/book/part2.html">Event-Driven Architecture</a></li>
+<li><a href="/book/chapter_08_events_and_message_bus.html">8. Events and the Message Bus</a></li>
+<li><a href="/book/chapter_09_all_messagebus.html">9. Going to Town on the Message Bus</a></li>
+<li><a href="/book/chapter_10_commands.html">10. Commands and Command Handler</a></li>
+<li><a href="/book/chapter_11_external_events.html">11. Event-Driven Architecture: Using Events to Integrate Microservices</a></li>
+<li><a href="/book/chapter_12_cqrs.html">12. Command-Query Responsibility Segregation (CQRS)</a></li>
+<li><a href="/book/chapter_13_dependency_injection.html">13. Dependency Injection (and Bootstrapping)</a></li>
+<li><a href="/book/epilogue_1_how_to_get_there_from_here.html">Appendix A: Epilogue</a></li>
+<li><a href="/book/appendix_ds1_table.html">Appendix B: Summary Diagram and Table</a></li>
+<li><a href="/book/appendix_project_structure.html">Appendix C: A Template Project Structure</a></li>
+<li><a href="/book/appendix_csvs.html">Appendix D: Swapping Out the Infrastructure: <span class="keep-together">Do Everything with CSVs</span></a></li>
+<li><a href="/book/appendix_django.html">Appendix E: Repository and Unit of Work <span class="keep-together">Patterns with Django</span></a></li>
+<li><a href="/book/appendix_validation.html">Appendix F: Validation</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1 afterword">
+<h2 id="epilogue_1_how_to_get_there_from_here">Epilogue: Epilogue</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_what_now">What Now?</h3>
+<div class="paragraph">
+<p>Phew! We&#8217;ve covered a lot of ground in this book, and for most of our audience
+all of these ideas are new. With that in mind, we can&#8217;t hope to make you experts
+in these techniques. All we can really do is show you the broad-brush ideas, and
+just enough code for you to go ahead and write something from scratch.</p>
+</div>
+<div class="paragraph">
+<p>The code we&#8217;ve shown in this book isn&#8217;t battle-hardened production code: it&#8217;s a
+set of Lego blocks that you can play with to make your first house, spaceship,
+and <span class="keep-together">skyscraper</span>.</p>
+</div>
+<div class="paragraph">
+<p>That leaves us with two big tasks. We want to talk
+about how to start applying these ideas for real in an existing system, and we
+need to warn you about some of the things we had to skip. We&#8217;ve given you a
+whole new arsenal of ways to shoot yourself in the foot, so we should discuss
+some basic firearms safety.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_how_do_i_get_there_from_here">How Do I Get There from Here?</h3>
+<div class="paragraph">
+<p>Chances are that a lot of you are thinking something like this:</p>
+</div>
+<div class="paragraph">
+<p>"OK Bob and Harry, that&#8217;s all well and good, and if I ever get hired to work
+on a green-field new service, I know what to do. But in the meantime, I&#8217;m
+here with my big ball of Django mud, and I don&#8217;t see any way to get to your
+nice, clean, perfect, untainted, simplistic model. Not from here."</p>
+</div>
+<div class="paragraph">
+<p>We hear you. Once you&#8217;ve already <em>built</em> a big ball of mud, it&#8217;s hard to know
+how to start improving things. Really, we need to tackle things step by step.</p>
+</div>
+<div class="paragraph">
+<p>First things first: what problem are you trying to solve? Is the software too
+hard to change? Is the performance unacceptable? Have you got weird, inexplicable
+bugs?</p>
+</div>
+<div class="paragraph">
+<p>Having a clear goal in mind will help you to prioritize the work that needs to
+be done and, importantly, communicate the reasons for doing it to the rest of
+the team. <span class="keep-together">Businesses</span> tend to have pragmatic approaches to technical debt
+and refactoring, so long as engineers can make a reasoned argument for fixing
+things.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+Making complex changes to a system is often an easier sell if you link it
+to feature work. Perhaps you&#8217;re launching a new product or opening your service
+to new markets? This is the right time to spend engineering resources on fixing
+the foundations. With a six-month project to deliver, it&#8217;s easier to make the
+argument for three weeks of cleanup work. Bob refers to this as <em>architecture
+tax</em>.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_separating_entangled_responsibilities">Separating Entangled Responsibilities</h3>
+<div class="paragraph">
+<p>At the beginning of the book, we said that the main characteristic of a big ball
+of mud is homogeneity: every part of the system looks the same, because we
+haven&#8217;t been clear about the responsibilities of each component. To fix that,
+we&#8217;ll need to start separating out responsibilities and introducing clear
+boundaries. One of the first things we can do is to start building a service
+layer (<a href="#collaboration_app_model">Domain of a collaboration system</a>).</p>
+</div>
+<div id="collaboration_app_model" class="imageblock width-60">
+<div class="content">
+<img src="images/apwp_ep01.png" alt="apwp ep01">
+</div>
+<div class="title">Figure 1. Domain of a collaboration system</div>
+</div>
+<div class="listingblock image-source">
+<div class="content">
+<pre>[plantuml, apwp_ep01, config=plantuml.cfg]
+@startuml
+scale 4
+hide empty members
+
+Workspace *- Folder : contains
+Account *- Workspace : owns
+Account *-- Package : has
+User *-- Account : manages
+Workspace *-- User : has members
+User *-- Document : owns
+Folder *-- Document : contains
+Document *- Version: has
+User *-- Version: authors
+@enduml</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This was the system in which Bob first learned how to break apart a ball of mud,
+and it was a doozy. There was logic <em>everywhere</em>&#8212;in the web pages, in
+manager objects, in helpers, in fat service classes that we&#8217;d written to
+abstract the managers and helpers, and in hairy command objects that we&#8217;d
+written to break apart the services.</p>
+</div>
+<div class="paragraph">
+<p>If you&#8217;re working in a system that&#8217;s reached this point, the situation can feel hopeless,
+but it&#8217;s never too late to start weeding an overgrown garden. Eventually, we
+hired an architect who knew what he was doing, and he helped us get things
+back under control.</p>
+</div>
+<div class="paragraph">
+<p>Start by working out the <em>use cases</em> of your system. If you have a
+user interface, what actions does it perform? If you have a backend
+processing component, maybe each cron job or Celery job is a single
+use case. Each of your use cases needs to have an imperative name: Apply
+Billing Charges, Clean Abandoned Accounts, or Raise Purchase Order, for example.</p>
+</div>
+<div class="paragraph">
+<p>In our case, most of our use cases were part of the manager classes and had
+names like Create Workspace or Delete Document Version. Each use case
+was invoked from a web frontend.</p>
+</div>
+<div class="paragraph">
+<p>We aim to create a single function or class for each of these supported
+operations that deals with <em>orchestrating</em> the work to be done. Each use case
+should do the following:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Start its own database transaction if needed</p>
+</li>
+<li>
+<p>Fetch any required data</p>
+</li>
+<li>
+<p>Check any preconditions (see the Ensure pattern in <a href="/book/appendix_validation.html">[appendix_validation]</a>)</p>
+</li>
+<li>
+<p>Update the domain model</p>
+</li>
+<li>
+<p>Persist any changes</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Each use case should succeed or fail as an atomic unit. You might need to call
+one use case from another. That&#8217;s OK; just make a note of it, and try to
+avoid long-running database transactions.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+One of the biggest problems we had was that manager methods called other
+manager methods, and data access could happen from the model objects themselves.
+It was hard to understand what each operation did without going on a treasure hunt across the codebase. Pulling all the logic into a single method, and using
+a UoW to control our transactions, made the system easier to reason
+about.
+</td>
+</tr>
+</table>
+</div>
+<div class="sidebarblock less_space nobreakinside">
+<div class="content">
+<div class="title">Case Study: Layering an Overgrown System</div>
+<div class="paragraph">
+<p>Many years ago, Bob worked for a software company that had outsourced the first
+version of its application, an online collaboration platform for sharing and
+working on files.</p>
+</div>
+<div class="paragraph">
+<p>When the company brought development in-house, it passed through several
+generations of developers' hands, and each wave of new developers added more
+complexity to the code&#8217;s structure.</p>
+</div>
+<div class="paragraph">
+<p>At its heart, the system was an ASP.NET Web Forms application, built with an
+NHibernate ORM. Users would upload documents into workspaces, where they could
+invite other workspace members to review, comment on, or modify their work.</p>
+</div>
+<div class="paragraph">
+<p>Most of the complexity of the application was in the permissions model because
+each document was contained in a folder, and folders allowed read, write, and
+edit permissions, much like a Linux filesystem.</p>
+</div>
+<div class="paragraph">
+<p>Additionally, each workspace belonged to an account, and the account had quotas
+attached to it via a billing package.</p>
+</div>
+<div class="paragraph">
+<p>As a result, every read or write operation against a document had to load an
+enormous number of objects from the database in order to test permissions and
+quotas. Creating a new workspace involved hundreds of database queries as we set
+up the permissions structure, invited users, and set up sample content.</p>
+</div>
+<div class="paragraph">
+<p>Some of the code for operations was in web handlers that ran when a user clicked
+a button or submitted a form; some of it was in manager objects that held
+code for orchestrating work; and some of it was in the domain model. Model
+objects would make database calls or copy files on disk, and the test coverage
+was abysmal.</p>
+</div>
+<div class="paragraph">
+<p>To fix the problem, we first introduced a service layer so that all of the code
+for creating a document or workspace was in one place and could be understood.
+This involved pulling data access code out of the domain model and into
+command handlers. Likewise, we pulled orchestration code out of the managers and
+the web handlers and pushed it into handlers.</p>
+</div>
+<div class="paragraph">
+<p>The resulting command handlers were <em>long</em> and messy, but we&#8217;d made a start at
+introducing order to the chaos.</p>
+</div>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+It&#8217;s fine if you have duplication in the use-case functions. We&#8217;re not
+    trying to write perfect code; we&#8217;re just trying to extract some meaningful
+    layers. It&#8217;s better to duplicate some code in a few places than to have
+    use-case functions calling one another in a long chain.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>This is a good opportunity to pull any data-access or orchestration code out of
+the domain model and into the use cases. We should also try to pull I/O
+concerns (e.g., sending email, writing files) out of the domain model and up into
+the use-case functions. We apply the techniques from <a href="/book/chapter_03_abstractions.html">[chapter_03_abstractions]</a> on abstractions
+to keep our handlers unit testable even when they&#8217;re performing I/O.</p>
+</div>
+<div class="paragraph">
+<p>These use-case functions will mostly be about logging, data access, and error
+handling. Once you&#8217;ve done this step, you&#8217;ll have a grasp of what your program
+actually <em>does</em>, and a way to make sure each operation has a clearly defined
+start and finish. We&#8217;ll have taken a step toward building a pure domain model.</p>
+</div>
+<div class="paragraph">
+<p>Read <em>Working Effectively with Legacy Code</em> by Michael C. Feathers (Prentice Hall) for guidance on getting legacy code
+under test and starting separating responsibilities.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_identifying_aggregates_and_bounded_contexts">Identifying Aggregates and Bounded Contexts</h3>
+<div class="paragraph">
+<p>Part of the problem with the codebase in our case study was that the object
+graph was highly connected. Each account had many workspaces, and each workspace had
+many members, all of whom had their own accounts. Each workspace contained many
+documents, which had many versions.</p>
+</div>
+<div class="paragraph">
+<p>You can&#8217;t express the full horror of the thing in a class diagram.
+For one thing, there wasn&#8217;t really a single account related to a user. Instead,
+there was a bizarre rule requiring you to enumerate all of the accounts
+associated to the user via the workspaces and take the one with the earliest
+creation date.</p>
+</div>
+<div class="paragraph">
+<p>Every object in the system was part of an inheritance hierarchy that included
+<code>SecureObject</code> and <code>Version</code>. This inheritance hierarchy was mirrored directly
+in the database schema, so that every query had to join across 10 different
+tables and look at a discriminator column just to tell what kind of objects
+you were working with.</p>
+</div>
+<div class="paragraph">
+<p>The codebase made it easy to "dot" your way through these objects like so:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-n">user</span><span class="tok-o">.</span><span class="tok-n">account</span><span class="tok-o">.</span><span class="tok-n">workspaces</span><span class="tok-p">[</span><span class="tok-mi">0</span><span class="tok-p">]</span><span class="tok-o">.</span><span class="tok-n">documents</span><span class="tok-o">.</span><span class="tok-n">versions</span><span class="tok-p">[</span><span class="tok-mi">1</span><span class="tok-p">]</span><span class="tok-o">.</span><span class="tok-n">owner</span><span class="tok-o">.</span><span class="tok-n">account</span><span class="tok-o">.</span><span class="tok-n">settings</span><span class="tok-p">[</span><span class="tok-mi">0</span><span class="tok-p">];</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Building a system this way with Django ORM or SQLAlchemy is easy but is
+to be <span class="keep-together">avoided</span>. Although it&#8217;s <em>convenient</em>, it makes it very hard to reason about
+performance because each property might trigger a lookup to the database.</p>
+</div>
+<div class="admonitionblock tip pagebreak-before">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+Aggregates are a <em>consistency boundary</em>. In general, each use case should
+    update a single aggregate at a time. One handler fetches one aggregate from
+    a repository, modifies its state, and raises any events that happen as a
+    result. If you need data from another part of the system, it&#8217;s totally fine
+    to use a read model, but avoid updating multiple aggregates in a single
+    transaction. When we choose to separate code into different aggregates,
+    we&#8217;re explicitly choosing to make them <em>eventually consistent</em> with one
+    another.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>A bunch of operations required us to loop over objects this way&#8212;for example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-c1"># Lock a user's workspaces for nonpayment</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">lock_account</span><span class="tok-p">(</span><span class="tok-n">user</span><span class="tok-p">):</span>
+    <span class="tok-k">for</span> <span class="tok-n">workspace</span> <span class="tok-ow">in</span> <span class="tok-n">user</span><span class="tok-o">.</span><span class="tok-n">account</span><span class="tok-o">.</span><span class="tok-n">workspaces</span><span class="tok-p">:</span>
+        <span class="tok-n">workspace</span><span class="tok-o">.</span><span class="tok-n">archive</span><span class="tok-p">()</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Or even recurse over collections of folders and documents:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">lock_documents_in_folder</span><span class="tok-p">(</span><span class="tok-n">folder</span><span class="tok-p">):</span>
+
+    <span class="tok-k">for</span> <span class="tok-n">doc</span> <span class="tok-ow">in</span> <span class="tok-n">folder</span><span class="tok-o">.</span><span class="tok-n">documents</span><span class="tok-p">:</span>
+         <span class="tok-n">doc</span><span class="tok-o">.</span><span class="tok-n">archive</span><span class="tok-p">()</span>
+
+     <span class="tok-k">for</span> <span class="tok-n">child</span> <span class="tok-ow">in</span> <span class="tok-n">folder</span><span class="tok-o">.</span><span class="tok-n">children</span><span class="tok-p">:</span>
+         <span class="tok-n">lock_documents_in_folder</span><span class="tok-p">(</span><span class="tok-n">child</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>These operations <em>killed</em> performance, but fixing them meant giving up our single
+object graph. Instead, we began to identify aggregates and to break the direct
+links between objects.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+We talked about the infamous <code>SELECT N+1</code> problem in <a href="/book/chapter_12_cqrs.html">[chapter_12_cqrs]</a>, and how
+we might choose to use different techniques when reading data for queries versus
+reading data for commands.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Mostly we did this by replacing direct references with identifiers.</p>
+</div>
+<div class="paragraph pagebreak-before">
+<p>Before aggregates:</p>
+</div>
+<div id="aggregates_before" class="imageblock">
+<div class="content">
+<img src="images/apwp_ep02.png" alt="apwp ep02">
+</div>
+</div>
+<div class="listingblock image-source">
+<div class="content">
+<pre>[plantuml, apwp_ep02, config=plantuml.cfg]
+@startuml
+scale 4
+hide empty members
+
+together {
+    class Document {
+      add_version()
+      workspace: Workspace
+      parent: Folder
+      versions: List[DocumentVersion]
+
+    }
+
+    class DocumentVersion {
+      title : str
+      version_number: int
+      document: Document
+
+    }
+    class Folder {
+      parent: Workspace
+      children: List[Folder]
+      copy_to(target: Folder)
+      add_document(document: Document)
+    }
+}
+
+together {
+    class User {
+      account: Account
+    }
+
+
+    class Account {
+      add_package()
+      owner : User
+      packages : List[BillingPackage]
+      workspaces: List[Workspace]
+    }
+}
+
+
+class BillingPackage {
+}
+
+class Workspace {
+  add_member(member: User)
+  account: Account
+  owner: User
+  members: List[User]
+}
+
+
+
+Account --&gt; Workspace
+Account -left-&gt; BillingPackage
+Account -right-&gt; User
+Workspace --&gt; User
+Workspace --&gt; Folder
+Workspace --&gt; Account
+Folder --&gt; Folder
+Folder --&gt; Document
+Folder --&gt; Workspace
+Folder --&gt; User
+Document -right-&gt; DocumentVersion
+Document --&gt; Folder
+Document --&gt; User
+DocumentVersion -right-&gt; Document
+DocumentVersion --&gt; User
+User -left-&gt; Account
+
+@enduml</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>After modeling with aggregates:</p>
+</div>
+<div id="aggregates_after" class="imageblock">
+<div class="content">
+<img src="images/apwp_ep03.png" alt="apwp ep03">
+</div>
+</div>
+<div class="listingblock image-source">
+<div class="content">
+<pre>[plantuml, apwp_ep03, config=plantuml.cfg]
+@startuml
+scale 4
+hide empty members
+
+frame Document {
+
+  class Document {
+
+    add_version()
+
+    workspace_id: int
+    parent_folder: int
+
+    versions: List[DocumentVersion]
+
+  }
+
+  class DocumentVersion {
+
+    title : str
+    version_number: int
+
+  }
+}
+
+frame Account {
+
+  class Account {
+    add_package()
+
+    owner : int
+    packages : List[BillingPackage]
+  }
+
+
+  class BillingPackage {
+  }
+
+}
+
+frame Workspace {
+   class Workspace {
+
+     add_member(member: int)
+
+     account_id: int
+     owner: int
+     members: List[int]
+
+   }
+}
+
+frame Folder {
+
+  class Folder {
+    workspace_id : int
+    children: List[int]
+
+    copy_to(target: int)
+  }
+
+}
+
+Document o-- DocumentVersion
+Account o-- BillingPackage
+
+@enduml</pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+Bidirectional links are often a sign that your aggregates aren&#8217;t right.
+    In our original code, a <code>Document</code> knew about its containing <code>Folder</code>, and the
+    <code>Folder</code> had a collection of <code>Documents</code>. This makes it easy to traverse the
+    object graph but stops us from thinking properly about the consistency
+    boundaries we need. We break apart aggregates by using references instead.
+    In the new model, a <code>Document</code> had reference to its <code>parent_folder</code> but had no way
+    to directly access the <code>Folder</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>If we needed to <em>read</em> data, we avoided writing complex loops and transforms and
+tried to replace them with straight SQL. For example, one of our screens was a
+tree view of folders and documents.</p>
+</div>
+<div class="paragraph">
+<p>This screen was <em>incredibly</em> heavy on the database, because it relied on nested
+<code>for</code> loops that triggered a lazy-loaded ORM.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+We use this same technique in <a href="/book/chapter_11_external_events.html">[chapter_11_external_events]</a>, where we replace a
+    nested loop over ORM objects with a simple SQL query. It&#8217;s the first step
+    in a CQRS approach.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>After a lot of head-scratching, we replaced the ORM code with a big, ugly stored
+procedure. The code looked horrible, but it was much faster and helped
+to break the links between <code>Folder</code> and <code>Document</code>.</p>
+</div>
+<div class="paragraph">
+<p>When we needed to <em>write</em> data, we changed a single aggregate at a time, and we
+introduced a message bus to handle events. For example, in the new model, when
+we locked an account, we could first query for all the affected workspaces via
+<code>SELECT <em>id</em> FROM <em>workspace</em> WHERE <em>account_id</em> = ?</code>.</p>
+</div>
+<div class="paragraph">
+<p>We could then raise a new command for each workspace:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">for</span> <span class="tok-n">workspace_id</span> <span class="tok-ow">in</span> <span class="tok-n">workspaces</span><span class="tok-p">:</span>
+    <span class="tok-n">bus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">LockWorkspace</span><span class="tok-p">(</span><span class="tok-n">workspace_id</span><span class="tok-p">))</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_an_event_driven_approach_to_go_to_microservices_via_strangler_pattern">An Event-Driven Approach to Go to Microservices via Strangler Pattern</h3>
+<div class="paragraph">
+<p>The <em>Strangler Fig</em> pattern involves creating a new system around the edges
+of an old system, while keeping it running. Bits of old functionality
+are gradually intercepted and replaced, until the old system is left
+doing nothing at all and can be switched off.</p>
+</div>
+<div class="paragraph">
+<p>When building the availability service, we used a technique called <em>event
+interception</em> to move functionality from one place to another. This is a three-step
+process:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Raise events to represent the changes happening in a system you want to
+replace.</p>
+</li>
+<li>
+<p>Build a second system that consumes those events and uses them to build its
+own domain model.</p>
+</li>
+<li>
+<p>Replace the older system with the new.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>We used event interception to move from <a href="#strangler_before">Before: strong, bidirectional coupling based on XML-RPC</a>&#8230;&#8203;</p>
+</div>
+<div id="strangler_before" class="imageblock">
+<div class="content">
+<img src="images/apwp_ep04.png" alt="apwp ep04">
+</div>
+<div class="title">Figure 2. Before: strong, bidirectional coupling based on XML-RPC</div>
+</div>
+<div class="listingblock image-source">
+<div class="content">
+<pre>[plantuml, apwp_ep04, config=plantuml.cfg]
+@startuml Ecommerce Context
+!include images/C4_Context.puml
+
+LAYOUT_LEFT_RIGHT
+scale 2
+
+Person_Ext(customer, "Customer", "Wants to buy furniture")
+
+System(fulfillment, "Fulfillment System", "Manages order fulfillment and logistics")
+System(ecom, "Ecommerce website", "Allows customers to buy furniture")
+
+Rel(customer, ecom, "Uses")
+Rel(fulfillment, ecom, "Updates stock and orders", "xml-rpc")
+Rel(ecom, fulfillment, "Sends orders", "xml-rpc")
+
+@enduml</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>to <a href="#strangler_after">After: loose coupling with asynchronous events (you can find a high-resolution version of this diagram at cosmicpython.com)</a>.</p>
+</div>
+<div id="strangler_after" class="imageblock">
+<div class="content">
+<img src="images/apwp_ep05.png" alt="apwp ep05">
+</div>
+<div class="title">Figure 3. After: loose coupling with asynchronous events (you can find a high-resolution version of this diagram at cosmicpython.com)</div>
+</div>
+<div class="listingblock image-source">
+<div class="content">
+<pre>[plantuml, apwp_ep05, config=plantuml.cfg]
+@startuml Ecommerce Context
+!include images/C4_Context.puml
+
+LAYOUT_LEFT_RIGHT
+scale 2
+
+Person_Ext(customer, "Customer", "Wants to buy furniture")
+
+System(av, "Availability Service", "Calculates stock availability")
+System(fulfillment, "Fulfillment System", "Manages order fulfillment and logistics")
+System(ecom, "Ecommerce website", "Allows customers to buy furniture")
+
+Rel(customer, ecom, "Uses")
+Rel(customer, av, "Uses")
+Rel(fulfillment, av, "Publishes batch_created", "events")
+Rel(av, ecom, "Publishes out_of_stock", "events")
+Rel(ecom, fulfillment, "Sends orders", "xml-rpc")
+
+@enduml</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Practically, this was a several month-long project. Our first step was to write a
+domain model that could represent batches, shipments, and products. We used TDD
+to build a toy system that could answer a single question: "If I want N units of
+<span class="keep-together">HAZARDOUS_RUG</span>, how long will they take to be delivered?"</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+When deploying an event-driven system, start with a "walking skeleton."
+    Deploying a system that just logs its input forces us to tackle all the
+    infrastructural questions and start working in <span class="keep-together">production</span>.
+</td>
+</tr>
+</table>
+</div>
+<div class="sidebarblock nobreakinside less_space">
+<div class="content">
+<div class="title">Case Study: Carving Out a Microservice to Replace a Domain</div>
+<div class="paragraph">
+<p>MADE.com started out with <em>two</em> monoliths: one for the frontend ecommerce
+application, and one for the backend fulfillment system.</p>
+</div>
+<div class="paragraph">
+<p>The two systems communicated through XML-RPC. Periodically, the backend system
+would wake up and query the frontend system to find out about new orders. When
+it had imported all the new orders, it would send RPC commands to update the
+stock levels.</p>
+</div>
+<div class="paragraph">
+<p>Over time this synchronization process became slower and slower until, one
+Christmas, it took longer than 24 hours to import a single day&#8217;s orders. Bob was
+hired to break the system into a set of event-driven services.</p>
+</div>
+<div class="paragraph">
+<p>First, we identified that the slowest part of the process was calculating and
+synchronizing the available stock. What we needed was a system that could listen
+to external events and keep a running total of how much stock was available.</p>
+</div>
+<div class="paragraph">
+<p>We exposed that information via an API, so that the user&#8217;s browser could ask
+how much stock was available for each product and how long it would take to
+deliver to their address.</p>
+</div>
+<div class="paragraph">
+<p>Whenever a product ran out of stock completely, we would raise a new event that
+the ecommerce platform could use to take a product off sale. Because we didn&#8217;t
+know how much load we would need to handle, we wrote the system with a CQRS
+pattern. Whenever the amount of stock changed, we would update a Redis database
+with a cached view model. Our Flask API queried these <em>view models</em> instead of
+running the complex domain model.</p>
+</div>
+<div class="paragraph">
+<p>As a result, we could answer the question "How much stock is available?" in 2
+to 3 milliseconds, and now the API frequently handles hundreds of requests a
+second for sustained periods.</p>
+</div>
+<div class="paragraph">
+<p>If this all sounds a little familiar, well, now you know where our example app
+came from!</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Once we had a working domain model, we switched to building out some
+infrastructural pieces. Our first production deployment was a tiny system that
+could receive a <code>batch_created</code> event and log its JSON representation. This is
+the "Hello World" of event-driven architecture. It forced us to deploy a message
+bus, hook up a producer and consumer, build a deployment pipeline, and write a
+simple message handler.</p>
+</div>
+<div class="paragraph">
+<p>Given a deployment pipeline, the infrastructure we needed, and a basic domain
+model, we were off. A couple months later, we were in production and serving
+real customers.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_convincing_your_stakeholders_to_try_something_new">Convincing Your Stakeholders to Try Something New</h3>
+<div class="paragraph">
+<p>If you&#8217;re thinking about carving a new system out of a big ball of mud, you&#8217;re
+probably suffering problems with reliability, performance, maintainability, or
+all three simultaneously. Deep, intractable problems call for drastic measures!</p>
+</div>
+<div class="paragraph">
+<p>We recommend <em>domain modeling</em> as a first step. In many overgrown systems, the
+engineers, product owners, and customers no longer speak the same language.
+Business stakeholders speak about the system in abstract, process-focused terms,
+while developers are forced to speak about the system as it physically exists in
+its wild and chaotic state.</p>
+</div>
+<div class="sidebarblock nobreakinside less_space">
+<div class="content">
+<div class="title">Case Study: The User Model</div>
+<div class="paragraph">
+<p>We mentioned earlier that the account and user model in our first system were
+bound together by a "bizarre rule." This is a perfect example of how engineering
+and business stakeholders can drift apart.</p>
+</div>
+<div class="paragraph">
+<p>In this system, <em>accounts</em> parented <em>workspaces</em>, and users were <em>members</em> of
+workspaces. Workspaces were the fundamental unit for applying permissions and
+quotas. If a user <em>joined</em> a workspace and didn&#8217;t already have an <em>account</em>, we
+would associate them with the account that owned that workspace.</p>
+</div>
+<div class="paragraph">
+<p>This was messy and ad hoc, but it worked fine until the day a product owner
+asked for a new feature:</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>When a user joins a company, we want to add them to some default workspaces
+  for the company, like the HR workspace or the Company Announcements workspace.</p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>We had to explain to them that there was <em>no such thing</em> as a company, and there
+was no sense in which a user joined an account. Moreover, a "company" might have
+<em>many</em> accounts owned by different users, and a new user might be invited to
+any one of them.</p>
+</div>
+<div class="paragraph">
+<p>Years of adding hacks and work-arounds to a broken model caught up with us, and
+we had to rewrite the entire user management function as a brand-new system.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Figuring out how to model your domain is a complex task that&#8217;s the subject of many
+decent books in its own right. We like to use interactive techniques like event
+storming and CRC modeling, because humans are good at collaborating through
+play. <em>Event modeling</em> is another technique that brings engineers and product
+owners together to understand a system in terms of commands, queries, and events.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+Check out <em>www.eventmodeling.org</em> and <em>www.eventstorming.org</em> for some great
+guides to visual modeling of systems with events.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The goal is to be able to talk about the system by using the same ubiquitous
+language, so that you can agree on where the complexity lies.</p>
+</div>
+<div class="paragraph">
+<p>We&#8217;ve found a lot of value in treating domain problems as TDD kata. For example,
+the first code we wrote for the availability service was the batch and order
+line model. You can treat this as a lunchtime workshop, or as a spike at the
+beginning of a project. Once you can demonstrate the value of modeling, it&#8217;s
+easier to make the argument for structuring the project to optimize for modeling.</p>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Case Study: David Seddon on Taking Small Steps</div>
+<div class="paragraph">
+<p><em>Hi, I&#8217;m David, one of the tech reviewers on this book. I&#8217;ve worked on
+several complex Django monoliths, and so I&#8217;ve known the pain that Bob and
+Harry have made all sorts of grand promises about soothing.</em></p>
+</div>
+<div class="paragraph">
+<p><em>When I was first exposed to the patterns described here, I was rather
+excited. I had successfully used some of the techniques already on
+smaller projects, but here was a blueprint for much larger, database-backed
+systems like the one I work on in my day job. So I started trying to figure
+out how I could implement that blueprint at my current organization.</em></p>
+</div>
+<div class="paragraph">
+<p><em>I chose to tackle a problem area of the codebase that had always bothered me.
+I began by implementing it as a use case. But I found myself running
+into unexpected questions. There were things that I hadn&#8217;t considered
+while reading that now made it difficult to see what to do. Was it a
+problem if my use case interacted with two different aggregates? Could
+one use case call another? And how was it going to exist within
+a system that followed different architectural principles without resulting
+in a horrible mess?</em></p>
+</div>
+<div class="paragraph">
+<p><em>What happened to that oh-so-promising blueprint? Did I actually understand
+the ideas well enough to put them into practice? Was it even suitable for my
+application? Even if it was, would any of my colleagues agree to such a
+major change? Were these just nice ideas for me to fantasize about while I got
+on with real life?</em></p>
+</div>
+<div class="paragraph">
+<p><em>It took me a while to realize that I could start small. I didn&#8217;t
+need to be a purist or to 'get it right' the first time: I could experiment,
+finding what worked for me.</em></p>
+</div>
+<div class="paragraph">
+<p><em>And so that&#8217;s what I&#8217;ve done. I&#8217;ve been able to apply</em> some <em>of the ideas
+in a few places. I&#8217;ve built new features whose business logic
+can be tested without the database or mocks. And as a team, we&#8217;ve
+introduced a service layer to help define the jobs the system does.</em></p>
+</div>
+<div class="paragraph">
+<p><em>If you start trying to apply these patterns in your work, you may go through
+similar feelings to begin with. When the nice theory of a book meets the reality
+of your codebase, it can be demoralizing.</em></p>
+</div>
+<div class="paragraph">
+<p><em>My advice is to focus on a specific problem and ask yourself how you can
+put the relevant ideas to use, perhaps in an initially limited and imperfect fashion.
+You may discover, as I did, that the first problem you pick might be a bit too difficult; if so, move on to something else. Don&#8217;t try to boil the ocean, and don&#8217;t be</em> too
+<em>afraid of making mistakes. It will be a learning experience, and you can be confident
+that you&#8217;re moving roughly in a direction that others have found useful.</em></p>
+</div>
+<div class="paragraph">
+<p><em>So, if you&#8217;re feeling the pain too, give these ideas a try. Don&#8217;t feel you need permission
+to rearchitect everything. Just look for somewhere small to start. And above all, do it
+to solve a specific problem. If you&#8217;re successful in solving it, you&#8217;ll know you got something
+right&#8212;and others will too.</em></p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_questions_our_tech_reviewers_asked_that_we_couldnt_work_into_prose">Questions Our Tech Reviewers Asked That We Couldn&#8217;t Work into Prose</h3>
+<div class="paragraph">
+<p>Here are some questions we heard during drafting that we couldn&#8217;t find a good place to address elsewhere in the book:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Do I need to do all of this at once? Can I just do a bit at a time?</dt>
+<dd>
+<p>No, you can absolutely adopt these techniques bit by bit. If you have an existing system, we recommend building a service layer to try to keep orchestration in one place. Once you have that, it&#8217;s much easier to push logic into the model and push edge concerns like validation or error handling to the entrypoints.</p>
+<div class="paragraph">
+<p>It&#8217;s worth having a service layer even if you still have a big, messy Django ORM because it&#8217;s a way to start understanding the boundaries of operations.</p>
+</div>
+</dd>
+<dt class="hdlist1">Extracting use cases will break a lot of my existing code; it&#8217;s too tangled</dt>
+<dd>
+<p>Just copy and paste. It&#8217;s OK to cause more duplication in the short term. Think of this as a multistep process. Your code is in a bad state now, so copy and paste it to a new place and then make that new code clean and tidy.</p>
+<div class="paragraph">
+<p>Once you&#8217;ve done that, you can replace uses of the old code with calls to your new code and finally delete the mess. Fixing large codebases is a messy and painful process. Don&#8217;t expect things to get instantly better, and don&#8217;t worry if some bits of your application stay messy.</p>
+</div>
+</dd>
+<dt class="hdlist1">Do I need to do CQRS? That sounds weird. Can&#8217;t I just use repositories?</dt>
+<dd>
+<p>Of course you can! The techniques we&#8217;re presenting in this book are intended to make your life <em>easier</em>. They&#8217;re not some kind of ascetic discipline with which to punish yourself.</p>
+<div class="paragraph">
+<p>In our first case-study system, we had a lot of <em>View Builder</em> objects that used repositories to fetch data and then performed some transformations to return dumb read models. The advantage is that when you hit a performance problem, it&#8217;s easy to rewrite a view builder to use custom queries or raw SQL.</p>
+</div>
+</dd>
+<dt class="hdlist1">How should use cases interact across a larger system? Is it a problem for one to call another?</dt>
+<dd>
+<p>This might be an interim step. Again, in the first case study, we had handlers that would need to invoke other handlers. This gets <em>really</em> messy, though, and it&#8217;s much better to move to using a message bus to separate these concerns.</p>
+<div class="paragraph">
+<p>Generally, your system will have a single message bus implementation and a bunch of subdomains that center on a particular aggregate or set of aggregates. When your use case has finished, it can raise an event, and a handler elsewhere can run.</p>
+</div>
+</dd>
+<dt class="hdlist1">Is it a code smell for a use case to use multiple repositories/aggregates, and if so, why?</dt>
+<dd>
+<p>An aggregate is a consistency boundary, so if your use case needs to update two aggregates atomically (within the same transaction), then your consistency boundary is wrong, strictly speaking. Ideally you should think about moving to a new aggregate that wraps up all the things you want to change at the same time.</p>
+<div class="paragraph">
+<p>If you&#8217;re actually updating only one aggregate and using the other(s) for read-only access, then that&#8217;s <em>fine</em>, although you could consider building a read/view model to get you that data instead&#8212;&#8203;it makes things cleaner if each use case has only one aggregate.</p>
+</div>
+<div class="paragraph">
+<p>If you do need to modify two aggregates, but the two operations don&#8217;t have to be in the same transaction/UoW, then consider splitting the work out into two different handlers and using a domain event to carry information between the two. You can read more in <a href="https://oreil.ly/sufKE">these papers on aggregate design</a> by Vaughn Vernon.</p>
+</div>
+</dd>
+<dt class="hdlist1">What if I have a read-only but business-logic-heavy system?</dt>
+<dd>
+<p>View models can have complex logic in them. In this book, we&#8217;ve encouraged you to separate your read and write models because they have different consistency and throughput requirements. Mostly, we can use simpler logic for reads, but that&#8217;s not always true. In particular, permissions and authorization models can add a lot of complexity to our read side.</p>
+<div class="paragraph">
+<p>We&#8217;ve written systems in which the view models needed extensive unit tests. In those systems, we split a <em>view builder</em> from a <em>view fetcher</em>, as in <a href="#view_builder_diagram">A view builder and view fetcher (you can find a high-resolution version of this diagram at cosmicpython.com)</a>.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div id="view_builder_diagram" class="imageblock">
+<div class="content">
+<img src="images/apwp_ep06.png" alt="apwp ep06">
+</div>
+<div class="title">Figure 4. A view builder and view fetcher (you can find a high-resolution version of this diagram at cosmicpython.com)</div>
+</div>
+<div class="listingblock image-source">
+<div class="content">
+<pre>[plantuml, apwp_ep06, config=plantuml.cfg]
+@startuml View Fetcher Component Diagram
+!include images/C4_Component.puml
+
+ComponentDb(db, "Database", "RDBMS")
+Component(fetch, "View Fetcher", "Reads data from db, returning list of tuples or dicts")
+Component(build, "View Builder", "Filters and maps tuples")
+Component(api, "API", "Handles HTTP and serialization concerns")
+
+Rel(api, build, "Invokes")
+Rel_R(build, fetch, "Invokes")
+Rel_D(fetch, db, "Reads data from")
+
+@enduml</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>+
+This makes it easy to test the view builder by giving it mocked data (e.g., a list of dicts). "Fancy CQRS" with event handlers is really a way of running our complex view logic whenever we write so that we can avoid running it when we read.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Do I need to build microservices to do this stuff?</dt>
+<dd>
+<p>Egads, no! These techniques predate microservices by a decade or so. Aggregates,
+domain events, and dependency inversion are ways to control complexity in large
+systems. It just so happens that when you&#8217;ve built a set of use cases and a model
+for a business process, moving it to its own service is relatively easy, but
+that&#8217;s not a requirement.</p>
+</dd>
+<dt class="hdlist1">I&#8217;m using Django. Can I still do this?</dt>
+<dd>
+<p>We have an entire appendix just for you: <a href="/book/appendix_django.html">[appendix_django]</a>!</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2 pagebreak-before less_space">
+<h3 id="footguns">Footguns</h3>
+<div class="paragraph">
+<p>OK, so we&#8217;ve given you a whole bunch of new toys to play with. Here&#8217;s the
+fine print. Harry and Bob do not recommend that you copy and paste our code into
+a production system and rebuild your automated trading platform on Redis
+pub/sub. For reasons of brevity and simplicity, we&#8217;ve hand-waved a lot of tricky
+subjects. Here&#8217;s a list of things we think you should know before trying this
+for real.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Reliable messaging is hard</dt>
+<dd>
+<p>Redis pub/sub is not reliable and shouldn&#8217;t be used as a general-purpose
+messaging tool. We picked it because it&#8217;s familiar and easy to run. At MADE, we
+run Event Store as our messaging tool, but we&#8217;ve had experience with RabbitMQ and
+Amazon EventBridge.</p>
+<div class="paragraph">
+<p>Tyler Treat has some excellent blog posts on his site <em>bravenewgeek.com</em>; you
+should read at least read <a href="https://oreil.ly/pcstD">"You Cannot Have Exactly-Once Delivery"</a>
+and <a href="https://oreil.ly/j8bmF">"What You Want Is What You Don&#8217;t: Understanding Trade-Offs in Distributed Messaging"</a>.</p>
+</div>
+</dd>
+<dt class="hdlist1">We explicitly choose small, focused transactions that can fail independently</dt>
+<dd>
+<p>In <a href="/book/chapter_08_events_and_message_bus.html">[chapter_08_events_and_message_bus]</a>, we update our process so that <em>deallocating</em> an order line and
+<em>reallocating</em> the line happen in two separate units of work.
+You will need monitoring to know when these transactions fail, and tooling to
+replay events. Some of this is made easier by using a transaction log as your
+message broker (e.g., Kafka or <span class="keep-together">EventStore</span>). You might also look at the
+<a href="https://oreil.ly/sLfnp">Outbox pattern</a>.</p>
+</dd>
+<dt class="hdlist1">We don&#8217;t discuss idempotency</dt>
+<dd>
+<p>We haven&#8217;t given any real thought to what happens when handlers are retried.
+In practice you will want to make handlers idempotent so that calling them
+repeatedly with the same message will not make repeated changes to state.
+This is a key technique for building reliability, because it enables us to
+safely retry events when they fail.</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>There&#8217;s a lot of good material on idempotent message handling, try starting
+with <a href="https://oreil.ly/yERzR">"How to Ensure Idempotency in an Eventual Consistent DDD/CQRS Application"</a> and <a href="https://oreil.ly/Ekuhi">"(Un)Reliability in Messaging"</a>.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Your events will need to change their schema over time</dt>
+<dd>
+<p>You&#8217;ll need to find some way of documenting your events and sharing schema
+with consumers. We like using JSON schema and markdown because it&#8217;s simple but
+there is other prior art. Greg Young wrote an entire book on managing event-driven systems over time: <em>Versioning in an Event Sourced System</em> (Leanpub).</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_more_required_reading">More Required Reading</h3>
+<div class="paragraph">
+<p>A few more books we&#8217;d like to recommend to help you on your way:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><em>Clean Architectures in Python</em> by Leonardo Giordani (Leanpub), which came out in 2019, is one of the few previous books on application architecture in Python.</p>
+</li>
+<li>
+<p><em>Enterprise Integration Patterns</em> by Gregor Hohpe and Bobby Woolf (Addison-Wesley Professional) is a pretty good start for messaging patterns.</p>
+</li>
+<li>
+<p><em>Monolith to Microservices</em> by Sam Newman (O&#8217;Reilly), and Newman&#8217;s first book,
+<em>Building Microservices</em> (O&#8217;Reilly). The Strangler Fig pattern is mentioned as a
+favorite, along with many others. These are good to check out if you&#8217;re thinking of moving to
+microservices, and they&#8217;re also good on integration patterns and the considerations
+of async messaging-based <span class="keep-together">integration</span>.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_wrap_up">Wrap-Up</h3>
+<div class="paragraph">
+<p>Phew! That&#8217;s a lot of warnings and reading suggestions; we hope we
+haven&#8217;t scared you off completely. Our goal with this book is to give you
+just enough knowledge and intuition for you to start building some of this
+for yourself. We would love to hear how you get on and what problems you&#8217;re
+facing with the techniques in your own systems, so why not get in touch with us
+over at <em>www.cosmicpython.com</em>?</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2020-03-16 11:03:29 UTC
+</div>
+</div>
+<style>
+pre.pygments .hll { background-color: #ffffcc }
+pre.pygments  { background: #f0f0f0; }
+pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
+pre.pygments .tok-err { border: 1px solid #FF0000 } /* Error */
+pre.pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
+pre.pygments .tok-o { color: #666666 } /* Operator */
+pre.pygments .tok-ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
+pre.pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
+pre.pygments .tok-cp { color: #007020 } /* Comment.Preproc */
+pre.pygments .tok-cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
+pre.pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
+pre.pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
+pre.pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
+pre.pygments .tok-ge { font-style: italic } /* Generic.Emph */
+pre.pygments .tok-gr { color: #FF0000 } /* Generic.Error */
+pre.pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
+pre.pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
+pre.pygments .tok-go { color: #888888 } /* Generic.Output */
+pre.pygments .tok-gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+pre.pygments .tok-gs { font-weight: bold } /* Generic.Strong */
+pre.pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+pre.pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
+pre.pygments .tok-kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+pre.pygments .tok-kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+pre.pygments .tok-kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+pre.pygments .tok-kp { color: #007020 } /* Keyword.Pseudo */
+pre.pygments .tok-kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+pre.pygments .tok-kt { color: #902000 } /* Keyword.Type */
+pre.pygments .tok-m { color: #40a070 } /* Literal.Number */
+pre.pygments .tok-s { color: #4070a0 } /* Literal.String */
+pre.pygments .tok-na { color: #4070a0 } /* Name.Attribute */
+pre.pygments .tok-nb { color: #007020 } /* Name.Builtin */
+pre.pygments .tok-nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+pre.pygments .tok-no { color: #60add5 } /* Name.Constant */
+pre.pygments .tok-nd { color: #555555; font-weight: bold } /* Name.Decorator */
+pre.pygments .tok-ni { color: #d55537; font-weight: bold } /* Name.Entity */
+pre.pygments .tok-ne { color: #007020 } /* Name.Exception */
+pre.pygments .tok-nf { color: #06287e } /* Name.Function */
+pre.pygments .tok-nl { color: #002070; font-weight: bold } /* Name.Label */
+pre.pygments .tok-nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+pre.pygments .tok-nt { color: #062873; font-weight: bold } /* Name.Tag */
+pre.pygments .tok-nv { color: #bb60d5 } /* Name.Variable */
+pre.pygments .tok-ow { color: #007020; font-weight: bold } /* Operator.Word */
+pre.pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
+pre.pygments .tok-mb { color: #40a070 } /* Literal.Number.Bin */
+pre.pygments .tok-mf { color: #40a070 } /* Literal.Number.Float */
+pre.pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
+pre.pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
+pre.pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
+pre.pygments .tok-sa { color: #4070a0 } /* Literal.String.Affix */
+pre.pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
+pre.pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
+pre.pygments .tok-dl { color: #4070a0 } /* Literal.String.Delimiter */
+pre.pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+pre.pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
+pre.pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+pre.pygments .tok-sh { color: #4070a0 } /* Literal.String.Heredoc */
+pre.pygments .tok-si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+pre.pygments .tok-sx { color: #c65d09 } /* Literal.String.Other */
+pre.pygments .tok-sr { color: #235388 } /* Literal.String.Regex */
+pre.pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
+pre.pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
+pre.pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
+pre.pygments .tok-fm { color: #06287e } /* Name.Function.Magic */
+pre.pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
+pre.pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
+pre.pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
+pre.pygments .tok-vm { color: #bb60d5 } /* Name.Variable.Magic */
+pre.pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
+</style>
+<div><div id="disqus_thread" style="margin: 10px"></div>
+<script>
+
+var disqus_config = function () {
+this.page.url = 'https://cosmicpython.com';
+this.page.identifier = 'epilogue_1_how_to_get_there_from_here';
+};
+
+(function() { // DON'T EDIT BELOW THIS LINE
+var d = document, s = d.createElement('script');
+s.src = 'https://cosmic-python.disqus.com/embed.js';
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div><html><head><script async src="https://www.googletagmanager.com/gtag/js?id=UA-40928035-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-40928035-3');
+</script>
+</head></html></body>
+</html>
