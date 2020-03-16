@@ -41,6 +41,7 @@ def get_anchor_targets(parsed_html):
 class ChapterInfo:
     href_id: str
     chapter_title: str
+    old_title: str
     subheaders: list
     xrefs: list
 
@@ -63,12 +64,12 @@ def get_chapter_info():
             href_id = parsed_html.cssselect('body')[0].get('id')
         subheaders = [h.get('id') for h in parsed_html.cssselect('h3')]
 
-        chapter_title = header.text_content()
-        chapter_title = chapter_title.replace('Appendix A: ', '')
+        old_title = header.text_content()
+        chapter_title = old_title.replace('Appendix A: ', '')
 
         if chapter.startswith('chapter_'):
             chapter_no = chapter_numbers.pop(0)
-            chapter_title = f'Chapter {chapter_no}: {chapter_title}'
+            chapter_title = f'{chapter_no}: {chapter_title}'
 
         if chapter.startswith('appendix_'):
             appendix_no = appendix_numbers.pop(0)
@@ -82,7 +83,9 @@ def get_chapter_info():
             chapter_title = f'Epilogue: {chapter_title}'
 
         xrefs = get_anchor_targets(parsed_html)
-        chapter_info[chapter] = ChapterInfo(href_id, chapter_title, subheaders, xrefs)
+        chapter_info[chapter] = ChapterInfo(
+            href_id, chapter_title, old_title, subheaders, xrefs
+        )
 
     return chapter_info
 
@@ -117,7 +120,6 @@ def copy_chapters_across_with_fixes(chapter_info, fixed_toc):
     # comments_html = open('disqus_comments.html').read()
     # buy_book_div = html.fromstring(open('buy_the_book_banner.html').read())
     # analytics_div = html.fromstring(open('analytics.html').read())
-    # load_toc_script = open('load_toc.js').read()
 
     for chapter in CHAPTERS:
         old_contents = Path(f'book/{chapter}').read_text()
@@ -126,8 +128,6 @@ def copy_chapters_across_with_fixes(chapter_info, fixed_toc):
         parsed = html.fromstring(new_contents)
         body = parsed.cssselect('body')[0]
         if header := parsed.cssselect('#header'):
-            # head = parsed.cssselect('head')[0]
-            # head.append(html.fragment_fromstring('<script>' + load_toc_script + '</script>'))
             body.set('class', 'article toc2 toc-left')
             header[0].append(fixed_toc)
         # body.insert(0, buy_book_div)
@@ -150,19 +150,26 @@ def extract_toc_from_book():
 
 def fix_toc(toc, chapter_info):
     href_mappings = {}
+    title_mappings = {}
     for chapter in CHAPTERS:
-        chap = chapter_info[chapter]
-        if chap.href_id:
-            href_mappings['#' + chap.href_id] = f'/book/{chapter}'
-        for subheader in chap.subheaders:
+        chapinfo = chapter_info[chapter]
+        if chapinfo.href_id:
+            href_mappings['#' + chapinfo.href_id] = f'/book/{chapter}'
+        for subheader in chapinfo.subheaders:
             href_mappings['#' + subheader] = f'/book/{chapter}#{subheader}'
+        title_mappings[chapinfo.old_title] = chapinfo.chapter_title
 
-    def fix_link(href):
-        if href in href_mappings:
-            return href_mappings[href]
-        return href
+    for (el, attr, link, pos) in toc.iterlinks():
+        print(el.text, attr, link, pos)
+        el.set('href', href_mappings[link])
+        if 'Appendix' in el.text:
+            old_title = el.text.partition(':')[2].strip()
+            new_title = title_mappings.get(old_title, el.text)
+            print('old', old_title)
+            el.text = new_title
+        print(el.text)
 
-    toc.rewrite_links(fix_link)
+    # toc.rewrite_links(lambda href: href_mappings.get(href, href))
     toc.set('class', 'toc2')
     return toc
 
@@ -172,7 +179,6 @@ def main():
     chapter_info = get_chapter_info()
     fixed_toc = fix_toc(toc, chapter_info)
     copy_chapters_across_with_fixes(chapter_info, fixed_toc)
-    rsync_images()
 
 
 if __name__ == '__main__':
