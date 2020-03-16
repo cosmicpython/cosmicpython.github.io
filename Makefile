@@ -7,9 +7,7 @@ build:
 watch-build:
 	ls **/*.md **/*.html *.py | entr ./generate-html.py
 
-update-book:
-	cd book && make html
+update-book:  ## assumes book repo is at ../book
+	cd ../book && make html
 	./copy-and-fix-book-html.py
-	rsync -a -v book/images/ _site/book/images/
-
-
+	rsync -a -v ../book/images/ _site/book/images/

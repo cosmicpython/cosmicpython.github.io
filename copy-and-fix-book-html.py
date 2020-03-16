@@ -5,11 +5,12 @@ import json
 from lxml import html
 import subprocess
 
+BOOK_SOURCE = Path('../book')
 DEST = Path('_site/book')
 
 CHAPTERS = [
     c.replace('.asciidoc', '.html')
-    for c in json.loads(Path('book/atlas.json').read_text())['files']
+    for c in json.loads((BOOK_SOURCE / 'atlas.json').read_text())['files']
     if c.partition('.')[0] not in [
         'cover',
         'titlepage',
@@ -26,7 +27,7 @@ CHAPTERS = [
 
 def parse_chapters():
     for chapter in CHAPTERS:
-        path = Path('book') / chapter
+        path = BOOK_SOURCE / chapter
         yield chapter, html.fromstring(path.read_text())
 
 
@@ -126,7 +127,7 @@ def copy_chapters_across_with_fixes(chapter_info, fixed_toc):
     )
 
     for chapter in CHAPTERS:
-        old_contents = Path(f'book/{chapter}').read_text()
+        old_contents = (BOOK_SOURCE / chapter).read_text()
         new_contents = fix_xrefs(old_contents, chapter, chapter_info)
         new_contents = fix_title(new_contents, chapter, chapter_info)
         parsed = html.fromstring(new_contents)
@@ -147,7 +148,7 @@ def copy_chapters_across_with_fixes(chapter_info, fixed_toc):
 
 
 def extract_toc_from_book():
-    parsed = html.fromstring(Path('book/book.html').read_text())
+    parsed = html.fromstring((BOOK_SOURCE / 'book.html').read_text())
     return parsed.cssselect('#toc')[0]
 
 
