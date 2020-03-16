@@ -1,17 +1,19 @@
 #!/usr/bin/env python
 # copied from https://github.com/tonybaloney/tonybaloney.github.io/blob/master/blog-gen.py
-import markdown
-import jinja2
-from pathlib import Path
+from dataclasses import dataclass
 from datetime import date, datetime
 from email.utils import formatdate, format_datetime  # for RFC2822 formatting
+from pathlib import Path
+
+import jinja2
+import markdown
 
 TEMPLATE_FILE = "templates/blog_post_template.html"
 FEED_TEMPLATE_FILE = "templates/rss_feed_template.xml"
 BLOG_POSTS_PATH = Path("posts")
 OUTPUT_DIR = Path("_site")
 
-from dataclasses import dataclass
+
 
 @dataclass
 class Post:
@@ -67,9 +69,15 @@ def main():
 
     # Order blog posts by date published
     all_posts.sort(key=lambda p: p.date, reverse=True)
+
     # Make the RSS feed
-    with open("rss.xml", "w") as rss_f:
-        rss_f.write(env.get_template(FEED_TEMPLATE_FILE).render(posts=all_posts, date=formatdate()))
+    rss_path = OUTPUT_DIR / "rss.xml"
+    print("writing", rss_path)
+    rss_path.write_text(
+        env.get_template(FEED_TEMPLATE_FILE).render(
+            posts=all_posts, date=formatdate()
+        )
+    )
 
 
 if __name__ == "__main__":
