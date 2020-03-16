@@ -6,3 +6,10 @@ build:
 
 watch-build:
 	ls **/*.md **/*.html *.py | entr ./generate-html.py
+
+update-book:
+	cd book && make html
+	./prep-book-html.py
+	rsync -a -v book/images _site/book/images/
+
+
