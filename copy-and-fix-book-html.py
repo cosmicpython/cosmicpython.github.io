@@ -155,24 +155,24 @@ def extract_toc_from_book():
 
 def fix_toc(toc, chapter_info):
     href_mappings = {}
-    title_mappings = {}
+    appendix_title_mappings = {}
     for chapter in CHAPTERS:
         chapinfo = chapter_info[chapter]
         if chapinfo.href_id:
             href_mappings['#' + chapinfo.href_id] = f'/book/{chapter}'
         for subheader in chapinfo.subheaders:
             href_mappings['#' + subheader] = f'/book/{chapter}#{subheader}'
-        title_mappings[chapinfo.old_title] = chapinfo.chapter_title
+        if 'Appendix' in chapinfo.old_title:
+            appendix_title_mappings[chapinfo.old_title.partition(':')[2].strip()] = chapinfo.chapter_title
 
-    for (el, attr, link, pos) in toc.iterlinks():
-        print(el.text, attr, link, pos)
+    for (el, attr, link, pos) in list(toc.iterlinks()):
         el.set('href', href_mappings[link])
-        if 'Appendix' in el.text:
-            old_title = el.text.partition(':')[2].strip()
-            new_title = title_mappings.get(old_title, el.text)
-            print('old', old_title)
+        if 'Appendix' in el.text_content():
+            old_title = el.text_content().partition(':')[2].strip()
+            new_title = appendix_title_mappings[old_title]
+            for child in el.cssselect('span'):
+                el.remove(child)
             el.text = new_title
-        print(el.text)
 
     toc.set('class', 'toc2')
     return toc

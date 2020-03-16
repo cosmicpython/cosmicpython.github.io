@@ -96,12 +96,12 @@ table {
 <li><a href="/book/chapter_11_external_events.html">11. Event-Driven Architecture: Using Events to Integrate Microservices</a></li>
 <li><a href="/book/chapter_12_cqrs.html">12. Command-Query Responsibility Segregation (CQRS)</a></li>
 <li><a href="/book/chapter_13_dependency_injection.html">13. Dependency Injection (and Bootstrapping)</a></li>
-<li><a href="/book/epilogue_1_how_to_get_there_from_here.html">Appendix A: Epilogue</a></li>
-<li><a href="/book/appendix_ds1_table.html">Appendix B: Summary Diagram and Table</a></li>
-<li><a href="/book/appendix_project_structure.html">Appendix C: A Template Project Structure</a></li>
-<li><a href="/book/appendix_csvs.html">Appendix D: Swapping Out the Infrastructure: <span class="keep-together">Do Everything with CSVs</span></a></li>
-<li><a href="/book/appendix_django.html">Appendix E: Repository and Unit of Work <span class="keep-together">Patterns with Django</span></a></li>
-<li><a href="/book/appendix_validation.html">Appendix F: Validation</a></li>
+<li><a href="/book/epilogue_1_how_to_get_there_from_here.html">Epilogue: Epilogue</a></li>
+<li><a href="/book/appendix_ds1_table.html">Appendix A: Summary Diagram and Table</a></li>
+<li><a href="/book/appendix_project_structure.html">Appendix B: A Template Project Structure</a></li>
+<li><a href="/book/appendix_csvs.html">Appendix C: Swapping Out the Infrastructure: Do Everything with CSVs</a></li>
+<li><a href="/book/appendix_django.html">Appendix D: Repository and Unit of Work Patterns with Django</a></li>
+<li><a href="/book/appendix_validation.html">Appendix E: Validation</a></li>
 </ul>
 </div>
 </div>
@@ -118,35 +118,35 @@ package next to our main allocation code:</p>
 <div class="content">
 <div class="listingblock tree">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-err">&#9500;&#9472;&#9472;</span> <span class="tok-n">src</span>
-<span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9500;&#9472;&#9472;</span> <span class="tok-n">allocation</span>
-<span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9500;&#9472;&#9472;</span> <span class="tok-fm">__init__</span><span class="tok-o">.</span><span class="tok-n">py</span>
-<span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9500;&#9472;&#9472;</span> <span class="tok-n">adapters</span>
-<span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9500;&#9472;&#9472;</span> <span class="tok-fm">__init__</span><span class="tok-o">.</span><span class="tok-n">py</span>
-<span class="tok-o">...</span>
-<span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9500;&#9472;&#9472;</span> <span class="tok-n">djangoproject</span>
-<span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9500;&#9472;&#9472;</span> <span class="tok-n">alloc</span>
-<span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9500;&#9472;&#9472;</span> <span class="tok-fm">__init__</span><span class="tok-o">.</span><span class="tok-n">py</span>
-<span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9500;&#9472;&#9472;</span> <span class="tok-n">apps</span><span class="tok-o">.</span><span class="tok-n">py</span>
-<span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9500;&#9472;&#9472;</span> <span class="tok-n">migrations</span>
-<span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9500;&#9472;&#9472;</span> <span class="tok-mo">0001</span><span class="tok-n">_initial</span><span class="tok-o">.</span><span class="tok-n">py</span>
-<span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9492;&#9472;&#9472;</span> <span class="tok-fm">__init__</span><span class="tok-o">.</span><span class="tok-n">py</span>
-<span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9500;&#9472;&#9472;</span> <span class="tok-n">models</span><span class="tok-o">.</span><span class="tok-n">py</span>
-<span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9492;&#9472;&#9472;</span> <span class="tok-n">views</span><span class="tok-o">.</span><span class="tok-n">py</span>
-<span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9500;&#9472;&#9472;</span> <span class="tok-n">django_project</span>
-<span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9500;&#9472;&#9472;</span> <span class="tok-fm">__init__</span><span class="tok-o">.</span><span class="tok-n">py</span>
-<span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9500;&#9472;&#9472;</span> <span class="tok-n">settings</span><span class="tok-o">.</span><span class="tok-n">py</span>
-<span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9500;&#9472;&#9472;</span> <span class="tok-n">urls</span><span class="tok-o">.</span><span class="tok-n">py</span>
-<span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9492;&#9472;&#9472;</span> <span class="tok-n">wsgi</span><span class="tok-o">.</span><span class="tok-n">py</span>
-<span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9492;&#9472;&#9472;</span> <span class="tok-n">manage</span><span class="tok-o">.</span><span class="tok-n">py</span>
-<span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9492;&#9472;&#9472;</span> <span class="tok-n">setup</span><span class="tok-o">.</span><span class="tok-n">py</span>
-<span class="tok-err">&#9492;&#9472;&#9472;</span> <span class="tok-n">tests</span>
-    <span class="tok-err">&#9500;&#9472;&#9472;</span> <span class="tok-n">conftest</span><span class="tok-o">.</span><span class="tok-n">py</span>
-    <span class="tok-err">&#9500;&#9472;&#9472;</span> <span class="tok-n">e2e</span>
-    <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9492;&#9472;&#9472;</span> <span class="tok-n">test_api</span><span class="tok-o">.</span><span class="tok-n">py</span>
-    <span class="tok-err">&#9500;&#9472;&#9472;</span> <span class="tok-n">integration</span>
-    <span class="tok-err">&#9474;&#160;&#160;</span> <span class="tok-err">&#9500;&#9472;&#9472;</span> <span class="tok-n">test_repository</span><span class="tok-o">.</span><span class="tok-n">py</span>
-<span class="tok-o">...</span></code></pre>
+<pre class="pygments highlight"><code data-lang="text"><span></span>&#9500;&#9472;&#9472; src
+&#9474;&#160;&#160; &#9500;&#9472;&#9472; allocation
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9500;&#9472;&#9472; __init__.py
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9500;&#9472;&#9472; adapters
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9474;&#160;&#160; &#9500;&#9472;&#9472; __init__.py
+...
+&#9474;&#160;&#160; &#9500;&#9472;&#9472; djangoproject
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9500;&#9472;&#9472; alloc
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9474;&#160;&#160; &#9500;&#9472;&#9472; __init__.py
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9474;&#160;&#160; &#9500;&#9472;&#9472; apps.py
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9474;&#160;&#160; &#9500;&#9472;&#9472; migrations
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9474;&#160;&#160; &#9474;&#160;&#160; &#9500;&#9472;&#9472; 0001_initial.py
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9474;&#160;&#160; &#9474;&#160;&#160; &#9492;&#9472;&#9472; __init__.py
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9474;&#160;&#160; &#9500;&#9472;&#9472; models.py
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9474;&#160;&#160; &#9492;&#9472;&#9472; views.py
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9500;&#9472;&#9472; django_project
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9474;&#160;&#160; &#9500;&#9472;&#9472; __init__.py
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9474;&#160;&#160; &#9500;&#9472;&#9472; settings.py
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9474;&#160;&#160; &#9500;&#9472;&#9472; urls.py
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9474;&#160;&#160; &#9492;&#9472;&#9472; wsgi.py
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9492;&#9472;&#9472; manage.py
+&#9474;&#160;&#160; &#9492;&#9472;&#9472; setup.py
+&#9492;&#9472;&#9472; tests
+    &#9500;&#9472;&#9472; conftest.py
+    &#9500;&#9472;&#9472; e2e
+    &#9474;&#160;&#160; &#9492;&#9472;&#9472; test_api.py
+    &#9500;&#9472;&#9472; integration
+    &#9474;&#160;&#160; &#9500;&#9472;&#9472; test_repository.py
+...</code></pre>
 </div>
 </div>
 </div>
@@ -654,7 +654,7 @@ applications, refer to the <a href="/book/epilogue_1_how_to_get_there_from_here.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-10 17:16:05 UTC
+Last updated 2020-03-16 17:07:49 UTC
 </div>
 </div>
 <style>
