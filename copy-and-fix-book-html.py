@@ -6,7 +6,7 @@ from lxml import html
 import subprocess
 
 BOOK_SOURCE = Path('../book')
-DEST = Path('_site/book')
+DEST = Path('./book')
 
 CHAPTERS = [
     c.replace('.asciidoc', '.html')

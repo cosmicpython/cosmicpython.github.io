@@ -1,8 +1,8 @@
 serve:
-	python -m http.server --directory=_site 8888
+	python -m http.server
 
 build:
-	./generate-html
+	./generate-html.py
 
 watch-build:
 	ls **/*.md **/*.html *.py | entr ./generate-html.py
@@ -10,4 +10,4 @@ watch-build:
 update-book:  ## assumes book repo is at ../book
 	cd ../book && make html
 	./copy-and-fix-book-html.py
-	rsync -a -v ../book/images/ _site/book/images/
+	rsync -a -v ../book/images/ ./book/images/

@@ -11,7 +11,7 @@ import markdown
 TEMPLATE_FILE = "templates/blog_post_template.html"
 FEED_TEMPLATE_FILE = "templates/rss_feed_template.xml"
 BLOG_POSTS_PATH = Path("posts")
-OUTPUT_DIR = Path("_site")
+OUTPUT_DIR = Path(".")
 
 
 
