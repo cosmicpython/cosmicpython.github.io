@@ -24,11 +24,11 @@ class Post:
 
     @property
     def html_path(self):
-        return OUTPUT_DIR / "posts" / self.md_path.name.replace('.md', '.html')
+        return OUTPUT_DIR / "blog" / self.md_path.name.replace('.md', '.html')
 
     @property
     def url(self):
-        return f"posts/{self.html_path.name}"
+        return f"blog/{self.html_path.name}"
 
 
 
