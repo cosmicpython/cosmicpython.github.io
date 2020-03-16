@@ -2,13 +2,14 @@
 # copied from https://github.com/tonybaloney/tonybaloney.github.io/blob/master/blog-gen.py
 import markdown
 import jinja2
-import glob
+from pathlib import Path
 from datetime import date, datetime
 from email.utils import formatdate, format_datetime  # for RFC2822 formatting
 
 TEMPLATE_FILE = "templates/blog_post_template.html"
 FEED_TEMPLATE_FILE = "templates/rss_feed_template.xml"
-BASE_URL = "https://tonybaloney.github.io/"
+BLOG_POSTS_PATH = Path("posts")
+OUTPUT_DIR = Path("_site")
 
 from dataclasses import dataclass
 
@@ -16,18 +17,21 @@ from dataclasses import dataclass
 class Post:
     title: str
     author: str
-    md_path: str
+    md_path: Path
     date: date
 
     @property
     def html_path(self):
-        return self.md_path.replace('blog/', 'posts/').replace('.md', '.html')
+        return OUTPUT_DIR / "posts" / self.md_path.name.replace('.md', '.html')
 
+    @property
+    def url(self):
+        return f"posts/{self.html_path.name}"
 
 
 
 def main():
-    md_post_paths = sorted(glob.glob("blog/*.md"))
+    md_post_paths = sorted(BLOG_POSTS_PATH.glob("*.md"))
     extensions = ['extra', 'smarty', 'meta', 'codehilite']
     _md = markdown.Markdown(extensions=extensions, output_format='html5')
 
@@ -36,34 +40,30 @@ def main():
 
     all_posts = []
     for md_post_path in md_post_paths:
-        print("rendering", md_post_path)
-        post_date = date.fromisoformat(md_post_path[5:15])
-        with open(md_post_path) as f:
-            html = _md.convert(f.read())
+        # print("rendering", md_post_path)
+        post_date = date.fromisoformat(md_post_path.name[:10])
+        html_content = _md.convert(md_post_path.read_text())
         post = Post(
             md_path=md_post_path, date=post_date,
             author=_md.Meta['author'][0],
             title=_md.Meta['title'][0],
         )
-        doc = env.get_template(TEMPLATE_FILE).render(
-            content=html, baseurl=BASE_URL, url=post.html_path, post=post,
+        post_html = env.get_template(TEMPLATE_FILE).render(
+            content=html_content, url=post.html_path, post=post,
         )
+        print("writing", post.html_path)
+        post.html_path.write_text(post_html)
 
-        with open(post.html_path, "w") as f:
-            f.write(doc)
-        # all_posts.append(dict(**_md.Meta, date=post_date, rfc2822_date=format_datetime(post_date), link="{0}{1}".format(BASE_URL, url)))
-        all_posts.append(post)  # TODO fix date
+        all_posts.append(post)  # TODO rfc2822_date=format_datetime(post_date),
 
     # index
-    print("rendering index.html")
-    with open('index.md') as f:
-        index_html = _md.convert(f.read())
-    doc = env.get_template('templates/index.html').render(
-        content=index_html,
+    # print("rendering index.html")
+    index_html = env.get_template('pages/index.html').render(
         posts=all_posts,
     )
-    with open('index.html', "w") as f:
-        f.write(doc)
+    index_html_path = OUTPUT_DIR / 'index.html'
+    print("writing", index_html_path)
+    index_html_path.write_text(index_html)
 
     # Order blog posts by date published
     all_posts.sort(key=lambda p: p.date, reverse=True)
