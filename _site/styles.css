@@ -43,3 +43,12 @@
     text-align: right;
 }
 
+/* fix bad milligram bulletpoint lists */
+ul {
+    list-style: circle outside;
+    padding-left: 1em;
+}
+
+li > p {
+    display: inline;
+}
