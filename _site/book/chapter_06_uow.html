@@ -1,0 +1,1052 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<title>Unit of Work Pattern</title>
+<style>
+/* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+
+@import url("//fonts.googleapis.com/css?family=Noto+Sans:300,600italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700");
+@import url(//asciidoctor.org/stylesheets/asciidoctor.css); /* Default asciidoc style framework - important */
+
+/* customisations by harry */
+
+/* hide inline ditaa/plantuml source listings for images */
+.image-source {
+    display: none
+}
+/* make formal codeblocks a bit nicer */
+.exampleblock > .content {
+    padding: 2px;
+    background-color: white;
+    border: 0;
+    margin-bottom: 2em;
+}
+
+.exampleblock .title {
+    text-align: right;
+}
+
+/* end customisations by harry */
+
+/* CUSTOMISATIONS */
+
+/* Change the values in root for quick customisation. If you want even more fine grain... venture further. */
+
+:root{
+--maincolor:#FFFFFF;
+--primarycolor:#2c3e50;
+--secondarycolor:#ba3925;
+--tertiarycolor: #186d7a;
+--sidebarbackground:#CCC;
+--linkcolor:#b71c1c;
+--linkcoloralternate:#f44336;
+--white:#FFFFFF;
+--black:#000000;
+}
+
+/* Text styles */
+h1{color:var(--primarycolor) !important;}
+h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+.title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
+p{font-family: "Noto Sans",sans-serif !important}
+
+/* Table styles */
+th{font-family: "Noto Sans",sans-serif !important}
+
+/* Responsiveness fixes */
+video {
+  max-width: 100%;
+}
+
+@media all and (max-width: 600px) {
+table {
+  width: 55vw!important;
+  font-size: 3vw;
+}
+
+</style>
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="/book/preface.html">Preface</a></li>
+<li><a href="/book/introduction.html">Introduction</a></li>
+<li><a href="/book/part1.html">Building an Architecture to Support Domain Modeling</a></li>
+<li><a href="/book/chapter_01_domain_model.html">1. Domain Modeling</a></li>
+<li><a href="/book/chapter_02_repository.html">2. Repository Pattern</a></li>
+<li><a href="/book/chapter_03_abstractions.html">3. A Brief Interlude: On Coupling <span class="keep-together">and Abstractions</span></a></li>
+<li><a href="/book/chapter_04_service_layer.html">4. Our First Use Case: <span class="keep-together">Flask API and Service Layer</span></a></li>
+<li><a href="/book/chapter_05_high_gear_low_gear.html">5. TDD in High Gear and Low Gear</a></li>
+<li><a href="/book/chapter_06_uow.html">6. Unit of Work Pattern</a></li>
+<li><a href="/book/chapter_07_aggregate.html">7. Aggregates and Consistency Boundaries</a></li>
+<li><a href="/book/part2.html">Event-Driven Architecture</a></li>
+<li><a href="/book/chapter_08_events_and_message_bus.html">8. Events and the Message Bus</a></li>
+<li><a href="/book/chapter_09_all_messagebus.html">9. Going to Town on the Message Bus</a></li>
+<li><a href="/book/chapter_10_commands.html">10. Commands and Command Handler</a></li>
+<li><a href="/book/chapter_11_external_events.html">11. Event-Driven Architecture: Using Events to Integrate Microservices</a></li>
+<li><a href="/book/chapter_12_cqrs.html">12. Command-Query Responsibility Segregation (CQRS)</a></li>
+<li><a href="/book/chapter_13_dependency_injection.html">13. Dependency Injection (and Bootstrapping)</a></li>
+<li><a href="/book/epilogue_1_how_to_get_there_from_here.html">Appendix A: Epilogue</a></li>
+<li><a href="/book/appendix_ds1_table.html">Appendix B: Summary Diagram and Table</a></li>
+<li><a href="/book/appendix_project_structure.html">Appendix C: A Template Project Structure</a></li>
+<li><a href="/book/appendix_csvs.html">Appendix D: Swapping Out the Infrastructure: <span class="keep-together">Do Everything with CSVs</span></a></li>
+<li><a href="/book/appendix_django.html">Appendix E: Repository and Unit of Work <span class="keep-together">Patterns with Django</span></a></li>
+<li><a href="/book/appendix_validation.html">Appendix F: Validation</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="chapter_06_uow">Unit of Work Pattern</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this chapter we&#8217;ll introduce the final piece of the puzzle that ties
+together the Repository and Service Layer patterns: the <em>Unit of Work</em> pattern.</p>
+</div>
+<div class="paragraph">
+<p>If the Repository pattern is our abstraction over the idea of persistent storage,
+the Unit of Work (UoW) pattern is our abstraction over the idea of <em>atomic operations</em>. It
+will allow us to finally and fully decouple our service layer from the data layer.</p>
+</div>
+<div class="paragraph">
+<p><a href="#before_uow_diagram">Without UoW: API talks directly to three layers</a> shows that, currently, a lot of communication occurs
+across the layers of our infrastructure: the API talks directly to the database
+layer to start a session, it talks to the repository layer to initialize
+<code>SQLAlchemyRepository</code>, and it talks to the service layer to ask it to allocate.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The code for this chapter is in the
+chapter_06_uow branch <a href="https://oreil.ly/MoWdZ">on <span class="keep-together">GitHub</span></a>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>git clone https://github.com/cosmicpython/code.git
+cd code
+git checkout chapter_06_uow
+# or to code along, checkout Chapter 4:
+git checkout chapter_04_service_layer</pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div id="before_uow_diagram" class="imageblock width-75">
+<div class="content">
+<img src="images/apwp_0601.png" alt="apwp 0601">
+</div>
+<div class="title">Figure 1. Without UoW: API talks directly to three layers</div>
+</div>
+<div class="paragraph">
+<p><a href="#after_uow_diagram">With UoW: UoW now manages database state</a> shows our target state. The Flask API now does only two
+things: it initializes a unit of work, and it invokes a service. The service
+collaborates with the UoW (we like to think of the UoW as being part of the
+service layer), but neither the service function itself nor Flask now needs
+to talk directly to the database.</p>
+</div>
+<div class="paragraph">
+<p>And we&#8217;ll do it all using a lovely piece of Python syntax, a context manager.</p>
+</div>
+<div id="after_uow_diagram" class="imageblock width-75">
+<div class="content">
+<img src="images/apwp_0602.png" alt="apwp 0602">
+</div>
+<div class="title">Figure 2. With UoW: UoW now manages database state</div>
+</div>
+<div class="sect2">
+<h3 id="_the_unit_of_work_collaborates_with_the_repository">The Unit of Work Collaborates with the Repository</h3>
+<div class="paragraph">
+<p>Let&#8217;s see the unit of work (or UoW, which we pronounce "you-wow") in action. Here&#8217;s how the service layer will look when we&#8217;re finished:</p>
+</div>
+<div id="uow_preview" class="exampleblock">
+<div class="title">Preview of unit of work in action (src/allocation/service_layer/services.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">allocate</span><span class="tok-p">(</span>
+        <span class="tok-n">orderid</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">,</span>
+        <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span>
+<span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-nb">str</span><span class="tok-p">:</span>
+    <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">)</span>
+    <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>  #<b class="conum">(1)</b>
+        <span class="tok-n">batches</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-o">.</span><span class="tok-n">list</span><span class="tok-p">()</span>  #<b class="conum">(2)</b>
+        <span class="tok-o">...</span>
+        <span class="tok-n">batchref</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">)</span>
+        <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span>  #<b class="conum">(3)</b></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>We&#8217;ll start a UoW as a context manager.</p>
+</li>
+<li>
+<p><code>uow.batches</code> is the batches repo, so the UoW provides us
+access to our permanent storage.</p>
+</li>
+<li>
+<p>When we&#8217;re done, we commit or roll back our work, using the UoW.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The UoW acts as a single entrypoint to our persistent storage, and it
+ keeps track of what objects were loaded and of the latest state.<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup></p>
+</div>
+<div class="paragraph">
+<p>This gives us three useful things:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>A stable snapshot of the database to work with, so the
+objects we use aren&#8217;t changing halfway through an operation</p>
+</li>
+<li>
+<p>A way to persist all of our changes at once, so if something
+goes wrong, we don&#8217;t end up in an inconsistent state</p>
+</li>
+<li>
+<p>A simple API to our persistence concerns and a handy place
+to get a repository</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_test_driving_a_uow_with_integration_tests">Test-Driving a UoW with Integration Tests</h3>
+<div class="paragraph">
+<p>Here are our integration tests for the UOW:</p>
+</div>
+<div id="test_unit_of_work" class="exampleblock">
+<div class="title">A basic "round-trip" test for a UoW (tests/integration/test_uow.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_uow_can_retrieve_a_batch_and_allocate_to_it</span><span class="tok-p">(</span><span class="tok-n">session_factory</span><span class="tok-p">):</span>
+    <span class="tok-n">session</span> <span class="tok-o">=</span> <span class="tok-n">session_factory</span><span class="tok-p">()</span>
+    <span class="tok-n">insert_batch</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">,</span> <span class="tok-s1">'batch1'</span><span class="tok-p">,</span> <span class="tok-s1">'HIPSTER-WORKBENCH'</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">)</span>
+    <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span>
+
+    <span class="tok-n">uow</span> <span class="tok-o">=</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyUnitOfWork</span><span class="tok-p">(</span><span class="tok-n">session_factory</span><span class="tok-p">)</span>  #<b class="conum">(1)</b>
+    <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
+        <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">reference</span><span class="tok-o">=</span><span class="tok-s1">'batch1'</span><span class="tok-p">)</span>  #<b class="conum">(2)</b>
+        <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s1">'o1'</span><span class="tok-p">,</span> <span class="tok-s1">'HIPSTER-WORKBENCH'</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">)</span>
+        <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">)</span>
+        <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span>  #<b class="conum">(3)</b>
+
+    <span class="tok-n">batchref</span> <span class="tok-o">=</span> <span class="tok-n">get_allocated_batch_ref</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">,</span> <span class="tok-s1">'o1'</span><span class="tok-p">,</span> <span class="tok-s1">'HIPSTER-WORKBENCH'</span><span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">batchref</span> <span class="tok-o">==</span> <span class="tok-s1">'batch1'</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>We initialize the UoW by using our custom session factory
+and get back a <code>uow</code> object to use in our <code>with</code> block.</p>
+</li>
+<li>
+<p>The UoW gives us access to the batches repository via
+<code>uow.batches</code>.</p>
+</li>
+<li>
+<p>We call <code>commit()</code> on it when we&#8217;re done.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>For the curious, the <code>insert_batch</code> and <code>get_allocated_batch_ref</code> helpers
+look like this:</p>
+</div>
+<div id="sql_helpers" class="exampleblock">
+<div class="title">Helpers for doing SQL stuff (tests/integration/test_uow.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">insert_batch</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">,</span> <span class="tok-n">ref</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-p">):</span>
+    <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>
+        <span class="tok-s1">'INSERT INTO batches (reference, sku, _purchased_quantity, eta)'</span>
+        <span class="tok-s1">' VALUES (:ref, :sku, :qty, :eta)'</span><span class="tok-p">,</span>
+        <span class="tok-nb">dict</span><span class="tok-p">(</span><span class="tok-n">ref</span><span class="tok-o">=</span><span class="tok-n">ref</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-o">=</span><span class="tok-n">qty</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-n">eta</span><span class="tok-p">)</span>
+    <span class="tok-p">)</span>
+
+
+<span class="tok-k">def</span> <span class="tok-nf">get_allocated_batch_ref</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">,</span> <span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">):</span>
+    <span class="tok-p">[[</span><span class="tok-n">orderlineid</span><span class="tok-p">]]</span> <span class="tok-o">=</span> <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>
+        <span class="tok-s1">'SELECT id FROM order_lines WHERE orderid=:orderid AND sku=:sku'</span><span class="tok-p">,</span>
+        <span class="tok-nb">dict</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-o">=</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-n">sku</span><span class="tok-p">)</span>
+    <span class="tok-p">)</span>
+    <span class="tok-p">[[</span><span class="tok-n">batchref</span><span class="tok-p">]]</span> <span class="tok-o">=</span> <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>
+        <span class="tok-s1">'SELECT b.reference FROM allocations JOIN batches AS b ON batch_id = b.id'</span>
+        <span class="tok-s1">' WHERE orderline_id=:orderlineid'</span><span class="tok-p">,</span>
+        <span class="tok-nb">dict</span><span class="tok-p">(</span><span class="tok-n">orderlineid</span><span class="tok-o">=</span><span class="tok-n">orderlineid</span><span class="tok-p">)</span>
+    <span class="tok-p">)</span>
+    <span class="tok-k">return</span> <span class="tok-n">batchref</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_unit_of_work_and_its_context_manager">Unit of Work and Its Context Manager</h3>
+<div class="paragraph">
+<p>In our tests we&#8217;ve implicitly defined an interface for what a UoW needs to do. Let&#8217;s make that explicit by using an abstract
+base class:</p>
+</div>
+<div id="abstract_unit_of_work" class="exampleblock">
+<div class="title">Abstract UoW context manager (src/allocation/service_layer/unit_of_work.py)</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">AbstractUnitOfWork</span><span class="tok-p">(</span><span class="tok-n">abc</span><span class="tok-o">.</span><span class="tok-n">ABC</span><span class="tok-p">):</span>
+    <span class="tok-n">batches</span><span class="tok-p">:</span> <span class="tok-n">repository</span><span class="tok-o">.</span><span class="tok-n">AbstractRepository</span>  #<b class="conum">(1)</b>
+
+    <span class="tok-k">def</span> <span class="tok-fm">__exit__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-o">*</span><span class="tok-n">args</span><span class="tok-p">):</span>  #<b class="conum">(2)</b>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">rollback</span><span class="tok-p">()</span>  #<b class="conum">(4)</b>
+
+    <span class="tok-nd">@abc.abstractmethod</span>
+    <span class="tok-k">def</span> <span class="tok-nf">commit</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>  #<b class="conum">(3)</b>
+        <span class="tok-k">raise</span> <span class="tok-ne">NotImplementedError</span>
+
+    <span class="tok-nd">@abc.abstractmethod</span>
+    <span class="tok-k">def</span> <span class="tok-nf">rollback</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>  #<b class="conum">(4)</b>
+        <span class="tok-k">raise</span> <span class="tok-ne">NotImplementedError</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>The UoW provides an attribute called <code>.batches</code>, which will give us access
+to the batches repository.</p>
+</li>
+<li>
+<p>If you&#8217;ve never seen a context manager, <code>__enter__</code> and <code>__exit__</code> are
+the two magic methods that execute when we enter the <code>with</code> block and
+when we exit it, respectively. They&#8217;re our setup and teardown phases.</p>
+</li>
+<li>
+<p>We&#8217;ll call this method to explicitly commit our work when we&#8217;re ready.</p>
+</li>
+<li>
+<p>If we don&#8217;t commit, or if we exit the context manager by raising an error,
+we do a <code>rollback</code>. (The rollback has no effect if <code>commit()</code> has been
+called. Read on for more discussion of this.)</p>
+</li>
+</ol>
+</div>
+<div class="sect3">
+<h4 id="_the_real_unit_of_work_uses_sqlalchemy_sessions">The Real Unit of Work Uses SQLAlchemy Sessions</h4>
+<div class="paragraph">
+<p>The main thing that our concrete implementation adds is the
+database session:</p>
+</div>
+<div id="unit_of_work" class="exampleblock">
+<div class="title">The real SQLAlchemy UoW (src/allocation/service_layer/unit_of_work.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-n">DEFAULT_SESSION_FACTORY</span> <span class="tok-o">=</span> <span class="tok-n">sessionmaker</span><span class="tok-p">(</span><span class="tok-n">bind</span><span class="tok-o">=</span><span class="tok-n">create_engine</span><span class="tok-p">(</span>  #<b class="conum">(1)</b>
+    <span class="tok-n">config</span><span class="tok-o">.</span><span class="tok-n">get_postgres_uri</span><span class="tok-p">(),</span>
+<span class="tok-p">))</span>
+
+<span class="tok-k">class</span> <span class="tok-nc">SqlAlchemyUnitOfWork</span><span class="tok-p">(</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">):</span>
+
+    <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">session_factory</span><span class="tok-o">=</span><span class="tok-n">DEFAULT_SESSION_FACTORY</span><span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">session_factory</span> <span class="tok-o">=</span> <span class="tok-n">session_factory</span>  #<b class="conum">(1)</b>
+
+    <span class="tok-k">def</span> <span class="tok-fm">__enter__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">session</span> <span class="tok-o">=</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">session_factory</span><span class="tok-p">()</span>  <span class="tok-c1"># type: Session  </span>#<b class="conum">(2)</b>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">batches</span> <span class="tok-o">=</span> <span class="tok-n">repository</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyRepository</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-p">)</span>  #<b class="conum">(2)</b>
+        <span class="tok-k">return</span> <span class="tok-nb">super</span><span class="tok-p">()</span><span class="tok-o">.</span><span class="tok-fm">__enter__</span><span class="tok-p">()</span>
+
+    <span class="tok-k">def</span> <span class="tok-fm">__exit__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-o">*</span><span class="tok-n">args</span><span class="tok-p">):</span>
+        <span class="tok-nb">super</span><span class="tok-p">()</span><span class="tok-o">.</span><span class="tok-fm">__exit__</span><span class="tok-p">(</span><span class="tok-o">*</span><span class="tok-n">args</span><span class="tok-p">)</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">close</span><span class="tok-p">()</span>  #<b class="conum">(3)</b>
+
+    <span class="tok-k">def</span> <span class="tok-nf">commit</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>  #<b class="conum">(4)</b>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">rollback</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>  #<b class="conum">(4)</b>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">rollback</span><span class="tok-p">()</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>The module defines a default session factory that will connect to Postgres,
+but we allow that to be overridden in our integration tests so that we
+can use SQLite instead.</p>
+</li>
+<li>
+<p>The <code>__enter__</code> method is responsible for starting a database session and instantiating
+a real repository that can use that session.</p>
+</li>
+<li>
+<p>We close the session on exit.</p>
+</li>
+<li>
+<p>Finally, we provide concrete <code>commit()</code> and <code>rollback()</code> methods that
+use our database session.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_fake_unit_of_work_for_testing">Fake Unit of Work for Testing</h4>
+<div class="paragraph">
+<p>Here&#8217;s how we use a fake UoW in our service-layer tests:</p>
+</div>
+<div id="fake_unit_of_work" class="exampleblock">
+<div class="title">Fake UoW (tests/unit/test_services.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">FakeUnitOfWork</span><span class="tok-p">(</span><span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">):</span>
+
+    <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">batches</span> <span class="tok-o">=</span> <span class="tok-n">FakeRepository</span><span class="tok-p">([])</span>  #<b class="conum">(1)</b>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">committed</span> <span class="tok-o">=</span> <span class="tok-bp">False</span>  #<b class="conum">(2)</b>
+
+    <span class="tok-k">def</span> <span class="tok-nf">commit</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">committed</span> <span class="tok-o">=</span> <span class="tok-bp">True</span>  #<b class="conum">(2)</b>
+
+    <span class="tok-k">def</span> <span class="tok-nf">rollback</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
+        <span class="tok-k">pass</span>
+
+
+
+<span class="tok-k">def</span> <span class="tok-nf">test_add_batch</span><span class="tok-p">():</span>
+    <span class="tok-n">uow</span> <span class="tok-o">=</span> <span class="tok-n">FakeUnitOfWork</span><span class="tok-p">()</span>  #<b class="conum">(3)</b>
+    <span class="tok-n">services</span><span class="tok-o">.</span><span class="tok-n">add_batch</span><span class="tok-p">(</span><span class="tok-s2">"b1"</span><span class="tok-p">,</span> <span class="tok-s2">"CRUNCHY-ARMCHAIR"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">)</span>  #<b class="conum">(3)</b>
+    <span class="tok-k">assert</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s2">"b1"</span><span class="tok-p">)</span> <span class="tok-ow">is</span> <span class="tok-ow">not</span> <span class="tok-bp">None</span>
+    <span class="tok-k">assert</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">committed</span>
+
+
+<span class="tok-k">def</span> <span class="tok-nf">test_allocate_returns_allocation</span><span class="tok-p">():</span>
+    <span class="tok-n">uow</span> <span class="tok-o">=</span> <span class="tok-n">FakeUnitOfWork</span><span class="tok-p">()</span>  #<b class="conum">(3)</b>
+    <span class="tok-n">services</span><span class="tok-o">.</span><span class="tok-n">add_batch</span><span class="tok-p">(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-s2">"COMPLICATED-LAMP"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">)</span>  #<b class="conum">(3)</b>
+    <span class="tok-n">result</span> <span class="tok-o">=</span> <span class="tok-n">services</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-s2">"o1"</span><span class="tok-p">,</span> <span class="tok-s2">"COMPLICATED-LAMP"</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">)</span>  #<b class="conum">(3)</b>
+    <span class="tok-k">assert</span> <span class="tok-n">result</span> <span class="tok-o">==</span> <span class="tok-s2">"batch1"</span>
+<span class="tok-o">...</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p><code>FakeUnitOfWork</code> and <code>FakeRepository</code> are tightly coupled,
+just like the real <code>UnitofWork</code> and <code>Repository</code> classes.
+That&#8217;s fine because we recognize that the objects are collaborators.</p>
+</li>
+<li>
+<p>Notice the similarity with the fake <code>commit()</code> function
+from <code>FakeSession</code> (which we can now get rid of). But it&#8217;s
+a substantial improvement because we&#8217;re now <span class="keep-together">faking</span> out
+code that we wrote rather than third-party code. Some
+people say, <a href="https://oreil.ly/0LVj3">"Don&#8217;t mock what you don&#8217;t own"</a>.</p>
+</li>
+<li>
+<p>In our tests, we can instantiate a UoW and pass it to
+our service layer, rather than passing a repository and a session.
+This is considerably less cumbersome.</p>
+</li>
+</ol>
+</div>
+<div class="sidebarblock nobreakinside less_space">
+<div class="content">
+<div class="title">Don&#8217;t Mock What You Don&#8217;t Own</div>
+<div class="paragraph">
+<p>Why do we feel more comfortable mocking the UoW than the session?
+Both of our fakes achieve the same thing: they give us a way to swap out our
+persistence layer so we can run tests in memory instead of needing to
+talk to a real database. The difference is in the resulting design.</p>
+</div>
+<div class="paragraph">
+<p>If we cared only about writing tests that run quickly, we could create mocks
+that replace SQLAlchemy and use those throughout our codebase. The problem is
+that <code>Session</code> is a complex object that exposes lots of persistence-related
+functionality. It&#8217;s easy to use <code>Session</code> to make arbitrary queries against
+the database, but that quickly leads to data access code being sprinkled all
+over the codebase. To avoid that, we want to limit access to our persistence
+layer so each component has exactly what it needs and nothing more.</p>
+</div>
+<div class="paragraph">
+<p>By coupling to the <code>Session</code> interface, you&#8217;re choosing to couple to all the
+complexity of SQLAlchemy. Instead, we want to choose a simpler abstraction and
+use that to clearly separate responsibilities. Our UoW is much simpler
+than a session, and we feel comfortable with the service layer being able to
+start and stop units of work.</p>
+</div>
+<div class="paragraph">
+<p>"Don&#8217;t mock what you don&#8217;t own" is a rule of thumb that forces us to build
+these simple abstractions over messy subsystems. This has the same performance
+benefit as mocking the SQLAlchemy session but encourages us to think carefully
+about our designs.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_using_the_uow_in_the_service_layer">Using the UoW in the Service Layer</h3>
+<div class="paragraph">
+<p>Here&#8217;s what our new service layer looks like:</p>
+</div>
+<div id="service_layer_with_uow" class="exampleblock">
+<div class="title">Service layer using UoW (src/allocation/service_layer/services.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">add_batch</span><span class="tok-p">(</span>
+        <span class="tok-n">ref</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-p">:</span> <span class="tok-n">Optional</span><span class="tok-p">[</span><span class="tok-n">date</span><span class="tok-p">],</span>
+        <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span>  #<b class="conum">(1)</b>
+<span class="tok-p">):</span>
+    <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
+        <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-o">.</span><span class="tok-n">add</span><span class="tok-p">(</span><span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-n">ref</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-p">))</span>
+        <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span>
+
+
+<span class="tok-k">def</span> <span class="tok-nf">allocate</span><span class="tok-p">(</span>
+        <span class="tok-n">orderid</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">,</span>
+        <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span>  #<b class="conum">(1)</b>
+<span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-nb">str</span><span class="tok-p">:</span>
+    <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">)</span>
+    <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
+        <span class="tok-n">batches</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-o">.</span><span class="tok-n">list</span><span class="tok-p">()</span>
+        <span class="tok-k">if</span> <span class="tok-ow">not</span> <span class="tok-n">is_valid_sku</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">):</span>
+            <span class="tok-k">raise</span> <span class="tok-n">InvalidSku</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'Invalid sku {line.sku}'</span><span class="tok-p">)</span>
+        <span class="tok-n">batchref</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">)</span>
+        <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span>
+    <span class="tok-k">return</span> <span class="tok-n">batchref</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Our service layer now has only the one dependency, once again
+on an <em>abstract</em> UoW.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_explicit_tests_for_commitrollback_behavior">Explicit Tests for Commit/Rollback Behavior</h3>
+<div class="paragraph">
+<p>To convince ourselves that the commit/rollback behavior works, we wrote
+a couple of tests:</p>
+</div>
+<div id="testing_rollback" class="exampleblock">
+<div class="title">Integration tests for rollback behavior (tests/integration/test_uow.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_rolls_back_uncommitted_work_by_default</span><span class="tok-p">(</span><span class="tok-n">session_factory</span><span class="tok-p">):</span>
+    <span class="tok-n">uow</span> <span class="tok-o">=</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyUnitOfWork</span><span class="tok-p">(</span><span class="tok-n">session_factory</span><span class="tok-p">)</span>
+    <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
+        <span class="tok-n">insert_batch</span><span class="tok-p">(</span><span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-p">,</span> <span class="tok-s1">'batch1'</span><span class="tok-p">,</span> <span class="tok-s1">'MEDIUM-PLINTH'</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">)</span>
+
+    <span class="tok-n">new_session</span> <span class="tok-o">=</span> <span class="tok-n">session_factory</span><span class="tok-p">()</span>
+    <span class="tok-n">rows</span> <span class="tok-o">=</span> <span class="tok-nb">list</span><span class="tok-p">(</span><span class="tok-n">new_session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span><span class="tok-s1">'SELECT * FROM "batches"'</span><span class="tok-p">))</span>
+    <span class="tok-k">assert</span> <span class="tok-n">rows</span> <span class="tok-o">==</span> <span class="tok-p">[]</span>
+
+
+<span class="tok-k">def</span> <span class="tok-nf">test_rolls_back_on_error</span><span class="tok-p">(</span><span class="tok-n">session_factory</span><span class="tok-p">):</span>
+    <span class="tok-k">class</span> <span class="tok-nc">MyException</span><span class="tok-p">(</span><span class="tok-ne">Exception</span><span class="tok-p">):</span>
+        <span class="tok-k">pass</span>
+
+    <span class="tok-n">uow</span> <span class="tok-o">=</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyUnitOfWork</span><span class="tok-p">(</span><span class="tok-n">session_factory</span><span class="tok-p">)</span>
+    <span class="tok-k">with</span> <span class="tok-n">pytest</span><span class="tok-o">.</span><span class="tok-n">raises</span><span class="tok-p">(</span><span class="tok-n">MyException</span><span class="tok-p">):</span>
+        <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
+            <span class="tok-n">insert_batch</span><span class="tok-p">(</span><span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-p">,</span> <span class="tok-s1">'batch1'</span><span class="tok-p">,</span> <span class="tok-s1">'LARGE-FORK'</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">)</span>
+            <span class="tok-k">raise</span> <span class="tok-n">MyException</span><span class="tok-p">()</span>
+
+    <span class="tok-n">new_session</span> <span class="tok-o">=</span> <span class="tok-n">session_factory</span><span class="tok-p">()</span>
+    <span class="tok-n">rows</span> <span class="tok-o">=</span> <span class="tok-nb">list</span><span class="tok-p">(</span><span class="tok-n">new_session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span><span class="tok-s1">'SELECT * FROM "batches"'</span><span class="tok-p">))</span>
+    <span class="tok-k">assert</span> <span class="tok-n">rows</span> <span class="tok-o">==</span> <span class="tok-p">[]</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+We haven&#8217;t shown it here, but it can be worth testing some of the more
+    "obscure" database behavior, like transactions, against the "real"
+    database&#8212;that is, the same engine. For now, we&#8217;re getting away with using
+    SQLite instead of Postgres, but in <a href="/book/chapter_07_aggregate.html">[chapter_07_aggregate]</a>, we&#8217;ll switch
+    some of the tests to using the real database. It&#8217;s convenient that our UoW
+    class makes that easy!
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_explicit_versus_implicit_commits">Explicit Versus Implicit Commits</h3>
+<div class="paragraph">
+<p>Now we briefly digress on different ways of implementing the UoW pattern.</p>
+</div>
+<div class="paragraph">
+<p>We could imagine a slightly different version of the UoW that commits by default
+and rolls back only if it spots an exception:</p>
+</div>
+<div id="uow_implicit_commit" class="exampleblock">
+<div class="title">A UoW with implicit commit&#8230;&#8203; (src/allocation/unit_of_work.py)</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span>
+<span class="tok-k">class</span> <span class="tok-nc">AbstractUnitOfWork</span><span class="tok-p">(</span><span class="tok-n">abc</span><span class="tok-o">.</span><span class="tok-n">ABC</span><span class="tok-p">):</span>
+
+    <span class="tok-k">def</span> <span class="tok-fm">__enter__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
+        <span class="tok-k">return</span> <span class="tok-bp">self</span>
+
+    <span class="tok-k">def</span> <span class="tok-fm">__exit__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">exn_type</span><span class="tok-p">,</span> <span class="tok-n">exn_value</span><span class="tok-p">,</span> <span class="tok-n">traceback</span><span class="tok-p">):</span>
+        <span class="tok-k">if</span> <span class="tok-n">exn_type</span> <span class="tok-ow">is</span> <span class="tok-bp">None</span><span class="tok-p">:</span>
+            <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span>  #<b class="conum">(1)</b>
+        <span class="tok-k">else</span><span class="tok-p">:</span>
+            <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">rollback</span><span class="tok-p">()</span>  #<b class="conum">(2)</b></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Should we have an implicit commit in the happy path?</p>
+</li>
+<li>
+<p>And roll back only on exception?</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>It would allow us to save a line of code and to remove the explicit commit from our
+client code:</p>
+</div>
+<div id="add_batch_nocommit" class="exampleblock">
+<div class="title">...would save us a line of code (src/allocation/service_layer/services.py)</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">add_batch</span><span class="tok-p">(</span><span class="tok-n">ref</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-p">:</span> <span class="tok-n">Optional</span><span class="tok-p">[</span><span class="tok-n">date</span><span class="tok-p">],</span> <span class="tok-n">uow</span><span class="tok-p">):</span>
+    <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
+        <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-o">.</span><span class="tok-n">add</span><span class="tok-p">(</span><span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-n">ref</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-p">))</span>
+        <span class="tok-c1"># uow.commit()</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This is a judgment call, but we tend to prefer requiring the explicit commit
+so that we have to choose when to flush state.</p>
+</div>
+<div class="paragraph">
+<p>Although we use an extra line of code, this makes the software safe by default.
+The default behavior is to <em>not change anything</em>. In turn, that makes our code
+easier to reason about because there&#8217;s only one code path that leads to changes
+in the system: total success and an explicit commit. Any other code path, any
+exception, any early exit from the UoW&#8217;s scope leads to a safe state.</p>
+</div>
+<div class="paragraph">
+<p>Similarly, we prefer to roll back by default because
+it&#8217;s easier to understand; this rolls back to the last commit,
+so either the user did one, or we blow their changes away. Harsh but simple.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_examples_using_uow_to_group_multiple_operations_into_an_atomic_unit">Examples: Using UoW to Group Multiple Operations into an Atomic Unit</h3>
+<div class="paragraph">
+<p>Here are a few examples showing the Unit of Work pattern in use. You can
+see how it leads to simple reasoning about what blocks of code happen
+together.</p>
+</div>
+<div class="sect3">
+<h4 id="_example_1_reallocate">Example 1: Reallocate</h4>
+<div class="paragraph">
+<p>Suppose we want to be able to deallocate and then reallocate orders:</p>
+</div>
+<div id="reallocate" class="exampleblock">
+<div class="title">Reallocate service function</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">reallocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">:</span> <span class="tok-n">OrderLine</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-nb">str</span><span class="tok-p">:</span>
+    <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
+        <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">)</span>
+        <span class="tok-k">if</span> <span class="tok-n">batch</span> <span class="tok-ow">is</span> <span class="tok-bp">None</span><span class="tok-p">:</span>
+            <span class="tok-k">raise</span> <span class="tok-n">InvalidSku</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'Invalid sku {line.sku}'</span><span class="tok-p">)</span>
+        <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">deallocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">)</span>  #<b class="conum">(1)</b>
+        <span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">)</span>  #<b class="conum">(2)</b>
+        <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>If <code>deallocate()</code> fails, we don&#8217;t want to call <code>allocate()</code>, obviously.</p>
+</li>
+<li>
+<p>If <code>allocate()</code> fails, we probably don&#8217;t want to actually commit
+the <code>deallocate()</code> either.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_example_2_change_batch_quantity">Example 2: Change Batch Quantity</h4>
+<div class="paragraph">
+<p>Our shipping company gives us a call to say that one of the container doors
+opened, and half our sofas have fallen into the Indian Ocean. Oops!</p>
+</div>
+<div id="change_batch_quantity" class="exampleblock">
+<div class="title">Change quantity</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">change_batch_quantity</span><span class="tok-p">(</span><span class="tok-n">batchref</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">new_qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">):</span>
+    <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
+        <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">reference</span><span class="tok-o">=</span><span class="tok-n">batchref</span><span class="tok-p">)</span>
+        <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">change_purchased_quantity</span><span class="tok-p">(</span><span class="tok-n">new_qty</span><span class="tok-p">)</span>
+        <span class="tok-k">while</span> <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">&lt;</span> <span class="tok-mi">0</span><span class="tok-p">:</span>
+            <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">deallocate_one</span><span class="tok-p">()</span>  #<b class="conum">(1)</b>
+        <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Here we may need to deallocate any number of lines. If we get a failure
+at any stage, we probably want to commit none of the changes.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_tidying_up_the_integration_tests">Tidying Up the Integration Tests</h3>
+<div class="paragraph">
+<p>We now have three sets of tests, all essentially pointing at the database:
+<em>test_orm.py</em>, <em>test_repository.py</em>, and <em>test_uow.py</em>. Should we throw any
+away?</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock tree">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="text"><span></span>&#9492;&#9472;&#9472; tests
+    &#9500;&#9472;&#9472; conftest.py
+    &#9500;&#9472;&#9472; e2e
+    &#9474;&#160;&#160; &#9492;&#9472;&#9472; test_api.py
+    &#9500;&#9472;&#9472; integration
+    &#9474;&#160;&#160; &#9500;&#9472;&#9472; test_orm.py
+    &#9474;&#160;&#160; &#9500;&#9472;&#9472; test_repository.py
+    &#9474;&#160;&#160; &#9492;&#9472;&#9472; test_uow.py
+    &#9500;&#9472;&#9472; pytest.ini
+    &#9492;&#9472;&#9472; unit
+        &#9500;&#9472;&#9472; test_allocate.py
+        &#9500;&#9472;&#9472; test_batches.py
+        &#9492;&#9472;&#9472; test_services.py</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>You should always feel free to throw away tests if you think they&#8217;re not going to
+add value longer term. We&#8217;d say that <em>test_orm.py</em> was primarily a tool to help
+us learn SQLAlchemy, so we won&#8217;t need that long term, especially if the main things
+it&#8217;s doing are covered in <em>test_repository.py</em>. That last test, you might keep around,
+but we could certainly see an argument for just keeping everything at the highest
+possible level of abstraction (just as we did for the unit tests).</p>
+</div>
+<div class="sidebarblock nobreakinside less_space">
+<div class="content">
+<div class="title">Exercise for the Reader</div>
+<div class="paragraph">
+<p>For this chapter, probably the best thing to try is to implement a
+UoW from scratch. The code, as always, is <a href="https://github.com/cosmicpython/code/tree/chapter_06_uow_exercise">on GitHub</a>. You could either follow the model we have quite closely,
+or perhaps experiment with separating the UoW (whose responsibilities are
+<code>commit()</code>, <code>rollback()</code>, and providing the <code>.batches</code> repository) from the
+context manager, whose job is to initialize things, and then do the commit
+or rollback on exit. If you feel like going all-functional rather than
+messing about with all these classes, you could use <code>@contextmanager</code> from
+<code>contextlib</code>.</p>
+</div>
+<div class="paragraph">
+<p>We&#8217;ve stripped out both the actual UoW and the fakes, as well as paring back
+the abstract UoW. Why not send us a link to your repo if you come up with
+something you&#8217;re particularly proud of?</p>
+</div>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+This is another example of the lesson from <a href="/book/chapter_05_high_gear_low_gear.html">[chapter_05_high_gear_low_gear]</a>:
+    as we build better abstractions, we can move our tests to run against them,
+    which leaves us free to change the underlying details.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_wrap_up">Wrap-Up</h3>
+<div class="paragraph">
+<p>Hopefully we&#8217;ve convinced you that the Unit of Work pattern is useful, and
+that the context manager is a really nice Pythonic way
+of visually grouping code into blocks that we want to happen atomically.</p>
+</div>
+<div class="paragraph">
+<p>This pattern is so useful, in fact, that SQLAlchemy already uses a UoW
+in the shape of the <code>Session</code> object. The <code>Session</code> object in SQLAlchemy is the way
+that your application loads data from the database.</p>
+</div>
+<div class="paragraph">
+<p>Every time you load a new entity from the database, the session begins to <em>track</em>
+changes to the entity, and when the session is <em>flushed</em>, all your changes are
+persisted together. Why do we go to the effort of abstracting away the SQLAlchemy session if it already implements the pattern we want?</p>
+</div>
+<div class="paragraph">
+<p><a href="#chapter_06_uow_tradeoffs">Unit of Work pattern: the trade-offs</a> discusses some of the trade-offs.</p>
+</div>
+<table id="chapter_06_uow_tradeoffs" class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. Unit of Work pattern: the trade-offs</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Pros</th>
+<th class="tableblock halign-left valign-top">Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="ulist">
+<ul>
+<li>
+<p>We have a nice abstraction over the concept of atomic operations, and the
+context manager makes it easy to see, visually, what blocks of code are
+grouped together atomically.</p>
+</li>
+<li>
+<p>We have explicit control over when a transaction starts and finishes, and our
+application fails in a way that is safe by default. We never have to worry
+that an operation is partially committed.</p>
+</li>
+<li>
+<p>It&#8217;s a nice place to put all your repositories so client code can access them.</p>
+</li>
+<li>
+<p>As you&#8217;ll see in later chapters, atomicity isn&#8217;t only about transactions; it
+can help us work with events and the message bus.</p>
+</li>
+</ul>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="ulist">
+<ul>
+<li>
+<p>Your ORM probably already has some perfectly good abstractions around
+atomicity. SQLAlchemy even has context managers. You can go a long way
+just passing a session around.</p>
+</li>
+<li>
+<p>We&#8217;ve made it look easy, but you have to think quite carefully about
+things like rollbacks, multithreading, and nested transactions. Perhaps just
+sticking to what Django or Flask-SQLAlchemy gives you will keep your life
+simpler.</p>
+</li>
+</ul>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>For one thing, the Session API is rich and supports operations that we don&#8217;t
+want or need in our domain. Our <code>UnitOfWork</code> simplifies the session to its
+essential core: it can be started, committed, or thrown away.</p>
+</div>
+<div class="paragraph">
+<p>For another, we&#8217;re using the <code>UnitOfWork</code> to access our <code>Repository</code> objects.
+This is a neat bit of developer usability that we couldn&#8217;t do with a plain
+SQLAlchemy <code>Session</code>.</p>
+</div>
+<div class="sidebarblock nobreakinside less_space">
+<div class="content">
+<div class="title">Unit of Work Pattern Recap</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">The Unit of Work pattern is an abstraction around data integrity</dt>
+<dd>
+<p>It helps to enforce the consistency of our domain model, and improves
+performance, by letting us perform a single <em>flush</em> operation at the
+end of an operation.</p>
+</dd>
+<dt class="hdlist1">It works closely with the Repository and Service Layer patterns</dt>
+<dd>
+<p>The Unit of Work pattern completes our abstractions over data access by
+representing atomic updates. Each of our service-layer use cases runs in a
+single unit of work that succeeds or fails as a block.</p>
+</dd>
+<dt class="hdlist1">This is a lovely case for a context manager</dt>
+<dd>
+<p>Context managers are an idiomatic way of defining scope in Python. We can use a
+context manager to automatically roll back our work at the end of a request,
+which means the system is safe by default.</p>
+</dd>
+<dt class="hdlist1">SQLAlchemy already implements this pattern</dt>
+<dd>
+<p>We introduce an even simpler abstraction over the SQLAlchemy <code>Session</code> object
+in order to "narrow" the interface between the ORM and our code. This helps
+to keep us loosely coupled.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Lastly, we&#8217;re motivated again by the dependency inversion principle: our
+service layer depends on a thin abstraction, and we attach a concrete
+implementation at the outside edge of the system. This lines up nicely with
+SQLAlchemy&#8217;s own
+<a href="https://oreil.ly/tS0E0">recommendations</a>:</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>Keep the life cycle of the session (and usually the transaction) separate and
+external. The most comprehensive approach, recommended for more substantial
+applications, will try to keep the details of session, transaction, and
+exception management as far as possible from the details of the program doing
+its work.</p>
+</div>
+</blockquote>
+<div class="attribution">
+&#8212; SQLALchemy "Session Basics" Documentation
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<hr>
+<div class="footnote" id="_footnotedef_1">
+<a href="#_footnoteref_1">1</a>. You may have come across the use of the word <em>collaborators</em> to describe objects that work together to achieve a goal. The unit of work and the repository are a great example of collaborators in the object-modeling sense. In responsibility-driven design, clusters of objects that collaborate in their roles are called <em>object neighborhoods</em>, which is, in our professional opinion, totally adorable.
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2020-03-16 11:03:29 UTC
+</div>
+</div>
+<style>
+pre.pygments .hll { background-color: #ffffcc }
+pre.pygments  { background: #f0f0f0; }
+pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
+pre.pygments .tok-err { border: 1px solid #FF0000 } /* Error */
+pre.pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
+pre.pygments .tok-o { color: #666666 } /* Operator */
+pre.pygments .tok-ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
+pre.pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
+pre.pygments .tok-cp { color: #007020 } /* Comment.Preproc */
+pre.pygments .tok-cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
+pre.pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
+pre.pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
+pre.pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
+pre.pygments .tok-ge { font-style: italic } /* Generic.Emph */
+pre.pygments .tok-gr { color: #FF0000 } /* Generic.Error */
+pre.pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
+pre.pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
+pre.pygments .tok-go { color: #888888 } /* Generic.Output */
+pre.pygments .tok-gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+pre.pygments .tok-gs { font-weight: bold } /* Generic.Strong */
+pre.pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+pre.pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
+pre.pygments .tok-kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+pre.pygments .tok-kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+pre.pygments .tok-kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+pre.pygments .tok-kp { color: #007020 } /* Keyword.Pseudo */
+pre.pygments .tok-kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+pre.pygments .tok-kt { color: #902000 } /* Keyword.Type */
+pre.pygments .tok-m { color: #40a070 } /* Literal.Number */
+pre.pygments .tok-s { color: #4070a0 } /* Literal.String */
+pre.pygments .tok-na { color: #4070a0 } /* Name.Attribute */
+pre.pygments .tok-nb { color: #007020 } /* Name.Builtin */
+pre.pygments .tok-nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+pre.pygments .tok-no { color: #60add5 } /* Name.Constant */
+pre.pygments .tok-nd { color: #555555; font-weight: bold } /* Name.Decorator */
+pre.pygments .tok-ni { color: #d55537; font-weight: bold } /* Name.Entity */
+pre.pygments .tok-ne { color: #007020 } /* Name.Exception */
+pre.pygments .tok-nf { color: #06287e } /* Name.Function */
+pre.pygments .tok-nl { color: #002070; font-weight: bold } /* Name.Label */
+pre.pygments .tok-nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+pre.pygments .tok-nt { color: #062873; font-weight: bold } /* Name.Tag */
+pre.pygments .tok-nv { color: #bb60d5 } /* Name.Variable */
+pre.pygments .tok-ow { color: #007020; font-weight: bold } /* Operator.Word */
+pre.pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
+pre.pygments .tok-mb { color: #40a070 } /* Literal.Number.Bin */
+pre.pygments .tok-mf { color: #40a070 } /* Literal.Number.Float */
+pre.pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
+pre.pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
+pre.pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
+pre.pygments .tok-sa { color: #4070a0 } /* Literal.String.Affix */
+pre.pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
+pre.pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
+pre.pygments .tok-dl { color: #4070a0 } /* Literal.String.Delimiter */
+pre.pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+pre.pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
+pre.pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+pre.pygments .tok-sh { color: #4070a0 } /* Literal.String.Heredoc */
+pre.pygments .tok-si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+pre.pygments .tok-sx { color: #c65d09 } /* Literal.String.Other */
+pre.pygments .tok-sr { color: #235388 } /* Literal.String.Regex */
+pre.pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
+pre.pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
+pre.pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
+pre.pygments .tok-fm { color: #06287e } /* Name.Function.Magic */
+pre.pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
+pre.pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
+pre.pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
+pre.pygments .tok-vm { color: #bb60d5 } /* Name.Variable.Magic */
+pre.pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
+</style>
+</body>
+</html>

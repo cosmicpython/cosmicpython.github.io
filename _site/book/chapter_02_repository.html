@@ -1,0 +1,1293 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<title>Repository Pattern</title>
+<style>
+/* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+
+@import url("//fonts.googleapis.com/css?family=Noto+Sans:300,600italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700");
+@import url(//asciidoctor.org/stylesheets/asciidoctor.css); /* Default asciidoc style framework - important */
+
+/* customisations by harry */
+
+/* hide inline ditaa/plantuml source listings for images */
+.image-source {
+    display: none
+}
+/* make formal codeblocks a bit nicer */
+.exampleblock > .content {
+    padding: 2px;
+    background-color: white;
+    border: 0;
+    margin-bottom: 2em;
+}
+
+.exampleblock .title {
+    text-align: right;
+}
+
+/* end customisations by harry */
+
+/* CUSTOMISATIONS */
+
+/* Change the values in root for quick customisation. If you want even more fine grain... venture further. */
+
+:root{
+--maincolor:#FFFFFF;
+--primarycolor:#2c3e50;
+--secondarycolor:#ba3925;
+--tertiarycolor: #186d7a;
+--sidebarbackground:#CCC;
+--linkcolor:#b71c1c;
+--linkcoloralternate:#f44336;
+--white:#FFFFFF;
+--black:#000000;
+}
+
+/* Text styles */
+h1{color:var(--primarycolor) !important;}
+h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+.title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
+p{font-family: "Noto Sans",sans-serif !important}
+
+/* Table styles */
+th{font-family: "Noto Sans",sans-serif !important}
+
+/* Responsiveness fixes */
+video {
+  max-width: 100%;
+}
+
+@media all and (max-width: 600px) {
+table {
+  width: 55vw!important;
+  font-size: 3vw;
+}
+
+</style>
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="/book/preface.html">Preface</a></li>
+<li><a href="/book/introduction.html">Introduction</a></li>
+<li><a href="/book/part1.html">Building an Architecture to Support Domain Modeling</a></li>
+<li><a href="/book/chapter_01_domain_model.html">1. Domain Modeling</a></li>
+<li><a href="/book/chapter_02_repository.html">2. Repository Pattern</a></li>
+<li><a href="/book/chapter_03_abstractions.html">3. A Brief Interlude: On Coupling <span class="keep-together">and Abstractions</span></a></li>
+<li><a href="/book/chapter_04_service_layer.html">4. Our First Use Case: <span class="keep-together">Flask API and Service Layer</span></a></li>
+<li><a href="/book/chapter_05_high_gear_low_gear.html">5. TDD in High Gear and Low Gear</a></li>
+<li><a href="/book/chapter_06_uow.html">6. Unit of Work Pattern</a></li>
+<li><a href="/book/chapter_07_aggregate.html">7. Aggregates and Consistency Boundaries</a></li>
+<li><a href="/book/part2.html">Event-Driven Architecture</a></li>
+<li><a href="/book/chapter_08_events_and_message_bus.html">8. Events and the Message Bus</a></li>
+<li><a href="/book/chapter_09_all_messagebus.html">9. Going to Town on the Message Bus</a></li>
+<li><a href="/book/chapter_10_commands.html">10. Commands and Command Handler</a></li>
+<li><a href="/book/chapter_11_external_events.html">11. Event-Driven Architecture: Using Events to Integrate Microservices</a></li>
+<li><a href="/book/chapter_12_cqrs.html">12. Command-Query Responsibility Segregation (CQRS)</a></li>
+<li><a href="/book/chapter_13_dependency_injection.html">13. Dependency Injection (and Bootstrapping)</a></li>
+<li><a href="/book/epilogue_1_how_to_get_there_from_here.html">Appendix A: Epilogue</a></li>
+<li><a href="/book/appendix_ds1_table.html">Appendix B: Summary Diagram and Table</a></li>
+<li><a href="/book/appendix_project_structure.html">Appendix C: A Template Project Structure</a></li>
+<li><a href="/book/appendix_csvs.html">Appendix D: Swapping Out the Infrastructure: <span class="keep-together">Do Everything with CSVs</span></a></li>
+<li><a href="/book/appendix_django.html">Appendix E: Repository and Unit of Work <span class="keep-together">Patterns with Django</span></a></li>
+<li><a href="/book/appendix_validation.html">Appendix F: Validation</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="chapter_02_repository">Repository Pattern</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It&#8217;s time to make good on our promise to use the dependency inversion principle as
+a way of decoupling our core logic from infrastructural concerns.</p>
+</div>
+<div class="paragraph">
+<p>We&#8217;ll introduce the <em>Repository</em> pattern, a simplifying abstraction over data storage,
+allowing us to decouple our model layer from the data layer. We&#8217;ll present a
+concrete example of how this simplifying abstraction makes our system more
+testable by hiding the complexities of the database.</p>
+</div>
+<div class="paragraph">
+<p><a href="#maps_chapter_02">Before and after the Repository pattern</a> shows a little preview of what we&#8217;re going to build:
+a <code>Repository</code> object that sits between our domain model and the database.</p>
+</div>
+<div id="maps_chapter_02" class="imageblock">
+<div class="content">
+<img src="images/apwp_0201.png" alt="apwp 0201">
+</div>
+<div class="title">Figure 1. Before and after the Repository pattern</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The code for this chapter is in the
+chapter_02_repository branch <a href="https://oreil.ly/6STDu">on GitHub</a>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>git clone https://github.com/cosmicpython/code.git
+cd code
+git checkout chapter_02_repository
+# or to code along, checkout the previous chapter:
+git checkout chapter_01_domain_model</pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_persisting_our_domain_model">Persisting Our Domain Model</h3>
+<div class="paragraph">
+<p>In <a href="/book/chapter_01_domain_model.html">[chapter_01_domain_model]</a> we built a simple domain model that can allocate orders
+to batches of stock. It&#8217;s easy for us to write tests against this code because
+there aren&#8217;t any dependencies or infrastructure to set up. If we needed to run
+a database or an API and create test data, our tests would be harder to write
+and maintain.</p>
+</div>
+<div class="paragraph">
+<p>Sadly, at some point we&#8217;ll need to put our perfect little model in the hands of
+users and contend with the real world of spreadsheets and web
+browsers and race conditions. For the next few chapters we&#8217;re going to look at
+how we can connect our idealized domain model to external state.</p>
+</div>
+<div class="paragraph">
+<p>We expect to be working in an agile manner, so our priority is to get to a
+minimum viable product as quickly as possible. In our case, that&#8217;s going to be
+a web API. In a real project, you might dive straight in with some end-to-end
+tests and start plugging in a web framework, test-driving things outside-in.</p>
+</div>
+<div class="paragraph">
+<p>But we know that, no matter what, we&#8217;re going to need some form of persistent
+storage, and this is a textbook, so we can allow ourselves a tiny bit more
+bottom-up development and start to think about storage and databases.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_some_pseudocode_what_are_we_going_to_need">Some Pseudocode: What Are We Going to Need?</h3>
+<div class="paragraph">
+<p>When we build our first API endpoint, we know we&#8217;re going to have
+some code that looks more or less like the following.</p>
+</div>
+<div id="api_endpoint_pseudocode" class="exampleblock">
+<div class="title">What our first API endpoint will look like</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@flask.route.gubbins</span>
+<span class="tok-k">def</span> <span class="tok-nf">allocate_endpoint</span><span class="tok-p">():</span>
+    <span class="tok-c1"># extract order line from request</span>
+    <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">params</span><span class="tok-p">,</span> <span class="tok-o">...</span><span class="tok-p">)</span>
+    <span class="tok-c1"># load all batches from the DB</span>
+    <span class="tok-n">batches</span> <span class="tok-o">=</span> <span class="tok-o">...</span>
+    <span class="tok-c1"># call our domain service</span>
+    <span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">)</span>
+    <span class="tok-c1"># then save the allocation back to the database somehow</span>
+    <span class="tok-k">return</span> <span class="tok-mi">201</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+We&#8217;ve used Flask because it&#8217;s lightweight, but you don&#8217;t need
+to be a Flask user to understand this book. In fact, we&#8217;ll show you how
+to make your choice of framework a minor detail.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>We&#8217;ll need a way to retrieve batch info from the database and instantiate our domain
+model objects from it, and we&#8217;ll also need a way of saving them back to the
+database.</p>
+</div>
+<div class="paragraph">
+<p><em>What? Oh, "gubbins" is a British word for "stuff." You can just ignore that. It&#8217;s pseudocode, OK?</em></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_applying_the_dip_to_data_access">Applying the DIP to Data Access</h3>
+<div class="paragraph">
+<p>As mentioned in the <a href="/book/introduction.html">introduction</a>, a layered architecture is a common
+ approach to structuring a system that has a UI, some logic, and a database (see
+<a href="#layered_architecture2">Layered architecture</a>).</p>
+</div>
+<div id="layered_architecture2" class="imageblock width-75">
+<div class="content">
+<img src="images/apwp_0202.png" alt="apwp 0202">
+</div>
+<div class="title">Figure 2. Layered architecture</div>
+</div>
+<div class="paragraph">
+<p>Django&#8217;s Model-View-Template structure is closely related, as is
+Model-View-Controller (MVC). In any case, the aim is to keep the layers
+separate (which is a good thing), and to have each layer depend only on the one
+below it.</p>
+</div>
+<div class="paragraph">
+<p>But we want our domain model to have <em>no dependencies whatsoever</em>.<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup>
+We don&#8217;t want infrastructure concerns bleeding over into our domain model and
+slowing our unit tests or our ability to make changes.</p>
+</div>
+<div class="paragraph">
+<p>Instead, as discussed in the introduction, we&#8217;ll think of our model as being on the
+"inside," and dependencies flowing inward to it; this is what people sometimes call
+<em>onion architecture</em> (see <a href="#onion_architecture">Onion architecture</a>).</p>
+</div>
+<div id="onion_architecture" class="imageblock width-75">
+<div class="content">
+<img src="images/apwp_0203.png" alt="apwp 0203">
+</div>
+<div class="title">Figure 3. Onion architecture</div>
+</div>
+<div class="listingblock image-source">
+<div class="content">
+<pre>[ditaa, apwp_0203]
++------------------------+
+|   Presentation Layer   |
++------------------------+
+           |
+           V
++--------------------------------------------------+
+|                  Domain Model                    |
++--------------------------------------------------+
+                                        ^
+                                        |
+                             +---------------------+
+                             |    Database Layer   |
+                             +---------------------+</pre>
+</div>
+</div>
+<div class="sidebarblock nobreakinside less_space">
+<div class="content">
+<div class="title">Is This Ports and Adapters?</div>
+<div class="paragraph">
+<p>If you&#8217;ve been reading about architectural patterns, you may be asking
+yourself questions like this:</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p><em>Is this ports and adapters? Or is it hexagonal architecture? Is that the same as onion architecture? What about the clean architecture? What&#8217;s a port, and what&#8217;s an adapter? Why do you people have so many words for the same thing?</em></p>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p>Although some people like to nitpick over the differences, all these are
+pretty much names for the same thing, and they all boil down to the
+dependency inversion principle: high-level modules (the domain) should
+not depend on low-level ones (the infrastructure).<sup class="footnote">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup></p>
+</div>
+<div class="paragraph">
+<p>We&#8217;ll get into some of the nitty-gritty around "depending on abstractions,"
+and whether there is a Pythonic equivalent of interfaces,
+<a href="/book/chapter_04_service_layer.html#depend_on_abstractions">later in the book</a>. See also <a href="#what_is_a_port_and_what_is_an_adapter">What Is a Port and What Is an Adapter, in Python?</a>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_reminder_our_model">Reminder: Our Model</h3>
+<div class="paragraph">
+<p>Let&#8217;s remind ourselves of our domain model (see <a href="#model_diagram_reminder">Our model</a>):
+an allocation is the concept of linking an <code>OrderLine</code> to a <code>Batch</code>.  We&#8217;re
+storing the allocations as a collection on our <code>Batch</code> object.</p>
+</div>
+<div id="model_diagram_reminder" class="imageblock">
+<div class="content">
+<img src="images/apwp_0103.png" alt="apwp 0103">
+</div>
+<div class="title">Figure 4. Our model</div>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s see how we might translate this to a relational database.</p>
+</div>
+<div class="sect3">
+<h4 id="_the_normal_orm_way_model_depends_on_orm">The "Normal" ORM Way: Model Depends on ORM</h4>
+<div class="paragraph">
+<p>These days, it&#8217;s unlikely that your team members are hand-rolling their own SQL queries.
+Instead, you&#8217;re almost certainly using some kind of framework to generate
+SQL for you based on your model objects.</p>
+</div>
+<div class="paragraph">
+<p>These frameworks are called <em>object-relational mappers</em> (ORMs) because they exist to
+bridge the conceptual gap between the world of objects and domain modeling and
+the world of databases and relational algebra.</p>
+</div>
+<div class="paragraph">
+<p>The most important thing an ORM gives us is <em>persistence ignorance</em>: the idea
+that our fancy domain model doesn&#8217;t need to know anything about how data is
+loaded or persisted. This helps keep our domain clean of direct dependencies
+on particular database technologies.<sup class="footnote">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup></p>
+</div>
+<div class="paragraph">
+<p>But if you follow the typical SQLAlchemy tutorial, you&#8217;ll end up with something
+like this:</p>
+</div>
+<div id="typical_sqlalchemy_example" class="exampleblock">
+<div class="title">SQLAlchemy "declarative" syntax, model depends on ORM (orm.py)</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">sqlalchemy</span> <span class="tok-kn">import</span> <span class="tok-n">Column</span><span class="tok-p">,</span> <span class="tok-n">ForeignKey</span><span class="tok-p">,</span> <span class="tok-n">Integer</span><span class="tok-p">,</span> <span class="tok-n">String</span>
+<span class="tok-kn">from</span> <span class="tok-nn">sqlalchemy.ext.declarative</span> <span class="tok-kn">import</span> <span class="tok-n">declarative_base</span>
+<span class="tok-kn">from</span> <span class="tok-nn">sqlalchemy.orm</span> <span class="tok-kn">import</span> <span class="tok-n">relationship</span>
+
+<span class="tok-n">Base</span> <span class="tok-o">=</span> <span class="tok-n">declarative_base</span><span class="tok-p">()</span>
+
+<span class="tok-k">class</span> <span class="tok-nc">Order</span><span class="tok-p">(</span><span class="tok-n">Base</span><span class="tok-p">):</span>
+    <span class="tok-nb">id</span> <span class="tok-o">=</span> <span class="tok-n">Column</span><span class="tok-p">(</span><span class="tok-n">Integer</span><span class="tok-p">,</span> <span class="tok-n">primary_key</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">)</span>
+
+<span class="tok-k">class</span> <span class="tok-nc">OrderLine</span><span class="tok-p">(</span><span class="tok-n">Base</span><span class="tok-p">):</span>
+    <span class="tok-nb">id</span> <span class="tok-o">=</span> <span class="tok-n">Column</span><span class="tok-p">(</span><span class="tok-n">Integer</span><span class="tok-p">,</span> <span class="tok-n">primary_key</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">)</span>
+    <span class="tok-n">sku</span> <span class="tok-o">=</span> <span class="tok-n">Column</span><span class="tok-p">(</span><span class="tok-n">String</span><span class="tok-p">(</span><span class="tok-mi">250</span><span class="tok-p">))</span>
+    <span class="tok-n">qty</span> <span class="tok-o">=</span> <span class="tok-n">Integer</span><span class="tok-p">(</span><span class="tok-n">String</span><span class="tok-p">(</span><span class="tok-mi">250</span><span class="tok-p">))</span>
+    <span class="tok-n">order_id</span> <span class="tok-o">=</span> <span class="tok-n">Column</span><span class="tok-p">(</span><span class="tok-n">Integer</span><span class="tok-p">,</span> <span class="tok-n">ForeignKey</span><span class="tok-p">(</span><span class="tok-s1">'order.id'</span><span class="tok-p">))</span>
+    <span class="tok-n">order</span> <span class="tok-o">=</span> <span class="tok-n">relationship</span><span class="tok-p">(</span><span class="tok-n">Order</span><span class="tok-p">)</span>
+
+<span class="tok-k">class</span> <span class="tok-nc">Allocation</span><span class="tok-p">(</span><span class="tok-n">Base</span><span class="tok-p">):</span>
+    <span class="tok-o">...</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>You don&#8217;t need to understand SQLAlchemy to see that our pristine model is now
+full of dependencies on the ORM and is starting to look ugly as hell besides.
+Can we really say this model is ignorant of the database? How can it be
+separate from storage concerns when our model properties are directly coupled
+to database columns?</p>
+</div>
+<div class="sidebarblock nobreakinside less_space">
+<div class="content">
+<div class="title">Django&#8217;s ORM Is Essentially the Same, but More Restrictive</div>
+<div class="paragraph">
+<p>If you&#8217;re more used to Django, the preceding "declarative" SQLAlchemy snippet
+translates to something like this:</p>
+</div>
+<div id="django_orm_example" class="exampleblock">
+<div class="title">Django ORM example</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">Order</span><span class="tok-p">(</span><span class="tok-n">models</span><span class="tok-o">.</span><span class="tok-n">Model</span><span class="tok-p">):</span>
+    <span class="tok-k">pass</span>
+
+<span class="tok-k">class</span> <span class="tok-nc">OrderLine</span><span class="tok-p">(</span><span class="tok-n">models</span><span class="tok-o">.</span><span class="tok-n">Model</span><span class="tok-p">):</span>
+    <span class="tok-n">sku</span> <span class="tok-o">=</span> <span class="tok-n">models</span><span class="tok-o">.</span><span class="tok-n">CharField</span><span class="tok-p">(</span><span class="tok-n">max_length</span><span class="tok-o">=</span><span class="tok-mi">255</span><span class="tok-p">)</span>
+    <span class="tok-n">qty</span> <span class="tok-o">=</span> <span class="tok-n">models</span><span class="tok-o">.</span><span class="tok-n">IntegerField</span><span class="tok-p">()</span>
+    <span class="tok-n">order</span> <span class="tok-o">=</span> <span class="tok-n">models</span><span class="tok-o">.</span><span class="tok-n">ForeignKey</span><span class="tok-p">(</span><span class="tok-n">Order</span><span class="tok-p">)</span>
+
+<span class="tok-k">class</span> <span class="tok-nc">Allocation</span><span class="tok-p">(</span><span class="tok-n">models</span><span class="tok-o">.</span><span class="tok-n">Model</span><span class="tok-p">):</span>
+    <span class="tok-o">...</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The point is the same&#8212;&#8203;our model classes inherit directly from ORM
+classes, so our model depends on the ORM.  We want it to be the other
+way around.</p>
+</div>
+<div class="paragraph">
+<p>Django doesn&#8217;t provide an equivalent for SQLAlchemy&#8217;s classical mapper,
+but see <a href="/book/appendix_django.html">[appendix_django]</a> for examples of how to apply dependency
+inversion and the Repository pattern to Django.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_inverting_the_dependency_orm_depends_on_model">Inverting the Dependency: ORM Depends on Model</h4>
+<div class="paragraph">
+<p>Well, thankfully, that&#8217;s not the only way to use SQLAlchemy.  The alternative is
+to define your schema separately, and to define an explicit <em>mapper</em> for how to convert
+between the schema and our domain model, what SQLAlchemy calls a
+<a href="https://oreil.ly/ZucTG">classical mapping</a>:</p>
+</div>
+<div id="sqlalchemy_classical_mapper" class="exampleblock nobreakinside less_space">
+<div class="title">Explicit ORM mapping with SQLAlchemy Table objects (orm.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">sqlalchemy.orm</span> <span class="tok-kn">import</span> <span class="tok-n">mapper</span><span class="tok-p">,</span> <span class="tok-n">relationship</span>
+
+<span class="tok-kn">import</span> <span class="tok-nn">model</span>  #<b class="conum">(1)</b>
+
+
+<span class="tok-n">metadata</span> <span class="tok-o">=</span> <span class="tok-n">MetaData</span><span class="tok-p">()</span>
+
+<span class="tok-n">order_lines</span> <span class="tok-o">=</span> <span class="tok-n">Table</span><span class="tok-p">(</span>  #<b class="conum">(2)</b>
+    <span class="tok-s1">'order_lines'</span><span class="tok-p">,</span> <span class="tok-n">metadata</span><span class="tok-p">,</span>
+    <span class="tok-n">Column</span><span class="tok-p">(</span><span class="tok-s1">'id'</span><span class="tok-p">,</span> <span class="tok-n">Integer</span><span class="tok-p">,</span> <span class="tok-n">primary_key</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">,</span> <span class="tok-n">autoincrement</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">),</span>
+    <span class="tok-n">Column</span><span class="tok-p">(</span><span class="tok-s1">'sku'</span><span class="tok-p">,</span> <span class="tok-n">String</span><span class="tok-p">(</span><span class="tok-mi">255</span><span class="tok-p">)),</span>
+    <span class="tok-n">Column</span><span class="tok-p">(</span><span class="tok-s1">'qty'</span><span class="tok-p">,</span> <span class="tok-n">Integer</span><span class="tok-p">,</span> <span class="tok-n">nullable</span><span class="tok-o">=</span><span class="tok-bp">False</span><span class="tok-p">),</span>
+    <span class="tok-n">Column</span><span class="tok-p">(</span><span class="tok-s1">'orderid'</span><span class="tok-p">,</span> <span class="tok-n">String</span><span class="tok-p">(</span><span class="tok-mi">255</span><span class="tok-p">)),</span>
+<span class="tok-p">)</span>
+
+<span class="tok-o">...</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">start_mappers</span><span class="tok-p">():</span>
+    <span class="tok-n">lines_mapper</span> <span class="tok-o">=</span> <span class="tok-n">mapper</span><span class="tok-p">(</span><span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">,</span> <span class="tok-n">order_lines</span><span class="tok-p">)</span>  #<b class="conum">(3)</b></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>The ORM imports (or "depends on" or "knows about") the domain model, and
+not the other way around.</p>
+</li>
+<li>
+<p>We define our database tables and columns by using SQLAlchemy&#8217;s
+abstractions.<sup class="footnote">[<a id="_footnoteref_4" class="footnote" href="#_footnotedef_4" title="View footnote.">4</a>]</sup></p>
+</li>
+<li>
+<p>When we call the <code>mapper</code> function, SQLAlchemy does its magic to bind
+our domain model classes to the various tables we&#8217;ve defined.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The end result will be that, if we call <code>start_mappers</code>, we will be able to
+easily load and save domain model instances from and to the database. But if
+we never call that function, our domain model classes stay blissfully
+unaware of the database.</p>
+</div>
+<div class="paragraph">
+<p>This gives us all the benefits of SQLAlchemy, including the ability to use
+<code>alembic</code> for migrations, and the ability to transparently query using our
+domain classes, as we&#8217;ll see.</p>
+</div>
+<div class="paragraph">
+<p>When you&#8217;re first trying to build your ORM config, it can be useful to write
+tests for it, as in the following example:</p>
+</div>
+<div id="orm_tests" class="exampleblock">
+<div class="title">Testing the ORM directly (throwaway tests) (test_orm.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_orderline_mapper_can_load_lines</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">):</span>  #<b class="conum">(1)</b>
+    <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>
+        <span class="tok-s1">'INSERT INTO order_lines (orderid, sku, qty) VALUES '</span>
+        <span class="tok-s1">'("order1", "RED-CHAIR", 12),'</span>
+        <span class="tok-s1">'("order1", "RED-TABLE", 13),'</span>
+        <span class="tok-s1">'("order2", "BLUE-LIPSTICK", 14)'</span>
+    <span class="tok-p">)</span>
+    <span class="tok-n">expected</span> <span class="tok-o">=</span> <span class="tok-p">[</span>
+        <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s2">"order1"</span><span class="tok-p">,</span> <span class="tok-s2">"RED-CHAIR"</span><span class="tok-p">,</span> <span class="tok-mi">12</span><span class="tok-p">),</span>
+        <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s2">"order1"</span><span class="tok-p">,</span> <span class="tok-s2">"RED-TABLE"</span><span class="tok-p">,</span> <span class="tok-mi">13</span><span class="tok-p">),</span>
+        <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s2">"order2"</span><span class="tok-p">,</span> <span class="tok-s2">"BLUE-LIPSTICK"</span><span class="tok-p">,</span> <span class="tok-mi">14</span><span class="tok-p">),</span>
+    <span class="tok-p">]</span>
+    <span class="tok-k">assert</span> <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">query</span><span class="tok-p">(</span><span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">all</span><span class="tok-p">()</span> <span class="tok-o">==</span> <span class="tok-n">expected</span>
+
+
+<span class="tok-k">def</span> <span class="tok-nf">test_orderline_mapper_can_save_lines</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">):</span>
+    <span class="tok-n">new_line</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s2">"order1"</span><span class="tok-p">,</span> <span class="tok-s2">"DECORATIVE-WIDGET"</span><span class="tok-p">,</span> <span class="tok-mi">12</span><span class="tok-p">)</span>
+    <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">add</span><span class="tok-p">(</span><span class="tok-n">new_line</span><span class="tok-p">)</span>
+    <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span>
+
+    <span class="tok-n">rows</span> <span class="tok-o">=</span> <span class="tok-nb">list</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span><span class="tok-s1">'SELECT orderid, sku, qty FROM "order_lines"'</span><span class="tok-p">))</span>
+    <span class="tok-k">assert</span> <span class="tok-n">rows</span> <span class="tok-o">==</span> <span class="tok-p">[(</span><span class="tok-s2">"order1"</span><span class="tok-p">,</span> <span class="tok-s2">"DECORATIVE-WIDGET"</span><span class="tok-p">,</span> <span class="tok-mi">12</span><span class="tok-p">)]</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>If you haven&#8217;t used pytest, the <code>session</code> argument to this test needs
+explaining. You don&#8217;t need to worry about the details of pytest or its
+fixtures for the purposes of this book, but the short explanation is that
+you can define common dependencies for your tests as "fixtures," and
+pytest will inject them to the tests that need them by looking at their
+function arguments. In this case, it&#8217;s a SQLAlchemy database session.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>You probably wouldn&#8217;t keep these tests around&#8212;&#8203;as you&#8217;ll see shortly, once
+you&#8217;ve taken the step of inverting the dependency of ORM and domain model, it&#8217;s
+only a small additional step to implement another abstraction called the
+Repository pattern, which will be easier to write tests against and will
+provide a simple interface for faking out later in tests.</p>
+</div>
+<div class="paragraph">
+<p>But we&#8217;ve already achieved our objective of inverting the traditional
+dependency: the domain model stays "pure" and free from infrastructure
+concerns. We could throw away SQLAlchemy and use a different ORM, or a totally
+different persistence system, and the domain model doesn&#8217;t need to change at
+all.</p>
+</div>
+<div class="paragraph">
+<p>Depending on what you&#8217;re doing in your domain model, and especially if you
+stray far from the OO paradigm, you may find it increasingly hard to get the
+ORM to produce the exact behavior you need, and you may need to modify your
+domain model.<sup class="footnote">[<a id="_footnoteref_5" class="footnote" href="#_footnotedef_5" title="View footnote.">5</a>]</sup> As so often happens with
+architectural decisions, you&#8217;ll need to consider a trade-off. As the
+Zen of Python says, "Practicality beats purity!"</p>
+</div>
+<div class="paragraph">
+<p>At this point, though, our API endpoint might look something like
+the following, and we could get it to work just fine:</p>
+</div>
+<div id="api_endpoint_with_session" class="exampleblock">
+<div class="title">Using SQLAlchemy directly in our API endpoint</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@flask.route.gubbins</span>
+<span class="tok-k">def</span> <span class="tok-nf">allocate_endpoint</span><span class="tok-p">():</span>
+    <span class="tok-n">session</span> <span class="tok-o">=</span> <span class="tok-n">start_session</span><span class="tok-p">()</span>
+
+    <span class="tok-c1"># extract order line from request</span>
+    <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">OrderLine</span><span class="tok-p">(</span>
+        <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s1">'orderid'</span><span class="tok-p">],</span>
+        <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s1">'sku'</span><span class="tok-p">],</span>
+        <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s1">'qty'</span><span class="tok-p">],</span>
+    <span class="tok-p">)</span>
+
+    <span class="tok-c1"># load all batches from the DB</span>
+    <span class="tok-n">batches</span> <span class="tok-o">=</span> <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">query</span><span class="tok-p">(</span><span class="tok-n">Batch</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">all</span><span class="tok-p">()</span>
+
+    <span class="tok-c1"># call our domain service</span>
+    <span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">)</span>
+
+    <span class="tok-c1"># save the allocation back to the database</span>
+    <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span>
+
+    <span class="tok-k">return</span> <span class="tok-mi">201</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_introducing_the_repository_pattern">Introducing the Repository Pattern</h3>
+<div class="paragraph">
+<p>The <em>Repository</em> pattern is an abstraction over persistent storage. It hides the
+boring details of data access by pretending that all of our data is in memory.</p>
+</div>
+<div class="paragraph">
+<p>If we had infinite memory in our laptops, we&#8217;d have no need for clumsy databases.
+Instead, we could just use our objects whenever we liked. What would that look
+like?</p>
+</div>
+<div id="all_my_data" class="exampleblock">
+<div class="title">You have to get your data from somewhere</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">import</span> <span class="tok-nn">all_my_data</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">create_a_batch</span><span class="tok-p">():</span>
+    <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-o">...</span><span class="tok-p">)</span>
+    <span class="tok-n">all_my_data</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-o">.</span><span class="tok-n">add</span><span class="tok-p">(</span><span class="tok-n">batch</span><span class="tok-p">)</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">modify_a_batch</span><span class="tok-p">(</span><span class="tok-n">batch_id</span><span class="tok-p">,</span> <span class="tok-n">new_quantity</span><span class="tok-p">):</span>
+    <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">all_my_data</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">batch_id</span><span class="tok-p">)</span>
+    <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">change_initial_quantity</span><span class="tok-p">(</span><span class="tok-n">new_quantity</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Even though our objects are in memory, we need to put them <em>somewhere</em> so we can
+find them again. Our in-memory data would let us add new objects, just like a
+list or a set. Because the objects are in memory, we never need to call a
+<code>.save()</code> method; we just fetch the object we care about and modify it in memory.</p>
+</div>
+<div class="sect3">
+<h4 id="_the_repository_in_the_abstract">The Repository in the Abstract</h4>
+<div class="paragraph">
+<p>The simplest repository has just two methods: <code>add()</code> to put a new item in the
+repository, and <code>get()</code> to return a previously added item.<sup class="footnote">[<a id="_footnoteref_6" class="footnote" href="#_footnotedef_6" title="View footnote.">6</a>]</sup>.]
+We stick rigidly to using these methods for data access in our domain and our
+service layer. This self-imposed simplicity stops us from coupling our domain
+model to the database.</p>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s what an abstract base class (ABC) for our repository would look like:</p>
+</div>
+<div id="abstract_repo" class="exampleblock">
+<div class="title">The simplest possible repository (repository.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">AbstractRepository</span><span class="tok-p">(</span><span class="tok-n">abc</span><span class="tok-o">.</span><span class="tok-n">ABC</span><span class="tok-p">):</span>
+
+    <span class="tok-nd">@abc.abstractmethod</span>  #<b class="conum">(1)</b>
+    <span class="tok-k">def</span> <span class="tok-nf">add</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">batch</span><span class="tok-p">:</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-p">):</span>
+        <span class="tok-k">raise</span> <span class="tok-ne">NotImplementedError</span>  #<b class="conum">(2)</b>
+
+    <span class="tok-nd">@abc.abstractmethod</span>
+    <span class="tok-k">def</span> <span class="tok-nf">get</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">reference</span><span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-p">:</span>
+        <span class="tok-k">raise</span> <span class="tok-ne">NotImplementedError</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Python tip: <code>@abc.abstractmethod</code> is one of the only things that makes
+    ABCs actually "work" in Python. Python will refuse to let you instantiate
+    a class that does not implement all the <code>abstractmethods</code> defined in its
+    parent class.<sup class="footnote">[<a id="_footnoteref_7" class="footnote" href="#_footnotedef_7" title="View footnote.">7</a>]</sup></p>
+</li>
+<li>
+<p><code>raise NotImplementedError</code> is nice, but it&#8217;s neither necessary nor sufficient. In fact, your abstract methods can have real behavior that subclasses
+can call out to, if you really want.</p>
+</li>
+</ol>
+</div>
+<div class="sidebarblock pagebreak-before less_space">
+<div class="content">
+<div class="title">Abstract Base Classes, Duck Typing, and Protocols</div>
+<div class="paragraph">
+<p>We&#8217;re using abstract base classes in this book for didactic reasons: we hope
+they help explain what the interface of the repository abstraction is.</p>
+</div>
+<div class="paragraph">
+<p>In real life, we&#8217;ve sometimes found ourselves deleting ABCs from our production
+code, because Python makes it too easy to ignore them, and they end up
+unmaintained and, at worst, misleading. In practice we often just rely on
+Python&#8217;s duck typing to enable abstractions. To a Pythonista, a repository is
+<em>any</em> object that has <code>add(<em>thing</em>)</code> and <code>get(<em>id</em>)</code> methods.</p>
+</div>
+<div class="paragraph">
+<p>An alternative to look into is <a href="https://oreil.ly/q9EPC">PEP
+544 protocols</a>. These give you typing without the possibility of inheritance,
+which "prefer composition over inheritance" fans will particularly like.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_what_is_the_trade_off">What Is the Trade-Off?</h4>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>You know they say economists know the price of everything and the value of
+nothing?  Well, programmers know the benefits of everything and the trade-offs
+of nothing.</p>
+</div>
+</blockquote>
+<div class="attribution">
+&#8212; Rich Hickey
+</div>
+</div>
+<div class="paragraph">
+<p>Whenever we introduce an architectural pattern in this book, we&#8217;ll always
+ask, "What do we get for this?  And what does it cost us?"</p>
+</div>
+<div class="paragraph">
+<p>Usually, at the very least, we&#8217;ll be introducing an extra layer of abstraction,
+and although we may hope it will reduce complexity overall, it does add
+complexity locally, and it has a cost in terms of the raw numbers of moving parts and
+ongoing maintenance.</p>
+</div>
+<div class="paragraph">
+<p>The Repository pattern is probably one of the easiest choices in the book, though,
+if you&#8217;re already heading down the DDD and dependency inversion route.  As far
+as our code is concerned, we&#8217;re really just swapping the SQLAlchemy abstraction
+(<code>session.query(Batch)</code>) for a different one (<code>batches_repo.get</code>) that we
+designed.</p>
+</div>
+<div class="paragraph">
+<p>We will have to write a few lines of code in our repository class each time we
+add a new domain object that we want to retrieve, but in return we get a
+simple abstraction over our storage layer, which we control. The Repository pattern would make
+it easy to make fundamental changes to the way we store things (see
+<a href="/book/appendix_csvs.html">[appendix_csvs]</a>), and as we&#8217;ll see, it is easy to fake out for unit tests.</p>
+</div>
+<div class="paragraph">
+<p>In addition, the Repository pattern is so common in the DDD world that, if you
+do collaborate with programmers who have come to Python from the Java and C#
+worlds, they&#8217;re likely to recognize it. <a href="#repository_pattern_diagram">Repository pattern</a> illustrates the pattern.</p>
+</div>
+<div id="repository_pattern_diagram" class="imageblock width-60">
+<div class="content">
+<img src="images/apwp_0205.png" alt="apwp 0205">
+</div>
+<div class="title">Figure 5. Repository pattern</div>
+</div>
+<div class="listingblock image-source">
+<div class="content">
+<pre>[ditaa, apwp_0205]
+  +-----------------------------+
+  |      Application Layer      |
+  +-----------------------------+
+                 |^
+                 ||          /------------------\
+                 ||----------|   Domain Model   |
+                 ||          |      Objects     |
+                 ||          \------------------/
+                 V|
+  +------------------------------+
+  |          Repository          |
+  +------------------------------+
+                 |
+                 V
+  +------------------------------+
+  |        Database Layer        |
+  +------------------------------+</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As always, we start with a test. This would probably be classified as an
+integration test, since we&#8217;re checking that our code (the repository) is
+correctly integrated with the database; hence, the tests tend to mix
+raw SQL with calls and assertions on our own code.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+Unlike the ORM tests from earlier, these tests are good candidates for
+    staying part of your codebase longer term, particularly if any parts of
+    your domain model mean the object-relational map is nontrivial.
+</td>
+</tr>
+</table>
+</div>
+<div id="repo_test_save" class="exampleblock">
+<div class="title">Repository test for saving an object (test_repository.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_repository_can_save_a_batch</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">):</span>
+    <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-s2">"RUSTY-SOAPDISH"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-bp">None</span><span class="tok-p">)</span>
+
+    <span class="tok-n">repo</span> <span class="tok-o">=</span> <span class="tok-n">repository</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyRepository</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">)</span>
+    <span class="tok-n">repo</span><span class="tok-o">.</span><span class="tok-n">add</span><span class="tok-p">(</span><span class="tok-n">batch</span><span class="tok-p">)</span>  #<b class="conum">(1)</b>
+    <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span>  #<b class="conum">(2)</b>
+
+    <span class="tok-n">rows</span> <span class="tok-o">=</span> <span class="tok-nb">list</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>
+        <span class="tok-s1">'SELECT reference, sku, _purchased_quantity, eta FROM "batches"'</span>  #<b class="conum">(3)</b>
+    <span class="tok-p">))</span>
+    <span class="tok-k">assert</span> <span class="tok-n">rows</span> <span class="tok-o">==</span> <span class="tok-p">[(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-s2">"RUSTY-SOAPDISH"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">)]</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p><code>repo.add()</code> is the method under test here.</p>
+</li>
+<li>
+<p>We keep the <code>.commit()</code> outside of the repository and make
+it the responsibility of the caller. There are pros and cons for
+this; some of our reasons will become clearer when we get to
+<a href="/book/chapter_06_uow.html">[chapter_06_uow]</a>.</p>
+</li>
+<li>
+<p>We use the raw SQL to verify that the right data has been saved.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The next test involves retrieving batches and allocations, so it&#8217;s more
+complex:</p>
+</div>
+<div id="repo_test_retrieve" class="exampleblock">
+<div class="title">Repository test for retrieving a complex object (test_repository.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">insert_order_line</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">):</span>
+    <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>  #<b class="conum">(1)</b>
+        <span class="tok-s1">'INSERT INTO order_lines (orderid, sku, qty)'</span>
+        <span class="tok-s1">' VALUES ("order1", "GENERIC-SOFA", 12)'</span>
+    <span class="tok-p">)</span>
+    <span class="tok-p">[[</span><span class="tok-n">orderline_id</span><span class="tok-p">]]</span> <span class="tok-o">=</span> <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>
+        <span class="tok-s1">'SELECT id FROM order_lines WHERE orderid=:orderid AND sku=:sku'</span><span class="tok-p">,</span>
+        <span class="tok-nb">dict</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-o">=</span><span class="tok-s2">"order1"</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-s2">"GENERIC-SOFA"</span><span class="tok-p">)</span>
+    <span class="tok-p">)</span>
+    <span class="tok-k">return</span> <span class="tok-n">orderline_id</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">insert_batch</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">,</span> <span class="tok-n">batch_id</span><span class="tok-p">):</span>  #<b class="conum">(2)</b>
+    <span class="tok-o">...</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">test_repository_can_retrieve_a_batch_with_allocations</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">):</span>
+    <span class="tok-n">orderline_id</span> <span class="tok-o">=</span> <span class="tok-n">insert_order_line</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">)</span>
+    <span class="tok-n">batch1_id</span> <span class="tok-o">=</span> <span class="tok-n">insert_batch</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">,</span> <span class="tok-s2">"batch1"</span><span class="tok-p">)</span>
+    <span class="tok-n">insert_batch</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">,</span> <span class="tok-s2">"batch2"</span><span class="tok-p">)</span>
+    <span class="tok-n">insert_allocation</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">,</span> <span class="tok-n">orderline_id</span><span class="tok-p">,</span> <span class="tok-n">batch1_id</span><span class="tok-p">)</span>  #<b class="conum">(3)</b>
+
+    <span class="tok-n">repo</span> <span class="tok-o">=</span> <span class="tok-n">repository</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyRepository</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">)</span>
+    <span class="tok-n">retrieved</span> <span class="tok-o">=</span> <span class="tok-n">repo</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s2">"batch1"</span><span class="tok-p">)</span>
+
+    <span class="tok-n">expected</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-s2">"GENERIC-SOFA"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-bp">None</span><span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">retrieved</span> <span class="tok-o">==</span> <span class="tok-n">expected</span>  <span class="tok-c1"># Batch.__eq__ only compares reference  </span>#<b class="conum">(3)</b>
+    <span class="tok-k">assert</span> <span class="tok-n">retrieved</span><span class="tok-o">.</span><span class="tok-n">sku</span> <span class="tok-o">==</span> <span class="tok-n">expected</span><span class="tok-o">.</span><span class="tok-n">sku</span>  #<b class="conum">(4)</b>
+    <span class="tok-k">assert</span> <span class="tok-n">retrieved</span><span class="tok-o">.</span><span class="tok-n">_purchased_quantity</span> <span class="tok-o">==</span> <span class="tok-n">expected</span><span class="tok-o">.</span><span class="tok-n">_purchased_quantity</span>
+    <span class="tok-k">assert</span> <span class="tok-n">retrieved</span><span class="tok-o">.</span><span class="tok-n">_allocations</span> <span class="tok-o">==</span> <span class="tok-p">{</span>  #<b class="conum">(4)</b>
+        <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s2">"order1"</span><span class="tok-p">,</span> <span class="tok-s2">"GENERIC-SOFA"</span><span class="tok-p">,</span> <span class="tok-mi">12</span><span class="tok-p">),</span>
+    <span class="tok-p">}</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>This tests the read side, so the raw SQL is preparing data to be read
+by the <code>repo.get()</code>.</p>
+</li>
+<li>
+<p>We&#8217;ll spare you the details of <code>insert_batch</code> and <code>insert_allocation</code>;
+the point is to create a couple of batches, and, for the
+batch we&#8217;re interested in, to have one existing order line allocated to it.</p>
+</li>
+<li>
+<p>And that&#8217;s what we verify here. The first <code>assert ==</code> checks that the
+types match, and that the reference is the same (because, as you remember,
+<code>Batch</code> is an entity, and we have a custom __eq__ for it).</p>
+</li>
+<li>
+<p>So we also explicitly check on its major attributes, including
+<code>._allocations</code>, which is a Python set of <code>OrderLine</code> value objects.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Whether or not you painstakingly write tests for every model is a judgment
+call. Once you have one class tested for create/modify/save, you might be
+happy to go on and do the others with a minimal round-trip test, or even nothing
+at all, if they all follow a similar pattern. In our case, the ORM config
+that sets up the <code>._allocations</code> set is a little complex, so it merited a
+specific test.</p>
+</div>
+<div class="paragraph">
+<p>You end up with something like this:</p>
+</div>
+<div id="batch_repository" class="exampleblock">
+<div class="title">A typical repository (repository.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">SqlAlchemyRepository</span><span class="tok-p">(</span><span class="tok-n">AbstractRepository</span><span class="tok-p">):</span>
+
+    <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">session</span><span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">session</span> <span class="tok-o">=</span> <span class="tok-n">session</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">add</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">batch</span><span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">add</span><span class="tok-p">(</span><span class="tok-n">batch</span><span class="tok-p">)</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">get</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">reference</span><span class="tok-p">):</span>
+        <span class="tok-k">return</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">query</span><span class="tok-p">(</span><span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">filter_by</span><span class="tok-p">(</span><span class="tok-n">reference</span><span class="tok-o">=</span><span class="tok-n">reference</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">one</span><span class="tok-p">()</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">list</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
+        <span class="tok-k">return</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">query</span><span class="tok-p">(</span><span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">all</span><span class="tok-p">()</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>And now our Flask endpoint might look something like the following:</p>
+</div>
+<div id="api_endpoint_with_repo" class="exampleblock">
+<div class="title">Using our repository directly in our API endpoint</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@flask.route.gubbins</span>
+<span class="tok-k">def</span> <span class="tok-nf">allocate_endpoint</span><span class="tok-p">():</span>
+    <span class="tok-n">batches</span> <span class="tok-o">=</span> <span class="tok-n">SqlAlchemyRepository</span><span class="tok-o">.</span><span class="tok-n">list</span><span class="tok-p">()</span>
+    <span class="tok-n">lines</span> <span class="tok-o">=</span> <span class="tok-p">[</span>
+        <span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-n">l</span><span class="tok-p">[</span><span class="tok-s1">'orderid'</span><span class="tok-p">],</span> <span class="tok-n">l</span><span class="tok-p">[</span><span class="tok-s1">'sku'</span><span class="tok-p">],</span> <span class="tok-n">l</span><span class="tok-p">[</span><span class="tok-s1">'qty'</span><span class="tok-p">])</span>
+         <span class="tok-k">for</span> <span class="tok-n">l</span> <span class="tok-ow">in</span> <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">params</span><span class="tok-o">...</span>
+    <span class="tok-p">]</span>
+    <span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">lines</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">)</span>
+    <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span>
+    <span class="tok-k">return</span> <span class="tok-mi">201</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sidebarblock nobreakinside less_space">
+<div class="content">
+<div class="title">Exercise for the Reader</div>
+<div class="paragraph">
+<p>We bumped into a friend at a DDD conference the other day who said, "I haven&#8217;t
+used an ORM in 10 years." The Repository pattern and an ORM both act as abstractions
+in front of raw SQL, so using one behind the other isn&#8217;t really necessary.  Why
+not have a go at implementing our repository without using the ORM? You&#8217;ll find the code <a href="https://github.com/cosmicpython/code/tree/chapter_02_repository_exercise">on GitHub</a>.</p>
+</div>
+<div class="paragraph">
+<p>We&#8217;ve left the repository tests, but figuring out what SQL to write is up
+to you. Perhaps it&#8217;ll be harder than you think; perhaps it&#8217;ll be easier.
+But the nice thing is, the rest of your application just doesn&#8217;t care.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_building_a_fake_repository_for_tests_is_now_trivial">Building a Fake Repository for Tests Is Now Trivial!</h3>
+<div class="paragraph">
+<p>Here&#8217;s one of the biggest benefits of the Repository pattern:</p>
+</div>
+<div id="fake_repository" class="exampleblock">
+<div class="title">A simple fake repository using a set (repository.py)</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">FakeRepository</span><span class="tok-p">(</span><span class="tok-n">AbstractRepository</span><span class="tok-p">):</span>
+
+    <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_batches</span> <span class="tok-o">=</span> <span class="tok-nb">set</span><span class="tok-p">(</span><span class="tok-n">batches</span><span class="tok-p">)</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">add</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">batch</span><span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_batches</span><span class="tok-o">.</span><span class="tok-n">add</span><span class="tok-p">(</span><span class="tok-n">batch</span><span class="tok-p">)</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">get</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">reference</span><span class="tok-p">):</span>
+        <span class="tok-k">return</span> <span class="tok-nb">next</span><span class="tok-p">(</span><span class="tok-n">b</span> <span class="tok-k">for</span> <span class="tok-n">b</span> <span class="tok-ow">in</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_batches</span> <span class="tok-k">if</span> <span class="tok-n">b</span><span class="tok-o">.</span><span class="tok-n">reference</span> <span class="tok-o">==</span> <span class="tok-n">reference</span><span class="tok-p">)</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">list</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
+        <span class="tok-k">return</span> <span class="tok-nb">list</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_batches</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Because it&#8217;s a simple wrapper around a <code>set</code>, all the methods are one-liners.</p>
+</div>
+<div class="paragraph">
+<p>Using a fake repo in tests is really easy, and we have a simple
+abstraction that&#8217;s easy to use and reason about:</p>
+</div>
+<div id="fake_repository_example" class="exampleblock">
+<div class="title">Example usage of fake repository (test_api.py)</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-n">fake_repo</span> <span class="tok-o">=</span> <span class="tok-n">FakeRepository</span><span class="tok-p">([</span><span class="tok-n">batch1</span><span class="tok-p">,</span> <span class="tok-n">batch2</span><span class="tok-p">,</span> <span class="tok-n">batch3</span><span class="tok-p">])</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>You&#8217;ll see this fake in action in the next chapter.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+Building fakes for your abstractions is an excellent way to get design
+    feedback: if it&#8217;s hard to fake, the abstraction is probably too
+    complicated.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="what_is_a_port_and_what_is_an_adapter">What Is a Port and What Is an Adapter, in Python?</h3>
+<div class="paragraph">
+<p>We don&#8217;t want to dwell on the terminology too much here because the main thing
+we want to focus on is dependency inversion, and the specifics of the
+technique you use don&#8217;t matter too much. Also, we&#8217;re aware that different
+people use slightly different definitions.</p>
+</div>
+<div class="paragraph">
+<p>Ports and adapters came out of the OO world, and the definition we hold onto
+is that the <em>port</em> is the <em>interface</em> between our application and whatever
+it is we wish to abstract away, and the <em>adapter</em> is the <em>implementation</em>
+behind that interface or abstraction.</p>
+</div>
+<div class="paragraph">
+<p>Now Python doesn&#8217;t have interfaces per se, so although it&#8217;s
+usually easy to identify an adapter, defining the port can be harder. If
+you&#8217;re using an abstract base class, that&#8217;s the port. If not, the port
+is just the duck type that your adapters conform to and that your core application
+expects&#8212;the function and method names in use, and their argument names and types.</p>
+</div>
+<div class="paragraph">
+<p>Concretely, in this chapter, <code>AbstractRepository</code> is the port, and
+<code>SqlAlchemyRepository</code> and <code>FakeRepository</code> are the adapters.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_wrap_up">Wrap-Up</h3>
+<div class="paragraph">
+<p>Bearing the Rich Hickey quote in mind, in each chapter we
+summarize the costs and benefits of each architectural pattern we introduce.
+We want to be clear that we&#8217;re not saying every single application needs
+to be built this way; only sometimes does the complexity of the app and domain
+make it worth investing the time and effort in adding these extra layers of
+indirection.</p>
+</div>
+<div class="paragraph">
+<p>With that in mind, <a href="#chapter_02_repository_tradeoffs">Repository pattern and persistence ignorance: the trade-offs</a> shows
+some of the pros and cons of the Repository pattern and our persistence-ignorant
+model.</p>
+</div>
+<table id="chapter_02_repository_tradeoffs" class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. Repository pattern and persistence ignorance: the trade-offs</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Pros</th>
+<th class="tableblock halign-left valign-top">Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="ulist">
+<ul>
+<li>
+<p>We have a simple interface between persistent storage and our domain model.</p>
+</li>
+<li>
+<p>It&#8217;s easy to make a fake version of the repository for unit testing, or to
+swap out different storage solutions, because we&#8217;ve fully decoupled the model
+from infrastructure concerns.</p>
+</li>
+<li>
+<p>Writing the domain model before thinking about persistence helps us focus on
+the business problem at hand. If we ever want to radically change our approach,
+we can do that in our model, without needing to worry about foreign keys
+or migrations until later.</p>
+</li>
+<li>
+<p>Our database schema is really simple because we have complete control over
+how we map our objects to tables.</p>
+</li>
+</ul>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="ulist">
+<ul>
+<li>
+<p>An ORM already buys you some decoupling. Changing foreign keys might be hard,
+but it should be pretty easy to swap between MySQL and Postgres if you
+ever need to.</p>
+</li>
+</ul>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Maintaining ORM mappings by hand requires extra work and extra code.</p>
+</li>
+<li>
+<p>Any extra layer of indirection always increases maintenance costs and
+adds a "WTF factor" for Python programmers who&#8217;ve never seen the Repository pattern
+before.</p>
+</li>
+</ul>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p><a href="#domain_model_tradeoffs_diagram">Domain model trade-offs as a diagram</a> shows the basic thesis: yes, for simple
+cases, a decoupled domain model is harder work than a simple ORM/ActiveRecord
+pattern.<sup class="footnote">[<a id="_footnoteref_8" class="footnote" href="#_footnotedef_8" title="View footnote.">8</a>]</sup></p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+If your app is just a simple CRUD (create-read-update-delete) wrapper
+    around a database, then you don&#8217;t need a domain model or a repository.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>But the more complex the domain, the more an investment in freeing
+yourself from infrastructure concerns will pay off in terms of the ease of
+making changes.</p>
+</div>
+<div id="domain_model_tradeoffs_diagram" class="imageblock">
+<div class="content">
+<img src="images/apwp_0206.png" alt="apwp 0206">
+</div>
+<div class="title">Figure 6. Domain model trade-offs as a diagram</div>
+</div>
+<div class="paragraph">
+<p>Our example code isn&#8217;t complex enough to give more than a hint of what
+the right-hand side of the graph looks like, but the hints are there.
+Imagine, for example, if we decide one day that we want to change allocations
+to live on the <code>OrderLine</code> instead of on the <code>Batch</code> object: if we were using
+Django, say, we&#8217;d have to define and think through the database migration
+before we could run any tests. As it is, because our model is just plain
+old Python objects, we can change a <code>set()</code> to being a new attribute, without
+needing to think about the database until later.</p>
+</div>
+<div class="sidebarblock nobreakinside">
+<div class="content">
+<div class="title">Repository Pattern Recap</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Apply dependency inversion to your ORM</dt>
+<dd>
+<p>Our domain model should be free of infrastructure concerns,
+so your ORM should import your model, and not the other way
+around.</p>
+</dd>
+<dt class="hdlist1">The Repository pattern is a simple abstraction around permanent storage</dt>
+<dd>
+<p>The repository gives you the illusion of a collection of in-memory
+objects. It makes it easy to create a <code>FakeRepository</code> for
+testing and to swap fundamental details of your
+infrastructure without disrupting your core application. See
+<a href="/book/appendix_csvs.html">[appendix_csvs]</a> for an example.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>You&#8217;ll be wondering, how do we instantiate these repositories, fake or
+real? What will our Flask app actually look like? You&#8217;ll find out in the next
+exciting installment, <a href="/book/chapter_04_service_layer.html">the Service Layer pattern</a>.</p>
+</div>
+<div class="paragraph">
+<p>But first, a brief digression.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<hr>
+<div class="footnote" id="_footnotedef_1">
+<a href="#_footnoteref_1">1</a>. I suppose we mean "no stateful dependencies." Depending on a helper library is fine; depending on an ORM or a web framework is not.
+</div>
+<div class="footnote" id="_footnotedef_2">
+<a href="#_footnoteref_2">2</a>. Mark Seemann has <a href="https://oreil.ly/LpFS9">an excellent blog post</a> on the topic.
+</div>
+<div class="footnote" id="_footnotedef_3">
+<a href="#_footnoteref_3">3</a>. In this sense, using an ORM is already an example of the DIP. Instead of depending on hardcoded SQL, we depend on an abstraction, the ORM. But that&#8217;s not enough for us&#8212;not in this book!
+</div>
+<div class="footnote" id="_footnotedef_4">
+<a href="#_footnoteref_4">4</a>. Even in projects where we don&#8217;t use an ORM, we often use SQLAlchemy alongside Alembic to declaratively create schemas in Python and to manage migrations, connections, and sessions.
+</div>
+<div class="footnote" id="_footnotedef_5">
+<a href="#_footnoteref_5">5</a>. Shout-out to the amazingly helpful SQLAlchemy maintainers, and to Mike Bayer in particular.
+</div>
+<div class="footnote" id="_footnotedef_6">
+<a href="#_footnoteref_6">6</a>. You may be thinking, "What about <code>list</code> or <code>delete</code> or <code>update</code>?" However, in an ideal world, we modify our model objects one at a time, and delete is usually handled as a soft-delete&#8212;i.e., <code>batch.cancel()</code>. Finally, update is taken care of by the Unit of Work pattern, as you&#8217;ll see in <a href="/book/chapter_06_uow.html">[chapter_06_uow
+</a></div>
+<div class="footnote" id="_footnotedef_7">
+<a href="#_footnoteref_7">7</a>. To really reap the benefits of ABCs (such as they may be), be running helpers like <code>pylint</code> and <code>mypy</code>.
+</div>
+<div class="footnote" id="_footnotedef_8">
+<a href="#_footnoteref_8">8</a>. Diagram inspired by a post called <a href="https://oreil.ly/fQXkP">"Global Complexity, Local Simplicity"</a> by Rob Vens.
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2020-03-16 11:03:29 UTC
+</div>
+</div>
+<style>
+pre.pygments .hll { background-color: #ffffcc }
+pre.pygments  { background: #f0f0f0; }
+pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
+pre.pygments .tok-err { border: 1px solid #FF0000 } /* Error */
+pre.pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
+pre.pygments .tok-o { color: #666666 } /* Operator */
+pre.pygments .tok-ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
+pre.pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
+pre.pygments .tok-cp { color: #007020 } /* Comment.Preproc */
+pre.pygments .tok-cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
+pre.pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
+pre.pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
+pre.pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
+pre.pygments .tok-ge { font-style: italic } /* Generic.Emph */
+pre.pygments .tok-gr { color: #FF0000 } /* Generic.Error */
+pre.pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
+pre.pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
+pre.pygments .tok-go { color: #888888 } /* Generic.Output */
+pre.pygments .tok-gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+pre.pygments .tok-gs { font-weight: bold } /* Generic.Strong */
+pre.pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+pre.pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
+pre.pygments .tok-kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+pre.pygments .tok-kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+pre.pygments .tok-kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+pre.pygments .tok-kp { color: #007020 } /* Keyword.Pseudo */
+pre.pygments .tok-kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+pre.pygments .tok-kt { color: #902000 } /* Keyword.Type */
+pre.pygments .tok-m { color: #40a070 } /* Literal.Number */
+pre.pygments .tok-s { color: #4070a0 } /* Literal.String */
+pre.pygments .tok-na { color: #4070a0 } /* Name.Attribute */
+pre.pygments .tok-nb { color: #007020 } /* Name.Builtin */
+pre.pygments .tok-nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+pre.pygments .tok-no { color: #60add5 } /* Name.Constant */
+pre.pygments .tok-nd { color: #555555; font-weight: bold } /* Name.Decorator */
+pre.pygments .tok-ni { color: #d55537; font-weight: bold } /* Name.Entity */
+pre.pygments .tok-ne { color: #007020 } /* Name.Exception */
+pre.pygments .tok-nf { color: #06287e } /* Name.Function */
+pre.pygments .tok-nl { color: #002070; font-weight: bold } /* Name.Label */
+pre.pygments .tok-nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+pre.pygments .tok-nt { color: #062873; font-weight: bold } /* Name.Tag */
+pre.pygments .tok-nv { color: #bb60d5 } /* Name.Variable */
+pre.pygments .tok-ow { color: #007020; font-weight: bold } /* Operator.Word */
+pre.pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
+pre.pygments .tok-mb { color: #40a070 } /* Literal.Number.Bin */
+pre.pygments .tok-mf { color: #40a070 } /* Literal.Number.Float */
+pre.pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
+pre.pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
+pre.pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
+pre.pygments .tok-sa { color: #4070a0 } /* Literal.String.Affix */
+pre.pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
+pre.pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
+pre.pygments .tok-dl { color: #4070a0 } /* Literal.String.Delimiter */
+pre.pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+pre.pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
+pre.pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+pre.pygments .tok-sh { color: #4070a0 } /* Literal.String.Heredoc */
+pre.pygments .tok-si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+pre.pygments .tok-sx { color: #c65d09 } /* Literal.String.Other */
+pre.pygments .tok-sr { color: #235388 } /* Literal.String.Regex */
+pre.pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
+pre.pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
+pre.pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
+pre.pygments .tok-fm { color: #06287e } /* Name.Function.Magic */
+pre.pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
+pre.pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
+pre.pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
+pre.pygments .tok-vm { color: #bb60d5 } /* Name.Variable.Magic */
+pre.pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
+</style>
+</body>
+</html>

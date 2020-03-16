@@ -1,0 +1,222 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<title>Summary Diagram and Table</title>
+<style>
+/* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+
+@import url("//fonts.googleapis.com/css?family=Noto+Sans:300,600italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700");
+@import url(//asciidoctor.org/stylesheets/asciidoctor.css); /* Default asciidoc style framework - important */
+
+/* customisations by harry */
+
+/* hide inline ditaa/plantuml source listings for images */
+.image-source {
+    display: none
+}
+/* make formal codeblocks a bit nicer */
+.exampleblock > .content {
+    padding: 2px;
+    background-color: white;
+    border: 0;
+    margin-bottom: 2em;
+}
+
+.exampleblock .title {
+    text-align: right;
+}
+
+/* end customisations by harry */
+
+/* CUSTOMISATIONS */
+
+/* Change the values in root for quick customisation. If you want even more fine grain... venture further. */
+
+:root{
+--maincolor:#FFFFFF;
+--primarycolor:#2c3e50;
+--secondarycolor:#ba3925;
+--tertiarycolor: #186d7a;
+--sidebarbackground:#CCC;
+--linkcolor:#b71c1c;
+--linkcoloralternate:#f44336;
+--white:#FFFFFF;
+--black:#000000;
+}
+
+/* Text styles */
+h1{color:var(--primarycolor) !important;}
+h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+.title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
+p{font-family: "Noto Sans",sans-serif !important}
+
+/* Table styles */
+th{font-family: "Noto Sans",sans-serif !important}
+
+/* Responsiveness fixes */
+video {
+  max-width: 100%;
+}
+
+@media all and (max-width: 600px) {
+table {
+  width: 55vw!important;
+  font-size: 3vw;
+}
+
+</style>
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="/book/preface.html">Preface</a></li>
+<li><a href="/book/introduction.html">Introduction</a></li>
+<li><a href="/book/part1.html">Building an Architecture to Support Domain Modeling</a></li>
+<li><a href="/book/chapter_01_domain_model.html">1. Domain Modeling</a></li>
+<li><a href="/book/chapter_02_repository.html">2. Repository Pattern</a></li>
+<li><a href="/book/chapter_03_abstractions.html">3. A Brief Interlude: On Coupling <span class="keep-together">and Abstractions</span></a></li>
+<li><a href="/book/chapter_04_service_layer.html">4. Our First Use Case: <span class="keep-together">Flask API and Service Layer</span></a></li>
+<li><a href="/book/chapter_05_high_gear_low_gear.html">5. TDD in High Gear and Low Gear</a></li>
+<li><a href="/book/chapter_06_uow.html">6. Unit of Work Pattern</a></li>
+<li><a href="/book/chapter_07_aggregate.html">7. Aggregates and Consistency Boundaries</a></li>
+<li><a href="/book/part2.html">Event-Driven Architecture</a></li>
+<li><a href="/book/chapter_08_events_and_message_bus.html">8. Events and the Message Bus</a></li>
+<li><a href="/book/chapter_09_all_messagebus.html">9. Going to Town on the Message Bus</a></li>
+<li><a href="/book/chapter_10_commands.html">10. Commands and Command Handler</a></li>
+<li><a href="/book/chapter_11_external_events.html">11. Event-Driven Architecture: Using Events to Integrate Microservices</a></li>
+<li><a href="/book/chapter_12_cqrs.html">12. Command-Query Responsibility Segregation (CQRS)</a></li>
+<li><a href="/book/chapter_13_dependency_injection.html">13. Dependency Injection (and Bootstrapping)</a></li>
+<li><a href="/book/epilogue_1_how_to_get_there_from_here.html">Appendix A: Epilogue</a></li>
+<li><a href="/book/appendix_ds1_table.html">Appendix B: Summary Diagram and Table</a></li>
+<li><a href="/book/appendix_project_structure.html">Appendix C: A Template Project Structure</a></li>
+<li><a href="/book/appendix_csvs.html">Appendix D: Swapping Out the Infrastructure: <span class="keep-together">Do Everything with CSVs</span></a></li>
+<li><a href="/book/appendix_django.html">Appendix E: Repository and Unit of Work <span class="keep-together">Patterns with Django</span></a></li>
+<li><a href="/book/appendix_validation.html">Appendix F: Validation</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="appendix_ds1_table">Appendix A: Summary Diagram and Table</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Here&#8217;s what our architecture looks like by the end of the book:</p>
+</div>
+<div id="recap_diagram" class="imageblock">
+<div class="content">
+<img src="images/apwp_aa01.png" alt="diagram showing all components: flask+eventconsumer, service layer, adapters, domain etc">
+</div>
+</div>
+<div class="paragraph">
+<p><a href="#ds1_table">The components of our architecture and what they all do</a> recaps each pattern and what it does.</p>
+</div>
+<table id="ds1_table" class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. The components of our architecture and what they all do</caption>
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Layer</th>
+<th class="tableblock halign-left valign-top">Component</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top" rowspan="5"><div class="content"><div class="paragraph">
+<p><strong>Domain</strong></p>
+</div>
+<div class="paragraph">
+<p><em>Defines the business logic.</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Entity</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A domain object whose attributes may change but that has a recognizable identity over time.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Value object</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">An immutable domain object whose attributes entirely define it. It is fungible with other identical objects.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Aggregate</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Cluster of associated objects that we treat as a unit for the purpose of data changes. Defines and enforces a consistency boundary.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Event</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Represents something that happened.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Command</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Represents a job the system should perform.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top" rowspan="3"><div class="content"><div class="paragraph">
+<p><strong>Service Layer</strong></p>
+</div>
+<div class="paragraph">
+<p><em>Defines the jobs the system should perform and orchestrates different components.</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Handler</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Receives a command or an event and performs what needs to happen.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Unit of work</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Abstraction around data integrity. Each unit of work represents an atomic update. Makes repositories available. Tracks new events on retrieved aggregates.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Message bus (internal)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Handles commands and events by routing them to the appropriate handler.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top" rowspan="2"><div class="content"><div class="paragraph">
+<p><strong>Adapters</strong> (Secondary)</p>
+</div>
+<div class="paragraph">
+<p><em>Concrete implementations of an interface that goes from our system
+to the outside world (I/O).</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Repository</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Abstraction around persistent storage. Each aggregate has its own repository.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Event publisher</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Pushes events onto the external message bus.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top" rowspan="2"><div class="content"><div class="paragraph">
+<p><strong>Entrypoints</strong> (Primary adapters)</p>
+</div>
+<div class="paragraph">
+<p><em>Translate external inputs into calls into the service layer.</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Web</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Receives web requests and translates them into commands, passing them to the internal message bus.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Event consumer</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Reads events from the external message bus and translates them into commands, passing them to the internal message bus.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N/A</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">External message bus (message broker)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A piece of infrastructure that different services use to intercommunicate, via events.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2020-03-16 11:03:29 UTC
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,794 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<title>Validation</title>
+<style>
+/* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+
+@import url("//fonts.googleapis.com/css?family=Noto+Sans:300,600italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700");
+@import url(//asciidoctor.org/stylesheets/asciidoctor.css); /* Default asciidoc style framework - important */
+
+/* customisations by harry */
+
+/* hide inline ditaa/plantuml source listings for images */
+.image-source {
+    display: none
+}
+/* make formal codeblocks a bit nicer */
+.exampleblock > .content {
+    padding: 2px;
+    background-color: white;
+    border: 0;
+    margin-bottom: 2em;
+}
+
+.exampleblock .title {
+    text-align: right;
+}
+
+/* end customisations by harry */
+
+/* CUSTOMISATIONS */
+
+/* Change the values in root for quick customisation. If you want even more fine grain... venture further. */
+
+:root{
+--maincolor:#FFFFFF;
+--primarycolor:#2c3e50;
+--secondarycolor:#ba3925;
+--tertiarycolor: #186d7a;
+--sidebarbackground:#CCC;
+--linkcolor:#b71c1c;
+--linkcoloralternate:#f44336;
+--white:#FFFFFF;
+--black:#000000;
+}
+
+/* Text styles */
+h1{color:var(--primarycolor) !important;}
+h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+.title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
+p{font-family: "Noto Sans",sans-serif !important}
+
+/* Table styles */
+th{font-family: "Noto Sans",sans-serif !important}
+
+/* Responsiveness fixes */
+video {
+  max-width: 100%;
+}
+
+@media all and (max-width: 600px) {
+table {
+  width: 55vw!important;
+  font-size: 3vw;
+}
+
+</style>
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="/book/preface.html">Preface</a></li>
+<li><a href="/book/introduction.html">Introduction</a></li>
+<li><a href="/book/part1.html">Building an Architecture to Support Domain Modeling</a></li>
+<li><a href="/book/chapter_01_domain_model.html">1. Domain Modeling</a></li>
+<li><a href="/book/chapter_02_repository.html">2. Repository Pattern</a></li>
+<li><a href="/book/chapter_03_abstractions.html">3. A Brief Interlude: On Coupling <span class="keep-together">and Abstractions</span></a></li>
+<li><a href="/book/chapter_04_service_layer.html">4. Our First Use Case: <span class="keep-together">Flask API and Service Layer</span></a></li>
+<li><a href="/book/chapter_05_high_gear_low_gear.html">5. TDD in High Gear and Low Gear</a></li>
+<li><a href="/book/chapter_06_uow.html">6. Unit of Work Pattern</a></li>
+<li><a href="/book/chapter_07_aggregate.html">7. Aggregates and Consistency Boundaries</a></li>
+<li><a href="/book/part2.html">Event-Driven Architecture</a></li>
+<li><a href="/book/chapter_08_events_and_message_bus.html">8. Events and the Message Bus</a></li>
+<li><a href="/book/chapter_09_all_messagebus.html">9. Going to Town on the Message Bus</a></li>
+<li><a href="/book/chapter_10_commands.html">10. Commands and Command Handler</a></li>
+<li><a href="/book/chapter_11_external_events.html">11. Event-Driven Architecture: Using Events to Integrate Microservices</a></li>
+<li><a href="/book/chapter_12_cqrs.html">12. Command-Query Responsibility Segregation (CQRS)</a></li>
+<li><a href="/book/chapter_13_dependency_injection.html">13. Dependency Injection (and Bootstrapping)</a></li>
+<li><a href="/book/epilogue_1_how_to_get_there_from_here.html">Appendix A: Epilogue</a></li>
+<li><a href="/book/appendix_ds1_table.html">Appendix B: Summary Diagram and Table</a></li>
+<li><a href="/book/appendix_project_structure.html">Appendix C: A Template Project Structure</a></li>
+<li><a href="/book/appendix_csvs.html">Appendix D: Swapping Out the Infrastructure: <span class="keep-together">Do Everything with CSVs</span></a></li>
+<li><a href="/book/appendix_django.html">Appendix E: Repository and Unit of Work <span class="keep-together">Patterns with Django</span></a></li>
+<li><a href="/book/appendix_validation.html">Appendix F: Validation</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="appendix_validation">Appendix E: Validation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Whenever we&#8217;re teaching and talking about these techniques, one question that
+comes up over and over is "Where should I do validation? Does that belong with
+my business logic in the domain model, or is that an infrastructural concern?"</p>
+</div>
+<div class="paragraph">
+<p>As with any architectural question, the answer is: it depends!</p>
+</div>
+<div class="paragraph">
+<p>The most important consideration is that we want to keep our code well separated
+so that each part of the system is simple. We don&#8217;t want to clutter our code
+with irrelevant detail.</p>
+</div>
+<div class="sect2">
+<h3 id="_what_is_validation_anyway">What Is Validation, Anyway?</h3>
+<div class="paragraph">
+<p>When people use the word <em>validation</em>, they usually mean a process whereby they
+test the inputs of an operation to make sure that they match certain criteria.
+Inputs that match the criteria are considered <em>valid</em>, and inputs that don&#8217;t
+are <em>invalid</em>.</p>
+</div>
+<div class="paragraph">
+<p>If the input is invalid, the operation can&#8217;t continue but should exit with
+some kind of error. In other words, validation is about creating <em>preconditions</em>. We find it useful
+to separate our preconditions into three subtypes: syntax, semantics, and
+pragmatics.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_validating_syntax">Validating Syntax</h3>
+<div class="paragraph">
+<p>In linguistics, the <em>syntax</em> of a language is the set of rules that govern the
+structure of grammatical sentences. For example, in English, the sentence
+"Allocate three units of <code>TASTELESS-LAMP</code> to order twenty-seven" is grammatically
+sound, while the phrase "hat hat hat hat hat hat wibble" is not. We can describe
+grammatically correct sentences as <em>well formed</em>.</p>
+</div>
+<div class="paragraph pagebreak-before">
+<p>How does this map to our application? Here are some examples of syntactic rules:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>An <code>Allocate</code> command must have an order ID, a SKU, and a quantity.</p>
+</li>
+<li>
+<p>A quantity is a positive integer.</p>
+</li>
+<li>
+<p>A SKU is a string.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>These are rules about the shape and structure of incoming data. An <code>Allocate</code>
+command without a SKU or an order ID isn&#8217;t a valid message. It&#8217;s the equivalent
+of the phrase "Allocate three to."</p>
+</div>
+<div class="paragraph">
+<p>We tend to validate these rules at the edge of the system. Our rule of thumb is
+that a message handler should always receive only a message that is well-formed
+and contains all required information.</p>
+</div>
+<div class="paragraph">
+<p>One option is to put your validation logic on the message type itself:</p>
+</div>
+<div id="validation_on_message" class="exampleblock">
+<div class="title">Validation on the message class (src/allocation/commands.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">schema</span> <span class="tok-kn">import</span> <span class="tok-n">And</span><span class="tok-p">,</span> <span class="tok-n">Schema</span><span class="tok-p">,</span> <span class="tok-n">Use</span>
+
+
+<span class="tok-nd">@dataclass</span>
+<span class="tok-k">class</span> <span class="tok-nc">Allocate</span><span class="tok-p">(</span><span class="tok-n">Command</span><span class="tok-p">):</span>
+
+    <span class="tok-n">_schema</span> <span class="tok-o">=</span> <span class="tok-n">Schema</span><span class="tok-p">({</span>  #<b class="conum">(1)</b>
+        <span class="tok-s1">'orderid'</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">,</span>
+         <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span>
+         <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-n">And</span><span class="tok-p">(</span><span class="tok-n">Use</span><span class="tok-p">(</span><span class="tok-nb">int</span><span class="tok-p">),</span> <span class="tok-k">lambda</span> <span class="tok-n">n</span><span class="tok-p">:</span> <span class="tok-n">n</span> <span class="tok-o">&gt;</span> <span class="tok-mi">0</span><span class="tok-p">)</span>
+     <span class="tok-p">},</span> <span class="tok-n">ignore_extra_keys</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">)</span>
+
+    <span class="tok-n">orderid</span><span class="tok-p">:</span> <span class="tok-nb">str</span>
+    <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span>
+    <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span>
+
+    <span class="tok-nd">@classmethod</span>
+    <span class="tok-k">def</span> <span class="tok-nf">from_json</span><span class="tok-p">(</span><span class="tok-bp">cls</span><span class="tok-p">,</span> <span class="tok-n">data</span><span class="tok-p">):</span>  #<b class="conum">(2)</b>
+       <span class="tok-n">data</span> <span class="tok-o">=</span> <span class="tok-n">json</span><span class="tok-o">.</span><span class="tok-n">loads</span><span class="tok-p">(</span><span class="tok-n">data</span><span class="tok-p">)</span>
+       <span class="tok-k">return</span> <span class="tok-bp">cls</span><span class="tok-p">(</span><span class="tok-o">**</span><span class="tok-n">_schema</span><span class="tok-o">.</span><span class="tok-n">validate</span><span class="tok-p">(</span><span class="tok-n">data</span><span class="tok-p">))</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>The <a href="https://pypi.org/project/schema">schema library</a> lets us
+describe the structure and validation of our messages in a nice declarative way.</p>
+</li>
+<li>
+<p>The <code>from_json</code> method reads a string as JSON and turns it into our message
+type.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>This can get repetitive, though, since we need to specify our fields twice,
+so we might want to introduce a helper library that can unify the validation and
+declaration of our message types:</p>
+</div>
+<div id="command_factory" class="exampleblock">
+<div class="title">A command factory with schema (src/allocation/commands.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">command</span><span class="tok-p">(</span><span class="tok-n">name</span><span class="tok-p">,</span> <span class="tok-o">**</span><span class="tok-n">fields</span><span class="tok-p">):</span>  #<b class="conum">(1)</b>
+    <span class="tok-n">schema</span> <span class="tok-o">=</span> <span class="tok-n">Schema</span><span class="tok-p">(</span><span class="tok-n">And</span><span class="tok-p">(</span><span class="tok-n">Use</span><span class="tok-p">(</span><span class="tok-n">json</span><span class="tok-o">.</span><span class="tok-n">loads</span><span class="tok-p">),</span> <span class="tok-n">fields</span><span class="tok-p">),</span> <span class="tok-n">ignore_extra_keys</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">)</span>  #<b class="conum">(2)</b>
+    <span class="tok-bp">cls</span> <span class="tok-o">=</span> <span class="tok-n">make_dataclass</span><span class="tok-p">(</span><span class="tok-n">name</span><span class="tok-p">,</span> <span class="tok-n">fields</span><span class="tok-o">.</span><span class="tok-n">keys</span><span class="tok-p">())</span>
+    <span class="tok-bp">cls</span><span class="tok-o">.</span><span class="tok-n">from_json</span> <span class="tok-o">=</span> <span class="tok-k">lambda</span> <span class="tok-n">s</span><span class="tok-p">:</span> <span class="tok-bp">cls</span><span class="tok-p">(</span><span class="tok-o">**</span><span class="tok-n">schema</span><span class="tok-o">.</span><span class="tok-n">validate</span><span class="tok-p">(</span><span class="tok-n">s</span><span class="tok-p">))</span>  #<b class="conum">(3)</b>
+    <span class="tok-k">return</span> <span class="tok-bp">cls</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">greater_than_zero</span><span class="tok-p">(</span><span class="tok-n">x</span><span class="tok-p">):</span>
+    <span class="tok-k">return</span> <span class="tok-n">x</span> <span class="tok-o">&gt;</span> <span class="tok-mi">0</span>
+
+<span class="tok-n">quantity</span> <span class="tok-o">=</span> <span class="tok-n">And</span><span class="tok-p">(</span><span class="tok-n">Use</span><span class="tok-p">(</span><span class="tok-nb">int</span><span class="tok-p">),</span> <span class="tok-n">greater_than_zero</span><span class="tok-p">)</span>  #<b class="conum">(4)</b>
+
+<span class="tok-n">Allocate</span> <span class="tok-o">=</span> <span class="tok-n">command</span><span class="tok-p">(</span>  #<b class="conum">(5)</b>
+    <span class="tok-n">orderid</span><span class="tok-o">=</span><span class="tok-nb">int</span><span class="tok-p">,</span>
+    <span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-nb">str</span><span class="tok-p">,</span>
+    <span class="tok-n">qty</span><span class="tok-o">=</span><span class="tok-n">quantity</span>
+<span class="tok-p">)</span>
+
+<span class="tok-n">AddStock</span> <span class="tok-o">=</span> <span class="tok-n">command</span><span class="tok-p">(</span>
+    <span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-nb">str</span><span class="tok-p">,</span>
+    <span class="tok-n">qty</span><span class="tok-o">=</span><span class="tok-n">quantity</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>The <code>command</code> function takes a message name, plus kwargs for the fields of
+the message payload, where the name of the kwarg is the name of the field and
+the value is the parser.</p>
+</li>
+<li>
+<p>We use the <code>make_dataclass</code> function from the dataclass module to dynamically
+create our message type.</p>
+</li>
+<li>
+<p>We patch the <code>from_json</code> method onto our dynamic dataclass.</p>
+</li>
+<li>
+<p>We can create reusable parsers for quantity, SKU, and so on to keep things DRY.</p>
+</li>
+<li>
+<p>Declaring a message type becomes a one-liner.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>This comes at the expense of losing the types on your dataclass, so bear that
+trade-off in mind.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_postels_law_and_the_tolerant_reader_pattern">Postel&#8217;s Law and the Tolerant Reader Pattern</h3>
+<div class="paragraph">
+<p><em>Postel&#8217;s law</em>, or the <em>robustness principle</em>, tells us, "Be liberal in what you
+accept, and conservative in what you emit." We think this applies particularly
+well in the context of integration with our other systems. The idea here is
+that we should be strict whenever we&#8217;re sending messages to other systems, but
+as lenient as possible when we&#8217;re receiving messages from others.</p>
+</div>
+<div class="paragraph">
+<p>For example, our system <em>could</em> validate the format of a SKU. We&#8217;ve been using
+made-up SKUs like <code>UNFORGIVING-CUSHION</code> and <code>MISBEGOTTEN-POUFFE</code>. These follow
+a simple pattern: two words, separated by dashes, where the second word is the
+type of product and the first word is an adjective.</p>
+</div>
+<div class="paragraph">
+<p>Developers <em>love</em> to validate this kind of thing in their messages, and reject
+anything that looks like an invalid SKU. This causes horrible problems down the
+line when some anarchist releases a product named <code>COMFY-CHAISE-LONGUE</code> or when
+a snafu at the supplier results in a shipment of <code>CHEAP-CARPET-2</code>.</p>
+</div>
+<div class="paragraph">
+<p>Really, as the allocation system, it&#8217;s <em>none of our business</em> what the format of
+a SKU might be. All we need is an identifier, so we can simply describe it as a
+string. This means that the procurement system can change the format whenever
+they like, and we won&#8217;t care.</p>
+</div>
+<div class="paragraph">
+<p>This same principle applies to order numbers, customer phone numbers, and much
+more. For the most part, we can ignore the internal structure of strings.</p>
+</div>
+<div class="paragraph">
+<p>Similarly, developers <em>love</em> to validate incoming messages with tools like JSON
+Schema, or to build libraries that validate incoming messages and share them
+among systems. This likewise fails the robustness test.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s imagine, for example, that the procurement system adds new fields to the
+<code>ChangeBatchQuantity</code> message that record the reason for the change and the
+email of the user responsible for the change.</p>
+</div>
+<div class="paragraph">
+<p>Since these fields don&#8217;t matter to the allocation service, we should simply
+ignore them. We can do that in the <code>schema</code> library by passing the keyword arg
+<code>ignore_extra_keys=True</code>.</p>
+</div>
+<div class="paragraph">
+<p>This pattern, whereby we extract only the fields we care about and do minimal
+validation of them, is the Tolerant Reader pattern.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+Validate as little as possible. Read only the fields you need, and don&#8217;t
+    overspecify their contents. This will help your system stay robust when other
+    systems change over time. Resist the temptation to share message
+    definitions between systems: instead, make it easy to define the data you
+    depend on. For more info, see Martin Fowler&#8217;s article on the
+    <a href="https://oreil.ly/YL_La">Tolerant Reader pattern</a>.
+</td>
+</tr>
+</table>
+</div>
+<div class="sidebarblock pagebreak-before less_space">
+<div class="content">
+<div class="title">Is Postel Always Right?</div>
+<div class="paragraph">
+<p>Mentioning Postel can be quite triggering to some people. They will
+<a href="https://oreil.ly/bzLmb">tell you</a>
+that Postel is the precise reason that everything on the internet is broken and
+we can&#8217;t have nice things. Ask Hynek about SSLv3 one day.</p>
+</div>
+<div class="paragraph">
+<p>We like the Tolerant Reader approach in the particular context of event-based
+integration between services that we control, because it allows for independent
+evolution of those services.</p>
+</div>
+<div class="paragraph">
+<p>If you&#8217;re in charge of an API that&#8217;s open to the public on the big bad
+internet, there might be good reasons to be more conservative about what
+inputs you allow.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_validating_at_the_edge">Validating at the Edge</h3>
+<div class="paragraph">
+<p>Earlier, we said that we want to avoid cluttering our code with irrelevant
+details. In particular, we don&#8217;t want to code defensively inside our domain model.
+Instead, we want to make sure that requests are known to be valid before our
+domain model or use-case handlers see them. This helps our code stay clean
+and maintainable over the long term. We sometimes refer to this as <em>validating
+at the edge of the system</em>.</p>
+</div>
+<div class="paragraph">
+<p>In addition to keeping your code clean and free of endless checks and asserts,
+bear in mind that invalid data wandering through your system is a time bomb;
+the deeper it gets, the more damage it can do, and the fewer tools
+you have to respond to it.</p>
+</div>
+<div class="paragraph">
+<p>Back in <a href="/book/chapter_08_events_and_message_bus.html">[chapter_08_events_and_message_bus]</a>, we said that the message bus was a great place to put
+cross-cutting concerns, and validation is a perfect example of that. Here&#8217;s how
+we might change our bus to perform validation for us:</p>
+</div>
+<div id="validation_on_bus" class="exampleblock">
+<div class="title">Validation</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">MessageBus</span><span class="tok-p">:</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">handle_message</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">name</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">body</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">):</span>
+        <span class="tok-k">try</span><span class="tok-p">:</span>
+            <span class="tok-n">message_type</span> <span class="tok-o">=</span> <span class="tok-nb">next</span><span class="tok-p">(</span><span class="tok-n">mt</span> <span class="tok-k">for</span> <span class="tok-n">mt</span> <span class="tok-ow">in</span> <span class="tok-n">EVENT_HANDLERS</span> <span class="tok-k">if</span> <span class="tok-n">mt</span><span class="tok-o">.</span><span class="tok-vm">__name__</span> <span class="tok-o">==</span> <span class="tok-n">name</span><span class="tok-p">)</span>
+            <span class="tok-n">message</span> <span class="tok-o">=</span> <span class="tok-n">message_type</span><span class="tok-o">.</span><span class="tok-n">from_json</span><span class="tok-p">(</span><span class="tok-n">body</span><span class="tok-p">)</span>
+            <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">([</span><span class="tok-n">message</span><span class="tok-p">])</span>
+        <span class="tok-k">except</span> <span class="tok-ne">StopIteration</span><span class="tok-p">:</span>
+            <span class="tok-k">raise</span> <span class="tok-ne">KeyError</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s2">"Unknown message name {name}"</span><span class="tok-p">)</span>
+        <span class="tok-k">except</span> <span class="tok-n">ValidationError</span> <span class="tok-k">as</span> <span class="tok-n">e</span><span class="tok-p">:</span>
+            <span class="tok-n">logging</span><span class="tok-o">.</span><span class="tok-n">error</span><span class="tok-p">(</span>
+                <span class="tok-n">f</span><span class="tok-s1">'invalid message of type {name}</span><span class="tok-se">\n</span><span class="tok-s1">'</span>
+                <span class="tok-n">f</span><span class="tok-s1">'{body}</span><span class="tok-se">\n</span><span class="tok-s1">'</span>
+                <span class="tok-n">f</span><span class="tok-s1">'{e}'</span>
+            <span class="tok-p">)</span>
+            <span class="tok-k">raise</span> <span class="tok-n">e</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s how we might use that method from our Flask API endpoint:</p>
+</div>
+<div id="validation_bubbles_up" class="exampleblock">
+<div class="title">API bubbles up validation errors (src/allocation/flask_app.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@app.route</span><span class="tok-p">(</span><span class="tok-s2">"/change_quantity"</span><span class="tok-p">,</span> <span class="tok-n">methods</span><span class="tok-o">=</span><span class="tok-p">[</span><span class="tok-s1">'POST'</span><span class="tok-p">])</span>
+<span class="tok-k">def</span> <span class="tok-nf">change_batch_quantity</span><span class="tok-p">():</span>
+    <span class="tok-k">try</span><span class="tok-p">:</span>
+        <span class="tok-n">bus</span><span class="tok-o">.</span><span class="tok-n">handle_message</span><span class="tok-p">(</span><span class="tok-s1">'ChangeBatchQuantity'</span><span class="tok-p">,</span> <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">body</span><span class="tok-p">)</span>
+    <span class="tok-k">except</span> <span class="tok-n">ValidationError</span> <span class="tok-k">as</span> <span class="tok-n">e</span><span class="tok-p">:</span>
+        <span class="tok-k">return</span> <span class="tok-n">bad_request</span><span class="tok-p">(</span><span class="tok-n">e</span><span class="tok-p">)</span>
+    <span class="tok-k">except</span> <span class="tok-n">exceptions</span><span class="tok-o">.</span><span class="tok-n">InvalidSku</span> <span class="tok-k">as</span> <span class="tok-n">e</span><span class="tok-p">:</span>
+        <span class="tok-k">return</span> <span class="tok-n">jsonify</span><span class="tok-p">({</span><span class="tok-s1">'message'</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">(</span><span class="tok-n">e</span><span class="tok-p">)}),</span> <span class="tok-mi">400</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">bad_request</span><span class="tok-p">(</span><span class="tok-n">e</span><span class="tok-p">:</span> <span class="tok-n">ValidationError</span><span class="tok-p">):</span>
+    <span class="tok-k">return</span> <span class="tok-n">e</span><span class="tok-o">.</span><span class="tok-n">code</span><span class="tok-p">,</span> <span class="tok-mi">400</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>And here&#8217;s how we might plug it in to our asynchronous message processor:</p>
+</div>
+<div id="validation_pubsub" class="exampleblock">
+<div class="title">Validation errors when handling Redis messages (src/allocation/redis_pubsub.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">handle_change_batch_quantity</span><span class="tok-p">(</span><span class="tok-n">m</span><span class="tok-p">,</span> <span class="tok-n">bus</span><span class="tok-p">:</span> <span class="tok-n">messagebus</span><span class="tok-o">.</span><span class="tok-n">MessageBus</span><span class="tok-p">):</span>
+    <span class="tok-k">try</span><span class="tok-p">:</span>
+        <span class="tok-n">bus</span><span class="tok-o">.</span><span class="tok-n">handle_message</span><span class="tok-p">(</span><span class="tok-s1">'ChangeBatchQuantity'</span><span class="tok-p">,</span> <span class="tok-n">m</span><span class="tok-p">)</span>
+    <span class="tok-k">except</span> <span class="tok-n">ValidationError</span><span class="tok-p">:</span>
+       <span class="tok-k">print</span><span class="tok-p">(</span><span class="tok-s1">'Skipping invalid message'</span><span class="tok-p">)</span>
+    <span class="tok-k">except</span> <span class="tok-n">exceptions</span><span class="tok-o">.</span><span class="tok-n">InvalidSku</span> <span class="tok-k">as</span> <span class="tok-n">e</span><span class="tok-p">:</span>
+        <span class="tok-k">print</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'Unable to change stock for missing sku {e}'</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Notice that our entrypoints are solely concerned with how to get a message from
+the outside world and how to report success or failure. Our message bus takes
+care of validating our requests and routing them to the correct handler, and
+our handlers are exclusively focused on the logic of our use case.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+When you receive an invalid message, there&#8217;s usually little you can do but
+    log the error and continue. At MADE we use metrics to count the number of
+    messages a system receives, and how many of those are successfully
+    processed, skipped, or invalid. Our monitoring tools will alert us if we
+    see spikes in the numbers of bad messages.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_validating_semantics">Validating Semantics</h3>
+<div class="paragraph">
+<p>While syntax is concerned with the structure of messages, <em>semantics</em> is the study
+of <em>meaning</em> in messages. The sentence "Undo no dogs from ellipsis four" is
+syntactically valid and has the same structure as the sentence "Allocate one
+teapot to order five,"" but it is meaningless.</p>
+</div>
+<div class="paragraph">
+<p>We can read this JSON blob as an <code>Allocate</code> command but can&#8217;t successfully
+execute it, because it&#8217;s <em>nonsense</em>:</p>
+</div>
+<div id="invalid_order" class="exampleblock">
+<div class="title">A meaningless message</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-p">{</span>
+  <span class="tok-s2">"orderid"</span><span class="tok-p">:</span> <span class="tok-s2">"superman"</span><span class="tok-p">,</span>
+  <span class="tok-s2">"sku"</span><span class="tok-p">:</span> <span class="tok-s2">"zygote"</span><span class="tok-p">,</span>
+  <span class="tok-s2">"qty"</span><span class="tok-p">:</span> <span class="tok-o">-</span><span class="tok-mi">1</span>
+<span class="tok-p">}</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>We tend to validate semantic concerns at the message-handler layer with a kind
+of contract-based programming:</p>
+</div>
+<div id="ensure_dot_py" class="exampleblock">
+<div class="title">Preconditions (src/allocation/ensure.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-sd">"""</span>
+<span class="tok-sd">This module contains preconditions that we apply to our handlers.</span>
+<span class="tok-sd">"""</span>
+
+<span class="tok-k">class</span> <span class="tok-nc">MessageUnprocessable</span><span class="tok-p">(</span><span class="tok-ne">Exception</span><span class="tok-p">):</span>  #<b class="conum">(1)</b>
+
+    <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">message</span><span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">message</span> <span class="tok-o">=</span> <span class="tok-n">message</span>
+
+<span class="tok-k">class</span> <span class="tok-nc">ProductNotFound</span><span class="tok-p">(</span><span class="tok-n">MessageUnprocessable</span><span class="tok-p">):</span>  #<b class="conum">(2)</b>
+   <span class="tok-sd">""""</span>
+<span class="tok-sd">   This exception is raised when we try to perform an action on a product</span>
+<span class="tok-sd">   that doesn't exist in our database.</span>
+<span class="tok-sd">   """</span><span class="tok-s2">"</span>
+
+    <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">message</span><span class="tok-p">):</span>
+        <span class="tok-nb">super</span><span class="tok-p">()</span><span class="tok-o">.</span><span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-n">message</span><span class="tok-p">)</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">sku</span> <span class="tok-o">=</span> <span class="tok-n">message</span><span class="tok-o">.</span><span class="tok-n">sku</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">product_exists</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">):</span>  #<b class="conum">(3)</b>
+    <span class="tok-n">product</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">products</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">)</span>
+    <span class="tok-k">if</span> <span class="tok-n">product</span> <span class="tok-ow">is</span> <span class="tok-bp">None</span><span class="tok-p">:</span>
+        <span class="tok-k">raise</span> <span class="tok-n">ProductNotFound</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>We use a common base class for errors that mean a message is invalid.</p>
+</li>
+<li>
+<p>Using a specific error type for this problem makes it easier to report on
+and handle the error. For example, it&#8217;s easy to map <code>ProductNotFound</code> to a 404
+in Flask.</p>
+</li>
+<li>
+<p><code>product_exists</code> is a precondition. If the condition is <code>False</code>, we raise an
+error.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>This keeps the main flow of our logic in the service layer clean and declarative:</p>
+</div>
+<div id="ensure_in_services" class="exampleblock">
+<div class="title">Ensure calls in services (src/allocation/services.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-c1"># services.py</span>
+
+<span class="tok-kn">from</span> <span class="tok-nn">allocation</span> <span class="tok-kn">import</span> <span class="tok-n">ensure</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">allocate</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">):</span>
+    <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">mode</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">qty</span><span class="tok-p">)</span>
+    <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
+<span class="hll">        <span class="tok-n">ensure</span><span class="tok-o">.</span><span class="tok-n">product_exists</span><span class="tok-p">(</span><span class="tok-n">uow</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">)</span>
+</span>
+        <span class="tok-n">product</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">products</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">)</span>
+        <span class="tok-n">product</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">)</span>
+        <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>We can extend this technique to make sure that we apply messages idempotently.
+For example, we want to make sure that we don&#8217;t insert a batch of stock more
+than once.</p>
+</div>
+<div class="paragraph">
+<p>If we get asked to create a batch that already exists, we&#8217;ll log a warning and
+continue to the next message:</p>
+</div>
+<div id="skipmessage" class="exampleblock">
+<div class="title">Raise SkipMessage exception for ignorable events (src/allocation/services.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">SkipMessage</span> <span class="tok-p">(</span><span class="tok-ne">Exception</span><span class="tok-p">):</span>
+    <span class="tok-sd">""""</span>
+<span class="tok-sd">    This exception is raised when a message can't be processed, but there's no</span>
+<span class="tok-sd">    incorrect behavior. For example, we might receive the same message multiple</span>
+<span class="tok-sd">    times, or we might receive a message that is now out of date.</span>
+<span class="tok-sd">    """</span><span class="tok-s2">"</span>
+
+    <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">reason</span><span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">reason</span> <span class="tok-o">=</span> <span class="tok-n">reason</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">batch_is_new</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">):</span>
+    <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">batchid</span><span class="tok-p">)</span>
+    <span class="tok-k">if</span> <span class="tok-n">batch</span> <span class="tok-ow">is</span> <span class="tok-ow">not</span> <span class="tok-bp">None</span><span class="tok-p">:</span>
+        <span class="tok-k">raise</span> <span class="tok-n">SkipMessage</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s2">"Batch with id {event.batchid} already exists"</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Introducing a <code>SkipMessage</code> exception lets us handle these cases in a generic
+way in our message bus:</p>
+</div>
+<div id="skip_in_bus" class="exampleblock">
+<div class="title">The bus now knows how to skip (src/allocation/messagebus.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">MessageBus</span><span class="tok-p">:</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">handle_message</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">message</span><span class="tok-p">):</span>
+        <span class="tok-k">try</span><span class="tok-p">:</span>
+           <span class="tok-o">...</span>
+       <span class="tok-k">except</span> <span class="tok-n">SkipMessage</span> <span class="tok-k">as</span> <span class="tok-n">e</span><span class="tok-p">:</span>
+           <span class="tok-n">logging</span><span class="tok-o">.</span><span class="tok-n">warn</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s2">"Skipping message {message.id} because {e.reason}"</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>There are a couple of pitfalls to be aware of here. First, we need to be sure
+that we&#8217;re using the same UoW that we use for the main logic of our
+use case. Otherwise, we open ourselves to irritating concurrency bugs.</p>
+</div>
+<div class="paragraph">
+<p>Second, we should try to avoid putting <em>all</em> our business logic into these
+precondition checks. As a rule of thumb, if a rule <em>can</em> be tested inside our
+domain model, then it <em>should</em> be tested in the domain model.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_validating_pragmatics">Validating Pragmatics</h3>
+<div class="paragraph">
+<p><em>Pragmatics</em> is the study of how we understand language in context. After we have
+parsed a message and grasped its meaning, we still need to process it in
+context. For example, if you get a comment on a pull request saying, "I think
+this is very brave," it may mean that the reviewer admires your courage&#8212;unless
+they&#8217;re British, in which case, they&#8217;re trying to tell you that what you&#8217;re doing
+is insanely risky, and only a fool would attempt it. Context is everything.</p>
+</div>
+<div class="sidebarblock nobreakinside less_space">
+<div class="content">
+<div class="title">Validation Recap</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Validation means different things to different people</dt>
+<dd>
+<p>When talking about validation, make sure you&#8217;re clear about what you&#8217;re
+validating.
+We find it useful to think about syntax, semantics, and pragmatics: the
+structure of messages, the meaningfulness of messages, and the business
+logic governing our response to messages.</p>
+</dd>
+<dt class="hdlist1">Validate at the edge when possible</dt>
+<dd>
+<p>Validating required fields and the permissible ranges of numbers is <em>boring</em>,
+and we want to keep it out of our nice clean codebase. Handlers should always
+receive only valid messages.</p>
+</dd>
+<dt class="hdlist1">Only validate what you require</dt>
+<dd>
+<p>Use the Tolerant Reader pattern: read only the fields your application needs
+and don&#8217;t overspecify their internal structure. Treating fields as opaque
+strings buys you a lot of flexibility.</p>
+</dd>
+<dt class="hdlist1">Spend time writing helpers for validation</dt>
+<dd>
+<p>Having a nice declarative way to validate incoming messages and apply
+preconditions to your handlers will make your codebase much cleaner.
+It&#8217;s worth investing time to make boring code easy to maintain.</p>
+</dd>
+<dt class="hdlist1">Locate each of the three types of validation in the right place</dt>
+<dd>
+<p>Validating syntax can happen on message classes, validating
+semantics can happen in the service layer or on the message bus,
+and validating pragmatics belongs in the domain model.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+Once you&#8217;ve validated the syntax and semantics of your commands
+    at the edges of your system, the domain is the place for the rest
+    of your validation.  Validation of pragmatics is often a core part
+    of your business rules.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>In software terms, the pragmatics of an operation are usually managed by the
+domain model. When we receive a message like "allocate three million units of
+<code>SCARCE-CLOCK</code> to order 76543," the message is <em>syntactically</em> valid and
+<em>semantically</em> valid, but we&#8217;re unable to comply because we don&#8217;t have the stock
+available.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2020-03-16 11:03:29 UTC
+</div>
+</div>
+<style>
+pre.pygments .hll { background-color: #ffffcc }
+pre.pygments  { background: #f0f0f0; }
+pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
+pre.pygments .tok-err { border: 1px solid #FF0000 } /* Error */
+pre.pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
+pre.pygments .tok-o { color: #666666 } /* Operator */
+pre.pygments .tok-ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
+pre.pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
+pre.pygments .tok-cp { color: #007020 } /* Comment.Preproc */
+pre.pygments .tok-cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
+pre.pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
+pre.pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
+pre.pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
+pre.pygments .tok-ge { font-style: italic } /* Generic.Emph */
+pre.pygments .tok-gr { color: #FF0000 } /* Generic.Error */
+pre.pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
+pre.pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
+pre.pygments .tok-go { color: #888888 } /* Generic.Output */
+pre.pygments .tok-gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+pre.pygments .tok-gs { font-weight: bold } /* Generic.Strong */
+pre.pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+pre.pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
+pre.pygments .tok-kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+pre.pygments .tok-kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+pre.pygments .tok-kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+pre.pygments .tok-kp { color: #007020 } /* Keyword.Pseudo */
+pre.pygments .tok-kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+pre.pygments .tok-kt { color: #902000 } /* Keyword.Type */
+pre.pygments .tok-m { color: #40a070 } /* Literal.Number */
+pre.pygments .tok-s { color: #4070a0 } /* Literal.String */
+pre.pygments .tok-na { color: #4070a0 } /* Name.Attribute */
+pre.pygments .tok-nb { color: #007020 } /* Name.Builtin */
+pre.pygments .tok-nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+pre.pygments .tok-no { color: #60add5 } /* Name.Constant */
+pre.pygments .tok-nd { color: #555555; font-weight: bold } /* Name.Decorator */
+pre.pygments .tok-ni { color: #d55537; font-weight: bold } /* Name.Entity */
+pre.pygments .tok-ne { color: #007020 } /* Name.Exception */
+pre.pygments .tok-nf { color: #06287e } /* Name.Function */
+pre.pygments .tok-nl { color: #002070; font-weight: bold } /* Name.Label */
+pre.pygments .tok-nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+pre.pygments .tok-nt { color: #062873; font-weight: bold } /* Name.Tag */
+pre.pygments .tok-nv { color: #bb60d5 } /* Name.Variable */
+pre.pygments .tok-ow { color: #007020; font-weight: bold } /* Operator.Word */
+pre.pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
+pre.pygments .tok-mb { color: #40a070 } /* Literal.Number.Bin */
+pre.pygments .tok-mf { color: #40a070 } /* Literal.Number.Float */
+pre.pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
+pre.pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
+pre.pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
+pre.pygments .tok-sa { color: #4070a0 } /* Literal.String.Affix */
+pre.pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
+pre.pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
+pre.pygments .tok-dl { color: #4070a0 } /* Literal.String.Delimiter */
+pre.pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+pre.pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
+pre.pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+pre.pygments .tok-sh { color: #4070a0 } /* Literal.String.Heredoc */
+pre.pygments .tok-si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+pre.pygments .tok-sx { color: #c65d09 } /* Literal.String.Other */
+pre.pygments .tok-sr { color: #235388 } /* Literal.String.Regex */
+pre.pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
+pre.pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
+pre.pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
+pre.pygments .tok-fm { color: #06287e } /* Name.Function.Magic */
+pre.pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
+pre.pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
+pre.pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
+pre.pygments .tok-vm { color: #bb60d5 } /* Name.Variable.Magic */
+pre.pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
+</style>
+</body>
+</html>

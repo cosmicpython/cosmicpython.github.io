@@ -1,0 +1,1447 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<title>Dependency Injection (and Bootstrapping)</title>
+<style>
+/* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+
+@import url("//fonts.googleapis.com/css?family=Noto+Sans:300,600italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700");
+@import url(//asciidoctor.org/stylesheets/asciidoctor.css); /* Default asciidoc style framework - important */
+
+/* customisations by harry */
+
+/* hide inline ditaa/plantuml source listings for images */
+.image-source {
+    display: none
+}
+/* make formal codeblocks a bit nicer */
+.exampleblock > .content {
+    padding: 2px;
+    background-color: white;
+    border: 0;
+    margin-bottom: 2em;
+}
+
+.exampleblock .title {
+    text-align: right;
+}
+
+/* end customisations by harry */
+
+/* CUSTOMISATIONS */
+
+/* Change the values in root for quick customisation. If you want even more fine grain... venture further. */
+
+:root{
+--maincolor:#FFFFFF;
+--primarycolor:#2c3e50;
+--secondarycolor:#ba3925;
+--tertiarycolor: #186d7a;
+--sidebarbackground:#CCC;
+--linkcolor:#b71c1c;
+--linkcoloralternate:#f44336;
+--white:#FFFFFF;
+--black:#000000;
+}
+
+/* Text styles */
+h1{color:var(--primarycolor) !important;}
+h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+.title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
+p{font-family: "Noto Sans",sans-serif !important}
+
+/* Table styles */
+th{font-family: "Noto Sans",sans-serif !important}
+
+/* Responsiveness fixes */
+video {
+  max-width: 100%;
+}
+
+@media all and (max-width: 600px) {
+table {
+  width: 55vw!important;
+  font-size: 3vw;
+}
+
+</style>
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="/book/preface.html">Preface</a></li>
+<li><a href="/book/introduction.html">Introduction</a></li>
+<li><a href="/book/part1.html">Building an Architecture to Support Domain Modeling</a></li>
+<li><a href="/book/chapter_01_domain_model.html">1. Domain Modeling</a></li>
+<li><a href="/book/chapter_02_repository.html">2. Repository Pattern</a></li>
+<li><a href="/book/chapter_03_abstractions.html">3. A Brief Interlude: On Coupling <span class="keep-together">and Abstractions</span></a></li>
+<li><a href="/book/chapter_04_service_layer.html">4. Our First Use Case: <span class="keep-together">Flask API and Service Layer</span></a></li>
+<li><a href="/book/chapter_05_high_gear_low_gear.html">5. TDD in High Gear and Low Gear</a></li>
+<li><a href="/book/chapter_06_uow.html">6. Unit of Work Pattern</a></li>
+<li><a href="/book/chapter_07_aggregate.html">7. Aggregates and Consistency Boundaries</a></li>
+<li><a href="/book/part2.html">Event-Driven Architecture</a></li>
+<li><a href="/book/chapter_08_events_and_message_bus.html">8. Events and the Message Bus</a></li>
+<li><a href="/book/chapter_09_all_messagebus.html">9. Going to Town on the Message Bus</a></li>
+<li><a href="/book/chapter_10_commands.html">10. Commands and Command Handler</a></li>
+<li><a href="/book/chapter_11_external_events.html">11. Event-Driven Architecture: Using Events to Integrate Microservices</a></li>
+<li><a href="/book/chapter_12_cqrs.html">12. Command-Query Responsibility Segregation (CQRS)</a></li>
+<li><a href="/book/chapter_13_dependency_injection.html">13. Dependency Injection (and Bootstrapping)</a></li>
+<li><a href="/book/epilogue_1_how_to_get_there_from_here.html">Appendix A: Epilogue</a></li>
+<li><a href="/book/appendix_ds1_table.html">Appendix B: Summary Diagram and Table</a></li>
+<li><a href="/book/appendix_project_structure.html">Appendix C: A Template Project Structure</a></li>
+<li><a href="/book/appendix_csvs.html">Appendix D: Swapping Out the Infrastructure: <span class="keep-together">Do Everything with CSVs</span></a></li>
+<li><a href="/book/appendix_django.html">Appendix E: Repository and Unit of Work <span class="keep-together">Patterns with Django</span></a></li>
+<li><a href="/book/appendix_validation.html">Appendix F: Validation</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="chapter_13_dependency_injection">Dependency Injection (and Bootstrapping)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Dependency injection (DI) is regarded with suspicion in the Python world.  And
+we&#8217;ve managed <em>just fine</em> without it so far in the example code for this
+book!</p>
+</div>
+<div class="paragraph">
+<p>In this chapter, we&#8217;ll explore some of the pain points in our code
+that lead us to consider using DI, and we&#8217;ll present some options
+for how to do it, leaving it to you to pick which you think is most Pythonic.</p>
+</div>
+<div class="paragraph">
+<p>We&#8217;ll also add a new component to our architecture called <em>bootstrap.py</em>;
+it will be in charge of dependency injection, as well as some other initialization
+stuff that we often need.  We&#8217;ll explain why this sort of thing is called
+a <em>composition root</em> in OO languages, and why <em>bootstrap script</em> is just fine
+for our purposes.</p>
+</div>
+<div class="paragraph">
+<p><a href="#bootstrap_chapter_before_diagram">Without bootstrap: entrypoints do a lot</a> shows what our app looks like without
+a bootstrapper: the entrypoints do a lot of initialization and passing around
+of our main dependency, the UoW.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If you haven&#8217;t already, it&#8217;s worth reading <a href="/book/chapter_03_abstractions.html">[chapter_03_abstractions]</a>
+    before continuing with this chapter, particularly the discussion of
+    functional versus object-oriented dependency management.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div id="bootstrap_chapter_before_diagram" class="imageblock">
+<div class="content">
+<img src="images/apwp_1301.png" alt="apwp 1301">
+</div>
+<div class="title">Figure 1. Without bootstrap: entrypoints do a lot</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The code for this chapter is in the
+chapter_13_dependency_injection branch <a href="https://oreil.ly/-B7e6">on GitHub</a>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>git clone https://github.com/cosmicpython/code.git
+cd code
+git checkout chapter_13_dependency_injection
+# or to code along, checkout the previous chapter:
+git checkout chapter_12_cqrs</pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p><a href="#bootstrap_chapter_after_diagram">Bootstrap takes care of all that in one place</a> shows our bootstrapper taking over those
+responsibilities.</p>
+</div>
+<div id="bootstrap_chapter_after_diagram" class="imageblock">
+<div class="content">
+<img src="images/apwp_1302.png" alt="apwp 1302">
+</div>
+<div class="title">Figure 2. Bootstrap takes care of all that in one place</div>
+</div>
+<div class="sect2">
+<h3 id="_implicit_versus_explicit_dependencies">Implicit Versus Explicit Dependencies</h3>
+<div class="paragraph">
+<p>Depending on your particular brain type, you may have a slight
+feeling of unease at the back of your mind at this point.  Let&#8217;s bring it out
+into the open. We&#8217;ve shown you two ways of managing
+dependencies and testing them.</p>
+</div>
+<div class="paragraph">
+<p>For our database dependency, we&#8217;ve built a careful framework of explicit
+dependencies and easy options for overriding them in tests. Our main handler
+functions declare an explicit dependency on the UoW:</p>
+</div>
+<div id="existing_handler" class="exampleblock">
+<div class="title">Our handlers have an explicit dependency on the UoW (src/allocation/service_layer/handlers.py)</div>
+<div class="content">
+<div class="listingblock existing">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">allocate</span><span class="tok-p">(</span>
+        <span class="tok-n">cmd</span><span class="tok-p">:</span> <span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">Allocate</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span>
+<span class="tok-p">):</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>And that makes it easy to swap in a fake UoW in our
+service-layer tests:</p>
+</div>
+<div id="existing_services_test" class="exampleblock">
+<div class="title">Service-layer tests against a fake UoW: (tests/unit/test_services.py)</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span>    <span class="tok-n">uow</span> <span class="tok-o">=</span> <span class="tok-n">FakeUnitOfWork</span><span class="tok-p">()</span>
+    <span class="tok-n">messagebus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">([</span><span class="tok-o">...</span><span class="tok-p">],</span> <span class="tok-n">uow</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The UoW itself declares an explicit dependency on the session factory:</p>
+</div>
+<div id="existing_uow" class="exampleblock">
+<div class="title">The UoW depends on a session factory (src/allocation/service_layer/unit_of_work.py)</div>
+<div class="content">
+<div class="listingblock existing">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">SqlAlchemyUnitOfWork</span><span class="tok-p">(</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">):</span>
+
+    <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">session_factory</span><span class="tok-o">=</span><span class="tok-n">DEFAULT_SESSION_FACTORY</span><span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">session_factory</span> <span class="tok-o">=</span> <span class="tok-n">session_factory</span>
+        <span class="tok-o">...</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>We take advantage of it in our integration tests to be able to sometimes use SQLite
+instead of Postgres:</p>
+</div>
+<div id="existing_integration_test" class="exampleblock">
+<div class="title">Integration tests against a different DB (tests/integration/test_uow.py)</div>
+<div class="content">
+<div class="listingblock existing">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_rolls_back_uncommitted_work_by_default</span><span class="tok-p">(</span><span class="tok-n">sqlite_session_factory</span><span class="tok-p">):</span>
+    <span class="tok-n">uow</span> <span class="tok-o">=</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyUnitOfWork</span><span class="tok-p">(</span><span class="tok-n">sqlite_session_factory</span><span class="tok-p">)</span>  #<b class="conum">(1)</b></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Integration tests swap out the default Postgres <code>session_factory</code> for a
+SQLite one.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_arent_explicit_dependencies_totally_weird_and_java_y">Aren&#8217;t Explicit Dependencies Totally Weird and Java-y?</h3>
+<div class="paragraph">
+<p>If you&#8217;re used to the way things normally happen in Python, you&#8217;ll be thinking
+all this is a bit weird.  The standard way to do things is to declare our
+dependency implicitly by simply importing it, and then if we ever need to
+change it for tests, we can monkeypatch, as is Right and True in dynamic
+languages:</p>
+</div>
+<div id="normal_implicit_dependency" class="exampleblock">
+<div class="title">Email sending as a normal import-based dependency (src/allocation/service_layer/handlers.py)</div>
+<div class="content">
+<div class="listingblock existing">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">allocation.adapters</span> <span class="tok-kn">import</span> <span class="tok-n">email</span><span class="tok-p">,</span> <span class="tok-n">redis_eventpublisher</span>  #<b class="conum">(1)</b>
+<span class="tok-o">...</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">send_out_of_stock_notification</span><span class="tok-p">(</span>
+        <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">OutOfStock</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>
+<span class="tok-p">):</span>
+    <span class="tok-n">email</span><span class="tok-o">.</span><span class="tok-n">send</span><span class="tok-p">(</span>  #<b class="conum">(2)</b>
+        <span class="tok-s1">'stock@made.com'</span><span class="tok-p">,</span>
+        <span class="tok-n">f</span><span class="tok-s1">'Out of stock for {event.sku}'</span><span class="tok-p">,</span>
+    <span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Hardcoded import</p>
+</li>
+<li>
+<p>Calls specific email sender directly</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Why pollute our application code with unnecessary arguments just for the
+sake of our tests? <code>mock.patch</code> makes monkeypatching nice and easy:</p>
+</div>
+<div id="mocking_is_easy" class="exampleblock">
+<div class="title">mock dot patch, thank you Michael Foord (tests/unit/test_handlers.py)</div>
+<div class="content">
+<div class="listingblock existing">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span>    <span class="tok-k">with</span> <span class="tok-n">mock</span><span class="tok-o">.</span><span class="tok-n">patch</span><span class="tok-p">(</span><span class="tok-s2">"allocation.adapters.email.send"</span><span class="tok-p">)</span> <span class="tok-k">as</span> <span class="tok-n">mock_send_mail</span><span class="tok-p">:</span>
+        <span class="tok-o">...</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The trouble is that we&#8217;ve made it look easy because our toy example doesn&#8217;t
+send real email (<code>email.send_mail</code> just does a <code>print</code>), but in real life,
+you&#8217;d end up having to call <code>mock.patch</code> for <em>every single test</em> that might
+cause an out-of-stock notification. If you&#8217;ve worked on codebases with lots of
+mocks used to prevent unwanted side effects, you&#8217;ll know how annoying that
+mocky boilerplate gets.</p>
+</div>
+<div class="paragraph">
+<p>And you&#8217;ll know that mocks tightly couple us to the implementation. By
+choosing to monkeypatch <code>email.send_mail</code>, we are tied to doing <code>import email</code>,
+and if we ever want to do <code>from email import send_mail</code>, a trivial refactor,
+we&#8217;d have to change all our mocks.</p>
+</div>
+<div class="paragraph">
+<p>So it&#8217;s a trade-off. Yes, declaring explicit dependencies is unnecessary,
+strictly speaking, and using them would make our application code marginally
+more complex. But in return, we&#8217;d get tests that are easier to write and
+manage.</p>
+</div>
+<div class="paragraph">
+<p>On top of that, declaring an explicit dependency is an example of the
+dependency inversion principle&#8212;rather than having an (implicit) dependency on
+a <em>specific</em> detail, we have an (explicit) dependency on an <em>abstraction</em>:</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>Explicit is better than implicit.</p>
+</div>
+</blockquote>
+<div class="attribution">
+&#8212; The Zen of Python
+</div>
+</div>
+<div id="handler_with_explicit_dependency" class="exampleblock">
+<div class="title">The explicit dependency is more abstract (src/allocation/service_layer/handlers.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">send_out_of_stock_notification</span><span class="tok-p">(</span>
+        <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">OutOfStock</span><span class="tok-p">,</span> <span class="tok-n">send_mail</span><span class="tok-p">:</span> <span class="tok-n">Callable</span><span class="tok-p">,</span>
+<span class="tok-p">):</span>
+    <span class="tok-n">send_mail</span><span class="tok-p">(</span>
+        <span class="tok-s1">'stock@made.com'</span><span class="tok-p">,</span>
+        <span class="tok-n">f</span><span class="tok-s1">'Out of stock for {event.sku}'</span><span class="tok-p">,</span>
+    <span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>But if we do change to declaring all these dependencies explicitly, who will
+inject them, and how? So far, we&#8217;ve really been dealing with only passing the
+UoW around: our tests use <code>FakeUnitOfWork</code>, while Flask and Redis eventconsumer
+entrypoints use the real UoW, and the message bus passes them onto our command
+handlers. If we add real and fake email classes, who will create them and
+pass them on?</p>
+</div>
+<div class="paragraph">
+<p>That&#8217;s extra (duplicated) cruft for Flask, Redis, and our tests. Moreover,
+putting all the responsibility for passing dependencies to the right handler
+onto the message bus feels like a violation of the SRP.</p>
+</div>
+<div class="paragraph">
+<p>Instead, we&#8217;ll reach for a pattern called <em>Composition Root</em> (a bootstrap
+script to you and me),<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup>
+ and we&#8217;ll do a bit of "manual DI" (dependency injection without a
+framework). See <a href="#bootstrap_new_image">Bootstrapper between entrypoints and message bus</a>.<sup class="footnote">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup></p>
+</div>
+<div id="bootstrap_new_image" class="imageblock">
+<div class="content">
+<img src="images/apwp_1303.png" alt="apwp 1303">
+</div>
+<div class="title">Figure 3. Bootstrapper between entrypoints and message bus</div>
+</div>
+<div class="listingblock image-source">
+<div class="content">
+<pre>[ditaa, apwp_1303]
+
++---------------+
+|  Entrypoints  |
+| (Flask/Redis) |
++---------------+
+        |
+        | call
+        V
+ /--------------\
+ |              |  prepares handlers with correct dependencies injected in
+ | Bootstrapper |  (test bootstrapper will use fakes, prod one will use real)
+ |              |
+ \--------------/
+        |
+        | pass injected handlers to
+        V
+/---------------\
+|  Message Bus  |
++---------------+
+        |
+        | dispatches events and commands to injected handlers
+        |
+        V</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_preparing_handlers_manual_di_with_closures_and_partials">Preparing Handlers: Manual DI with Closures and Partials</h3>
+<div class="paragraph">
+<p>One way to turn a function with dependencies into one that&#8217;s ready to be
+called later with those dependencies <em>already injected</em> is to use closures or
+partial functions to compose the function with its dependencies:</p>
+</div>
+<div id="di_with_partial_functions_examples" class="exampleblock">
+<div class="title">Examples of DI using closures or partial functions</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-c1"># existing allocate function, with abstract uow dependency</span>
+<span class="tok-k">def</span> <span class="tok-nf">allocate</span><span class="tok-p">(</span>
+        <span class="tok-n">cmd</span><span class="tok-p">:</span> <span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">Allocate</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span>
+<span class="tok-p">):</span>
+    <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-n">cmd</span><span class="tok-o">.</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">cmd</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">cmd</span><span class="tok-o">.</span><span class="tok-n">qty</span><span class="tok-p">)</span>
+    <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
+        <span class="tok-o">...</span>
+
+<span class="tok-c1"># bootstrap script prepares actual UoW</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">bootstrap</span><span class="tok-p">(</span><span class="tok-o">..</span><span class="tok-p">):</span>
+    <span class="tok-n">uow</span> <span class="tok-o">=</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyUnitOfWork</span><span class="tok-p">()</span>
+
+    <span class="tok-c1"># prepare a version of the allocate fn with UoW dependency captured in a closure</span>
+    <span class="tok-n">allocate_composed</span> <span class="tok-o">=</span> <span class="tok-k">lambda</span> <span class="tok-n">cmd</span><span class="tok-p">:</span> <span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">cmd</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">)</span>
+
+    <span class="tok-c1"># or, equivalently (this gets you a nicer stack trace)</span>
+    <span class="tok-k">def</span> <span class="tok-nf">allocate_composed</span><span class="tok-p">(</span><span class="tok-n">cmd</span><span class="tok-p">):</span>
+        <span class="tok-k">return</span> <span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">cmd</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">)</span>
+
+    <span class="tok-c1"># alternatively with a partial</span>
+    <span class="tok-kn">import</span> <span class="tok-nn">functools</span>
+    <span class="tok-n">allocate_composed</span> <span class="tok-o">=</span> <span class="tok-n">functools</span><span class="tok-o">.</span><span class="tok-n">partial</span><span class="tok-p">(</span><span class="tok-n">allocate</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-o">=</span><span class="tok-n">uow</span><span class="tok-p">)</span>  #<b class="conum">(1)</b>
+
+<span class="tok-c1"># later at runtime, we can call the partial function, and it will have</span>
+<span class="tok-c1"># the UoW already bound</span>
+<span class="tok-n">allocate_composed</span><span class="tok-p">(</span><span class="tok-n">cmd</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>The difference between closures (lambdas or named functions) and
+<code>functools.partial</code> is that the former use
+<a href="https://docs.python-guide.org/writing/gotchas/#late-binding-closures">late
+binding of variables</a>, which can be a source of confusion if
+any of the dependencies are mutable.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s the same pattern again for the <code>send_out_of_stock_notification()</code> handler,
+which has different dependencies:</p>
+</div>
+<div id="partial_functions_2" class="exampleblock">
+<div class="title">Another closure and partial functions example</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">send_out_of_stock_notification</span><span class="tok-p">(</span>
+        <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">OutOfStock</span><span class="tok-p">,</span> <span class="tok-n">send_mail</span><span class="tok-p">:</span> <span class="tok-n">Callable</span><span class="tok-p">,</span>
+<span class="tok-p">):</span>
+    <span class="tok-n">send_mail</span><span class="tok-p">(</span>
+        <span class="tok-s1">'stock@made.com'</span><span class="tok-p">,</span>
+        <span class="tok-o">...</span>
+
+
+<span class="tok-c1"># prepare a version of the send_out_of_stock_notification with dependencies</span>
+<span class="tok-n">sosn_composed</span>  <span class="tok-o">=</span> <span class="tok-k">lambda</span> <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">send_out_of_stock_notification</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">,</span> <span class="tok-n">email</span><span class="tok-o">.</span><span class="tok-n">send_mail</span><span class="tok-p">)</span>
+
+<span class="tok-o">...</span>
+<span class="tok-c1"># later, at runtime:</span>
+<span class="tok-n">sosn_composed</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">)</span>  <span class="tok-c1"># will have email.send_mail already injected in</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_an_alternative_using_classes">An Alternative Using Classes</h3>
+<div class="paragraph">
+<p>Closures and partial functions will feel familiar to people who&#8217;ve done a bit
+of functional programming. Here&#8217;s an alternative using classes, which may
+appeal to others. It requires rewriting all our handler functions as
+classes, though:</p>
+</div>
+<div id="di_with_classes" class="exampleblock">
+<div class="title">DI using classes</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-c1"># we replace the old `def allocate(cmd, uow)` with:</span>
+
+<span class="tok-k">class</span> <span class="tok-nc">AllocateHandler</span><span class="tok-p">:</span>
+
+    <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">):</span>  #<b class="conum">(2)</b>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">uow</span> <span class="tok-o">=</span> <span class="tok-n">uow</span>
+
+    <span class="tok-k">def</span> <span class="tok-fm">__call__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">cmd</span><span class="tok-p">:</span> <span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">Allocate</span><span class="tok-p">):</span>  #<b class="conum">(1)</b>
+        <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-n">cmd</span><span class="tok-o">.</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">cmd</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">cmd</span><span class="tok-o">.</span><span class="tok-n">qty</span><span class="tok-p">)</span>
+        <span class="tok-k">with</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">uow</span><span class="tok-p">:</span>
+            <span class="tok-c1"># rest of handler method as before</span>
+            <span class="tok-o">...</span>
+
+<span class="tok-c1"># bootstrap script prepares actual UoW</span>
+<span class="tok-n">uow</span> <span class="tok-o">=</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyUnitOfWork</span><span class="tok-p">()</span>
+
+<span class="tok-c1"># then prepares a version of the allocate fn with dependencies already injected</span>
+<span class="tok-n">allocate</span> <span class="tok-o">=</span> <span class="tok-n">AllocateHandler</span><span class="tok-p">(</span><span class="tok-n">uow</span><span class="tok-p">)</span>
+
+<span class="tok-o">...</span>
+<span class="tok-c1"># later at runtime, we can call the handler instance, and it will have</span>
+<span class="tok-c1"># the UoW already injected</span>
+<span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">cmd</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>The class is designed to produce a callable function, so it has a
+__call__ method.</p>
+</li>
+<li>
+<p>But we use the <code>init</code> to declare the dependencies it
+requires. This sort of thing will feel familiar if you&#8217;ve ever made
+class-based descriptors, or a class-based context manager that takes
+arguments.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Use whichever you and your team feel more comfortable with.</p>
+</div>
+</div>
+<div class="sect2 pagebreak-before less_space">
+<h3 id="_a_bootstrap_script">A Bootstrap Script</h3>
+<div class="paragraph">
+<p>We want our bootstrap script to do the following:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Declare default dependencies but allow us to override them</p>
+</li>
+<li>
+<p>Do the "init" stuff that we need to get our app started</p>
+</li>
+<li>
+<p>Inject all the dependencies into our handlers</p>
+</li>
+<li>
+<p>Give us back the core object for our app, the message bus</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s a first cut:</p>
+</div>
+<div id="bootstrap_script" class="exampleblock">
+<div class="title">A bootstrap function (src/allocation/bootstrap.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">bootstrap</span><span class="tok-p">(</span>
+    <span class="tok-n">start_orm</span><span class="tok-p">:</span> <span class="tok-nb">bool</span> <span class="tok-o">=</span> <span class="tok-bp">True</span><span class="tok-p">,</span>  #<b class="conum">(1)</b>
+    <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span> <span class="tok-o">=</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyUnitOfWork</span><span class="tok-p">(),</span>  #<b class="conum">(2)</b>
+    <span class="tok-n">send_mail</span><span class="tok-p">:</span> <span class="tok-n">Callable</span> <span class="tok-o">=</span> <span class="tok-n">email</span><span class="tok-o">.</span><span class="tok-n">send</span><span class="tok-p">,</span>
+    <span class="tok-n">publish</span><span class="tok-p">:</span> <span class="tok-n">Callable</span> <span class="tok-o">=</span> <span class="tok-n">redis_eventpublisher</span><span class="tok-o">.</span><span class="tok-n">publish</span><span class="tok-p">,</span>
+<span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-n">messagebus</span><span class="tok-o">.</span><span class="tok-n">MessageBus</span><span class="tok-p">:</span>
+
+    <span class="tok-k">if</span> <span class="tok-n">start_orm</span><span class="tok-p">:</span>
+        <span class="tok-n">orm</span><span class="tok-o">.</span><span class="tok-n">start_mappers</span><span class="tok-p">()</span>  #<b class="conum">(1)</b>
+
+    <span class="tok-n">dependencies</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s1">'uow'</span><span class="tok-p">:</span> <span class="tok-n">uow</span><span class="tok-p">,</span> <span class="tok-s1">'send_mail'</span><span class="tok-p">:</span> <span class="tok-n">send_mail</span><span class="tok-p">,</span> <span class="tok-s1">'publish'</span><span class="tok-p">:</span> <span class="tok-n">publish</span><span class="tok-p">}</span>
+    <span class="tok-n">injected_event_handlers</span> <span class="tok-o">=</span> <span class="tok-p">{</span>  #<b class="conum">(3)</b>
+        <span class="tok-n">event_type</span><span class="tok-p">:</span> <span class="tok-p">[</span>
+            <span class="tok-n">inject_dependencies</span><span class="tok-p">(</span><span class="tok-n">handler</span><span class="tok-p">,</span> <span class="tok-n">dependencies</span><span class="tok-p">)</span>
+            <span class="tok-k">for</span> <span class="tok-n">handler</span> <span class="tok-ow">in</span> <span class="tok-n">event_handlers</span>
+        <span class="tok-p">]</span>
+        <span class="tok-k">for</span> <span class="tok-n">event_type</span><span class="tok-p">,</span> <span class="tok-n">event_handlers</span> <span class="tok-ow">in</span> <span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">EVENT_HANDLERS</span><span class="tok-o">.</span><span class="tok-n">items</span><span class="tok-p">()</span>
+    <span class="tok-p">}</span>
+    <span class="tok-n">injected_command_handlers</span> <span class="tok-o">=</span> <span class="tok-p">{</span>  #<b class="conum">(3)</b>
+        <span class="tok-n">command_type</span><span class="tok-p">:</span> <span class="tok-n">inject_dependencies</span><span class="tok-p">(</span><span class="tok-n">handler</span><span class="tok-p">,</span> <span class="tok-n">dependencies</span><span class="tok-p">)</span>
+        <span class="tok-k">for</span> <span class="tok-n">command_type</span><span class="tok-p">,</span> <span class="tok-n">handler</span> <span class="tok-ow">in</span> <span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">COMMAND_HANDLERS</span><span class="tok-o">.</span><span class="tok-n">items</span><span class="tok-p">()</span>
+    <span class="tok-p">}</span>
+
+    <span class="tok-k">return</span> <span class="tok-n">messagebus</span><span class="tok-o">.</span><span class="tok-n">MessageBus</span><span class="tok-p">(</span>  #<b class="conum">(4)</b>
+        <span class="tok-n">uow</span><span class="tok-o">=</span><span class="tok-n">uow</span><span class="tok-p">,</span>
+        <span class="tok-n">event_handlers</span><span class="tok-o">=</span><span class="tok-n">injected_event_handlers</span><span class="tok-p">,</span>
+        <span class="tok-n">command_handlers</span><span class="tok-o">=</span><span class="tok-n">injected_command_handlers</span><span class="tok-p">,</span>
+    <span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p><code>orm.start_mappers()</code> is our example of initialization work that needs
+to be done once at the beginning of an app. We also see things like
+setting up the <code>logging</code> module.</p>
+</li>
+<li>
+<p>We can use the argument defaults to define what the normal/production
+defaults are. It&#8217;s nice to have them in a single place, but
+sometimes dependencies have some side effects at construction time,
+in which case you might prefer to default them to <code>None</code> instead.</p>
+</li>
+<li>
+<p>We build up our injected versions of the handler mappings by using
+a function called <code>inject_dependencies()</code>, which we&#8217;ll show next.</p>
+</li>
+<li>
+<p>We return a configured message bus ready for use.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s how we inject dependencies into a handler function by inspecting
+it:</p>
+</div>
+<div id="di_by_inspection" class="exampleblock">
+<div class="title">DI by inspecting function signatures (src/allocation/bootstrap.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">inject_dependencies</span><span class="tok-p">(</span><span class="tok-n">handler</span><span class="tok-p">,</span> <span class="tok-n">dependencies</span><span class="tok-p">):</span>
+    <span class="tok-n">params</span> <span class="tok-o">=</span> <span class="tok-n">inspect</span><span class="tok-o">.</span><span class="tok-n">signature</span><span class="tok-p">(</span><span class="tok-n">handler</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">parameters</span>  #<b class="conum">(1)</b>
+    <span class="tok-n">deps</span> <span class="tok-o">=</span> <span class="tok-p">{</span>
+        <span class="tok-n">name</span><span class="tok-p">:</span> <span class="tok-n">dependency</span>
+        <span class="tok-k">for</span> <span class="tok-n">name</span><span class="tok-p">,</span> <span class="tok-n">dependency</span> <span class="tok-ow">in</span> <span class="tok-n">dependencies</span><span class="tok-o">.</span><span class="tok-n">items</span><span class="tok-p">()</span>  #<b class="conum">(2)</b>
+        <span class="tok-k">if</span> <span class="tok-n">name</span> <span class="tok-ow">in</span> <span class="tok-n">params</span>
+    <span class="tok-p">}</span>
+    <span class="tok-k">return</span> <span class="tok-k">lambda</span> <span class="tok-n">message</span><span class="tok-p">:</span> <span class="tok-n">handler</span><span class="tok-p">(</span><span class="tok-n">message</span><span class="tok-p">,</span> <span class="tok-o">**</span><span class="tok-n">deps</span><span class="tok-p">)</span>  #<b class="conum">(3)</b></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>We inspect our command/event handler&#8217;s arguments.</p>
+</li>
+<li>
+<p>We match them by name to our dependencies.</p>
+</li>
+<li>
+<p>We inject them as kwargs to produce a partial.</p>
+</li>
+</ol>
+</div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Even-More-Manual DI with Less Magic</div>
+<div class="paragraph">
+<p>If you&#8217;re finding the preceding <code>inspect</code> code a little harder to grok, this
+even simpler version may appeal to you.</p>
+</div>
+<div class="paragraph">
+<p>Harry wrote the code for <code>inject_dependencies()</code> as a first cut of how to do
+"manual" dependency injection, and when he saw it, Bob accused him of
+overengineering and writing his own DI framework.</p>
+</div>
+<div class="paragraph">
+<p>It honestly didn&#8217;t even occur to Harry that you could do it any more plainly,
+but you can, like this:</p>
+</div>
+<div id="nomagic_di" class="exampleblock">
+<div class="title">Manually creating partial functions inline (src/allocation/bootstrap.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span>    <span class="tok-n">injected_event_handlers</span> <span class="tok-o">=</span> <span class="tok-p">{</span>
+        <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">Allocated</span><span class="tok-p">:</span> <span class="tok-p">[</span>
+            <span class="tok-k">lambda</span> <span class="tok-n">e</span><span class="tok-p">:</span> <span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">publish_allocated_event</span><span class="tok-p">(</span><span class="tok-n">e</span><span class="tok-p">,</span> <span class="tok-n">publish</span><span class="tok-p">),</span>
+            <span class="tok-k">lambda</span> <span class="tok-n">e</span><span class="tok-p">:</span> <span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">add_allocation_to_read_model</span><span class="tok-p">(</span><span class="tok-n">e</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">),</span>
+        <span class="tok-p">],</span>
+        <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">Deallocated</span><span class="tok-p">:</span> <span class="tok-p">[</span>
+            <span class="tok-k">lambda</span> <span class="tok-n">e</span><span class="tok-p">:</span> <span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">remove_allocation_from_read_model</span><span class="tok-p">(</span><span class="tok-n">e</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">),</span>
+            <span class="tok-k">lambda</span> <span class="tok-n">e</span><span class="tok-p">:</span> <span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">reallocate</span><span class="tok-p">(</span><span class="tok-n">e</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">),</span>
+        <span class="tok-p">],</span>
+        <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">OutOfStock</span><span class="tok-p">:</span> <span class="tok-p">[</span>
+            <span class="tok-k">lambda</span> <span class="tok-n">e</span><span class="tok-p">:</span> <span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">send_out_of_stock_notification</span><span class="tok-p">(</span><span class="tok-n">e</span><span class="tok-p">,</span> <span class="tok-n">send_mail</span><span class="tok-p">)</span>
+        <span class="tok-p">]</span>
+    <span class="tok-p">}</span>
+    <span class="tok-n">injected_command_handlers</span> <span class="tok-o">=</span> <span class="tok-p">{</span>
+        <span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">Allocate</span><span class="tok-p">:</span> <span class="tok-k">lambda</span> <span class="tok-n">c</span><span class="tok-p">:</span> <span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">c</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">),</span>
+        <span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">CreateBatch</span><span class="tok-p">:</span> \
+            <span class="tok-k">lambda</span> <span class="tok-n">c</span><span class="tok-p">:</span> <span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">add_batch</span><span class="tok-p">(</span><span class="tok-n">c</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">),</span>
+        <span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">ChangeBatchQuantity</span><span class="tok-p">:</span> \
+            <span class="tok-k">lambda</span> <span class="tok-n">c</span><span class="tok-p">:</span> <span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">change_batch_quantity</span><span class="tok-p">(</span><span class="tok-n">c</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">),</span>
+    <span class="tok-p">}</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Harry says he couldn&#8217;t even imagine writing out that many lines of code
+and having to look up that many function arguments manually.
+This is a perfectly viable solution, though, since it&#8217;s only one
+line of code or so per handler you add, and thus not a massive maintenance burden
+even if you have dozens of handlers.</p>
+</div>
+<div class="paragraph">
+<p>Our app is structured in such a way that we always want to do dependency
+injection in only one place, the handler functions, so this super-manual solution
+and Harry&#8217;s <code>inspect()</code>-based one will both work fine.</p>
+</div>
+<div class="paragraph">
+<p>If you find yourself wanting to do DI in more things and at different times,
+or if you ever get into <em>dependency chains</em> (in which your dependencies have their
+own dependencies, and so on), you may get some mileage out of a "real" DI
+framework.</p>
+</div>
+<div class="paragraph">
+<p>At MADE, we&#8217;ve used <a href="https://pypi.org/project/Inject">Inject</a> in a few places,
+and it&#8217;s fine, although it makes Pylint unhappy.  You might also check out
+<a href="https://pypi.org/project/punq">Punq</a>, as written by Bob himself, or the
+DRY-Python crew&#8217;s <a href="https://github.com/dry-python/dependencies">dependencies</a>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_message_bus_is_given_handlers_at_runtime">Message Bus Is Given Handlers at Runtime</h3>
+<div class="paragraph">
+<p>Our message bus will no longer be static; it needs to have the already-injected
+handlers given to it. So we turn it from being a module into a configurable
+class:</p>
+</div>
+<div id="messagebus_as_class" class="exampleblock">
+<div class="title">MessageBus as a class (src/allocation/service_layer/messagebus.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">MessageBus</span><span class="tok-p">:</span>  #<b class="conum">(1)</b>
+
+    <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span>
+        <span class="tok-bp">self</span><span class="tok-p">,</span>
+        <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>
+        <span class="tok-n">event_handlers</span><span class="tok-p">:</span> <span class="tok-n">Dict</span><span class="tok-p">[</span><span class="tok-n">Type</span><span class="tok-p">[</span><span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">Event</span><span class="tok-p">],</span> <span class="tok-n">List</span><span class="tok-p">[</span><span class="tok-n">Callable</span><span class="tok-p">]],</span>  #<b class="conum">(2)</b>
+        <span class="tok-n">command_handlers</span><span class="tok-p">:</span> <span class="tok-n">Dict</span><span class="tok-p">[</span><span class="tok-n">Type</span><span class="tok-p">[</span><span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">Command</span><span class="tok-p">],</span> <span class="tok-n">Callable</span><span class="tok-p">],</span>  #<b class="conum">(2)</b>
+    <span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">uow</span> <span class="tok-o">=</span> <span class="tok-n">uow</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">event_handlers</span> <span class="tok-o">=</span> <span class="tok-n">event_handlers</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">command_handlers</span> <span class="tok-o">=</span> <span class="tok-n">command_handlers</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">handle</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">message</span><span class="tok-p">:</span> <span class="tok-n">Message</span><span class="tok-p">):</span>  #<b class="conum">(3)</b>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">queue</span> <span class="tok-o">=</span> <span class="tok-p">[</span><span class="tok-n">message</span><span class="tok-p">]</span>  #<b class="conum">(4)</b>
+        <span class="tok-k">while</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">queue</span><span class="tok-p">:</span>
+            <span class="tok-n">message</span> <span class="tok-o">=</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">queue</span><span class="tok-o">.</span><span class="tok-n">pop</span><span class="tok-p">(</span><span class="tok-mi">0</span><span class="tok-p">)</span>
+            <span class="tok-k">if</span> <span class="tok-nb">isinstance</span><span class="tok-p">(</span><span class="tok-n">message</span><span class="tok-p">,</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">Event</span><span class="tok-p">):</span>
+                <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">handle_event</span><span class="tok-p">(</span><span class="tok-n">message</span><span class="tok-p">)</span>
+            <span class="tok-k">elif</span> <span class="tok-nb">isinstance</span><span class="tok-p">(</span><span class="tok-n">message</span><span class="tok-p">,</span> <span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">Command</span><span class="tok-p">):</span>
+                <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">handle_command</span><span class="tok-p">(</span><span class="tok-n">message</span><span class="tok-p">)</span>
+            <span class="tok-k">else</span><span class="tok-p">:</span>
+                <span class="tok-k">raise</span> <span class="tok-ne">Exception</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'{message} was not an Event or Command'</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>The message bus becomes a class&#8230;&#8203;</p>
+</li>
+<li>
+<p>&#8230;&#8203;which is given its already-dependency-injected handlers.</p>
+</li>
+<li>
+<p>The main <code>handle()</code> function is substantially the same, with just a few attributes and methods moved onto <code>self</code>.</p>
+</li>
+<li>
+<p>Using <code>self.queue</code> like this is not thread-safe, which might
+be a problem if you&#8217;re using threads, because the bus instance is global
+in the Flask app context as we&#8217;ve written it. Just something to watch out for.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>What else changes in the bus?</p>
+</div>
+<div id="messagebus_handlers_change" class="exampleblock">
+<div class="title">Event and command handler logic stays the same (src/allocation/service_layer/messagebus.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span>    <span class="tok-k">def</span> <span class="tok-nf">handle_event</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">Event</span><span class="tok-p">):</span>
+        <span class="tok-k">for</span> <span class="tok-n">handler</span> <span class="tok-ow">in</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">event_handlers</span><span class="tok-p">[</span><span class="tok-nb">type</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">)]:</span>  #<b class="conum">(1)</b>
+            <span class="tok-k">try</span><span class="tok-p">:</span>
+                <span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">debug</span><span class="tok-p">(</span><span class="tok-s1">'handling event </span><span class="tok-si">%s</span><span class="tok-s1"> with handler </span><span class="tok-si">%s</span><span class="tok-s1">'</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">,</span> <span class="tok-n">handler</span><span class="tok-p">)</span>
+                <span class="tok-n">handler</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">)</span>  #<b class="conum">(2)</b>
+                <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">queue</span><span class="tok-o">.</span><span class="tok-n">extend</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">collect_new_events</span><span class="tok-p">())</span>
+            <span class="tok-k">except</span> <span class="tok-ne">Exception</span><span class="tok-p">:</span>
+                <span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">exception</span><span class="tok-p">(</span><span class="tok-s1">'Exception handling event </span><span class="tok-si">%s</span><span class="tok-s1">'</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">)</span>
+                <span class="tok-k">continue</span>
+
+
+    <span class="tok-k">def</span> <span class="tok-nf">handle_command</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">command</span><span class="tok-p">:</span> <span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">Command</span><span class="tok-p">):</span>
+        <span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">debug</span><span class="tok-p">(</span><span class="tok-s1">'handling command </span><span class="tok-si">%s</span><span class="tok-s1">'</span><span class="tok-p">,</span> <span class="tok-n">command</span><span class="tok-p">)</span>
+        <span class="tok-k">try</span><span class="tok-p">:</span>
+            <span class="tok-n">handler</span> <span class="tok-o">=</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">command_handlers</span><span class="tok-p">[</span><span class="tok-nb">type</span><span class="tok-p">(</span><span class="tok-n">command</span><span class="tok-p">)]</span>  #<b class="conum">(1)</b>
+            <span class="tok-n">handler</span><span class="tok-p">(</span><span class="tok-n">command</span><span class="tok-p">)</span>  #<b class="conum">(2)</b>
+            <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">queue</span><span class="tok-o">.</span><span class="tok-n">extend</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">collect_new_events</span><span class="tok-p">())</span>
+        <span class="tok-k">except</span> <span class="tok-ne">Exception</span><span class="tok-p">:</span>
+            <span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">exception</span><span class="tok-p">(</span><span class="tok-s1">'Exception handling command </span><span class="tok-si">%s</span><span class="tok-s1">'</span><span class="tok-p">,</span> <span class="tok-n">command</span><span class="tok-p">)</span>
+            <span class="tok-k">raise</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p><code>handle_event</code> and <code>handle_command</code> are substantially the same, but instead
+of indexing into a static <code>EVENT_HANDLERS</code> or <code>COMMAND_HANDLERS</code> dict, they
+use the versions on <code>self</code>.</p>
+</li>
+<li>
+<p>Instead of passing a UoW into the handler, we expect the handlers
+to already have all their dependencies, so all they need is a single argument,
+the specific event or command.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_using_bootstrap_in_our_entrypoints">Using Bootstrap in Our Entrypoints</h3>
+<div class="paragraph">
+<p>In our application&#8217;s entrypoints, we now just call <code>bootstrap.bootstrap()</code>
+and get a message bus that&#8217;s ready to go, rather than configuring a UoW and the
+rest of it:</p>
+</div>
+<div id="flask_calls_bootstrap" class="exampleblock">
+<div class="title">Flask calls bootstrap (src/allocation/entrypoints/flask_app.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="diff"><span></span><span class="tok-gd">-from allocation import views</span>
+<span class="tok-gi">+from allocation import bootstrap, views</span>
+
+ app = Flask(__name__)
+<span class="tok-gd">-orm.start_mappers()  </span>#<b class="conum">(1)</b>
+<span class="tok-gi">+bus = bootstrap.bootstrap()</span>
+
+
+ @app.route("/add_batch", methods=['POST'])
+<span class="tok-gu">@@ -19,8 +16,7 @@ def add_batch():</span>
+     cmd = commands.CreateBatch(
+         request.json['ref'], request.json['sku'], request.json['qty'], eta,
+     )
+<span class="tok-gd">-    uow = unit_of_work.SqlAlchemyUnitOfWork()  </span>#<b class="conum">(2)</b>
+<span class="tok-gd">-    messagebus.handle(cmd, uow)</span>
+<span class="tok-gi">+    bus.handle(cmd)  </span>#<b class="conum">(3)</b>
+     return 'OK', 201</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>We no longer need to call <code>start_orm()</code>; the bootstrap script&#8217;s initialization
+stages will do that.</p>
+</li>
+<li>
+<p>We no longer need to explicitly build a particular type of UoW; the bootstrap
+script defaults take care of it.</p>
+</li>
+<li>
+<p>And our message bus is now a specific instance rather than the global module.<sup class="footnote">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup></p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_initializing_di_in_our_tests">Initializing DI in Our Tests</h3>
+<div class="paragraph">
+<p>In tests, we can use <code>bootstrap.bootstrap()</code> with overridden defaults to get a
+custom message bus. Here&#8217;s an example in an integration test:</p>
+</div>
+<div id="bootstrap_view_tests" class="exampleblock">
+<div class="title">Overriding bootstrap defaults (tests/integration/test_views.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@pytest.fixture</span>
+<span class="tok-k">def</span> <span class="tok-nf">sqlite_bus</span><span class="tok-p">(</span><span class="tok-n">sqlite_session_factory</span><span class="tok-p">):</span>
+    <span class="tok-n">bus</span> <span class="tok-o">=</span> <span class="tok-n">bootstrap</span><span class="tok-o">.</span><span class="tok-n">bootstrap</span><span class="tok-p">(</span>
+        <span class="tok-n">start_orm</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">,</span>  #<b class="conum">(1)</b>
+        <span class="tok-n">uow</span><span class="tok-o">=</span><span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyUnitOfWork</span><span class="tok-p">(</span><span class="tok-n">sqlite_session_factory</span><span class="tok-p">),</span>  #<b class="conum">(2)</b>
+        <span class="tok-n">send_mail</span><span class="tok-o">=</span><span class="tok-k">lambda</span> <span class="tok-o">*</span><span class="tok-n">args</span><span class="tok-p">:</span> <span class="tok-bp">None</span><span class="tok-p">,</span>  #<b class="conum">(3)</b>
+        <span class="tok-n">publish</span><span class="tok-o">=</span><span class="tok-k">lambda</span> <span class="tok-o">*</span><span class="tok-n">args</span><span class="tok-p">:</span> <span class="tok-bp">None</span><span class="tok-p">,</span>  #<b class="conum">(3)</b>
+    <span class="tok-p">)</span>
+    <span class="tok-k">yield</span> <span class="tok-n">bus</span>
+    <span class="tok-n">clear_mappers</span><span class="tok-p">()</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">test_allocations_view</span><span class="tok-p">(</span><span class="tok-n">sqlite_bus</span><span class="tok-p">):</span>
+    <span class="tok-n">sqlite_bus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">CreateBatch</span><span class="tok-p">(</span><span class="tok-s1">'sku1batch'</span><span class="tok-p">,</span> <span class="tok-s1">'sku1'</span><span class="tok-p">,</span> <span class="tok-mi">50</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">))</span>
+    <span class="tok-n">sqlite_bus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">CreateBatch</span><span class="tok-p">(</span><span class="tok-s1">'sku2batch'</span><span class="tok-p">,</span> <span class="tok-s1">'sku2'</span><span class="tok-p">,</span> <span class="tok-mi">50</span><span class="tok-p">,</span> <span class="tok-n">today</span><span class="tok-p">))</span>
+    <span class="tok-o">...</span>
+    <span class="tok-k">assert</span> <span class="tok-n">views</span><span class="tok-o">.</span><span class="tok-n">allocations</span><span class="tok-p">(</span><span class="tok-s1">'order1'</span><span class="tok-p">,</span> <span class="tok-n">sqlite_bus</span><span class="tok-o">.</span><span class="tok-n">uow</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-p">[</span>
+        <span class="tok-p">{</span><span class="tok-s1">'sku'</span><span class="tok-p">:</span> <span class="tok-s1">'sku1'</span><span class="tok-p">,</span> <span class="tok-s1">'batchref'</span><span class="tok-p">:</span> <span class="tok-s1">'sku1batch'</span><span class="tok-p">},</span>
+        <span class="tok-p">{</span><span class="tok-s1">'sku'</span><span class="tok-p">:</span> <span class="tok-s1">'sku2'</span><span class="tok-p">,</span> <span class="tok-s1">'batchref'</span><span class="tok-p">:</span> <span class="tok-s1">'sku2batch'</span><span class="tok-p">},</span>
+    <span class="tok-p">]</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>We do still want to start the ORM&#8230;&#8203;</p>
+</li>
+<li>
+<p>&#8230;&#8203;because we&#8217;re going to use a real UoW, albeit with an in-memory database.</p>
+</li>
+<li>
+<p>But we don&#8217;t need to send email or publish, so we make those noops.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>In our unit tests, in contrast, we can reuse our <code>FakeUnitOfWork</code>:</p>
+</div>
+<div id="bootstrap_tests" class="exampleblock">
+<div class="title">Bootstrap in unit test (tests/unit/test_handlers.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">bootstrap_test_app</span><span class="tok-p">():</span>
+    <span class="tok-k">return</span> <span class="tok-n">bootstrap</span><span class="tok-o">.</span><span class="tok-n">bootstrap</span><span class="tok-p">(</span>
+        <span class="tok-n">start_orm</span><span class="tok-o">=</span><span class="tok-bp">False</span><span class="tok-p">,</span>  #<b class="conum">(1)</b>
+        <span class="tok-n">uow</span><span class="tok-o">=</span><span class="tok-n">FakeUnitOfWork</span><span class="tok-p">(),</span>  #<b class="conum">(2)</b>
+        <span class="tok-n">send_mail</span><span class="tok-o">=</span><span class="tok-k">lambda</span> <span class="tok-o">*</span><span class="tok-n">args</span><span class="tok-p">:</span> <span class="tok-bp">None</span><span class="tok-p">,</span>  #<b class="conum">(3)</b>
+        <span class="tok-n">publish</span><span class="tok-o">=</span><span class="tok-k">lambda</span> <span class="tok-o">*</span><span class="tok-n">args</span><span class="tok-p">:</span> <span class="tok-bp">None</span><span class="tok-p">,</span>  #<b class="conum">(3)</b>
+    <span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>No need to start the ORM&#8230;&#8203;</p>
+</li>
+<li>
+<p>&#8230;&#8203;because the fake UoW doesn&#8217;t use one.</p>
+</li>
+<li>
+<p>We want to fake out our email and Redis adapters too.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>So that gets rid of a little duplication, and we&#8217;ve moved a bunch
+of setup and sensible defaults into a single place.</p>
+</div>
+<div class="sidebarblock nobreakinside less_space">
+<div class="content">
+<div class="title">Exercise for the Reader 1</div>
+<div class="paragraph">
+<p>Change all the handlers to being classes as per the <a href="#di_with_classes">DI using classes</a> example,
+and amend the bootstrapper&#8217;s DI code as appropriate.  This will let you
+know whether you prefer the functional approach or the class-based approach when
+it comes to your own projects.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_building_an_adapter_properly_a_worked_example">Building an Adapter "Properly": A Worked Example</h3>
+<div class="paragraph">
+<p>To really get a feel for how it all works, let&#8217;s work through an example of how
+you might "properly" build an adapter and do dependency injection for it.</p>
+</div>
+<div class="paragraph">
+<p>At the moment, we have two types of dependencies:</p>
+</div>
+<div id="two_types_of_dependency" class="exampleblock">
+<div class="title">Two types of dependencies (src/allocation/service_layer/messagebus.py)</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span>    <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>  #<b class="conum">(1)</b>
+    <span class="tok-n">send_mail</span><span class="tok-p">:</span> <span class="tok-n">Callable</span><span class="tok-p">,</span>  #<b class="conum">(2)</b>
+    <span class="tok-n">publish</span><span class="tok-p">:</span> <span class="tok-n">Callable</span><span class="tok-p">,</span>  #<b class="conum">(2)</b></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>The UoW has an abstract base class. This is the heavyweight
+option for declaring and managing your external dependency.
+We&#8217;d use this for the case when the dependency is relatively complex.</p>
+</li>
+<li>
+<p>Our email sender and pub/sub publisher are defined
+as functions. This works just fine for simple dependencies.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Here are some of the things we find ourselves injecting at work:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>An S3 filesystem client</p>
+</li>
+<li>
+<p>A key/value store client</p>
+</li>
+<li>
+<p>A <code>requests</code> session object</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Most of these will have more-complex APIs that you can&#8217;t capture
+as a single function: read and write, GET and POST, and so on.</p>
+</div>
+<div class="paragraph">
+<p>Even though it&#8217;s simple, let&#8217;s use <code>send_mail</code> as an example to talk
+through how you might define a more complex dependency.</p>
+</div>
+<div class="sect3">
+<h4 id="_define_the_abstract_and_concrete_implementations">Define the Abstract and Concrete Implementations</h4>
+<div class="paragraph">
+<p>We&#8217;ll imagine a more generic notifications API. Could be
+email, could be SMS, could be Slack posts one day.</p>
+</div>
+<div id="notifications_dot_py" class="exampleblock">
+<div class="title">An ABC and a concrete implementation (src/allocation/adapters/notifications.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">AbstractNotifications</span><span class="tok-p">(</span><span class="tok-n">abc</span><span class="tok-o">.</span><span class="tok-n">ABC</span><span class="tok-p">):</span>
+
+    <span class="tok-nd">@abc.abstractmethod</span>
+    <span class="tok-k">def</span> <span class="tok-nf">send</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">destination</span><span class="tok-p">,</span> <span class="tok-n">message</span><span class="tok-p">):</span>
+        <span class="tok-k">raise</span> <span class="tok-ne">NotImplementedError</span>
+
+<span class="tok-o">...</span>
+
+<span class="tok-k">class</span> <span class="tok-nc">EmailNotifications</span><span class="tok-p">(</span><span class="tok-n">AbstractNotifications</span><span class="tok-p">):</span>
+
+    <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">smtp_host</span><span class="tok-o">=</span><span class="tok-n">DEFAULT_HOST</span><span class="tok-p">,</span> <span class="tok-n">port</span><span class="tok-o">=</span><span class="tok-n">DEFAULT_PORT</span><span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">server</span> <span class="tok-o">=</span> <span class="tok-n">smtplib</span><span class="tok-o">.</span><span class="tok-n">SMTP</span><span class="tok-p">(</span><span class="tok-n">smtp_host</span><span class="tok-p">,</span> <span class="tok-n">port</span><span class="tok-o">=</span><span class="tok-n">port</span><span class="tok-p">)</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">server</span><span class="tok-o">.</span><span class="tok-n">noop</span><span class="tok-p">()</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">send</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">destination</span><span class="tok-p">,</span> <span class="tok-n">message</span><span class="tok-p">):</span>
+        <span class="tok-n">msg</span> <span class="tok-o">=</span> <span class="tok-n">f</span><span class="tok-s1">'Subject: allocation service notification</span><span class="tok-se">\n</span><span class="tok-s1">{message}'</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">server</span><span class="tok-o">.</span><span class="tok-n">sendmail</span><span class="tok-p">(</span>
+            <span class="tok-n">from_addr</span><span class="tok-o">=</span><span class="tok-s1">'allocations@example.com'</span><span class="tok-p">,</span>
+            <span class="tok-n">to_addrs</span><span class="tok-o">=</span><span class="tok-p">[</span><span class="tok-n">destination</span><span class="tok-p">],</span>
+            <span class="tok-n">msg</span><span class="tok-o">=</span><span class="tok-n">msg</span>
+        <span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>We change the dependency in the bootstrap script:</p>
+</div>
+<div id="notifications_in_bus" class="exampleblock">
+<div class="title">Notifications in message bus (src/allocation/bootstrap.py)</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="diff"><span></span> def bootstrap(
+     start_orm: bool = True,
+     uow: unit_of_work.AbstractUnitOfWork = unit_of_work.SqlAlchemyUnitOfWork(),
+<span class="tok-gd">-    send_mail: Callable = email.send,</span>
+<span class="tok-gi">+    notifications: AbstractNotifications = EmailNotifications(),</span>
+     publish: Callable = redis_eventpublisher.publish,
+ ) -&gt; messagebus.MessageBus:</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_make_a_fake_version_for_your_tests">Make a Fake Version for Your Tests</h4>
+<div class="paragraph">
+<p>We work through and define a fake version for unit testing:</p>
+</div>
+<div id="fake_notifications" class="exampleblock">
+<div class="title">Fake notifications (tests/unit/test_handlers.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">FakeNotifications</span><span class="tok-p">(</span><span class="tok-n">notifications</span><span class="tok-o">.</span><span class="tok-n">AbstractNotifications</span><span class="tok-p">):</span>
+
+    <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">sent</span> <span class="tok-o">=</span> <span class="tok-n">defaultdict</span><span class="tok-p">(</span><span class="tok-nb">list</span><span class="tok-p">)</span>  <span class="tok-c1"># type: Dict[str, List[str]]</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">send</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">destination</span><span class="tok-p">,</span> <span class="tok-n">message</span><span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">sent</span><span class="tok-p">[</span><span class="tok-n">destination</span><span class="tok-p">]</span><span class="tok-o">.</span><span class="tok-n">append</span><span class="tok-p">(</span><span class="tok-n">message</span><span class="tok-p">)</span>
+<span class="tok-o">...</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>And we use it in our tests:</p>
+</div>
+<div id="test_with_fake_notifs" class="exampleblock">
+<div class="title">Tests change slightly (tests/unit/test_handlers.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span>    <span class="tok-k">def</span> <span class="tok-nf">test_sends_email_on_out_of_stock_error</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
+        <span class="tok-n">fake_notifs</span> <span class="tok-o">=</span> <span class="tok-n">FakeNotifications</span><span class="tok-p">()</span>
+        <span class="tok-n">bus</span> <span class="tok-o">=</span> <span class="tok-n">bootstrap</span><span class="tok-o">.</span><span class="tok-n">bootstrap</span><span class="tok-p">(</span>
+            <span class="tok-n">start_orm</span><span class="tok-o">=</span><span class="tok-bp">False</span><span class="tok-p">,</span>
+            <span class="tok-n">uow</span><span class="tok-o">=</span><span class="tok-n">FakeUnitOfWork</span><span class="tok-p">(),</span>
+            <span class="tok-n">notifications</span><span class="tok-o">=</span><span class="tok-n">fake_notifs</span><span class="tok-p">,</span>
+            <span class="tok-n">publish</span><span class="tok-o">=</span><span class="tok-k">lambda</span> <span class="tok-o">*</span><span class="tok-n">args</span><span class="tok-p">:</span> <span class="tok-bp">None</span><span class="tok-p">,</span>
+        <span class="tok-p">)</span>
+        <span class="tok-n">bus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">CreateBatch</span><span class="tok-p">(</span><span class="tok-s2">"b1"</span><span class="tok-p">,</span> <span class="tok-s2">"POPULAR-CURTAINS"</span><span class="tok-p">,</span> <span class="tok-mi">9</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">))</span>
+        <span class="tok-n">bus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">Allocate</span><span class="tok-p">(</span><span class="tok-s2">"o1"</span><span class="tok-p">,</span> <span class="tok-s2">"POPULAR-CURTAINS"</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">))</span>
+        <span class="tok-k">assert</span> <span class="tok-n">fake_notifs</span><span class="tok-o">.</span><span class="tok-n">sent</span><span class="tok-p">[</span><span class="tok-s1">'stock@made.com'</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-p">[</span>
+            <span class="tok-n">f</span><span class="tok-s2">"Out of stock for POPULAR-CURTAINS"</span><span class="tok-p">,</span>
+        <span class="tok-p">]</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_figure_out_how_to_integration_test_the_real_thing">Figure Out How to Integration Test the Real Thing</h4>
+<div class="paragraph">
+<p>Now we test the real thing, usually with an end-to-end or integration
+test.  We&#8217;ve used <a href="https://github.com/mailhog/MailHog">MailHog</a> as a
+real-ish email server for our Docker dev environment:</p>
+</div>
+<div id="docker_compose_with_mailhog" class="exampleblock">
+<div class="title">Docker-compose config with real fake email server (docker-compose.yml)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="yaml"><span></span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">version</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-s">"3"</span>
+
+<span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">services</span><span class="tok-p tok-p-Indicator">:</span>
+
+  <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">redis_pubsub</span><span class="tok-p tok-p-Indicator">:</span>
+    <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">build</span><span class="tok-p tok-p-Indicator">:</span>
+      <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">context</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">.</span>
+      <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">dockerfile</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">Dockerfile</span>
+    <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">image</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">allocation-image</span>
+    <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">...</span>
+
+  <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">api</span><span class="tok-p tok-p-Indicator">:</span>
+    <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">image</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">allocation-image</span>
+    <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">...</span>
+
+  <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">postgres</span><span class="tok-p tok-p-Indicator">:</span>
+    <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">image</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">postgres:9.6</span>
+    <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">...</span>
+
+  <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">redis</span><span class="tok-p tok-p-Indicator">:</span>
+    <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">image</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">redis:alpine</span>
+    <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">...</span>
+
+  <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">mailhog</span><span class="tok-p tok-p-Indicator">:</span>
+    <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">image</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">mailhog/mailhog</span>
+    <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">ports</span><span class="tok-p tok-p-Indicator">:</span>
+      <span class="tok-p tok-p-Indicator">-</span> <span class="tok-s">"11025:1025"</span>
+      <span class="tok-p tok-p-Indicator">-</span> <span class="tok-s">"18025:8025"</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>In our integration tests, we use the real <code>EmailNotifications</code> class,
+talking to the MailHog server in the Docker cluster:</p>
+</div>
+<div id="integration_test_email" class="exampleblock">
+<div class="title">Integration test for email (tests/integration/test_email.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@pytest.fixture</span>
+<span class="tok-k">def</span> <span class="tok-nf">bus</span><span class="tok-p">(</span><span class="tok-n">sqlite_session_factory</span><span class="tok-p">):</span>
+    <span class="tok-n">bus</span> <span class="tok-o">=</span> <span class="tok-n">bootstrap</span><span class="tok-o">.</span><span class="tok-n">bootstrap</span><span class="tok-p">(</span>
+        <span class="tok-n">start_orm</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">,</span>
+        <span class="tok-n">uow</span><span class="tok-o">=</span><span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyUnitOfWork</span><span class="tok-p">(</span><span class="tok-n">sqlite_session_factory</span><span class="tok-p">),</span>
+        <span class="tok-n">notifications</span><span class="tok-o">=</span><span class="tok-n">notifications</span><span class="tok-o">.</span><span class="tok-n">EmailNotifications</span><span class="tok-p">(),</span>  #<b class="conum">(1)</b>
+        <span class="tok-n">publish</span><span class="tok-o">=</span><span class="tok-k">lambda</span> <span class="tok-o">*</span><span class="tok-n">args</span><span class="tok-p">:</span> <span class="tok-bp">None</span><span class="tok-p">,</span>
+    <span class="tok-p">)</span>
+    <span class="tok-k">yield</span> <span class="tok-n">bus</span>
+    <span class="tok-n">clear_mappers</span><span class="tok-p">()</span>
+
+
+<span class="tok-k">def</span> <span class="tok-nf">get_email_from_mailhog</span><span class="tok-p">(</span><span class="tok-n">sku</span><span class="tok-p">):</span>  #<b class="conum">(2)</b>
+    <span class="tok-n">host</span><span class="tok-p">,</span> <span class="tok-n">port</span> <span class="tok-o">=</span> <span class="tok-nb">map</span><span class="tok-p">(</span><span class="tok-n">config</span><span class="tok-o">.</span><span class="tok-n">get_email_host_and_port</span><span class="tok-p">()</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">,</span> <span class="tok-p">[</span><span class="tok-s1">'host'</span><span class="tok-p">,</span> <span class="tok-s1">'http_port'</span><span class="tok-p">])</span>
+    <span class="tok-n">all_emails</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'http://{host}:{port}/api/v2/messages'</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()</span>
+    <span class="tok-k">return</span> <span class="tok-nb">next</span><span class="tok-p">(</span><span class="tok-n">m</span> <span class="tok-k">for</span> <span class="tok-n">m</span> <span class="tok-ow">in</span> <span class="tok-n">all_emails</span><span class="tok-p">[</span><span class="tok-s1">'items'</span><span class="tok-p">]</span> <span class="tok-k">if</span> <span class="tok-n">sku</span> <span class="tok-ow">in</span> <span class="tok-nb">str</span><span class="tok-p">(</span><span class="tok-n">m</span><span class="tok-p">))</span>
+
+
+<span class="tok-k">def</span> <span class="tok-nf">test_out_of_stock_email</span><span class="tok-p">(</span><span class="tok-n">bus</span><span class="tok-p">):</span>
+    <span class="tok-n">sku</span> <span class="tok-o">=</span> <span class="tok-n">random_sku</span><span class="tok-p">()</span>
+    <span class="tok-n">bus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">CreateBatch</span><span class="tok-p">(</span><span class="tok-s1">'batch1'</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">9</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">))</span>  #<b class="conum">(3)</b>
+    <span class="tok-n">bus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">Allocate</span><span class="tok-p">(</span><span class="tok-s1">'order1'</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">))</span>
+    <span class="tok-n">email</span> <span class="tok-o">=</span> <span class="tok-n">get_email_from_mailhog</span><span class="tok-p">(</span><span class="tok-n">sku</span><span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">email</span><span class="tok-p">[</span><span class="tok-s1">'Raw'</span><span class="tok-p">][</span><span class="tok-s1">'From'</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-s1">'allocations@example.com'</span>  #<b class="conum">(4)</b>
+    <span class="tok-k">assert</span> <span class="tok-n">email</span><span class="tok-p">[</span><span class="tok-s1">'Raw'</span><span class="tok-p">][</span><span class="tok-s1">'To'</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-p">[</span><span class="tok-s1">'stock@made.com'</span><span class="tok-p">]</span>
+    <span class="tok-k">assert</span> <span class="tok-n">f</span><span class="tok-s1">'Out of stock for {sku}'</span> <span class="tok-ow">in</span> <span class="tok-n">email</span><span class="tok-p">[</span><span class="tok-s1">'Raw'</span><span class="tok-p">][</span><span class="tok-s1">'Data'</span><span class="tok-p">]</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>We use our bootstrapper to build a message bus that talks to the
+real notifications class.</p>
+</li>
+<li>
+<p>We figure out how to fetch emails from our "real" email server.</p>
+</li>
+<li>
+<p>We use the bus to do our test setup.</p>
+</li>
+<li>
+<p>Against all the odds, this actually worked, pretty much at the first go!</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>And that&#8217;s it really.</p>
+</div>
+<div class="sidebarblock less_space nobreakinside">
+<div class="content">
+<div class="title">Exercise for the Reader 2</div>
+<div class="paragraph">
+<p>You could do two things for practice regarding adapters:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Try swapping out our notifications from email to SMS
+notifications using Twilio, for example, or Slack notifications.  Can you find
+a good equivalent to MailHog for integration testing?</p>
+</li>
+<li>
+<p>In a similar way to what we did moving from <code>send_mail</code> to a <code>Notifications</code>
+class, try refactoring our <code>redis_eventpublisher</code> that is currently just
+a <code>Callable</code> to some sort of more formal adapter/base class/protocol.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_wrap_up">Wrap-Up</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Once you have more than one adapter, you&#8217;ll start to feel a lot of pain
+from passing dependencies around manually, unless you do some kind of
+<em>dependency injection.</em></p>
+</li>
+<li>
+<p>Setting up dependency injection is just one of many typical
+setup/initialization activities that you need to do just once when starting
+your app.  Putting this all together into a <em>bootstrap script</em> is often a
+good idea.</p>
+</li>
+<li>
+<p>The bootstrap script is also good as a place to provide sensible default
+configuration for your adapters, and as a single place to override those
+adapters with fakes for your tests.</p>
+</li>
+<li>
+<p>A dependency injection framework can be useful if you find yourself
+needing to do DI at multiple levels&#8212;if you have chained dependencies
+of components that all need DI, for example.</p>
+</li>
+<li>
+<p>This chapter also presented a worked example of changing an implicit/simple
+dependency into a "proper" adapter, factoring out an ABC, defining its real
+and fake implementations, and thinking through integration testing.</p>
+</li>
+</ul>
+</div>
+<div class="sidebarblock less_space nobreakinside">
+<div class="content">
+<div class="title">DI and Bootstrap Recap</div>
+<div class="paragraph">
+<p>In summary:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Define your API using an ABC.</p>
+</li>
+<li>
+<p>Implement the real thing.</p>
+</li>
+<li>
+<p>Build a fake and use it for unit/service-layer/handler tests.</p>
+</li>
+<li>
+<p>Find a less fake version you can put into your Docker environment.</p>
+</li>
+<li>
+<p>Test the less fake "real" thing.</p>
+</li>
+<li>
+<p>Profit!</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>These were the last patterns we wanted to cover, which brings us to the end of <a href="/book/part2.html">[part2]</a>. In <a href="/book/epilogue_1_how_to_get_there_from_here.html">the epilogue</a>, we&#8217;ll try to give you some pointers for applying these techniques in the Real World<sup>TM</sup>.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<hr>
+<div class="footnote" id="_footnotedef_1">
+<a href="#_footnoteref_1">1</a>. Because Python is not a "pure" OO language, Python developers aren&#8217;t necessarily used to the concept of needing to <em>compose</em> a set of objects into a working application. We just pick our entrypoint and run code from top to bottom.
+</div>
+<div class="footnote" id="_footnotedef_2">
+<a href="#_footnoteref_2">2</a>. Mark Seemann calls this <a href="https://oreil.ly/iGpDL"><em>Pure DI</em></a> or sometimes <em>Vanilla DI</em>.
+</div>
+<div class="footnote" id="_footnotedef_3">
+<a href="#_footnoteref_3">3</a>. However, it&#8217;s still a global in the <code>flask_app</code> module scope, if that makes sense. This may cause problems if you ever find yourself wanting to test your Flask app in-process by using the Flask Test Client instead of using Docker as we do. It&#8217;s worth researching <a href="https://oreil.ly/_a6Kl">Flask app factories</a> if you get into this.
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2020-03-16 11:03:29 UTC
+</div>
+</div>
+<style>
+pre.pygments .hll { background-color: #ffffcc }
+pre.pygments  { background: #f0f0f0; }
+pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
+pre.pygments .tok-err { border: 1px solid #FF0000 } /* Error */
+pre.pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
+pre.pygments .tok-o { color: #666666 } /* Operator */
+pre.pygments .tok-ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
+pre.pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
+pre.pygments .tok-cp { color: #007020 } /* Comment.Preproc */
+pre.pygments .tok-cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
+pre.pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
+pre.pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
+pre.pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
+pre.pygments .tok-ge { font-style: italic } /* Generic.Emph */
+pre.pygments .tok-gr { color: #FF0000 } /* Generic.Error */
+pre.pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
+pre.pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
+pre.pygments .tok-go { color: #888888 } /* Generic.Output */
+pre.pygments .tok-gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+pre.pygments .tok-gs { font-weight: bold } /* Generic.Strong */
+pre.pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+pre.pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
+pre.pygments .tok-kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+pre.pygments .tok-kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+pre.pygments .tok-kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+pre.pygments .tok-kp { color: #007020 } /* Keyword.Pseudo */
+pre.pygments .tok-kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+pre.pygments .tok-kt { color: #902000 } /* Keyword.Type */
+pre.pygments .tok-m { color: #40a070 } /* Literal.Number */
+pre.pygments .tok-s { color: #4070a0 } /* Literal.String */
+pre.pygments .tok-na { color: #4070a0 } /* Name.Attribute */
+pre.pygments .tok-nb { color: #007020 } /* Name.Builtin */
+pre.pygments .tok-nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+pre.pygments .tok-no { color: #60add5 } /* Name.Constant */
+pre.pygments .tok-nd { color: #555555; font-weight: bold } /* Name.Decorator */
+pre.pygments .tok-ni { color: #d55537; font-weight: bold } /* Name.Entity */
+pre.pygments .tok-ne { color: #007020 } /* Name.Exception */
+pre.pygments .tok-nf { color: #06287e } /* Name.Function */
+pre.pygments .tok-nl { color: #002070; font-weight: bold } /* Name.Label */
+pre.pygments .tok-nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+pre.pygments .tok-nt { color: #062873; font-weight: bold } /* Name.Tag */
+pre.pygments .tok-nv { color: #bb60d5 } /* Name.Variable */
+pre.pygments .tok-ow { color: #007020; font-weight: bold } /* Operator.Word */
+pre.pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
+pre.pygments .tok-mb { color: #40a070 } /* Literal.Number.Bin */
+pre.pygments .tok-mf { color: #40a070 } /* Literal.Number.Float */
+pre.pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
+pre.pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
+pre.pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
+pre.pygments .tok-sa { color: #4070a0 } /* Literal.String.Affix */
+pre.pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
+pre.pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
+pre.pygments .tok-dl { color: #4070a0 } /* Literal.String.Delimiter */
+pre.pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+pre.pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
+pre.pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+pre.pygments .tok-sh { color: #4070a0 } /* Literal.String.Heredoc */
+pre.pygments .tok-si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+pre.pygments .tok-sx { color: #c65d09 } /* Literal.String.Other */
+pre.pygments .tok-sr { color: #235388 } /* Literal.String.Regex */
+pre.pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
+pre.pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
+pre.pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
+pre.pygments .tok-fm { color: #06287e } /* Name.Function.Magic */
+pre.pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
+pre.pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
+pre.pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
+pre.pygments .tok-vm { color: #bb60d5 } /* Name.Variable.Magic */
+pre.pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
+</style>
+</body>
+</html>

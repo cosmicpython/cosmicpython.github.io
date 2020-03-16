@@ -1,0 +1,1220 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<title>Our First Use Case: Flask API and Service Layer</title>
+<style>
+/* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+
+@import url("//fonts.googleapis.com/css?family=Noto+Sans:300,600italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700");
+@import url(//asciidoctor.org/stylesheets/asciidoctor.css); /* Default asciidoc style framework - important */
+
+/* customisations by harry */
+
+/* hide inline ditaa/plantuml source listings for images */
+.image-source {
+    display: none
+}
+/* make formal codeblocks a bit nicer */
+.exampleblock > .content {
+    padding: 2px;
+    background-color: white;
+    border: 0;
+    margin-bottom: 2em;
+}
+
+.exampleblock .title {
+    text-align: right;
+}
+
+/* end customisations by harry */
+
+/* CUSTOMISATIONS */
+
+/* Change the values in root for quick customisation. If you want even more fine grain... venture further. */
+
+:root{
+--maincolor:#FFFFFF;
+--primarycolor:#2c3e50;
+--secondarycolor:#ba3925;
+--tertiarycolor: #186d7a;
+--sidebarbackground:#CCC;
+--linkcolor:#b71c1c;
+--linkcoloralternate:#f44336;
+--white:#FFFFFF;
+--black:#000000;
+}
+
+/* Text styles */
+h1{color:var(--primarycolor) !important;}
+h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+.title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
+p{font-family: "Noto Sans",sans-serif !important}
+
+/* Table styles */
+th{font-family: "Noto Sans",sans-serif !important}
+
+/* Responsiveness fixes */
+video {
+  max-width: 100%;
+}
+
+@media all and (max-width: 600px) {
+table {
+  width: 55vw!important;
+  font-size: 3vw;
+}
+
+</style>
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="/book/preface.html">Preface</a></li>
+<li><a href="/book/introduction.html">Introduction</a></li>
+<li><a href="/book/part1.html">Building an Architecture to Support Domain Modeling</a></li>
+<li><a href="/book/chapter_01_domain_model.html">1. Domain Modeling</a></li>
+<li><a href="/book/chapter_02_repository.html">2. Repository Pattern</a></li>
+<li><a href="/book/chapter_03_abstractions.html">3. A Brief Interlude: On Coupling <span class="keep-together">and Abstractions</span></a></li>
+<li><a href="/book/chapter_04_service_layer.html">4. Our First Use Case: <span class="keep-together">Flask API and Service Layer</span></a></li>
+<li><a href="/book/chapter_05_high_gear_low_gear.html">5. TDD in High Gear and Low Gear</a></li>
+<li><a href="/book/chapter_06_uow.html">6. Unit of Work Pattern</a></li>
+<li><a href="/book/chapter_07_aggregate.html">7. Aggregates and Consistency Boundaries</a></li>
+<li><a href="/book/part2.html">Event-Driven Architecture</a></li>
+<li><a href="/book/chapter_08_events_and_message_bus.html">8. Events and the Message Bus</a></li>
+<li><a href="/book/chapter_09_all_messagebus.html">9. Going to Town on the Message Bus</a></li>
+<li><a href="/book/chapter_10_commands.html">10. Commands and Command Handler</a></li>
+<li><a href="/book/chapter_11_external_events.html">11. Event-Driven Architecture: Using Events to Integrate Microservices</a></li>
+<li><a href="/book/chapter_12_cqrs.html">12. Command-Query Responsibility Segregation (CQRS)</a></li>
+<li><a href="/book/chapter_13_dependency_injection.html">13. Dependency Injection (and Bootstrapping)</a></li>
+<li><a href="/book/epilogue_1_how_to_get_there_from_here.html">Appendix A: Epilogue</a></li>
+<li><a href="/book/appendix_ds1_table.html">Appendix B: Summary Diagram and Table</a></li>
+<li><a href="/book/appendix_project_structure.html">Appendix C: A Template Project Structure</a></li>
+<li><a href="/book/appendix_csvs.html">Appendix D: Swapping Out the Infrastructure: <span class="keep-together">Do Everything with CSVs</span></a></li>
+<li><a href="/book/appendix_django.html">Appendix E: Repository and Unit of Work <span class="keep-together">Patterns with Django</span></a></li>
+<li><a href="/book/appendix_validation.html">Appendix F: Validation</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="chapter_04_service_layer">Our First Use Case: <span class="keep-together">Flask API and Service Layer</span></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Back to our allocations project! <a href="#maps_service_layer_before">Before: we drive our app by talking to repositories and the domain model</a> shows the point we reached at the end of <a href="/book/chapter_02_repository.html">[chapter_02_repository]</a>, which covered the Repository pattern.</p>
+</div>
+<div id="maps_service_layer_before" class="imageblock width-75">
+<div class="content">
+<img src="images/apwp_0401.png" alt="apwp 0401">
+</div>
+<div class="title">Figure 1. Before: we drive our app by talking to repositories and the domain model</div>
+</div>
+<div class="paragraph">
+<p>In this chapter, we discuss the differences between orchestration logic,
+business logic, and interfacing code, and we introduce the <em>Service Layer</em>
+pattern to take care of orchestrating our workflows and defining the use
+cases of our system.</p>
+</div>
+<div class="paragraph">
+<p>We&#8217;ll also discuss testing: by combining the Service Layer with our repository
+abstraction over the database, we&#8217;re able to write fast tests, not just of
+our domain model but of the entire workflow for a use case.</p>
+</div>
+<div class="paragraph">
+<p><a href="#maps_service_layer_after">The service layer will become the main way into our app</a> shows what we&#8217;re aiming for: we&#8217;re going to
+add a Flask API that will talk to the service layer, which will serve as the
+entrypoint to our domain model. Because our service layer depends on the
+<code>AbstractRepository</code>, we can unit test it by using <code>FakeRepository</code> but run our production code using <code>SqlAlchemyRepository</code>.</p>
+</div>
+<div id="maps_service_layer_after" class="imageblock">
+<div class="content">
+<img src="images/apwp_0402.png" alt="apwp 0402">
+</div>
+<div class="title">Figure 2. The service layer will become the main way into our app</div>
+</div>
+<div class="paragraph">
+<p>In our diagrams, we are using the convention that new components
+    are highlighted with bold text/lines (and yellow/orange color, if you&#8217;re
+    reading a digital version).</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The code for this chapter is in the
+chapter_04_service_layer branch <a href="https://oreil.ly/TBRuy">on GitHub</a>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>git clone https://github.com/cosmicpython/code.git
+cd code
+git checkout chapter_04_service_layer
+# or to code along, checkout Chapter 2:
+git checkout chapter_02_repository</pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_connecting_our_application_to_the_real_world">Connecting Our Application to the Real World</h3>
+<div class="paragraph">
+<p>Like any good agile team, we&#8217;re hustling to try to get an MVP out and
+in front of the users to start gathering feedback. We have the core
+of our domain model and the domain service we need to allocate orders,
+and we have the repository interface for permanent storage.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s plug all the moving parts together as quickly as we
+can and then refactor toward a cleaner architecture. Here&#8217;s our
+plan:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Use Flask to put an API endpoint in front of our <code>allocate</code> domain service.
+Wire up the database session and our repository. Test it with
+an end-to-end test and some quick-and-dirty SQL to prepare test
+data.</p>
+</li>
+<li>
+<p>Refactor out a service layer that can serve as an abstraction to
+capture the use case and that will sit between Flask and our domain model.
+Build some service-layer tests and show how they can use
+<code>FakeRepository</code>.</p>
+</li>
+<li>
+<p>Experiment with different types of parameters for our service layer
+functions; show that using primitive data types allows the service layer&#8217;s
+clients (our tests and our Flask API) to be decoupled from the model layer.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_a_first_end_to_end_test">A First End-to-End Test</h3>
+<div class="paragraph">
+<p>No one is interested in getting into a long terminology debate about what
+counts as an end-to-end (E2E) test versus a functional test versus an acceptance test versus
+an integration test versus a unit test. Different projects need different
+combinations of tests, and we&#8217;ve seen perfectly successful projects just split
+things into "fast tests" and "slow tests."</p>
+</div>
+<div class="paragraph">
+<p>For now, we want to write one or maybe two tests that are going to exercise
+a "real" API endpoint (using HTTP) and talk to a real database. Let&#8217;s call
+them <em>end-to-end tests</em> because it&#8217;s one of the most self-explanatory names.</p>
+</div>
+<div class="paragraph">
+<p>The following shows a first cut:</p>
+</div>
+<div id="first_api_test" class="exampleblock">
+<div class="title">A first API test (test_api.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@pytest.mark.usefixtures</span><span class="tok-p">(</span><span class="tok-s1">'restart_api'</span><span class="tok-p">)</span>
+<span class="tok-k">def</span> <span class="tok-nf">test_api_returns_allocation</span><span class="tok-p">(</span><span class="tok-n">add_stock</span><span class="tok-p">):</span>
+    <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">othersku</span> <span class="tok-o">=</span> <span class="tok-n">random_sku</span><span class="tok-p">(),</span> <span class="tok-n">random_sku</span><span class="tok-p">(</span><span class="tok-s1">'other'</span><span class="tok-p">)</span>  #<b class="conum">(1)</b>
+    <span class="tok-n">earlybatch</span> <span class="tok-o">=</span> <span class="tok-n">random_batchref</span><span class="tok-p">(</span><span class="tok-mi">1</span><span class="tok-p">)</span>
+    <span class="tok-n">laterbatch</span> <span class="tok-o">=</span> <span class="tok-n">random_batchref</span><span class="tok-p">(</span><span class="tok-mi">2</span><span class="tok-p">)</span>
+    <span class="tok-n">otherbatch</span> <span class="tok-o">=</span> <span class="tok-n">random_batchref</span><span class="tok-p">(</span><span class="tok-mi">3</span><span class="tok-p">)</span>
+    <span class="tok-n">add_stock</span><span class="tok-p">([</span>  #<b class="conum">(2)</b>
+        <span class="tok-p">(</span><span class="tok-n">laterbatch</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-s1">'2011-01-02'</span><span class="tok-p">),</span>
+        <span class="tok-p">(</span><span class="tok-n">earlybatch</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-s1">'2011-01-01'</span><span class="tok-p">),</span>
+        <span class="tok-p">(</span><span class="tok-n">otherbatch</span><span class="tok-p">,</span> <span class="tok-n">othersku</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">),</span>
+    <span class="tok-p">])</span>
+    <span class="tok-n">data</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s1">'orderid'</span><span class="tok-p">:</span> <span class="tok-n">random_orderid</span><span class="tok-p">(),</span> <span class="tok-s1">'sku'</span><span class="tok-p">:</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-s1">'qty'</span><span class="tok-p">:</span> <span class="tok-mi">3</span><span class="tok-p">}</span>
+    <span class="tok-n">url</span> <span class="tok-o">=</span> <span class="tok-n">config</span><span class="tok-o">.</span><span class="tok-n">get_api_url</span><span class="tok-p">()</span>  #<b class="conum">(3)</b>
+    <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">post</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'{url}/allocate'</span><span class="tok-p">,</span> <span class="tok-n">json</span><span class="tok-o">=</span><span class="tok-n">data</span><span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">status_code</span> <span class="tok-o">==</span> <span class="tok-mi">201</span>
+    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()[</span><span class="tok-s1">'batchref'</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-n">earlybatch</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p><code>random_sku()</code>, <code>random_batchref()</code>, and so on are little helper functions that
+generate randomized characters by using the <code>uuid</code> module. Because
+we&#8217;re running against an actual database now, this is one way to prevent
+various tests and runs from interfering with each other.</p>
+</li>
+<li>
+<p><code>add_stock</code> is a helper fixture that just hides away the details of
+manually inserting rows into the database using SQL. We&#8217;ll show a nicer
+way of doing this later in the chapter.</p>
+</li>
+<li>
+<p><em>config.py</em> is a module in which we keep configuration information.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Everyone solves these problems in different ways, but you&#8217;re going to need some
+way of spinning up Flask, possibly in a container, and of talking to a
+Postgres database. If you want to see how we did it, check out
+<a href="/book/appendix_project_structure.html">[appendix_project_structure]</a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_the_straightforward_implementation">The Straightforward Implementation</h3>
+<div class="paragraph">
+<p>Implementing things in the most obvious way, you might get something like this:</p>
+</div>
+<div id="first_cut_flask_app" class="exampleblock">
+<div class="title">First cut of Flask app (flask_app.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">flask</span> <span class="tok-kn">import</span> <span class="tok-n">Flask</span><span class="tok-p">,</span> <span class="tok-n">jsonify</span><span class="tok-p">,</span> <span class="tok-n">request</span>
+<span class="tok-kn">from</span> <span class="tok-nn">sqlalchemy</span> <span class="tok-kn">import</span> <span class="tok-n">create_engine</span>
+<span class="tok-kn">from</span> <span class="tok-nn">sqlalchemy.orm</span> <span class="tok-kn">import</span> <span class="tok-n">sessionmaker</span>
+
+<span class="tok-kn">import</span> <span class="tok-nn">config</span>
+<span class="tok-kn">import</span> <span class="tok-nn">model</span>
+<span class="tok-kn">import</span> <span class="tok-nn">orm</span>
+<span class="tok-kn">import</span> <span class="tok-nn">repository</span>
+
+
+<span class="tok-n">orm</span><span class="tok-o">.</span><span class="tok-n">start_mappers</span><span class="tok-p">()</span>
+<span class="tok-n">get_session</span> <span class="tok-o">=</span> <span class="tok-n">sessionmaker</span><span class="tok-p">(</span><span class="tok-n">bind</span><span class="tok-o">=</span><span class="tok-n">create_engine</span><span class="tok-p">(</span><span class="tok-n">config</span><span class="tok-o">.</span><span class="tok-n">get_postgres_uri</span><span class="tok-p">()))</span>
+<span class="tok-n">app</span> <span class="tok-o">=</span> <span class="tok-n">Flask</span><span class="tok-p">(</span><span class="tok-vm">__name__</span><span class="tok-p">)</span>
+
+<span class="tok-nd">@app.route</span><span class="tok-p">(</span><span class="tok-s2">"/allocate"</span><span class="tok-p">,</span> <span class="tok-n">methods</span><span class="tok-o">=</span><span class="tok-p">[</span><span class="tok-s1">'POST'</span><span class="tok-p">])</span>
+<span class="tok-k">def</span> <span class="tok-nf">allocate_endpoint</span><span class="tok-p">():</span>
+    <span class="tok-n">session</span> <span class="tok-o">=</span> <span class="tok-n">get_session</span><span class="tok-p">()</span>
+    <span class="tok-n">batches</span> <span class="tok-o">=</span> <span class="tok-n">repository</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyRepository</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">list</span><span class="tok-p">()</span>
+    <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span>
+        <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s1">'orderid'</span><span class="tok-p">],</span>
+        <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s1">'sku'</span><span class="tok-p">],</span>
+        <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s1">'qty'</span><span class="tok-p">],</span>
+    <span class="tok-p">)</span>
+
+    <span class="tok-n">batchref</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">)</span>
+
+    <span class="tok-k">return</span> <span class="tok-n">jsonify</span><span class="tok-p">({</span><span class="tok-s1">'batchref'</span><span class="tok-p">:</span> <span class="tok-n">batchref</span><span class="tok-p">}),</span> <span class="tok-mi">201</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>So far, so good. No need for too much more of your "architecture astronaut"
+nonsense, Bob and Harry, you may be thinking.</p>
+</div>
+<div class="paragraph">
+<p>But hang on a minute&#8212;&#8203;there&#8217;s no commit. We&#8217;re not actually saving our
+allocation to the database. Now we need a second test, either one that will
+inspect the database state after (not very black-boxy), or maybe one that
+checks that we can&#8217;t allocate a second line if a first should have already
+depleted the batch:</p>
+</div>
+<div id="second_api_test" class="exampleblock">
+<div class="title">Test allocations are persisted (test_api.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@pytest.mark.usefixtures</span><span class="tok-p">(</span><span class="tok-s1">'restart_api'</span><span class="tok-p">)</span>
+<span class="tok-k">def</span> <span class="tok-nf">test_allocations_are_persisted</span><span class="tok-p">(</span><span class="tok-n">add_stock</span><span class="tok-p">):</span>
+    <span class="tok-n">sku</span> <span class="tok-o">=</span> <span class="tok-n">random_sku</span><span class="tok-p">()</span>
+    <span class="tok-n">batch1</span><span class="tok-p">,</span> <span class="tok-n">batch2</span> <span class="tok-o">=</span> <span class="tok-n">random_batchref</span><span class="tok-p">(</span><span class="tok-mi">1</span><span class="tok-p">),</span> <span class="tok-n">random_batchref</span><span class="tok-p">(</span><span class="tok-mi">2</span><span class="tok-p">)</span>
+    <span class="tok-n">order1</span><span class="tok-p">,</span> <span class="tok-n">order2</span> <span class="tok-o">=</span> <span class="tok-n">random_orderid</span><span class="tok-p">(</span><span class="tok-mi">1</span><span class="tok-p">),</span> <span class="tok-n">random_orderid</span><span class="tok-p">(</span><span class="tok-mi">2</span><span class="tok-p">)</span>
+    <span class="tok-n">add_stock</span><span class="tok-p">([</span>
+        <span class="tok-p">(</span><span class="tok-n">batch1</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">,</span> <span class="tok-s1">'2011-01-01'</span><span class="tok-p">),</span>
+        <span class="tok-p">(</span><span class="tok-n">batch2</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">,</span> <span class="tok-s1">'2011-01-02'</span><span class="tok-p">),</span>
+    <span class="tok-p">])</span>
+    <span class="tok-n">line1</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s1">'orderid'</span><span class="tok-p">:</span> <span class="tok-n">order1</span><span class="tok-p">,</span> <span class="tok-s1">'sku'</span><span class="tok-p">:</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-s1">'qty'</span><span class="tok-p">:</span> <span class="tok-mi">10</span><span class="tok-p">}</span>
+    <span class="tok-n">line2</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s1">'orderid'</span><span class="tok-p">:</span> <span class="tok-n">order2</span><span class="tok-p">,</span> <span class="tok-s1">'sku'</span><span class="tok-p">:</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-s1">'qty'</span><span class="tok-p">:</span> <span class="tok-mi">10</span><span class="tok-p">}</span>
+    <span class="tok-n">url</span> <span class="tok-o">=</span> <span class="tok-n">config</span><span class="tok-o">.</span><span class="tok-n">get_api_url</span><span class="tok-p">()</span>
+
+    <span class="tok-c1"># first order uses up all stock in batch 1</span>
+    <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">post</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'{url}/allocate'</span><span class="tok-p">,</span> <span class="tok-n">json</span><span class="tok-o">=</span><span class="tok-n">line1</span><span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">status_code</span> <span class="tok-o">==</span> <span class="tok-mi">201</span>
+    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()[</span><span class="tok-s1">'batchref'</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-n">batch1</span>
+
+    <span class="tok-c1"># second order should go to batch 2</span>
+    <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">post</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'{url}/allocate'</span><span class="tok-p">,</span> <span class="tok-n">json</span><span class="tok-o">=</span><span class="tok-n">line2</span><span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">status_code</span> <span class="tok-o">==</span> <span class="tok-mi">201</span>
+    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()[</span><span class="tok-s1">'batchref'</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-n">batch2</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Not quite so lovely, but that will force us to add the commit.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_error_conditions_that_require_database_checks">Error Conditions That Require Database Checks</h3>
+<div class="paragraph">
+<p>If we keep going like this, though, things are going to get uglier and uglier.</p>
+</div>
+<div class="paragraph">
+<p>Suppose we want to add a bit of error handling. What if the domain raises an
+error, for a SKU that&#8217;s out of stock?  Or what about a SKU that doesn&#8217;t even
+exist? That&#8217;s not something the domain even knows about, nor should it. It&#8217;s
+more of a sanity check that we should implement at the database layer, before
+we even invoke the domain service.</p>
+</div>
+<div class="paragraph">
+<p>Now we&#8217;re looking at two more end-to-end tests:</p>
+</div>
+<div id="test_error_cases" class="exampleblock">
+<div class="title">Yet more tests at the E2E layer (test_api.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@pytest.mark.usefixtures</span><span class="tok-p">(</span><span class="tok-s1">'restart_api'</span><span class="tok-p">)</span>
+<span class="tok-k">def</span> <span class="tok-nf">test_400_message_for_out_of_stock</span><span class="tok-p">(</span><span class="tok-n">add_stock</span><span class="tok-p">):</span>  #<b class="conum">(1)</b>
+    <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">smalL_batch</span><span class="tok-p">,</span> <span class="tok-n">large_order</span> <span class="tok-o">=</span> <span class="tok-n">random_sku</span><span class="tok-p">(),</span> <span class="tok-n">random_batchref</span><span class="tok-p">(),</span> <span class="tok-n">random_orderid</span><span class="tok-p">()</span>
+    <span class="tok-n">add_stock</span><span class="tok-p">([</span>
+        <span class="tok-p">(</span><span class="tok-n">smalL_batch</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">,</span> <span class="tok-s1">'2011-01-01'</span><span class="tok-p">),</span>
+    <span class="tok-p">])</span>
+    <span class="tok-n">data</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s1">'orderid'</span><span class="tok-p">:</span> <span class="tok-n">large_order</span><span class="tok-p">,</span> <span class="tok-s1">'sku'</span><span class="tok-p">:</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-s1">'qty'</span><span class="tok-p">:</span> <span class="tok-mi">20</span><span class="tok-p">}</span>
+    <span class="tok-n">url</span> <span class="tok-o">=</span> <span class="tok-n">config</span><span class="tok-o">.</span><span class="tok-n">get_api_url</span><span class="tok-p">()</span>
+    <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">post</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'{url}/allocate'</span><span class="tok-p">,</span> <span class="tok-n">json</span><span class="tok-o">=</span><span class="tok-n">data</span><span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">status_code</span> <span class="tok-o">==</span> <span class="tok-mi">400</span>
+    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()[</span><span class="tok-s1">'message'</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-n">f</span><span class="tok-s1">'Out of stock for sku {sku}'</span>
+
+
+<span class="tok-nd">@pytest.mark.usefixtures</span><span class="tok-p">(</span><span class="tok-s1">'restart_api'</span><span class="tok-p">)</span>
+<span class="tok-k">def</span> <span class="tok-nf">test_400_message_for_invalid_sku</span><span class="tok-p">():</span>  #<b class="conum">(2)</b>
+    <span class="tok-n">unknown_sku</span><span class="tok-p">,</span> <span class="tok-n">orderid</span> <span class="tok-o">=</span> <span class="tok-n">random_sku</span><span class="tok-p">(),</span> <span class="tok-n">random_orderid</span><span class="tok-p">()</span>
+    <span class="tok-n">data</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s1">'orderid'</span><span class="tok-p">:</span> <span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-s1">'sku'</span><span class="tok-p">:</span> <span class="tok-n">unknown_sku</span><span class="tok-p">,</span> <span class="tok-s1">'qty'</span><span class="tok-p">:</span> <span class="tok-mi">20</span><span class="tok-p">}</span>
+    <span class="tok-n">url</span> <span class="tok-o">=</span> <span class="tok-n">config</span><span class="tok-o">.</span><span class="tok-n">get_api_url</span><span class="tok-p">()</span>
+    <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">post</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'{url}/allocate'</span><span class="tok-p">,</span> <span class="tok-n">json</span><span class="tok-o">=</span><span class="tok-n">data</span><span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">status_code</span> <span class="tok-o">==</span> <span class="tok-mi">400</span>
+    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()[</span><span class="tok-s1">'message'</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-n">f</span><span class="tok-s1">'Invalid sku {unknown_sku}'</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>In the first test, we&#8217;re trying to allocate more units than we have in stock.</p>
+</li>
+<li>
+<p>In the second, the SKU just doesn&#8217;t exist (because we never called <code>add_stock</code>),
+so it&#8217;s invalid as far as our app is concerned.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>And sure, we could implement it in the Flask app too:</p>
+</div>
+<div id="flask_error_handling" class="exampleblock">
+<div class="title">Flask app starting to get crufty (flask_app.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">is_valid_sku</span><span class="tok-p">(</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">):</span>
+    <span class="tok-k">return</span> <span class="tok-n">sku</span> <span class="tok-ow">in</span> <span class="tok-p">{</span><span class="tok-n">b</span><span class="tok-o">.</span><span class="tok-n">sku</span> <span class="tok-k">for</span> <span class="tok-n">b</span> <span class="tok-ow">in</span> <span class="tok-n">batches</span><span class="tok-p">}</span>
+
+<span class="tok-nd">@app.route</span><span class="tok-p">(</span><span class="tok-s2">"/allocate"</span><span class="tok-p">,</span> <span class="tok-n">methods</span><span class="tok-o">=</span><span class="tok-p">[</span><span class="tok-s1">'POST'</span><span class="tok-p">])</span>
+<span class="tok-k">def</span> <span class="tok-nf">allocate_endpoint</span><span class="tok-p">():</span>
+    <span class="tok-n">session</span> <span class="tok-o">=</span> <span class="tok-n">get_session</span><span class="tok-p">()</span>
+    <span class="tok-n">batches</span> <span class="tok-o">=</span> <span class="tok-n">repository</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyRepository</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">list</span><span class="tok-p">()</span>
+    <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span>
+        <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s1">'orderid'</span><span class="tok-p">],</span>
+        <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s1">'sku'</span><span class="tok-p">],</span>
+        <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s1">'qty'</span><span class="tok-p">],</span>
+    <span class="tok-p">)</span>
+
+    <span class="tok-k">if</span> <span class="tok-ow">not</span> <span class="tok-n">is_valid_sku</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">):</span>
+        <span class="tok-k">return</span> <span class="tok-n">jsonify</span><span class="tok-p">({</span><span class="tok-s1">'message'</span><span class="tok-p">:</span> <span class="tok-n">f</span><span class="tok-s1">'Invalid sku {line.sku}'</span><span class="tok-p">}),</span> <span class="tok-mi">400</span>
+
+    <span class="tok-k">try</span><span class="tok-p">:</span>
+        <span class="tok-n">batchref</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">)</span>
+    <span class="tok-k">except</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OutOfStock</span> <span class="tok-k">as</span> <span class="tok-n">e</span><span class="tok-p">:</span>
+        <span class="tok-k">return</span> <span class="tok-n">jsonify</span><span class="tok-p">({</span><span class="tok-s1">'message'</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">(</span><span class="tok-n">e</span><span class="tok-p">)}),</span> <span class="tok-mi">400</span>
+
+    <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span>
+    <span class="tok-k">return</span> <span class="tok-n">jsonify</span><span class="tok-p">({</span><span class="tok-s1">'batchref'</span><span class="tok-p">:</span> <span class="tok-n">batchref</span><span class="tok-p">}),</span> <span class="tok-mi">201</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>But our Flask app is starting to look a bit unwieldy.  And our number of
+E2E tests is starting to get out of control, and soon we&#8217;ll end up with an
+inverted test pyramid (or "ice-cream cone model," as Bob likes to call it).</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_introducing_a_service_layer_and_using_fakerepository_to_unit_test_it">Introducing a Service Layer, and Using FakeRepository to Unit Test It</h3>
+<div class="paragraph">
+<p>If we look at what our Flask app is doing, there&#8217;s quite a lot of what we
+might call <em>orchestration</em>&#8212;fetching stuff out of our repository, validating
+our input against database state, handling errors, and committing in the
+happy path. Most of these things don&#8217;t have anything to do with having a
+web API endpoint (you&#8217;d need them if you were building a CLI, for example; see
+<a href="/book/appendix_csvs.html">[appendix_csvs]</a>), and they&#8217;re not really things that need to be tested by
+end-to-end tests.</p>
+</div>
+<div class="paragraph">
+<p>It often makes sense to split out a service layer, sometimes called an
+<em>orchestration layer</em> or a <em>use-case layer</em>.</p>
+</div>
+<div class="paragraph">
+<p>Do you remember the <code>FakeRepository</code> that we prepared in <a href="/book/chapter_03_abstractions.html">[chapter_03_abstractions]</a>?</p>
+</div>
+<div id="fake_repo" class="exampleblock">
+<div class="title">Our fake repository, an in-memory collection of batches (test_services.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">FakeRepository</span><span class="tok-p">(</span><span class="tok-n">repository</span><span class="tok-o">.</span><span class="tok-n">AbstractRepository</span><span class="tok-p">):</span>
+
+    <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_batches</span> <span class="tok-o">=</span> <span class="tok-nb">set</span><span class="tok-p">(</span><span class="tok-n">batches</span><span class="tok-p">)</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">add</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">batch</span><span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_batches</span><span class="tok-o">.</span><span class="tok-n">add</span><span class="tok-p">(</span><span class="tok-n">batch</span><span class="tok-p">)</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">get</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">reference</span><span class="tok-p">):</span>
+        <span class="tok-k">return</span> <span class="tok-nb">next</span><span class="tok-p">(</span><span class="tok-n">b</span> <span class="tok-k">for</span> <span class="tok-n">b</span> <span class="tok-ow">in</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_batches</span> <span class="tok-k">if</span> <span class="tok-n">b</span><span class="tok-o">.</span><span class="tok-n">reference</span> <span class="tok-o">==</span> <span class="tok-n">reference</span><span class="tok-p">)</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">list</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
+        <span class="tok-k">return</span> <span class="tok-nb">list</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_batches</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s where it will come in useful; it lets us test our service layer with
+nice, fast unit tests:</p>
+</div>
+<div id="first_services_tests" class="exampleblock">
+<div class="title">Unit testing with fakes at the service layer (test_services.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_returns_allocation</span><span class="tok-p">():</span>
+    <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s2">"o1"</span><span class="tok-p">,</span> <span class="tok-s2">"COMPLICATED-LAMP"</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">)</span>
+    <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"b1"</span><span class="tok-p">,</span> <span class="tok-s2">"COMPLICATED-LAMP"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-bp">None</span><span class="tok-p">)</span>
+    <span class="tok-n">repo</span> <span class="tok-o">=</span> <span class="tok-n">FakeRepository</span><span class="tok-p">([</span><span class="tok-n">batch</span><span class="tok-p">])</span>  #<b class="conum">(1)</b>
+
+    <span class="tok-n">result</span> <span class="tok-o">=</span> <span class="tok-n">services</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">,</span> <span class="tok-n">repo</span><span class="tok-p">,</span> <span class="tok-n">FakeSession</span><span class="tok-p">())</span>  #<b class="conum">(2)</b> <b class="conum">(3)</b>
+    <span class="tok-k">assert</span> <span class="tok-n">result</span> <span class="tok-o">==</span> <span class="tok-s2">"b1"</span>
+
+
+<span class="tok-k">def</span> <span class="tok-nf">test_error_for_invalid_sku</span><span class="tok-p">():</span>
+    <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s2">"o1"</span><span class="tok-p">,</span> <span class="tok-s2">"NONEXISTENTSKU"</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">)</span>
+    <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"b1"</span><span class="tok-p">,</span> <span class="tok-s2">"AREALSKU"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-bp">None</span><span class="tok-p">)</span>
+    <span class="tok-n">repo</span> <span class="tok-o">=</span> <span class="tok-n">FakeRepository</span><span class="tok-p">([</span><span class="tok-n">batch</span><span class="tok-p">])</span>  #<b class="conum">(1)</b>
+
+    <span class="tok-k">with</span> <span class="tok-n">pytest</span><span class="tok-o">.</span><span class="tok-n">raises</span><span class="tok-p">(</span><span class="tok-n">services</span><span class="tok-o">.</span><span class="tok-n">InvalidSku</span><span class="tok-p">,</span> <span class="tok-n">match</span><span class="tok-o">=</span><span class="tok-s2">"Invalid sku NONEXISTENTSKU"</span><span class="tok-p">):</span>
+        <span class="tok-n">services</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">,</span> <span class="tok-n">repo</span><span class="tok-p">,</span> <span class="tok-n">FakeSession</span><span class="tok-p">())</span>  #<b class="conum">(2)</b> <b class="conum">(3)</b></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p><code>FakeRepository</code> holds the <code>Batch</code> objects that will be used by our test.</p>
+</li>
+<li>
+<p>Our services module (<em>services.py</em>) will define an <code>allocate()</code>
+service-layer function. It will sit between our <code>allocate_endpoint()</code>
+function in the API layer and the <code>allocate()</code> domain service function from
+our domain model.<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup></p>
+</li>
+<li>
+<p>We also need a <code>FakeSession</code> to fake out the database session, as shown in the following code snippet.</p>
+</li>
+</ol>
+</div>
+<div id="fake_session" class="exampleblock">
+<div class="title">A fake database session (test_services.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">FakeSession</span><span class="tok-p">():</span>
+    <span class="tok-n">committed</span> <span class="tok-o">=</span> <span class="tok-bp">False</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">commit</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">committed</span> <span class="tok-o">=</span> <span class="tok-bp">True</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This fake session is only a temporary solution.  We&#8217;ll get rid of it and make
+things even nicer soon, in <a href="/book/chapter_06_uow.html">[chapter_06_uow]</a>. But in the meantime
+the fake <code>.commit()</code> lets us migrate a third test from the E2E layer:</p>
+</div>
+<div id="second_services_test" class="exampleblock">
+<div class="title">A second test at the service layer (test_services.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_commits</span><span class="tok-p">():</span>
+    <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s1">'o1'</span><span class="tok-p">,</span> <span class="tok-s1">'OMINOUS-MIRROR'</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">)</span>
+    <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s1">'b1'</span><span class="tok-p">,</span> <span class="tok-s1">'OMINOUS-MIRROR'</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-bp">None</span><span class="tok-p">)</span>
+    <span class="tok-n">repo</span> <span class="tok-o">=</span> <span class="tok-n">FakeRepository</span><span class="tok-p">([</span><span class="tok-n">batch</span><span class="tok-p">])</span>
+    <span class="tok-n">session</span> <span class="tok-o">=</span> <span class="tok-n">FakeSession</span><span class="tok-p">()</span>
+
+    <span class="tok-n">services</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">,</span> <span class="tok-n">repo</span><span class="tok-p">,</span> <span class="tok-n">session</span><span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">committed</span> <span class="tok-ow">is</span> <span class="tok-bp">True</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_a_typical_service_function">A Typical Service Function</h4>
+<div class="paragraph">
+<p>We&#8217;ll write a service function that looks something like this:</p>
+</div>
+<div id="service_function" class="exampleblock">
+<div class="title">Basic allocation service (services.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">InvalidSku</span><span class="tok-p">(</span><span class="tok-ne">Exception</span><span class="tok-p">):</span>
+    <span class="tok-k">pass</span>
+
+
+<span class="tok-k">def</span> <span class="tok-nf">is_valid_sku</span><span class="tok-p">(</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">):</span>
+    <span class="tok-k">return</span> <span class="tok-n">sku</span> <span class="tok-ow">in</span> <span class="tok-p">{</span><span class="tok-n">b</span><span class="tok-o">.</span><span class="tok-n">sku</span> <span class="tok-k">for</span> <span class="tok-n">b</span> <span class="tok-ow">in</span> <span class="tok-n">batches</span><span class="tok-p">}</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">:</span> <span class="tok-n">OrderLine</span><span class="tok-p">,</span> <span class="tok-n">repo</span><span class="tok-p">:</span> <span class="tok-n">AbstractRepository</span><span class="tok-p">,</span> <span class="tok-n">session</span><span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-nb">str</span><span class="tok-p">:</span>
+    <span class="tok-n">batches</span> <span class="tok-o">=</span> <span class="tok-n">repo</span><span class="tok-o">.</span><span class="tok-n">list</span><span class="tok-p">()</span>  #<b class="conum">(1)</b>
+    <span class="tok-k">if</span> <span class="tok-ow">not</span> <span class="tok-n">is_valid_sku</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">):</span>  #<b class="conum">(2)</b>
+        <span class="tok-k">raise</span> <span class="tok-n">InvalidSku</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'Invalid sku {line.sku}'</span><span class="tok-p">)</span>
+    <span class="tok-n">batchref</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">)</span>  #<b class="conum">(3)</b>
+    <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span>  #<b class="conum">(4)</b>
+    <span class="tok-k">return</span> <span class="tok-n">batchref</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Typical service-layer functions have similar steps:</p>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>We fetch some objects from the repository.</p>
+</li>
+<li>
+<p>We make some checks or assertions about the request against
+the current state of the world.</p>
+</li>
+<li>
+<p>We call a domain service.</p>
+</li>
+<li>
+<p>If all is well, we save/update any state we&#8217;ve changed.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>That last step is a little unsatisfactory at the moment, as our service
+layer is tightly coupled to our database layer. We&#8217;ll improve
+that in <a href="/book/chapter_06_uow.html">[chapter_06_uow]</a> with the Unit of Work pattern.</p>
+</div>
+<div id="depend_on_abstractions" class="sidebarblock nobreakinside less_space">
+<div class="content">
+<div class="title">Depend on Abstractions</div>
+<div class="paragraph">
+<p>Notice one more thing about our service-layer function:</p>
+</div>
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">:</span> <span class="tok-n">OrderLine</span><span class="tok-p">,</span> <span class="tok-n">repo</span><span class="tok-p">:</span> <span class="tok-n">AbstractRepository</span><span class="tok-p">,</span> <span class="tok-n">session</span><span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-nb">str</span><span class="tok-p">:</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It depends on a repository.  We&#8217;ve chosen to make the dependency explicit,
+and we&#8217;ve used the type hint to say that we depend on <code>AbstractRepository</code>.
+This means it&#8217;ll work both when the tests give it a <code>FakeRepository</code> and
+when the Flask app gives it a <code>SqlAlchemyRepository</code>.</p>
+</div>
+<div class="paragraph">
+<p>If you remember <a href="/book/introduction.html#dip">[dip]</a>,
+this is what we mean when we say we should "depend on abstractions." Our
+<em>high-level module</em>, the service layer, depends on the repository abstraction.
+And the <em>details</em> of the implementation for our specific choice of persistent
+storage also depend on that same abstraction. See Figures <a data-type="xref" href="#service_layer_diagram_abstract_dependencies" data-xrefstyle="select:labelnumber">#service_layer_diagram_abstract_dependencies</a> and <a data-type="xref" href="#service_layer_diagram_test_dependencies" data-xrefstyle="select:labelnumber">#service_layer_diagram_test_dependencies</a>.</p>
+</div>
+<div class="paragraph">
+<p>See also in <a href="/book/appendix_csvs.html">[appendix_csvs]</a> a worked example of swapping out the
+<em>details</em> of which persistent storage system to use while leaving the
+abstractions intact.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>But the essentials of the service layer are there, and our Flask
+app now looks a lot cleaner:</p>
+</div>
+<div id="flask_app_using_service_layer" class="exampleblock">
+<div class="title">Flask app delegating to service layer (flask_app.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@app.route</span><span class="tok-p">(</span><span class="tok-s2">"/allocate"</span><span class="tok-p">,</span> <span class="tok-n">methods</span><span class="tok-o">=</span><span class="tok-p">[</span><span class="tok-s1">'POST'</span><span class="tok-p">])</span>
+<span class="tok-k">def</span> <span class="tok-nf">allocate_endpoint</span><span class="tok-p">():</span>
+    <span class="tok-n">session</span> <span class="tok-o">=</span> <span class="tok-n">get_session</span><span class="tok-p">()</span>  #<b class="conum">(1)</b>
+    <span class="tok-n">repo</span> <span class="tok-o">=</span> <span class="tok-n">repository</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyRepository</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">)</span>  #<b class="conum">(1)</b>
+    <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span>
+        <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s1">'orderid'</span><span class="tok-p">],</span>  #<b class="conum">(2)</b>
+        <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s1">'sku'</span><span class="tok-p">],</span>  #<b class="conum">(2)</b>
+        <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s1">'qty'</span><span class="tok-p">],</span>  #<b class="conum">(2)</b>
+    <span class="tok-p">)</span>
+    <span class="tok-k">try</span><span class="tok-p">:</span>
+        <span class="tok-n">batchref</span> <span class="tok-o">=</span> <span class="tok-n">services</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">,</span> <span class="tok-n">repo</span><span class="tok-p">,</span> <span class="tok-n">session</span><span class="tok-p">)</span>  #<b class="conum">(2)</b>
+    <span class="tok-k">except</span> <span class="tok-p">(</span><span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OutOfStock</span><span class="tok-p">,</span> <span class="tok-n">services</span><span class="tok-o">.</span><span class="tok-n">InvalidSku</span><span class="tok-p">)</span> <span class="tok-k">as</span> <span class="tok-n">e</span><span class="tok-p">:</span>
+        <span class="tok-k">return</span> <span class="tok-n">jsonify</span><span class="tok-p">({</span><span class="tok-s1">'message'</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">(</span><span class="tok-n">e</span><span class="tok-p">)}),</span> <span class="tok-mi">400</span>  <b class="conum">(3)</b>
+
+    <span class="tok-k">return</span> <span class="tok-n">jsonify</span><span class="tok-p">({</span><span class="tok-s1">'batchref'</span><span class="tok-p">:</span> <span class="tok-n">batchref</span><span class="tok-p">}),</span> <span class="tok-mi">201</span>  <b class="conum">(3)</b></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>We instantiate a database session and some repository objects.</p>
+</li>
+<li>
+<p>We extract the user&#8217;s commands from the web request and pass them
+to a domain service.</p>
+</li>
+<li>
+<p>We return some JSON responses with the appropriate status codes.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The responsibilities of the Flask app are just standard web stuff: per-request
+session management, parsing information out of POST parameters, response status
+codes, and JSON. All the orchestration logic is in the use case/service layer,
+and the domain logic stays in the domain.</p>
+</div>
+<div class="paragraph">
+<p>Finally, we can confidently strip down our E2E tests to just two, one for
+the happy path and one for the unhappy path:</p>
+</div>
+<div id="fewer_e2e_tests" class="exampleblock">
+<div class="title">E2E tests only happy and unhappy paths (test_api.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@pytest.mark.usefixtures</span><span class="tok-p">(</span><span class="tok-s1">'restart_api'</span><span class="tok-p">)</span>
+<span class="tok-k">def</span> <span class="tok-nf">test_happy_path_returns_201_and_allocated_batch</span><span class="tok-p">(</span><span class="tok-n">add_stock</span><span class="tok-p">):</span>
+    <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">othersku</span> <span class="tok-o">=</span> <span class="tok-n">random_sku</span><span class="tok-p">(),</span> <span class="tok-n">random_sku</span><span class="tok-p">(</span><span class="tok-s1">'other'</span><span class="tok-p">)</span>
+    <span class="tok-n">earlybatch</span> <span class="tok-o">=</span> <span class="tok-n">random_batchref</span><span class="tok-p">(</span><span class="tok-mi">1</span><span class="tok-p">)</span>
+    <span class="tok-n">laterbatch</span> <span class="tok-o">=</span> <span class="tok-n">random_batchref</span><span class="tok-p">(</span><span class="tok-mi">2</span><span class="tok-p">)</span>
+    <span class="tok-n">otherbatch</span> <span class="tok-o">=</span> <span class="tok-n">random_batchref</span><span class="tok-p">(</span><span class="tok-mi">3</span><span class="tok-p">)</span>
+    <span class="tok-n">add_stock</span><span class="tok-p">([</span>
+        <span class="tok-p">(</span><span class="tok-n">laterbatch</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-s1">'2011-01-02'</span><span class="tok-p">),</span>
+        <span class="tok-p">(</span><span class="tok-n">earlybatch</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-s1">'2011-01-01'</span><span class="tok-p">),</span>
+        <span class="tok-p">(</span><span class="tok-n">otherbatch</span><span class="tok-p">,</span> <span class="tok-n">othersku</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">),</span>
+    <span class="tok-p">])</span>
+    <span class="tok-n">data</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s1">'orderid'</span><span class="tok-p">:</span> <span class="tok-n">random_orderid</span><span class="tok-p">(),</span> <span class="tok-s1">'sku'</span><span class="tok-p">:</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-s1">'qty'</span><span class="tok-p">:</span> <span class="tok-mi">3</span><span class="tok-p">}</span>
+    <span class="tok-n">url</span> <span class="tok-o">=</span> <span class="tok-n">config</span><span class="tok-o">.</span><span class="tok-n">get_api_url</span><span class="tok-p">()</span>
+    <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">post</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'{url}/allocate'</span><span class="tok-p">,</span> <span class="tok-n">json</span><span class="tok-o">=</span><span class="tok-n">data</span><span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">status_code</span> <span class="tok-o">==</span> <span class="tok-mi">201</span>
+    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()[</span><span class="tok-s1">'batchref'</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-n">earlybatch</span>
+
+
+<span class="tok-nd">@pytest.mark.usefixtures</span><span class="tok-p">(</span><span class="tok-s1">'restart_api'</span><span class="tok-p">)</span>
+<span class="tok-k">def</span> <span class="tok-nf">test_unhappy_path_returns_400_and_error_message</span><span class="tok-p">():</span>
+    <span class="tok-n">unknown_sku</span><span class="tok-p">,</span> <span class="tok-n">orderid</span> <span class="tok-o">=</span> <span class="tok-n">random_sku</span><span class="tok-p">(),</span> <span class="tok-n">random_orderid</span><span class="tok-p">()</span>
+    <span class="tok-n">data</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s1">'orderid'</span><span class="tok-p">:</span> <span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-s1">'sku'</span><span class="tok-p">:</span> <span class="tok-n">unknown_sku</span><span class="tok-p">,</span> <span class="tok-s1">'qty'</span><span class="tok-p">:</span> <span class="tok-mi">20</span><span class="tok-p">}</span>
+    <span class="tok-n">url</span> <span class="tok-o">=</span> <span class="tok-n">config</span><span class="tok-o">.</span><span class="tok-n">get_api_url</span><span class="tok-p">()</span>
+    <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">post</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'{url}/allocate'</span><span class="tok-p">,</span> <span class="tok-n">json</span><span class="tok-o">=</span><span class="tok-n">data</span><span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">status_code</span> <span class="tok-o">==</span> <span class="tok-mi">400</span>
+    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()[</span><span class="tok-s1">'message'</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-n">f</span><span class="tok-s1">'Invalid sku {unknown_sku}'</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>We&#8217;ve successfully split our tests into two broad categories: tests about web
+stuff, which we implement end to end; and tests about orchestration stuff, which
+we can test against the service layer in memory.</p>
+</div>
+<div class="sidebarblock nobreakinside less_space">
+<div class="content">
+<div class="title">Exercise for the Reader</div>
+<div class="paragraph">
+<p>Now that we have an allocate service, why not build out a service for
+<code>deallocate</code>? We&#8217;ve added <a href="https://github.com/cosmicpython/code/tree/chapter_04_service_layer_exercise">an E2E test and a few stub service-layer tests</a> for
+you to get started on GitHub.</p>
+</div>
+<div class="paragraph">
+<p>If that&#8217;s not enough, continue into the E2E tests and <em>flask_app.py</em>, and
+refactor the Flask adapter to be more RESTful. Notice how doing so doesn&#8217;t
+require any change to our service layer or domain layer!</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+If you decide you want to build a read-only endpoint for retrieving allocation
+    info, just do "the simplest thing that can possibly work," which is
+    <code>repo.get()</code> right in the Flask handler. We&#8217;ll talk more about reads versus
+    writes in <a href="/book/chapter_12_cqrs.html">[chapter_12_cqrs]</a>.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="why_is_everything_a_service">Why Is Everything Called a Service?</h3>
+<div class="paragraph">
+<p>Some of you are probably scratching your heads at this point trying to figure
+out exactly what the difference is between a domain service and a service layer.</p>
+</div>
+<div class="paragraph">
+<p>We&#8217;re sorry&#8212;we didn&#8217;t choose the names, or we&#8217;d have much cooler and friendlier
+ways to talk about this stuff.</p>
+</div>
+<div class="paragraph">
+<p>We&#8217;re using two things called a <em>service</em> in this chapter. The first is an
+<em>application service</em> (our service layer). Its job is to handle requests from the
+outside world and to <em>orchestrate</em> an operation. What we mean is that the
+service layer <em>drives</em> the application by following a bunch of simple steps:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Get some data from the database</p>
+</li>
+<li>
+<p>Update the domain model</p>
+</li>
+<li>
+<p>Persist any changes</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This is the kind of boring work that has to happen for every operation in your
+system, and keeping it separate from business logic helps to keep things tidy.</p>
+</div>
+<div class="paragraph">
+<p>The second type of service is a <em>domain service</em>. This is the name for a piece of
+logic that belongs in the domain model but doesn&#8217;t sit naturally inside a
+stateful entity or value object. For example, if you were building a shopping
+cart application, you might choose to build taxation rules as a domain service.
+Calculating tax is a separate job from updating the cart, and it&#8217;s an important
+part of the model, but it doesn&#8217;t seem right to have a persisted entity for
+the job. Instead a stateless TaxCalculator class or a <code>calculate_tax</code> function
+can do the job.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_putting_things_in_folders_to_see_where_it_all_belongs">Putting Things in Folders to See Where It All Belongs</h3>
+<div class="paragraph">
+<p>As our application gets bigger, we&#8217;ll need to keep tidying our directory
+structure. The layout of our project gives us useful hints about what kinds of
+object we&#8217;ll find in each file.</p>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s one way we could organize things:</p>
+</div>
+<div id="nested_folder_tree" class="exampleblock">
+<div class="title">Some subfolders</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="text"><span></span>.
+&#9500;&#9472;&#9472; config.py
+&#9500;&#9472;&#9472; domain  #<b class="conum">(1)</b>
+&#9474;&#160;&#160; &#9500;&#9472;&#9472; __init__.py
+&#9474;&#160;&#160; &#9492;&#9472;&#9472; model.py
+&#9500;&#9472;&#9472; service_layer  #<b class="conum">(2)</b>
+&#9474;&#160;&#160; &#9500;&#9472;&#9472; __init__.py
+&#9474;&#160;&#160; &#9492;&#9472;&#9472; services.py
+&#9500;&#9472;&#9472; adapters  #<b class="conum">(3)</b>
+&#9474;&#160;&#160; &#9500;&#9472;&#9472; __init__.py
+&#9474;&#160;&#160; &#9500;&#9472;&#9472; orm.py
+&#9474;&#160;&#160; &#9492;&#9472;&#9472; repository.py
+&#9500;&#9472;&#9472; entrypoints  <b class="conum">(4)</b>
+&#9474;&#160;&#160; &#9500;&#9472;&#9472; __init__.py
+&#9474;&#160;&#160; &#9492;&#9472;&#9472; flask_app.py
+&#9492;&#9472;&#9472; tests
+    &#9500;&#9472;&#9472; __init__.py
+    &#9500;&#9472;&#9472; conftest.py
+    &#9500;&#9472;&#9472; unit
+    &#9474;   &#9500;&#9472;&#9472; test_allocate.py
+    &#9474;   &#9500;&#9472;&#9472; test_batches.py
+    &#9474;   &#9492;&#9472;&#9472; test_services.py
+    &#9500;&#9472;&#9472; integration
+    &#9474;&#160;&#160; &#9500;&#9472;&#9472; test_orm.py
+    &#9474;&#160;&#160; &#9492;&#9472;&#9472; test_repository.py
+    &#9492;&#9472;&#9472; e2e
+     &#160;&#160; &#9492;&#9472;&#9472; test_api.py</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Let&#8217;s have a folder for our domain model.  Currently that&#8217;s just one file,
+but for a more complex application, you might have one file per class; you
+might have helper parent classes for <code>Entity</code>, <code>ValueObject</code>, and
+<code>Aggregate</code>, and you might add an <em>exceptions.py</em> for domain-layer exceptions
+and, as you&#8217;ll see in <a href="/book/part2.html">[part2]</a>, <span class="keep-together"><em>commands.py</em></span> and <em>events.py</em>.</p>
+</li>
+<li>
+<p>We&#8217;ll distinguish the service layer. Currently that&#8217;s just one file
+called <em>services.py</em> for our service-layer functions.  You could
+add service-layer exceptions here, and as you&#8217;ll see in <a href="/book/chapter_05_high_gear_low_gear.html">[chapter_05_high_gear_low_gear]</a>, we&#8217;ll add <em>unit_of_work.py</em>.</p>
+</li>
+<li>
+<p><em>Adapters</em> is a nod to the ports and adapters terminology. This will fill
+up with any other abstractions around external I/O (e.g., a <em>redis_client.py</em>).
+Strictly speaking, you would call these <em>secondary</em> adapters or <em>driven</em>
+adapters, or sometimes <em>inward-facing</em> adapters.</p>
+</li>
+<li>
+<p>Entrypoints are the places we drive our application from. In the
+official ports and adapters terminology, these are adapters too, and are
+referred to as <em>primary</em>, <em>driving</em>, or <em>outward-facing</em> adapters.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>What about ports?  As you may remember, they are the abstract interfaces that the
+adapters implement. We tend to keep them in the same file as the adapters that
+implement them.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_wrap_up">Wrap-Up</h3>
+<div class="paragraph">
+<p>Adding the service layer has really bought us quite a lot:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Our Flask API endpoints become very thin and easy to write: their
+only responsibility is doing "web stuff," such as parsing JSON
+and producing the right HTTP codes for happy or unhappy cases.</p>
+</li>
+<li>
+<p>We&#8217;ve defined a clear API for our domain, a set of use cases or
+entrypoints that can be used by any adapter without needing to know anything
+about our domain model classes&#8212;&#8203;whether that&#8217;s an API, a CLI (see
+<a href="/book/appendix_csvs.html">[appendix_csvs]</a>), or the tests! They&#8217;re an adapter for our domain too.</p>
+</li>
+<li>
+<p>We can write tests in "high gear" by using the service layer, leaving us
+free to refactor the domain model in any way we see fit. As long as
+we can still deliver the same use cases, we can experiment with new
+designs without needing to rewrite a load of tests.</p>
+</li>
+<li>
+<p>And our test pyramid is looking good&#8212;&#8203;the bulk of our tests
+are fast unit tests, with just the bare minimum of E2E and integration
+tests.</p>
+</li>
+</ul>
+</div>
+<div class="sect3">
+<h4 id="_the_dip_in_action">The DIP in Action</h4>
+<div class="paragraph">
+<p><a href="#service_layer_diagram_abstract_dependencies">Abstract dependencies of the service layer</a> shows the
+dependencies of our service layer: the domain model
+and <code>AbstractRepository</code> (the port, in ports and adapters terminology).</p>
+</div>
+<div class="paragraph">
+<p>When we run the tests, <a href="#service_layer_diagram_test_dependencies">Tests provide an implementation of the abstract dependency</a> shows
+how we implement the abstract dependencies by using <code>FakeRepository</code> (the
+adapter).</p>
+</div>
+<div class="paragraph">
+<p>And when we actually run our app, we swap in the "real" dependency shown in
+<a href="#service_layer_diagram_runtime_dependencies">Dependencies at runtime</a>.</p>
+</div>
+<div id="service_layer_diagram_abstract_dependencies" class="imageblock width-75">
+<div class="content">
+<img src="images/apwp_0403.png" alt="apwp 0403">
+</div>
+<div class="title">Figure 3. Abstract dependencies of the service layer</div>
+</div>
+<div class="listingblock image-source">
+<div class="content">
+<pre>[ditaa, apwp_0403]
+        +-----------------------------+
+        |         Service Layer       |
+        +-----------------------------+
+           |                   |
+           |                   | depends on abstraction
+           V                   V
++------------------+     +--------------------+
+|   Domain Model   |     | AbstractRepository |
+|                  |     |       (Port)       |
++------------------+     +--------------------+</pre>
+</div>
+</div>
+<div id="service_layer_diagram_test_dependencies" class="imageblock width-75">
+<div class="content">
+<img src="images/apwp_0404.png" alt="apwp 0404">
+</div>
+<div class="title">Figure 4. Tests provide an implementation of the abstract dependency</div>
+</div>
+<div class="listingblock image-source">
+<div class="content">
+<pre>[ditaa, apwp_0404]
+        +-----------------------------+
+        |           Tests             |-------------\
+        +-----------------------------+             |
+                       |                            |
+                       V                            |
+        +-----------------------------+             |
+        |         Service Layer       |    provides |
+        +-----------------------------+             |
+           |                     |                  |
+           V                     V                  |
++------------------+     +--------------------+     |
+|   Domain Model   |     | AbstractRepository |     |
++------------------+     +--------------------+     |
+                                    ^               |
+                         implements |               |
+                                    |               |
+                         +----------------------+   |
+                         |    FakeRepository    |&lt;--/
+                         |     (in&#8211;memory)      |
+                         +----------------------+</pre>
+</div>
+</div>
+<div id="service_layer_diagram_runtime_dependencies" class="imageblock width-75">
+<div class="content">
+<img src="images/apwp_0405.png" alt="apwp 0405">
+</div>
+<div class="title">Figure 5. Dependencies at runtime</div>
+</div>
+<div class="listingblock image-source">
+<div class="content">
+<pre>[ditaa, apwp_0405]
+       +--------------------------------+
+       | Flask API (Presentation Layer) |-----------\
+       +--------------------------------+           |
+                       |                            |
+                       V                            |
+        +-----------------------------+             |
+        |         Service Layer       |             |
+        +-----------------------------+             |
+           |                     |                  |
+           V                     V                  |
++------------------+     +--------------------+     |
+|   Domain Model   |     | AbstractRepository |     |
++------------------+     +--------------------+     |
+              ^                     ^               |
+              |                     |               |
+       gets   |          +----------------------+   |
+       model  |          | SqlAlchemyRepository |&lt;--/
+   definitions|          +----------------------+
+       from   |                | uses
+              |                V
+           +-----------------------+
+           |          ORM          |
+           | (another abstraction) |
+           +-----------------------+
+                       |
+                       | talks to
+                       V
+           +------------------------+
+           |       Database         |
+           +------------------------+</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Wonderful.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s pause for <a href="#chapter_04_service_layer_tradeoffs">Service layer: the trade-offs</a>,
+in which we consider the pros and cons of having a service layer at all.</p>
+</div>
+<table id="chapter_04_service_layer_tradeoffs" class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. Service layer: the trade-offs</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Pros</th>
+<th class="tableblock halign-left valign-top">Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="ulist">
+<ul>
+<li>
+<p>We have a single place to capture all the use cases for our application.</p>
+</li>
+<li>
+<p>We&#8217;ve placed our clever domain logic behind an API, which leaves us free to
+refactor.</p>
+</li>
+<li>
+<p>We have cleanly separated "stuff that talks HTTP" from "stuff that talks
+allocation."</p>
+</li>
+<li>
+<p>When combined with the Repository pattern and <code>FakeRepository</code>, we have
+a nice way of writing tests at a higher level than the domain layer;
+we can test more of our workflow without needing to use integration tests
+(read on to <a href="/book/chapter_05_high_gear_low_gear.html">[chapter_05_high_gear_low_gear]</a> for more elaboration on this).</p>
+</li>
+</ul>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="ulist">
+<ul>
+<li>
+<p>If your app is <em>purely</em> a web app, your controllers/view functions can be
+the single place to capture all the use cases.</p>
+</li>
+<li>
+<p>It&#8217;s yet another layer of abstraction.</p>
+</li>
+<li>
+<p>Putting too much logic into the service layer can lead to the <em>Anemic Domain</em>
+anti-pattern. It&#8217;s better to introduce this layer after you spot orchestration
+logic creeping into your controllers.</p>
+</li>
+<li>
+<p>You can get a lot of the benefits that come from having rich domain models
+by simply pushing logic out of your controllers and down to the model layer,
+without needing to add an extra layer in between (aka "fat models, thin
+controllers").</p>
+</li>
+</ul>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>But there are still some bits of awkwardness to tidy up:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The service layer is still tightly coupled to the domain, because
+its API is expressed in terms of <code>OrderLine</code> objects. In
+<a href="/book/chapter_05_high_gear_low_gear.html">[chapter_05_high_gear_low_gear]</a>, we&#8217;ll fix that and talk about
+the way that the service layer enables more productive TDD.</p>
+</li>
+<li>
+<p>The service layer is tightly coupled to a <code>session</code> object. In <a href="/book/chapter_06_uow.html">[chapter_06_uow]</a>,
+we&#8217;ll introduce one more pattern that works closely with the Repository and
+Service Layer patterns, the Unit of Work pattern, and everything will be absolutely lovely.
+You&#8217;ll see!</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<hr>
+<div class="footnote" id="_footnotedef_1">
+<a href="#_footnoteref_1">1</a>. Service-layer services and domain services do have confusingly similar names. We tackle this topic later in <a href="#why_is_everything_a_service">Why Is Everything Called a Service?</a>.
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2020-03-16 11:03:29 UTC
+</div>
+</div>
+<style>
+pre.pygments .hll { background-color: #ffffcc }
+pre.pygments  { background: #f0f0f0; }
+pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
+pre.pygments .tok-err { border: 1px solid #FF0000 } /* Error */
+pre.pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
+pre.pygments .tok-o { color: #666666 } /* Operator */
+pre.pygments .tok-ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
+pre.pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
+pre.pygments .tok-cp { color: #007020 } /* Comment.Preproc */
+pre.pygments .tok-cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
+pre.pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
+pre.pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
+pre.pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
+pre.pygments .tok-ge { font-style: italic } /* Generic.Emph */
+pre.pygments .tok-gr { color: #FF0000 } /* Generic.Error */
+pre.pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
+pre.pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
+pre.pygments .tok-go { color: #888888 } /* Generic.Output */
+pre.pygments .tok-gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+pre.pygments .tok-gs { font-weight: bold } /* Generic.Strong */
+pre.pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+pre.pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
+pre.pygments .tok-kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+pre.pygments .tok-kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+pre.pygments .tok-kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+pre.pygments .tok-kp { color: #007020 } /* Keyword.Pseudo */
+pre.pygments .tok-kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+pre.pygments .tok-kt { color: #902000 } /* Keyword.Type */
+pre.pygments .tok-m { color: #40a070 } /* Literal.Number */
+pre.pygments .tok-s { color: #4070a0 } /* Literal.String */
+pre.pygments .tok-na { color: #4070a0 } /* Name.Attribute */
+pre.pygments .tok-nb { color: #007020 } /* Name.Builtin */
+pre.pygments .tok-nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+pre.pygments .tok-no { color: #60add5 } /* Name.Constant */
+pre.pygments .tok-nd { color: #555555; font-weight: bold } /* Name.Decorator */
+pre.pygments .tok-ni { color: #d55537; font-weight: bold } /* Name.Entity */
+pre.pygments .tok-ne { color: #007020 } /* Name.Exception */
+pre.pygments .tok-nf { color: #06287e } /* Name.Function */
+pre.pygments .tok-nl { color: #002070; font-weight: bold } /* Name.Label */
+pre.pygments .tok-nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+pre.pygments .tok-nt { color: #062873; font-weight: bold } /* Name.Tag */
+pre.pygments .tok-nv { color: #bb60d5 } /* Name.Variable */
+pre.pygments .tok-ow { color: #007020; font-weight: bold } /* Operator.Word */
+pre.pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
+pre.pygments .tok-mb { color: #40a070 } /* Literal.Number.Bin */
+pre.pygments .tok-mf { color: #40a070 } /* Literal.Number.Float */
+pre.pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
+pre.pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
+pre.pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
+pre.pygments .tok-sa { color: #4070a0 } /* Literal.String.Affix */
+pre.pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
+pre.pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
+pre.pygments .tok-dl { color: #4070a0 } /* Literal.String.Delimiter */
+pre.pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+pre.pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
+pre.pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+pre.pygments .tok-sh { color: #4070a0 } /* Literal.String.Heredoc */
+pre.pygments .tok-si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+pre.pygments .tok-sx { color: #c65d09 } /* Literal.String.Other */
+pre.pygments .tok-sr { color: #235388 } /* Literal.String.Regex */
+pre.pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
+pre.pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
+pre.pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
+pre.pygments .tok-fm { color: #06287e } /* Name.Function.Magic */
+pre.pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
+pre.pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
+pre.pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
+pre.pygments .tok-vm { color: #bb60d5 } /* Name.Variable.Magic */
+pre.pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
+</style>
+</body>
+</html>

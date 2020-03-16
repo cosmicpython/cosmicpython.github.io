@@ -1,0 +1,715 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<title>A Template Project Structure</title>
+<style>
+/* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+
+@import url("//fonts.googleapis.com/css?family=Noto+Sans:300,600italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700");
+@import url(//asciidoctor.org/stylesheets/asciidoctor.css); /* Default asciidoc style framework - important */
+
+/* customisations by harry */
+
+/* hide inline ditaa/plantuml source listings for images */
+.image-source {
+    display: none
+}
+/* make formal codeblocks a bit nicer */
+.exampleblock > .content {
+    padding: 2px;
+    background-color: white;
+    border: 0;
+    margin-bottom: 2em;
+}
+
+.exampleblock .title {
+    text-align: right;
+}
+
+/* end customisations by harry */
+
+/* CUSTOMISATIONS */
+
+/* Change the values in root for quick customisation. If you want even more fine grain... venture further. */
+
+:root{
+--maincolor:#FFFFFF;
+--primarycolor:#2c3e50;
+--secondarycolor:#ba3925;
+--tertiarycolor: #186d7a;
+--sidebarbackground:#CCC;
+--linkcolor:#b71c1c;
+--linkcoloralternate:#f44336;
+--white:#FFFFFF;
+--black:#000000;
+}
+
+/* Text styles */
+h1{color:var(--primarycolor) !important;}
+h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+.title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
+p{font-family: "Noto Sans",sans-serif !important}
+
+/* Table styles */
+th{font-family: "Noto Sans",sans-serif !important}
+
+/* Responsiveness fixes */
+video {
+  max-width: 100%;
+}
+
+@media all and (max-width: 600px) {
+table {
+  width: 55vw!important;
+  font-size: 3vw;
+}
+
+</style>
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="/book/preface.html">Preface</a></li>
+<li><a href="/book/introduction.html">Introduction</a></li>
+<li><a href="/book/part1.html">Building an Architecture to Support Domain Modeling</a></li>
+<li><a href="/book/chapter_01_domain_model.html">1. Domain Modeling</a></li>
+<li><a href="/book/chapter_02_repository.html">2. Repository Pattern</a></li>
+<li><a href="/book/chapter_03_abstractions.html">3. A Brief Interlude: On Coupling <span class="keep-together">and Abstractions</span></a></li>
+<li><a href="/book/chapter_04_service_layer.html">4. Our First Use Case: <span class="keep-together">Flask API and Service Layer</span></a></li>
+<li><a href="/book/chapter_05_high_gear_low_gear.html">5. TDD in High Gear and Low Gear</a></li>
+<li><a href="/book/chapter_06_uow.html">6. Unit of Work Pattern</a></li>
+<li><a href="/book/chapter_07_aggregate.html">7. Aggregates and Consistency Boundaries</a></li>
+<li><a href="/book/part2.html">Event-Driven Architecture</a></li>
+<li><a href="/book/chapter_08_events_and_message_bus.html">8. Events and the Message Bus</a></li>
+<li><a href="/book/chapter_09_all_messagebus.html">9. Going to Town on the Message Bus</a></li>
+<li><a href="/book/chapter_10_commands.html">10. Commands and Command Handler</a></li>
+<li><a href="/book/chapter_11_external_events.html">11. Event-Driven Architecture: Using Events to Integrate Microservices</a></li>
+<li><a href="/book/chapter_12_cqrs.html">12. Command-Query Responsibility Segregation (CQRS)</a></li>
+<li><a href="/book/chapter_13_dependency_injection.html">13. Dependency Injection (and Bootstrapping)</a></li>
+<li><a href="/book/epilogue_1_how_to_get_there_from_here.html">Appendix A: Epilogue</a></li>
+<li><a href="/book/appendix_ds1_table.html">Appendix B: Summary Diagram and Table</a></li>
+<li><a href="/book/appendix_project_structure.html">Appendix C: A Template Project Structure</a></li>
+<li><a href="/book/appendix_csvs.html">Appendix D: Swapping Out the Infrastructure: <span class="keep-together">Do Everything with CSVs</span></a></li>
+<li><a href="/book/appendix_django.html">Appendix E: Repository and Unit of Work <span class="keep-together">Patterns with Django</span></a></li>
+<li><a href="/book/appendix_validation.html">Appendix F: Validation</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="appendix_project_structure">Appendix B: A Template Project Structure</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Around <a href="/book/chapter_04_service_layer.html">[chapter_04_service_layer]</a>, we moved from just having
+everything in one folder to a more structured tree, and we thought it might
+be of interest to outline the moving parts.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The code for this appendix is in the
+appendix_project_structure branch <a href="https://oreil.ly/1rDRC">on GitHub</a>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>git clone https://github.com/cosmicpython/code.git
+cd code
+git checkout appendix_project_structure</pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The basic folder structure looks like this:</p>
+</div>
+<div id="project_tree" class="exampleblock">
+<div class="title">Project tree</div>
+<div class="content">
+<div class="listingblock tree">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="text"><span></span>.
+&#9500;&#9472;&#9472; Dockerfile  <b class="conum">(1)</b>
+&#9500;&#9472;&#9472; Makefile  <b class="conum">(2)</b>
+&#9500;&#9472;&#9472; README.md
+&#9500;&#9472;&#9472; docker-compose.yml  <b class="conum">(1)</b>
+&#9500;&#9472;&#9472; license.txt
+&#9500;&#9472;&#9472; mypy.ini
+&#9500;&#9472;&#9472; requirements.txt
+&#9500;&#9472;&#9472; src  <b class="conum">(3)</b>
+&#9474;&#160;&#160; &#9500;&#9472;&#9472; allocation
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9500;&#9472;&#9472; __init__.py
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9500;&#9472;&#9472; adapters
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9474;&#160;&#160; &#9500;&#9472;&#9472; __init__.py
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9474;&#160;&#160; &#9500;&#9472;&#9472; orm.py
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9474;&#160;&#160; &#9492;&#9472;&#9472; repository.py
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9500;&#9472;&#9472; config.py
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9500;&#9472;&#9472; domain
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9474;&#160;&#160; &#9500;&#9472;&#9472; __init__.py
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9474;&#160;&#160; &#9492;&#9472;&#9472; model.py
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9500;&#9472;&#9472; entrypoints
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9474;&#160;&#160; &#9500;&#9472;&#9472; __init__.py
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9474;&#160;&#160; &#9492;&#9472;&#9472; flask_app.py
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9492;&#9472;&#9472; service_layer
+&#9474;&#160;&#160; &#9474;&#160;&#160;     &#9500;&#9472;&#9472; __init__.py
+&#9474;&#160;&#160; &#9474;&#160;&#160;     &#9492;&#9472;&#9472; services.py
+&#9474;&#160;&#160; &#9492;&#9472;&#9472; setup.py  <b class="conum">(3)</b>
+&#9492;&#9472;&#9472; tests  <b class="conum">(4)</b>
+    &#9500;&#9472;&#9472; conftest.py  <b class="conum">(4)</b>
+    &#9500;&#9472;&#9472; e2e
+    &#9474;&#160;&#160; &#9492;&#9472;&#9472; test_api.py
+    &#9500;&#9472;&#9472; integration
+    &#9474;&#160;&#160; &#9500;&#9472;&#9472; test_orm.py
+    &#9474;&#160;&#160; &#9492;&#9472;&#9472; test_repository.py
+    &#9500;&#9472;&#9472; pytest.ini  <b class="conum">(4)</b>
+    &#9492;&#9472;&#9472; unit
+        &#9500;&#9472;&#9472; test_allocate.py
+        &#9500;&#9472;&#9472; test_batches.py
+        &#9492;&#9472;&#9472; test_services.py</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Our <em>docker-compose.yml</em> and our <em>Dockerfile</em> are the main bits of configuration
+for the containers that run our app, and they can also run the tests (for CI).  A
+more complex project might have several Dockerfiles, although we&#8217;ve found that
+minimizing the number of images is usually a good idea.<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup></p>
+</li>
+<li>
+<p>A <em>Makefile</em> provides the entrypoint for all the typical commands a developer
+(or a CI server) might want to run during their normal workflow: <code>make
+build</code>, <code>make test</code>, and so on.<sup class="footnote">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup> This is optional. You could just use
+<code>docker-compose</code> and <code>pytest</code> directly, but if nothing else, it&#8217;s nice to
+have all the "common commands" in a list somewhere, and unlike
+documentation, a Makefile is code so it has less tendency to become out of date.</p>
+</li>
+<li>
+<p>All the source code for our app, including the domain model, the
+Flask app, and infrastructure code, lives in a Python package inside
+<em>src</em>,<sup class="footnote">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup>
+which we install using <code>pip install -e</code> and the <em>setup.py</em> file.  This makes
+imports easy. Currently, the structure within this module is totally flat,
+but for a more complex project, you&#8217;d expect to grow a folder hierarchy
+that includes <em>domain_model/</em>, <em>infrastructure/</em>, <em>services/</em>, and <em>api/</em>.</p>
+</li>
+<li>
+<p>Tests live in their own folder. Subfolders distinguish different test
+types and allow you to run them separately.  We can keep shared fixtures
+(<em>conftest.py</em>) in the main tests folder and nest more specific ones if we
+wish. This is also the place to keep <em>pytest.ini</em>.</p>
+</li>
+</ol>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+The <a href="https://oreil.ly/QVb9Q">pytest docs</a> are really good on test layout and importability.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s look at a few of these files and concepts in more detail.</p>
+</div>
+<div class="sect2">
+<h3 id="_env_vars_12_factor_and_config_inside_and_outside_containers">Env Vars, 12-Factor, and Config, Inside and Outside Containers</h3>
+<div class="paragraph">
+<p>The basic problem we&#8217;re trying to solve here is that we need different
+config settings for the following:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Running code or tests directly from your own dev machine, perhaps
+talking to mapped ports from Docker containers</p>
+</li>
+<li>
+<p>Running on the containers themselves, with "real" ports and hostnames</p>
+</li>
+<li>
+<p>Different container environments (dev, staging, prod, and so on)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Configuration through environment variables as suggested by the
+<a href="https://12factor.net/config">12-factor manifesto</a> will solve this problem,
+but concretely, how do we implement it in our code and our containers?</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_config_py">Config.py</h3>
+<div class="paragraph">
+<p>Whenever our application code needs access to some config, it&#8217;s going to
+get it from a file called <em>config.py</em>. Here are a couple of examples from our
+app:</p>
+</div>
+<div id="config_dot_py" class="exampleblock">
+<div class="title">Sample config functions (src/allocation/config.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">import</span> <span class="tok-nn">os</span>
+
+<span class="tok-k">def</span> <span class="tok-nf">get_postgres_uri</span><span class="tok-p">():</span>  #<b class="conum">(1)</b>
+    <span class="tok-n">host</span> <span class="tok-o">=</span> <span class="tok-n">os</span><span class="tok-o">.</span><span class="tok-n">environ</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s1">'DB_HOST'</span><span class="tok-p">,</span> <span class="tok-s1">'localhost'</span><span class="tok-p">)</span>  #<b class="conum">(2)</b>
+    <span class="tok-n">port</span> <span class="tok-o">=</span> <span class="tok-mi">54321</span> <span class="tok-k">if</span> <span class="tok-n">host</span> <span class="tok-o">==</span> <span class="tok-s1">'localhost'</span> <span class="tok-k">else</span> <span class="tok-mi">5432</span>
+    <span class="tok-n">password</span> <span class="tok-o">=</span> <span class="tok-n">os</span><span class="tok-o">.</span><span class="tok-n">environ</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s1">'DB_PASSWORD'</span><span class="tok-p">,</span> <span class="tok-s1">'abc123'</span><span class="tok-p">)</span>
+    <span class="tok-n">user</span><span class="tok-p">,</span> <span class="tok-n">db_name</span> <span class="tok-o">=</span> <span class="tok-s1">'allocation'</span><span class="tok-p">,</span> <span class="tok-s1">'allocation'</span>
+    <span class="tok-k">return</span> <span class="tok-n">f</span><span class="tok-s2">"postgresql://{user}:{password}@{host}:{port}/{db_name}"</span>
+
+
+<span class="tok-k">def</span> <span class="tok-nf">get_api_url</span><span class="tok-p">():</span>
+    <span class="tok-n">host</span> <span class="tok-o">=</span> <span class="tok-n">os</span><span class="tok-o">.</span><span class="tok-n">environ</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s1">'API_HOST'</span><span class="tok-p">,</span> <span class="tok-s1">'localhost'</span><span class="tok-p">)</span>
+    <span class="tok-n">port</span> <span class="tok-o">=</span> <span class="tok-mi">5005</span> <span class="tok-k">if</span> <span class="tok-n">host</span> <span class="tok-o">==</span> <span class="tok-s1">'localhost'</span> <span class="tok-k">else</span> <span class="tok-mi">80</span>
+    <span class="tok-k">return</span> <span class="tok-n">f</span><span class="tok-s2">"http://{host}:{port}"</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>We use functions for getting the current config, rather than constants
+available at import time, because that allows client code to modify
+<code>os.environ</code> if it needs to.</p>
+</li>
+<li>
+<p><em>config.py</em> also defines some default settings, designed to work when
+running the code from the developer&#8217;s local machine.<sup class="footnote">[<a id="_footnoteref_4" class="footnote" href="#_footnotedef_4" title="View footnote.">4</a>]</sup></p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>An elegant Python package called
+<a href="https://github.com/hynek/environ-config"><em>environ-config</em></a> is worth looking
+at if you get tired of hand-rolling your own environment-based config functions.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+Don&#8217;t let this config module become a dumping ground that is full of things only vaguely related to config and that is then imported all over the place.
+    Keep things immutable and modify them only via environment variables.
+    If you decide to use a <a href="/book/chapter_13_dependency_injection.html">bootstrap script</a>,
+    you can make it the only place (other than tests) that config is imported to.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_docker_compose_and_containers_config">Docker-Compose and Containers Config</h3>
+<div class="paragraph">
+<p>We use a lightweight Docker container orchestration tool called <em>docker-compose</em>.
+It&#8217;s main configuration is via a YAML file (sigh):<sup class="footnote">[<a id="_footnoteref_5" class="footnote" href="#_footnotedef_5" title="View footnote.">5</a>]</sup></p>
+</div>
+<div id="docker_compose" class="exampleblock">
+<div class="title">docker-compose config file (docker-compose.yml)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="yaml"><span></span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">version</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-s">"3"</span>
+<span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">services</span><span class="tok-p tok-p-Indicator">:</span>
+
+  <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">app</span><span class="tok-p tok-p-Indicator">:</span>  #<b class="conum">(1)</b>
+    <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">build</span><span class="tok-p tok-p-Indicator">:</span>
+      <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">context</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">.</span>
+      <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">dockerfile</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">Dockerfile</span>
+    <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">depends_on</span><span class="tok-p tok-p-Indicator">:</span>
+      <span class="tok-p tok-p-Indicator">-</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">postgres</span>
+    <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">environment</span><span class="tok-p tok-p-Indicator">:</span>  #<b class="conum">(3)</b>
+      <span class="tok-p tok-p-Indicator">-</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">DB_HOST=postgres</span>  <b class="conum">(4)</b>
+      <span class="tok-p tok-p-Indicator">-</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">DB_PASSWORD=abc123</span>
+      <span class="tok-p tok-p-Indicator">-</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">API_HOST=app</span>
+      <span class="tok-p tok-p-Indicator">-</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">PYTHONDONTWRITEBYTECODE=1</span>  #<b class="conum">(5)</b>
+    <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">volumes</span><span class="tok-p tok-p-Indicator">:</span>  #<b class="conum">(6)</b>
+      <span class="tok-p tok-p-Indicator">-</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">./src:/src</span>
+      <span class="tok-p tok-p-Indicator">-</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">./tests:/tests</span>
+    <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">ports</span><span class="tok-p tok-p-Indicator">:</span>
+      <span class="tok-p tok-p-Indicator">-</span> <span class="tok-s">"5005:80"</span>  <b class="conum">(7)</b>
+
+
+  <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">postgres</span><span class="tok-p tok-p-Indicator">:</span>
+    <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">image</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">postgres:9.6</span>  #<b class="conum">(2)</b>
+    <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">environment</span><span class="tok-p tok-p-Indicator">:</span>
+      <span class="tok-p tok-p-Indicator">-</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">POSTGRES_USER=allocation</span>
+      <span class="tok-p tok-p-Indicator">-</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">POSTGRES_PASSWORD=abc123</span>
+    <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">ports</span><span class="tok-p tok-p-Indicator">:</span>
+      <span class="tok-p tok-p-Indicator">-</span> <span class="tok-s">"54321:5432"</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>In the <em>docker-compose</em> file, we define the different <em>services</em>
+(containers) that we need for our app. Usually one main image
+contains all our code, and we can use it to run our API, our tests,
+or any other service that needs access to the domain model.</p>
+</li>
+<li>
+<p>You&#8217;ll probably have other infrastructure services, including a database.
+In production you might not use containers for this; you might have a cloud
+provider instead, but <em>docker-compose</em> gives us a way of producing a
+similar service for dev or CI.</p>
+</li>
+<li>
+<p>The <code>environment</code> stanza lets you set the environment variables for your
+containers, the hostnames and ports as seen from inside the Docker cluster.
+If you have enough containers that information starts to be duplicated in
+these sections, you can use <code>environment_file</code> instead. We usually call
+ours <em>container.env</em>.</p>
+</li>
+<li>
+<p>Inside a cluster, <em>docker-compose</em> sets up networking such that containers are
+available to each other via hostnames named after their service name.</p>
+</li>
+<li>
+<p>Pro tip: if you&#8217;re mounting volumes to share source folders between your
+local dev machine and the container, the <code>PYTHONDONTWRITEBYTECODE</code> environment variable
+tells Python to not write <em>.pyc</em> files, and that will save you from
+having millions of root-owned files sprinkled all over your local filesystem,
+being all annoying to delete and causing weird Python compiler errors besides.</p>
+</li>
+<li>
+<p>Mounting our source and test code as <code>volumes</code> means we don&#8217;t need to rebuild
+our containers every time we make a code change.</p>
+</li>
+<li>
+<p>The <code>ports</code> section allows us to expose the ports from inside the containers
+to the outside world<sup class="footnote">[<a id="_footnoteref_6" class="footnote" href="#_footnotedef_6" title="View footnote.">6</a>]</sup>&#8212;these correspond to the default ports we set
+in <em>config.py</em>.</p>
+</li>
+</ol>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Inside Docker, other containers are available through hostnames named after
+    their service name. Outside Docker, they are available on <code>localhost</code>, at the
+    port defined in the <code>ports</code> section.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_installing_your_source_as_a_package">Installing Your Source as a Package</h3>
+<div class="paragraph">
+<p>All our application code (everything except tests, really) lives inside an
+<em>src</em> folder:</p>
+</div>
+<div id="src_folder_tree" class="exampleblock">
+<div class="title">The src folder</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="text"><span></span>&#9500;&#9472;&#9472; src
+&#9474;&#160;&#160; &#9500;&#9472;&#9472; allocation  #<b class="conum">(1)</b>
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9500;&#9472;&#9472; config.py
+&#9474;&#160;&#160; &#9474;&#160;&#160; &#9492;&#9472;&#9472; ...
+&#9474;&#160;&#160; &#9492;&#9472;&#9472; setup.py  <b class="conum">(2)</b></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Subfolders define top-level module names. You can have multiple if you like.</p>
+</li>
+<li>
+<p>And <em>setup.py</em> is the file you need to make it pip-installable, shown next.</p>
+</li>
+</ol>
+</div>
+<div id="setup_dot_py" class="exampleblock">
+<div class="title">pip-installable modules in three lines (src/setup.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">setuptools</span> <span class="tok-kn">import</span> <span class="tok-n">setup</span>
+
+<span class="tok-n">setup</span><span class="tok-p">(</span>
+    <span class="tok-n">name</span><span class="tok-o">=</span><span class="tok-s1">'allocation'</span><span class="tok-p">,</span>
+    <span class="tok-n">version</span><span class="tok-o">=</span><span class="tok-s1">'0.1'</span><span class="tok-p">,</span>
+    <span class="tok-n">packages</span><span class="tok-o">=</span><span class="tok-p">[</span><span class="tok-s1">'allocation'</span><span class="tok-p">],</span>
+<span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>That&#8217;s all you need. <code>packages=</code> specifies the names of subfolders that you
+want to install as top-level modules. The <code>name</code> entry is just cosmetic, but
+it&#8217;s required. For a package that&#8217;s never actually going to hit PyPI, it&#8217;ll
+do fine.<sup class="footnote">[<a id="_footnoteref_7" class="footnote" href="#_footnotedef_7" title="View footnote.">7</a>]</sup></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_dockerfile">Dockerfile</h3>
+<div class="paragraph">
+<p>Dockerfiles are going to be very project-specific, but here are a few key stages
+you&#8217;ll expect to see:</p>
+</div>
+<div id="dockerfile" class="exampleblock">
+<div class="title">Our Dockerfile (Dockerfile)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="dockerfile"><span></span><span class="tok-k">FROM</span><span class="tok-s"> python:3.8-alpine</span>
+
+<b class="conum">(1)</b>
+<span class="tok-k">RUN</span> apk add --no-cache --virtual .build-deps gcc postgresql-dev musl-dev python3-dev
+<span class="tok-k">RUN</span> apk add libpq
+
+<b class="conum">(2)</b>
+COPY requirements.txt /tmp/
+<span class="tok-k">RUN</span> pip install -r /tmp/requirements.txt
+
+<span class="tok-k">RUN</span> apk del --no-cache .build-deps
+
+<b class="conum">(3)</b>
+<span class="tok-k">RUN</span> mkdir -p /src
+COPY src/ /src/
+<span class="tok-k">RUN</span> pip install -e /src
+COPY tests/ /tests/
+
+<b class="conum">(4)</b>
+<span class="tok-k">WORKDIR</span><span class="tok-s"> /src</span>
+<span class="tok-k">ENV</span><span class="tok-s"> FLASK_APP=allocation/entrypoints/flask_app.py FLASK_DEBUG=1 PYTHONUNBUFFERED=1</span>
+<span class="tok-k">CMD</span><span class="tok-s"> flask run --host=0.0.0.0 --port=80</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Installing system-level dependencies</p>
+</li>
+<li>
+<p>Installing our Python dependencies (you may want to split out your dev from
+prod dependencies; we haven&#8217;t here, for simplicity)</p>
+</li>
+<li>
+<p>Copying and installing our source</p>
+</li>
+<li>
+<p>Optionally configuring a default startup command (you&#8217;ll probably override
+this a lot from the command line)</p>
+</li>
+</ol>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+One thing to note is that we install things in the order of how frequently they
+    are likely to change. This allows us to maximize Docker build cache reuse. I
+    can&#8217;t tell you how much pain and frustration underlies this lesson. For this
+    and many more Python Dockerfile improvement tips, check out
+    <a href="https://pythonspeed.com/docker">"Production-Ready Docker Packaging"</a>.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_tests">Tests</h3>
+<div class="paragraph">
+<p>Our tests are kept alongside everything else, as shown here:</p>
+</div>
+<div id="tests_folder" class="exampleblock">
+<div class="title">Tests folder tree</div>
+<div class="content">
+<div class="listingblock tree">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="text"><span></span>&#9492;&#9472;&#9472; tests
+    &#9500;&#9472;&#9472; conftest.py
+    &#9500;&#9472;&#9472; e2e
+    &#9474;&#160;&#160; &#9492;&#9472;&#9472; test_api.py
+    &#9500;&#9472;&#9472; integration
+    &#9474;&#160;&#160; &#9500;&#9472;&#9472; test_orm.py
+    &#9474;&#160;&#160; &#9492;&#9472;&#9472; test_repository.py
+    &#9500;&#9472;&#9472; pytest.ini
+    &#9492;&#9472;&#9472; unit
+        &#9500;&#9472;&#9472; test_allocate.py
+        &#9500;&#9472;&#9472; test_batches.py
+        &#9492;&#9472;&#9472; test_services.py</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Nothing particularly clever here, just some separation of different test types
+that you&#8217;re likely to want to run separately, and some files for common fixtures,
+config, and so on.</p>
+</div>
+<div class="paragraph">
+<p>There&#8217;s no <em>src</em> folder or <em>setup.py</em> in the test folders because we usually
+haven&#8217;t needed to make tests pip-installable, but if you have difficulties with
+import paths, you might find it helps.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_wrap_up">Wrap-Up</h3>
+<div class="paragraph">
+<p>These are our basic building blocks:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Source code in an <em>src</em> folder, pip-installable using <em>setup.py</em></p>
+</li>
+<li>
+<p>Some Docker config for spinning up a local cluster that mirrors production as far as possible</p>
+</li>
+<li>
+<p>Configuration via environment variables, centralized in a Python file called <em>config.py</em>, with defaults allowing things to run <em>outside</em> containers</p>
+</li>
+<li>
+<p>A Makefile for useful command-line, um, commands</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>We doubt that anyone will end up with <em>exactly</em> the same solutions we did, but we hope you
+find some inspiration here.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<hr>
+<div class="footnote" id="_footnotedef_1">
+<a href="#_footnoteref_1">1</a>. Splitting out images for production and testing is sometimes a good idea, but we&#8217;ve tended to find that going further and trying to split out different images for different types of application code (e.g., Web API versus pub/sub client) usually ends up being more trouble than it&#8217;s worth; the cost in terms of complexity and longer rebuild/CI times is too high. YMMV.
+</div>
+<div class="footnote" id="_footnotedef_2">
+<a href="#_footnoteref_2">2</a>. A pure-Python alternative to Makefiles is <a href="http://www.pyinvoke.org">Invoke</a>, worth checking out if everyone on your team knows Python (or at least knows it better than Bash!).
+</div>
+<div class="footnote" id="_footnotedef_3">
+<a href="#_footnoteref_3">3</a>. <a href="https://hynek.me/articles/testing-packaging">"Testing and Packaging"</a> by Hynek Schlawack provides more information on <em>src</em> folders.
+</div>
+<div class="footnote" id="_footnotedef_4">
+<a href="#_footnoteref_4">4</a>. This gives us a local development setup that "just works" (as much as possible). You may prefer to fail hard on missing environment variables instead, particularly if any of the defaults would be insecure in production.
+</div>
+<div class="footnote" id="_footnotedef_5">
+<a href="#_footnoteref_5">5</a>. Harry is a bit YAML-weary. It&#8217;s <em>everywhere</em>, and yet he can never remember the syntax or how it&#8217;s supposed to indent.
+</div>
+<div class="footnote" id="_footnotedef_6">
+<a href="#_footnoteref_6">6</a>. On a CI server, you may not be able to expose arbitrary ports reliably, but it&#8217;s only a convenience for local dev. You can find ways of making these port mappings optional (e.g., with <em>docker-compose.override.yml</em>).
+</div>
+<div class="footnote" id="_footnotedef_7">
+<a href="#_footnoteref_7">7</a>. For more <em>setup.py</em> tips, see <a href="https://oreil.ly/KMWDz">this article on packaging</a> by Hynek.
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2020-03-16 11:03:29 UTC
+</div>
+</div>
+<style>
+pre.pygments .hll { background-color: #ffffcc }
+pre.pygments  { background: #f0f0f0; }
+pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
+pre.pygments .tok-err { border: 1px solid #FF0000 } /* Error */
+pre.pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
+pre.pygments .tok-o { color: #666666 } /* Operator */
+pre.pygments .tok-ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
+pre.pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
+pre.pygments .tok-cp { color: #007020 } /* Comment.Preproc */
+pre.pygments .tok-cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
+pre.pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
+pre.pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
+pre.pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
+pre.pygments .tok-ge { font-style: italic } /* Generic.Emph */
+pre.pygments .tok-gr { color: #FF0000 } /* Generic.Error */
+pre.pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
+pre.pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
+pre.pygments .tok-go { color: #888888 } /* Generic.Output */
+pre.pygments .tok-gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+pre.pygments .tok-gs { font-weight: bold } /* Generic.Strong */
+pre.pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+pre.pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
+pre.pygments .tok-kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+pre.pygments .tok-kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+pre.pygments .tok-kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+pre.pygments .tok-kp { color: #007020 } /* Keyword.Pseudo */
+pre.pygments .tok-kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+pre.pygments .tok-kt { color: #902000 } /* Keyword.Type */
+pre.pygments .tok-m { color: #40a070 } /* Literal.Number */
+pre.pygments .tok-s { color: #4070a0 } /* Literal.String */
+pre.pygments .tok-na { color: #4070a0 } /* Name.Attribute */
+pre.pygments .tok-nb { color: #007020 } /* Name.Builtin */
+pre.pygments .tok-nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+pre.pygments .tok-no { color: #60add5 } /* Name.Constant */
+pre.pygments .tok-nd { color: #555555; font-weight: bold } /* Name.Decorator */
+pre.pygments .tok-ni { color: #d55537; font-weight: bold } /* Name.Entity */
+pre.pygments .tok-ne { color: #007020 } /* Name.Exception */
+pre.pygments .tok-nf { color: #06287e } /* Name.Function */
+pre.pygments .tok-nl { color: #002070; font-weight: bold } /* Name.Label */
+pre.pygments .tok-nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+pre.pygments .tok-nt { color: #062873; font-weight: bold } /* Name.Tag */
+pre.pygments .tok-nv { color: #bb60d5 } /* Name.Variable */
+pre.pygments .tok-ow { color: #007020; font-weight: bold } /* Operator.Word */
+pre.pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
+pre.pygments .tok-mb { color: #40a070 } /* Literal.Number.Bin */
+pre.pygments .tok-mf { color: #40a070 } /* Literal.Number.Float */
+pre.pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
+pre.pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
+pre.pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
+pre.pygments .tok-sa { color: #4070a0 } /* Literal.String.Affix */
+pre.pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
+pre.pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
+pre.pygments .tok-dl { color: #4070a0 } /* Literal.String.Delimiter */
+pre.pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+pre.pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
+pre.pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+pre.pygments .tok-sh { color: #4070a0 } /* Literal.String.Heredoc */
+pre.pygments .tok-si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+pre.pygments .tok-sx { color: #c65d09 } /* Literal.String.Other */
+pre.pygments .tok-sr { color: #235388 } /* Literal.String.Regex */
+pre.pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
+pre.pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
+pre.pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
+pre.pygments .tok-fm { color: #06287e } /* Name.Function.Magic */
+pre.pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
+pre.pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
+pre.pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
+pre.pygments .tok-vm { color: #bb60d5 } /* Name.Variable.Magic */
+pre.pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
+</style>
+</body>
+</html>

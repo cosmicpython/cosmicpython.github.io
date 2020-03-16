@@ -1,0 +1,1303 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<title>Going to Town on the Message Bus</title>
+<style>
+/* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+
+@import url("//fonts.googleapis.com/css?family=Noto+Sans:300,600italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700");
+@import url(//asciidoctor.org/stylesheets/asciidoctor.css); /* Default asciidoc style framework - important */
+
+/* customisations by harry */
+
+/* hide inline ditaa/plantuml source listings for images */
+.image-source {
+    display: none
+}
+/* make formal codeblocks a bit nicer */
+.exampleblock > .content {
+    padding: 2px;
+    background-color: white;
+    border: 0;
+    margin-bottom: 2em;
+}
+
+.exampleblock .title {
+    text-align: right;
+}
+
+/* end customisations by harry */
+
+/* CUSTOMISATIONS */
+
+/* Change the values in root for quick customisation. If you want even more fine grain... venture further. */
+
+:root{
+--maincolor:#FFFFFF;
+--primarycolor:#2c3e50;
+--secondarycolor:#ba3925;
+--tertiarycolor: #186d7a;
+--sidebarbackground:#CCC;
+--linkcolor:#b71c1c;
+--linkcoloralternate:#f44336;
+--white:#FFFFFF;
+--black:#000000;
+}
+
+/* Text styles */
+h1{color:var(--primarycolor) !important;}
+h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+.title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
+p{font-family: "Noto Sans",sans-serif !important}
+
+/* Table styles */
+th{font-family: "Noto Sans",sans-serif !important}
+
+/* Responsiveness fixes */
+video {
+  max-width: 100%;
+}
+
+@media all and (max-width: 600px) {
+table {
+  width: 55vw!important;
+  font-size: 3vw;
+}
+
+</style>
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="/book/preface.html">Preface</a></li>
+<li><a href="/book/introduction.html">Introduction</a></li>
+<li><a href="/book/part1.html">Building an Architecture to Support Domain Modeling</a></li>
+<li><a href="/book/chapter_01_domain_model.html">1. Domain Modeling</a></li>
+<li><a href="/book/chapter_02_repository.html">2. Repository Pattern</a></li>
+<li><a href="/book/chapter_03_abstractions.html">3. A Brief Interlude: On Coupling <span class="keep-together">and Abstractions</span></a></li>
+<li><a href="/book/chapter_04_service_layer.html">4. Our First Use Case: <span class="keep-together">Flask API and Service Layer</span></a></li>
+<li><a href="/book/chapter_05_high_gear_low_gear.html">5. TDD in High Gear and Low Gear</a></li>
+<li><a href="/book/chapter_06_uow.html">6. Unit of Work Pattern</a></li>
+<li><a href="/book/chapter_07_aggregate.html">7. Aggregates and Consistency Boundaries</a></li>
+<li><a href="/book/part2.html">Event-Driven Architecture</a></li>
+<li><a href="/book/chapter_08_events_and_message_bus.html">8. Events and the Message Bus</a></li>
+<li><a href="/book/chapter_09_all_messagebus.html">9. Going to Town on the Message Bus</a></li>
+<li><a href="/book/chapter_10_commands.html">10. Commands and Command Handler</a></li>
+<li><a href="/book/chapter_11_external_events.html">11. Event-Driven Architecture: Using Events to Integrate Microservices</a></li>
+<li><a href="/book/chapter_12_cqrs.html">12. Command-Query Responsibility Segregation (CQRS)</a></li>
+<li><a href="/book/chapter_13_dependency_injection.html">13. Dependency Injection (and Bootstrapping)</a></li>
+<li><a href="/book/epilogue_1_how_to_get_there_from_here.html">Appendix A: Epilogue</a></li>
+<li><a href="/book/appendix_ds1_table.html">Appendix B: Summary Diagram and Table</a></li>
+<li><a href="/book/appendix_project_structure.html">Appendix C: A Template Project Structure</a></li>
+<li><a href="/book/appendix_csvs.html">Appendix D: Swapping Out the Infrastructure: <span class="keep-together">Do Everything with CSVs</span></a></li>
+<li><a href="/book/appendix_django.html">Appendix E: Repository and Unit of Work <span class="keep-together">Patterns with Django</span></a></li>
+<li><a href="/book/appendix_validation.html">Appendix F: Validation</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="chapter_09_all_messagebus">Going to Town on the Message Bus</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this chapter, we&#8217;ll start to make events more fundamental to the internal
+structure of our application. We&#8217;ll move from the current state in
+<a href="#maps_chapter_08_before">Before: the message bus is an optional add-on</a>, where events are an optional
+side effect&#8230;&#8203;</p>
+</div>
+<div id="maps_chapter_08_before" class="imageblock">
+<div class="content">
+<img src="images/apwp_0901.png" alt="apwp 0901">
+</div>
+<div class="title">Figure 1. Before: the message bus is an optional add-on</div>
+</div>
+<div class="paragraph">
+<p>&#8230;&#8203;to the situation in <a href="#map_chapter_08_after">The message bus is now the main entrypoint to the service layer</a>, where
+everything goes via the message bus, and our app has been transformed
+fundamentally into a message processor.</p>
+</div>
+<div id="map_chapter_08_after" class="imageblock">
+<div class="content">
+<img src="images/apwp_0902.png" alt="apwp 0902">
+</div>
+<div class="title">Figure 2. The message bus is now the main entrypoint to the service layer</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The code for this chapter is in the
+chapter_09_all_messagebus branch <a href="https://oreil.ly/oKNkn">on GitHub</a>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>git clone https://github.com/cosmicpython/code.git
+cd code
+git checkout chapter_09_all_messagebus
+# or to code along, checkout the previous chapter:
+git checkout chapter_08_events_and_message_bus</pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2 pagebreak-before less_space">
+<h3 id="_a_new_requirement_leads_us_to_a_new_architecture">A New Requirement Leads Us to a New Architecture</h3>
+<div class="paragraph">
+<p>Rich Hickey talks about <em>situated software,</em> meaning software that runs for
+extended periods of time, managing a real-world process. Examples include
+warehouse-management systems, logistics schedulers, and payroll systems.</p>
+</div>
+<div class="paragraph">
+<p>This software is tricky to write because unexpected things happen all the time
+in the real world of physical objects and unreliable humans. For example:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>During a stock-take, we discover that three <code>SPRINGY-MATTRESS</code>es have been
+water damaged by a leaky roof.</p>
+</li>
+<li>
+<p>A consignment of <code>RELIABLE-FORK</code>s is missing the required documentation and is
+held in customs for several weeks. Three <code>RELIABLE-FORK</code>s subsequently fail safety
+testing and are destroyed.</p>
+</li>
+<li>
+<p>A global shortage of sequins means we&#8217;re unable to manufacture our next batch
+of <code>SPARKLY-BOOKCASE</code>.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>In these types of situations, we learn about the need to change batch quantities
+when they&#8217;re already in the system. Perhaps someone made a mistake on the number
+in the manifest, or perhaps some sofas fell off a truck. Following a
+conversation with the business,<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup> we model the situation as in
+<a href="#batch_changed_events_flow_diagram">Batch quantity changed means deallocate and reallocate</a>.</p>
+</div>
+<div id="batch_changed_events_flow_diagram" class="imageblock">
+<div class="content">
+<img src="images/apwp_0903.png" alt="apwp 0903">
+</div>
+<div class="title">Figure 3. Batch quantity changed means deallocate and reallocate</div>
+</div>
+<div class="listingblock image-source">
+<div class="content">
+<pre>[ditaa, apwp_0903]
++----------+    /----\      +------------+       +--------------------+
+| Batch    |--&gt; |RULE| --&gt;  | Deallocate | ----&gt; | AllocationRequired |
+| Quantity |    \----/      +------------+-+     +--------------------+-+
+| Changed  |                  | Deallocate | ----&gt; | AllocationRequired |
++----------+                  +------------+-+     +--------------------+-+
+                                | Deallocate | ----&gt; | AllocationRequired |
+                                +------------+       +--------------------+</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>An event we&#8217;ll call <code>BatchQuantityChanged</code> should lead us to change the
+quantity on the batch, yes, but also to apply a <em>business rule</em>: if the new
+quantity drops to less than the total already allocated, we need to
+<em>deallocate</em>  those orders from that batch. Then each one will require
+a new allocation, which we can capture as an event called <code>AllocationRequired</code>.</p>
+</div>
+<div class="paragraph">
+<p>Perhaps you&#8217;re already anticipating that our internal message bus and events can
+help implement this requirement. We could define a service called
+<code>change_batch_quantity</code> that knows how to adjust batch quantities and also how
+to <em>deallocate</em> any excess order lines, and then each deallocation can emit an
+<code>AllocationRequired</code> event that can be forwarded to the existing <code>allocate</code>
+service, in separate transactions. Once again, our message bus helps us to
+enforce the single responsibility principle, and it allows us to make choices about
+transactions and data integrity.</p>
+</div>
+<div class="sect3">
+<h4 id="_imagining_an_architecture_change_everything_will_be_an_event_handler">Imagining an Architecture Change: Everything Will Be an <span class="keep-together">Event Handler</span></h4>
+<div class="paragraph">
+<p>But before we jump in, think about where we&#8217;re headed.  There are two
+kinds of flows through our system:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>API calls that are handled by a service-layer function</p>
+</li>
+<li>
+<p>Internal events (which might be raised as a side effect of a service-layer function)
+and their handlers (which in turn call service-layer functions)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Wouldn&#8217;t it be easier if everything was an event handler?  If we rethink our API
+calls as capturing events, the service-layer functions can be event handlers
+too, and we no longer need to make a distinction between internal and external
+event handlers:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>services.allocate()</code> could be the handler for an
+<code>AllocationRequired</code> event and could emit <code>Allocated</code> events as its output.</p>
+</li>
+<li>
+<p><code>services.add_batch()</code> could be the handler for a <code>BatchCreated</code>
+event.<sup class="footnote">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Our new requirement will fit the same pattern:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>An event called <code>BatchQuantityChanged</code> can invoke a handler called
+<code>change_batch_quantity()</code>.</p>
+</li>
+<li>
+<p>And the new <code>AllocationRequired</code> events that it may raise can be passed on to
+<code>services.allocate()</code> too, so there is no conceptual difference between a
+brand-new allocation coming from the API and a reallocation that&#8217;s
+internally triggered by a deallocation.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>All sound like a bit much? Let&#8217;s work toward it all gradually.  We&#8217;ll
+follow the
+<a href="https://oreil.ly/W3RZM">Preparatory
+Refactoring</a> workflow, aka "Make the change easy; then make the easy change":</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>We refactor our service layer into event handlers. We can
+get used to the idea of events being the way we describe inputs to the
+system. In particular, the existing <code>services.allocate()</code> function will
+become the handler for an event called <code>AllocationRequired</code>.</p>
+</li>
+<li>
+<p>We build an end-to-end test that puts <code>BatchQuantityChanged</code> events
+into the system and looks for <code>Allocated</code> events coming out.</p>
+</li>
+<li>
+<p>Our implementation will conceptually be very simple: a new
+handler for <code>BatchQuantityChanged</code> events, whose implementation will emit
+<code>AllocationRequired</code> events, which in turn will be handled by the exact same
+handler for allocations that the API uses.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Along the way, we&#8217;ll make a small tweak to the message bus and UoW, moving the
+responsibility for putting new events on the message bus into the message bus itself.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_refactoring_service_functions_to_message_handlers">Refactoring Service Functions to Message Handlers</h3>
+<div class="paragraph">
+<p>We start by defining the two events that capture our current API inputs&#8212;<code>AllocationRequired</code> and <code>BatchCreated</code>:</p>
+</div>
+<div id="two_new_events" class="exampleblock">
+<div class="title">BatchCreated and AllocationRequired events (src/allocation/domain/events.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@dataclass</span>
+<span class="tok-k">class</span> <span class="tok-nc">BatchCreated</span><span class="tok-p">(</span><span class="tok-n">Event</span><span class="tok-p">):</span>
+    <span class="tok-n">ref</span><span class="tok-p">:</span> <span class="tok-nb">str</span>
+    <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span>
+    <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span>
+    <span class="tok-n">eta</span><span class="tok-p">:</span> <span class="tok-n">Optional</span><span class="tok-p">[</span><span class="tok-n">date</span><span class="tok-p">]</span> <span class="tok-o">=</span> <span class="tok-bp">None</span>
+
+<span class="tok-o">...</span>
+
+<span class="tok-nd">@dataclass</span>
+<span class="tok-k">class</span> <span class="tok-nc">AllocationRequired</span><span class="tok-p">(</span><span class="tok-n">Event</span><span class="tok-p">):</span>
+    <span class="tok-n">orderid</span><span class="tok-p">:</span> <span class="tok-nb">str</span>
+    <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span>
+    <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Then we rename <em>services.py</em> to <em>handlers.py</em>; we add the existing message handler
+for <code>send_out_of_stock_notification</code>; and most importantly, we change all the
+handlers so that they have the same inputs, an event and a UoW:</p>
+</div>
+<div id="services_to_handlers" class="exampleblock">
+<div class="title">Handlers and services are the same thing (src/allocation/service_layer/handlers.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">add_batch</span><span class="tok-p">(</span>
+        <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">BatchCreated</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span>
+<span class="tok-p">):</span>
+    <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
+        <span class="tok-n">product</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">products</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">)</span>
+        <span class="tok-o">...</span>
+
+
+<span class="tok-k">def</span> <span class="tok-nf">allocate</span><span class="tok-p">(</span>
+        <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">AllocationRequired</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span>
+<span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-nb">str</span><span class="tok-p">:</span>
+    <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">qty</span><span class="tok-p">)</span>
+    <span class="tok-o">...</span>
+
+
+<span class="tok-k">def</span> <span class="tok-nf">send_out_of_stock_notification</span><span class="tok-p">(</span>
+        <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">OutOfStock</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>
+<span class="tok-p">):</span>
+    <span class="tok-n">email</span><span class="tok-o">.</span><span class="tok-n">send</span><span class="tok-p">(</span>
+        <span class="tok-s1">'stock@made.com'</span><span class="tok-p">,</span>
+        <span class="tok-n">f</span><span class="tok-s1">'Out of stock for {event.sku}'</span><span class="tok-p">,</span>
+    <span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The change might be clearer as a diff:</p>
+</div>
+<div id="services_to_handlers_diff" class="exampleblock">
+<div class="title">Changing from services to handlers (src/allocation/service_layer/handlers.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="diff"><span></span> def add_batch(
+<span class="tok-gd">-        ref: str, sku: str, qty: int, eta: Optional[date],</span>
+<span class="tok-gd">-        uow: unit_of_work.AbstractUnitOfWork</span>
+<span class="tok-gi">+        event: events.BatchCreated, uow: unit_of_work.AbstractUnitOfWork</span>
+ ):
+     with uow:
+<span class="tok-gd">-        product = uow.products.get(sku=sku)</span>
+<span class="tok-gi">+        product = uow.products.get(sku=event.sku)</span>
+     ...
+
+
+ def allocate(
+<span class="tok-gd">-        orderid: str, sku: str, qty: int,</span>
+<span class="tok-gd">-        uow: unit_of_work.AbstractUnitOfWork</span>
+<span class="tok-gi">+        event: events.AllocationRequired, uow: unit_of_work.AbstractUnitOfWork</span>
+ ) -&gt; str:
+<span class="tok-gd">-    line = OrderLine(orderid, sku, qty)</span>
+<span class="tok-gi">+    line = OrderLine(event.orderid, event.sku, event.qty)</span>
+     ...
+
+<span class="tok-gi">+</span>
+<span class="tok-gi">+def send_out_of_stock_notification(</span>
+<span class="tok-gi">+        event: events.OutOfStock, uow: unit_of_work.AbstractUnitOfWork,</span>
+<span class="tok-gi">+):</span>
+<span class="tok-gi">+    email.send(</span>
+     ...</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Along the way, we&#8217;ve made our service-layer&#8217;s API more structured and more consistent. It was a scattering of
+primitives, and now it uses well-defined objects (see the following sidebar).</p>
+</div>
+<div class="sidebarblock nobreakinside less_space">
+<div class="content">
+<div class="title">From Domain Objects, via Primitive Obsession, to <span class="keep-together">Events as an Interface</span></div>
+<div class="paragraph">
+<p>Some of you may remember <a href="/book/chapter_05_high_gear_low_gear.html#primitive_obsession">[primitive_obsession]</a>, in which we changed our service-layer API
+from being in terms of domain objects to primitives. And now we&#8217;re moving
+back, but to different objects?  What gives?</p>
+</div>
+<div class="paragraph">
+<p>In OO circles, people talk about <em>primitive obsession</em> as an anti-pattern: avoid
+primitives in public APIs, and instead wrap them with custom value classes, they
+would say. In the Python world, a lot of people would be quite skeptical of
+that as a rule of thumb. When mindlessly applied, it&#8217;s certainly a recipe for
+unnecessary complexity. So that&#8217;s not what we&#8217;re doing per se.</p>
+</div>
+<div class="paragraph">
+<p>The move from domain objects to primitives bought us a nice bit of decoupling:
+our client code was no longer coupled directly to the domain, so the service
+layer could present an API that stays the same even if we decide to make changes
+to our model, and vice versa.</p>
+</div>
+<div class="paragraph">
+<p>So have we gone backward? Well, our core domain model objects are still free to
+vary, but instead we&#8217;ve coupled the external world to our event classes.
+They&#8217;re part of the domain too, but the hope is that they vary less often, so
+they&#8217;re a sensible artifact to couple on.</p>
+</div>
+<div class="paragraph">
+<p>And what have we bought ourselves? Now, when invoking a use case in our application,
+we no longer need to remember a particular combination of primitives, but just a single
+event class that represents the input to our application. That&#8217;s conceptually
+quite nice. On top of that, as you&#8217;ll see in <a href="/book/appendix_validation.html">[appendix_validation]</a>, those
+event classes can be a nice place to do some input validation.</p>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_the_message_bus_now_collects_events_from_the_uow">The Message Bus Now Collects Events from the UoW</h4>
+<div class="paragraph">
+<p>Our event handlers now need a UoW. In addition, as our message bus becomes
+more central to our application, it makes sense to put it explicitly in charge of
+collecting and processing new events. There was a bit of a circular dependency
+between the UoW and message bus until now, so this will make it one-way:</p>
+</div>
+<div id="handle_has_uow_and_queue" class="exampleblock">
+<div class="title">Handle takes a UoW and manages a queue (src/allocation/service_layer/messagebus.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">handle</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">Event</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">):</span>  #<b class="conum">(1)</b>
+    <span class="tok-n">queue</span> <span class="tok-o">=</span> <span class="tok-p">[</span><span class="tok-n">event</span><span class="tok-p">]</span>  #<b class="conum">(2)</b>
+    <span class="tok-k">while</span> <span class="tok-n">queue</span><span class="tok-p">:</span>
+        <span class="tok-n">event</span> <span class="tok-o">=</span> <span class="tok-n">queue</span><span class="tok-o">.</span><span class="tok-n">pop</span><span class="tok-p">(</span><span class="tok-mi">0</span><span class="tok-p">)</span>  #<b class="conum">(3)</b>
+        <span class="tok-k">for</span> <span class="tok-n">handler</span> <span class="tok-ow">in</span> <span class="tok-n">HANDLERS</span><span class="tok-p">[</span><span class="tok-nb">type</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">)]:</span>  #<b class="conum">(3)</b>
+            <span class="tok-n">handler</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-o">=</span><span class="tok-n">uow</span><span class="tok-p">)</span>  #<b class="conum">(4)</b>
+            <span class="tok-n">queue</span><span class="tok-o">.</span><span class="tok-n">extend</span><span class="tok-p">(</span><span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">collect_new_events</span><span class="tok-p">())</span>  #<b class="conum">(5)</b></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>The message bus now gets passed the UoW each time it starts up.</p>
+</li>
+<li>
+<p>When we begin handling our first event, we start a queue.</p>
+</li>
+<li>
+<p>We pop events from the front of the queue and invoke their handlers (the
+<span class="keep-together"><code>HANDLERS</code></span> dict hasn&#8217;t changed; it still maps event types to handler functions).</p>
+</li>
+<li>
+<p>The message bus passes the UoW down to each handler.</p>
+</li>
+<li>
+<p>After each handler finishes, we collect any new events that have been
+generated and add them to the queue.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>In <em>unit_of_work.py</em>, <code>publish_events()</code> becomes a less active method,
+<code>collect_new_events()</code>:</p>
+</div>
+<div id="uow_collect_new_events" class="exampleblock">
+<div class="title">UoW no longer puts events directly on the bus (src/allocation/service_layer/unit_of_work.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="diff"><span></span><span class="tok-gd">-from . import messagebus  </span>#<b class="conum">(1)</b>
+<span class="tok-gd">-</span>
+
+
+ class AbstractUnitOfWork(abc.ABC):
+<span class="tok-gu">@@ -23,13 +21,11 @@ class AbstractUnitOfWork(abc.ABC):</span>
+
+     def commit(self):
+         self._commit()
+<span class="tok-gd">-        self.publish_events()  </span>#<b class="conum">(2)</b>
+
+<span class="tok-gd">-    def publish_events(self):</span>
+<span class="tok-gi">+    def collect_new_events(self):</span>
+         for product in self.products.seen:
+             while product.events:
+<span class="tok-gd">-                event = product.events.pop(0)</span>
+<span class="tok-gd">-                messagebus.handle(event)</span>
+<span class="tok-gi">+                yield product.events.pop(0)  </span>#<b class="conum">(3)</b></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>The <code>unit_of_work</code> module now no longer depends on <code>messagebus</code>.</p>
+</li>
+<li>
+<p>We no longer <code>publish_events</code> automatically on commit. The message bus
+is keeping track of the event queue instead.</p>
+</li>
+<li>
+<p>And the UoW no longer actively puts events on the message bus; it
+just makes them available.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3 pagebreak-before less_space">
+<h4 id="_our_tests_are_all_written_in_terms_of_events_too">Our Tests Are All Written in Terms of Events Too</h4>
+<div class="paragraph">
+<p>Our tests now operate by creating events and putting them on the
+message bus, rather than invoking service-layer functions directly:</p>
+</div>
+<div id="handler_tests" class="exampleblock">
+<div class="title">Handler tests use events (tests/unit/test_handlers.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="diff"><span></span>class TestAddBatch:
+
+     def test_for_new_product(self):
+         uow = FakeUnitOfWork()
+<span class="tok-gd">-        services.add_batch("b1", "CRUNCHY-ARMCHAIR", 100, None, uow)</span>
+<span class="tok-gi">+        messagebus.handle(</span>
+<span class="tok-gi">+            events.BatchCreated("b1", "CRUNCHY-ARMCHAIR", 100, None), uow</span>
+<span class="tok-gi">+        )</span>
+         assert uow.products.get("CRUNCHY-ARMCHAIR") is not None
+         assert uow.committed
+
+...
+
+ class TestAllocate:
+
+     def test_returns_allocation(self):
+         uow = FakeUnitOfWork()
+<span class="tok-gd">-        services.add_batch("batch1", "COMPLICATED-LAMP", 100, None, uow)</span>
+<span class="tok-gd">-        result = services.allocate("o1", "COMPLICATED-LAMP", 10, uow)</span>
+<span class="tok-gi">+        messagebus.handle(</span>
+<span class="tok-gi">+            events.BatchCreated("batch1", "COMPLICATED-LAMP", 100, None), uow</span>
+<span class="tok-gi">+        )</span>
+<span class="tok-gi">+        result = messagebus.handle(</span>
+<span class="tok-gi">+            events.AllocationRequired("o1", "COMPLICATED-LAMP", 10), uow</span>
+<span class="tok-gi">+        )</span>
+         assert result == "batch1"</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="temporary_ugly_hack">A Temporary Ugly Hack: The Message Bus Has to Return Results</h4>
+<div class="paragraph">
+<p>Our API and our service layer currently want to know the allocated batch reference
+when they invoke our <code>allocate()</code> handler. This means we need to put in
+a temporary hack on our message bus to let it return events:</p>
+</div>
+<div id="hack_messagebus_results" class="exampleblock">
+<div class="title">Message bus returns results (src/allocation/service_layer/messagebus.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="diff"><span></span> def handle(event: events.Event, uow: unit_of_work.AbstractUnitOfWork):
+<span class="tok-gi">+    results = []</span>
+     queue = [event]
+     while queue:
+         event = queue.pop(0)
+         for handler in HANDLERS[type(event)]:
+<span class="tok-gd">-            handler(event, uow=uow)</span>
+<span class="tok-gi">+            results.append(handler(event, uow=uow))</span>
+             queue.extend(uow.collect_new_events())
+<span class="tok-gi">+    return results</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>It&#8217;s because we&#8217;re mixing the read and write responsibilities in our system.
+We&#8217;ll come back to fix this wart in <a href="/book/chapter_12_cqrs.html">[chapter_12_cqrs]</a>.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_modifying_our_api_to_work_with_events">Modifying Our API to Work with Events</h4>
+<div id="flask_uses_messagebus" class="exampleblock">
+<div class="title">Flask changing to message bus as a diff (src/allocation/entrypoints/flask_app.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="diff"><span></span> @app.route("/allocate", methods=['POST'])
+ def allocate_endpoint():
+     try:
+<span class="tok-gd">-        batchref = services.allocate(</span>
+<span class="tok-gd">-            request.json['orderid'],  </span>#<b class="conum">(1)</b>
+<span class="tok-gd">-            request.json['sku'],</span>
+<span class="tok-gd">-            request.json['qty'],</span>
+<span class="tok-gd">-            unit_of_work.SqlAlchemyUnitOfWork(),</span>
+<span class="tok-gi">+        event = events.AllocationRequired(  </span>#<b class="conum">(2)</b>
+<span class="tok-gi">+            request.json['orderid'], request.json['sku'], request.json['qty'],</span>
+         )
+<span class="tok-gi">+        results = messagebus.handle(event, unit_of_work.SqlAlchemyUnitOfWork())  </span>#<b class="conum">(3)</b>
+<span class="tok-gi">+        batchref = results.pop(0)</span>
+     except InvalidSku as e:</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Instead of calling the service layer with a bunch of primitives extracted
+from the request JSON&#8230;&#8203;</p>
+</li>
+<li>
+<p>We instantiate an event.</p>
+</li>
+<li>
+<p>Then we pass it to the message bus.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>And we should be back to a fully functional application, but one that&#8217;s now
+fully event-driven:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>What used to be service-layer functions are now event handlers.</p>
+</li>
+<li>
+<p>That makes them the same as the functions we invoke for handling internal events raised by
+our domain model.</p>
+</li>
+<li>
+<p>We use events as our data structure for capturing inputs to the system,
+as well as for handing off of internal work packages.</p>
+</li>
+<li>
+<p>The entire app is now best described as a message processor, or an event processor
+if you prefer.  We&#8217;ll talk about the distinction in the
+<a href="/book/chapter_10_commands.html">next chapter</a>.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_implementing_our_new_requirement">Implementing Our New Requirement</h3>
+<div class="paragraph">
+<p>We&#8217;re done with our refactoring phase. Let&#8217;s see if we really have "made the
+change easy."  Let&#8217;s implement our new requirement, shown in <a href="#reallocation_sequence_diagram">Sequence diagram for reallocation flow</a>: we&#8217;ll receive as our
+inputs some new <code>BatchQuantityChanged</code> events and pass them to a handler, which in
+turn might emit some <code>AllocationRequired</code> events, and those in turn will go
+back to our existing handler for reallocation.</p>
+</div>
+<div id="reallocation_sequence_diagram" class="imageblock width-75">
+<div class="content">
+<img src="images/apwp_0904.png" alt="apwp 0904">
+</div>
+<div class="title">Figure 4. Sequence diagram for reallocation flow</div>
+</div>
+<div class="listingblock image-source">
+<div class="content">
+<pre>[plantuml, apwp_0904, config=plantuml.cfg]
+@startuml
+scale 4
+
+API -&gt; MessageBus : BatchQuantityChanged event
+
+group BatchQuantityChanged Handler + Unit of Work 1
+    MessageBus -&gt; Domain_Model : change batch quantity
+    Domain_Model -&gt; MessageBus : emit AllocationRequired event(s)
+end
+
+
+group AllocationRequired Handler + Unit of Work 2 (or more)
+    MessageBus -&gt; Domain_Model : allocate
+end
+
+@enduml</pre>
+</div>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+When you split things out like this across two units of work,
+    you now have two database transactions, so you are opening yourself up
+    to integrity issues: something could happen that means the first transaction completes
+    but the second one does not. You&#8217;ll need to think about whether this is acceptable,
+    and whether you need to notice when it happens and do something about it.
+    See <a href="/book/epilogue_1_how_to_get_there_from_here.html#footguns">[footguns]</a> for more discussion.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_our_new_event">Our New Event</h4>
+<div class="paragraph">
+<p>The event that tells us a batch quantity has changed is simple; it just
+needs a batch reference and a new quantity:</p>
+</div>
+<div id="batch_quantity_changed_event" class="exampleblock">
+<div class="title">New event (src/allocation/domain/events.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@dataclass</span>
+<span class="tok-k">class</span> <span class="tok-nc">BatchQuantityChanged</span><span class="tok-p">(</span><span class="tok-n">Event</span><span class="tok-p">):</span>
+    <span class="tok-n">ref</span><span class="tok-p">:</span> <span class="tok-nb">str</span>
+    <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="test-driving-ch9">Test-Driving a New Handler</h3>
+<div class="paragraph">
+<p>Following the lessons learned in <a href="/book/chapter_04_service_layer.html">[chapter_04_service_layer]</a>,
+we can operate in "high gear" and write our unit tests at the highest
+possible level of abstraction, in terms of events. Here&#8217;s what they might
+look like:</p>
+</div>
+<div id="test_change_batch_quantity_handler" class="exampleblock">
+<div class="title">Handler tests for change_batch_quantity (tests/unit/test_handlers.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">TestChangeBatchQuantity</span><span class="tok-p">:</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">test_changes_available_quantity</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
+        <span class="tok-n">uow</span> <span class="tok-o">=</span> <span class="tok-n">FakeUnitOfWork</span><span class="tok-p">()</span>
+        <span class="tok-n">messagebus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span>
+            <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">BatchCreated</span><span class="tok-p">(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-s2">"ADORABLE-SETTEE"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">),</span> <span class="tok-n">uow</span>
+        <span class="tok-p">)</span>
+        <span class="tok-p">[</span><span class="tok-n">batch</span><span class="tok-p">]</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">products</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-s2">"ADORABLE-SETTEE"</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">batches</span>
+        <span class="tok-k">assert</span> <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">==</span> <span class="tok-mi">100</span>  #<b class="conum">(1)</b>
+
+        <span class="tok-n">messagebus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">BatchQuantityChanged</span><span class="tok-p">(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-mi">50</span><span class="tok-p">),</span> <span class="tok-n">uow</span><span class="tok-p">)</span>
+
+        <span class="tok-k">assert</span> <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">==</span> <span class="tok-mi">50</span>  #<b class="conum">(1)</b>
+
+
+    <span class="tok-k">def</span> <span class="tok-nf">test_reallocates_if_necessary</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
+        <span class="tok-n">uow</span> <span class="tok-o">=</span> <span class="tok-n">FakeUnitOfWork</span><span class="tok-p">()</span>
+        <span class="tok-n">event_history</span> <span class="tok-o">=</span> <span class="tok-p">[</span>
+            <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">BatchCreated</span><span class="tok-p">(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-s2">"INDIFFERENT-TABLE"</span><span class="tok-p">,</span> <span class="tok-mi">50</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">),</span>
+            <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">BatchCreated</span><span class="tok-p">(</span><span class="tok-s2">"batch2"</span><span class="tok-p">,</span> <span class="tok-s2">"INDIFFERENT-TABLE"</span><span class="tok-p">,</span> <span class="tok-mi">50</span><span class="tok-p">,</span> <span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-n">today</span><span class="tok-p">()),</span>
+            <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">AllocationRequired</span><span class="tok-p">(</span><span class="tok-s2">"order1"</span><span class="tok-p">,</span> <span class="tok-s2">"INDIFFERENT-TABLE"</span><span class="tok-p">,</span> <span class="tok-mi">20</span><span class="tok-p">),</span>
+            <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">AllocationRequired</span><span class="tok-p">(</span><span class="tok-s2">"order2"</span><span class="tok-p">,</span> <span class="tok-s2">"INDIFFERENT-TABLE"</span><span class="tok-p">,</span> <span class="tok-mi">20</span><span class="tok-p">),</span>
+        <span class="tok-p">]</span>
+        <span class="tok-k">for</span> <span class="tok-n">e</span> <span class="tok-ow">in</span> <span class="tok-n">event_history</span><span class="tok-p">:</span>
+            <span class="tok-n">messagebus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">e</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">)</span>
+        <span class="tok-p">[</span><span class="tok-n">batch1</span><span class="tok-p">,</span> <span class="tok-n">batch2</span><span class="tok-p">]</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">products</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-s2">"INDIFFERENT-TABLE"</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">batches</span>
+        <span class="tok-k">assert</span> <span class="tok-n">batch1</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">==</span> <span class="tok-mi">10</span>
+        <span class="tok-k">assert</span> <span class="tok-n">batch2</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">==</span> <span class="tok-mi">50</span>
+
+        <span class="tok-n">messagebus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">BatchQuantityChanged</span><span class="tok-p">(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-mi">25</span><span class="tok-p">),</span> <span class="tok-n">uow</span><span class="tok-p">)</span>
+
+        <span class="tok-c1"># order1 or order2 will be deallocated, so we'll have 25 - 20</span>
+        <span class="tok-k">assert</span> <span class="tok-n">batch1</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">==</span> <span class="tok-mi">5</span>  #<b class="conum">(2)</b>
+        <span class="tok-c1"># and 20 will be reallocated to the next batch</span>
+        <span class="tok-k">assert</span> <span class="tok-n">batch2</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">==</span> <span class="tok-mi">30</span>  #<b class="conum">(2)</b></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>The simple case would be trivially easy to implement; we just
+modify a quantity.</p>
+</li>
+<li>
+<p>But if we try to change the quantity to less than
+has been allocated, we&#8217;ll need to deallocate at least one order,
+and we expect to reallocate it to a new batch.</p>
+</li>
+</ol>
+</div>
+<div class="sect3">
+<h4 id="_implementation">Implementation</h4>
+<div class="paragraph">
+<p>Our new handler is very simple:</p>
+</div>
+<div id="change_quantity_handler" class="exampleblock">
+<div class="title">Handler delegates to model layer (src/allocation/service_layer/handlers.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">change_batch_quantity</span><span class="tok-p">(</span>
+        <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">BatchQuantityChanged</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span>
+<span class="tok-p">):</span>
+    <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
+        <span class="tok-n">product</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">products</span><span class="tok-o">.</span><span class="tok-n">get_by_batchref</span><span class="tok-p">(</span><span class="tok-n">batchref</span><span class="tok-o">=</span><span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">ref</span><span class="tok-p">)</span>
+        <span class="tok-n">product</span><span class="tok-o">.</span><span class="tok-n">change_batch_quantity</span><span class="tok-p">(</span><span class="tok-n">ref</span><span class="tok-o">=</span><span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">ref</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-o">=</span><span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">qty</span><span class="tok-p">)</span>
+        <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>We realize we&#8217;ll need a new query type on our repository:</p>
+</div>
+<div id="get_by_batchref" class="exampleblock">
+<div class="title">A new query type on our repository (src/allocation/adapters/repository.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">AbstractRepository</span><span class="tok-p">(</span><span class="tok-n">abc</span><span class="tok-o">.</span><span class="tok-n">ABC</span><span class="tok-p">):</span>
+    <span class="tok-o">...</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">get</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Product</span><span class="tok-p">:</span>
+        <span class="tok-o">...</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">get_by_batchref</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">batchref</span><span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Product</span><span class="tok-p">:</span>
+        <span class="tok-n">product</span> <span class="tok-o">=</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_get_by_batchref</span><span class="tok-p">(</span><span class="tok-n">batchref</span><span class="tok-p">)</span>
+        <span class="tok-k">if</span> <span class="tok-n">product</span><span class="tok-p">:</span>
+            <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">seen</span><span class="tok-o">.</span><span class="tok-n">add</span><span class="tok-p">(</span><span class="tok-n">product</span><span class="tok-p">)</span>
+        <span class="tok-k">return</span> <span class="tok-n">product</span>
+
+    <span class="tok-nd">@abc.abstractmethod</span>
+    <span class="tok-k">def</span> <span class="tok-nf">_add</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">product</span><span class="tok-p">:</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Product</span><span class="tok-p">):</span>
+        <span class="tok-k">raise</span> <span class="tok-ne">NotImplementedError</span>
+
+    <span class="tok-nd">@abc.abstractmethod</span>
+    <span class="tok-k">def</span> <span class="tok-nf">_get</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Product</span><span class="tok-p">:</span>
+        <span class="tok-k">raise</span> <span class="tok-ne">NotImplementedError</span>
+
+    <span class="tok-nd">@abc.abstractmethod</span>
+    <span class="tok-k">def</span> <span class="tok-nf">_get_by_batchref</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">batchref</span><span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Product</span><span class="tok-p">:</span>
+        <span class="tok-k">raise</span> <span class="tok-ne">NotImplementedError</span>
+    <span class="tok-o">...</span>
+
+<span class="tok-k">class</span> <span class="tok-nc">SqlAlchemyRepository</span><span class="tok-p">(</span><span class="tok-n">AbstractRepository</span><span class="tok-p">):</span>
+    <span class="tok-o">...</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">_get</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">):</span>
+        <span class="tok-k">return</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">query</span><span class="tok-p">(</span><span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Product</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">filter_by</span><span class="tok-p">(</span><span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-n">sku</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">first</span><span class="tok-p">()</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">_get_by_batchref</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">batchref</span><span class="tok-p">):</span>
+        <span class="tok-k">return</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">query</span><span class="tok-p">(</span><span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Product</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">join</span><span class="tok-p">(</span><span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">filter</span><span class="tok-p">(</span>
+            <span class="tok-n">orm</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-o">.</span><span class="tok-n">c</span><span class="tok-o">.</span><span class="tok-n">reference</span> <span class="tok-o">==</span> <span class="tok-n">batchref</span><span class="tok-p">,</span>
+        <span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">first</span><span class="tok-p">()</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>And on our <code>FakeRepository</code> too:</p>
+</div>
+<div id="fakerepo_get_by_batchref" class="exampleblock">
+<div class="title">Updating the fake repo too (tests/unit/test_handlers.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">FakeRepository</span><span class="tok-p">(</span><span class="tok-n">repository</span><span class="tok-o">.</span><span class="tok-n">AbstractRepository</span><span class="tok-p">):</span>
+    <span class="tok-o">...</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">_get</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">):</span>
+        <span class="tok-k">return</span> <span class="tok-nb">next</span><span class="tok-p">((</span><span class="tok-n">p</span> <span class="tok-k">for</span> <span class="tok-n">p</span> <span class="tok-ow">in</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_products</span> <span class="tok-k">if</span> <span class="tok-n">p</span><span class="tok-o">.</span><span class="tok-n">sku</span> <span class="tok-o">==</span> <span class="tok-n">sku</span><span class="tok-p">),</span> <span class="tok-bp">None</span><span class="tok-p">)</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">_get_by_batchref</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">batchref</span><span class="tok-p">):</span>
+        <span class="tok-k">return</span> <span class="tok-nb">next</span><span class="tok-p">((</span>
+            <span class="tok-n">p</span> <span class="tok-k">for</span> <span class="tok-n">p</span> <span class="tok-ow">in</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_products</span> <span class="tok-k">for</span> <span class="tok-n">b</span> <span class="tok-ow">in</span> <span class="tok-n">p</span><span class="tok-o">.</span><span class="tok-n">batches</span>
+            <span class="tok-k">if</span> <span class="tok-n">b</span><span class="tok-o">.</span><span class="tok-n">reference</span> <span class="tok-o">==</span> <span class="tok-n">batchref</span>
+        <span class="tok-p">),</span> <span class="tok-bp">None</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+We&#8217;re adding a query to our repository to make this use case easier to
+implement. So long as our query is returning a single aggregate, we&#8217;re not
+bending any rules. If you find yourself writing complex queries on your
+repositories, you might want to consider a different design. Methods like <code>get_most_popular_products</code> or <code>find_products_by_order_id</code> in particular would
+definitely trigger our spidey sense. <a href="/book/chapter_11_external_events.html">[chapter_11_external_events]</a> and the <a href="/book/epilogue_1_how_to_get_there_from_here.html">epilogue</a> have some tips on managing complex queries.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_a_new_method_on_the_domain_model">A New Method on the Domain Model</h4>
+<div class="paragraph">
+<p>We add the new method to the model, which does the quantity change and
+deallocation(s) inline and publishes a new event.  We also modify the existing
+allocate function to publish an event:</p>
+</div>
+<div id="change_batch_model_layer" class="exampleblock">
+<div class="title">Our model evolves to capture the new requirement (src/allocation/domain/model.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">Product</span><span class="tok-p">:</span>
+    <span class="tok-o">...</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">change_batch_quantity</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">ref</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">):</span>
+        <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-nb">next</span><span class="tok-p">(</span><span class="tok-n">b</span> <span class="tok-k">for</span> <span class="tok-n">b</span> <span class="tok-ow">in</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">batches</span> <span class="tok-k">if</span> <span class="tok-n">b</span><span class="tok-o">.</span><span class="tok-n">reference</span> <span class="tok-o">==</span> <span class="tok-n">ref</span><span class="tok-p">)</span>
+        <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">_purchased_quantity</span> <span class="tok-o">=</span> <span class="tok-n">qty</span>
+        <span class="tok-k">while</span> <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">&lt;</span> <span class="tok-mi">0</span><span class="tok-p">:</span>
+            <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">deallocate_one</span><span class="tok-p">()</span>
+            <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">append</span><span class="tok-p">(</span>
+                <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">AllocationRequired</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">qty</span><span class="tok-p">)</span>
+            <span class="tok-p">)</span>
+<span class="tok-o">...</span>
+
+<span class="tok-k">class</span> <span class="tok-nc">Batch</span><span class="tok-p">:</span>
+    <span class="tok-o">...</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">deallocate_one</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-n">OrderLine</span><span class="tok-p">:</span>
+        <span class="tok-k">return</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_allocations</span><span class="tok-o">.</span><span class="tok-n">pop</span><span class="tok-p">()</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>We wire up our new handler:</p>
+</div>
+<div id="full_messagebus" class="exampleblock">
+<div class="title">The message bus grows (src/allocation/service_layer/messagebus.py)</div>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-n">HANDLERS</span> <span class="tok-o">=</span> <span class="tok-p">{</span>
+    <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">BatchCreated</span><span class="tok-p">:</span> <span class="tok-p">[</span><span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">add_batch</span><span class="tok-p">],</span>
+    <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">BatchQuantityChanged</span><span class="tok-p">:</span> <span class="tok-p">[</span><span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">change_batch_quantity</span><span class="tok-p">],</span>
+    <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">AllocationRequired</span><span class="tok-p">:</span> <span class="tok-p">[</span><span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">],</span>
+    <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">OutOfStock</span><span class="tok-p">:</span> <span class="tok-p">[</span><span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">send_out_of_stock_notification</span><span class="tok-p">],</span>
+
+<span class="tok-p">}</span>  <span class="tok-c1"># type: Dict[Type[events.Event], List[Callable]]</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>And our new requirement is fully implemented.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="fake_message_bus">Optionally: Unit Testing Event Handlers in Isolation with a Fake Message Bus</h3>
+<div class="paragraph">
+<p>Our main test for the reallocation workflow is <em>edge-to-edge</em>
+(see the example code in <a href="#test-driving-ch9">Test-Driving a New Handler</a>). It uses
+the real message bus, and it tests the whole flow, where the <code>BatchQuantityChanged</code>
+event handler triggers deallocation, and emits new <code>AllocationRequired</code> events, which in
+turn are handled by their own handlers. One test covers a chain of multiple
+events and handlers.</p>
+</div>
+<div class="paragraph">
+<p>Depending on the complexity of your chain of events, you may decide that you
+want to test some handlers in isolation from one another. You can do this
+using a "fake" message bus.</p>
+</div>
+<div class="paragraph">
+<p>In our case, we actually intervene by modifying the <code>publish_events()</code> method
+on <code>FakeUnitOfWork</code> and decoupling it from the real message bus, instead making
+it record what events it sees:</p>
+</div>
+<div id="fake_messagebus" class="exampleblock">
+<div class="title">Fake message bus implemented in UoW (tests/unit/test_handlers.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">FakeUnitOfWorkWithFakeMessageBus</span><span class="tok-p">(</span><span class="tok-n">FakeUnitOfWork</span><span class="tok-p">):</span>
+
+    <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
+        <span class="tok-nb">super</span><span class="tok-p">()</span><span class="tok-o">.</span><span class="tok-fm">__init__</span><span class="tok-p">()</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">events_published</span> <span class="tok-o">=</span> <span class="tok-p">[]</span>  <span class="tok-c1"># type: List[events.Event]</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">publish_events</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
+        <span class="tok-k">for</span> <span class="tok-n">product</span> <span class="tok-ow">in</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">products</span><span class="tok-o">.</span><span class="tok-n">seen</span><span class="tok-p">:</span>
+            <span class="tok-k">while</span> <span class="tok-n">product</span><span class="tok-o">.</span><span class="tok-n">events</span><span class="tok-p">:</span>
+                <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">events_published</span><span class="tok-o">.</span><span class="tok-n">append</span><span class="tok-p">(</span><span class="tok-n">product</span><span class="tok-o">.</span><span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">pop</span><span class="tok-p">(</span><span class="tok-mi">0</span><span class="tok-p">))</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Now when we invoke <code>messagebus.handle()</code> using the <code>FakeUnitOfWorkWithFakeMessageBus</code>,
+it runs only the handler for that event. So we can write a more isolated unit
+test: instead of checking all the side effects, we just check that
+<code>BatchQuantityChanged</code> leads to <code>AllocationRequired</code> if the quantity drops
+below the total already allocated:</p>
+</div>
+<div id="test_handler_in_isolation" class="exampleblock nobreakinside less_space">
+<div class="title">Testing reallocation in isolation (tests/unit/test_handlers.py)</div>
+<div class="content">
+<div class="listingblock non-head">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_reallocates_if_necessary_isolated</span><span class="tok-p">():</span>
+    <span class="tok-n">uow</span> <span class="tok-o">=</span> <span class="tok-n">FakeUnitOfWorkWithFakeMessageBus</span><span class="tok-p">()</span>
+
+    <span class="tok-c1"># test setup as before</span>
+    <span class="tok-n">event_history</span> <span class="tok-o">=</span> <span class="tok-p">[</span>
+        <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">BatchCreated</span><span class="tok-p">(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-s2">"INDIFFERENT-TABLE"</span><span class="tok-p">,</span> <span class="tok-mi">50</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">),</span>
+        <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">BatchCreated</span><span class="tok-p">(</span><span class="tok-s2">"batch2"</span><span class="tok-p">,</span> <span class="tok-s2">"INDIFFERENT-TABLE"</span><span class="tok-p">,</span> <span class="tok-mi">50</span><span class="tok-p">,</span> <span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-n">today</span><span class="tok-p">()),</span>
+        <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">AllocationRequired</span><span class="tok-p">(</span><span class="tok-s2">"order1"</span><span class="tok-p">,</span> <span class="tok-s2">"INDIFFERENT-TABLE"</span><span class="tok-p">,</span> <span class="tok-mi">20</span><span class="tok-p">),</span>
+        <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">AllocationRequired</span><span class="tok-p">(</span><span class="tok-s2">"order2"</span><span class="tok-p">,</span> <span class="tok-s2">"INDIFFERENT-TABLE"</span><span class="tok-p">,</span> <span class="tok-mi">20</span><span class="tok-p">),</span>
+    <span class="tok-p">]</span>
+    <span class="tok-k">for</span> <span class="tok-n">e</span> <span class="tok-ow">in</span> <span class="tok-n">event_history</span><span class="tok-p">:</span>
+        <span class="tok-n">messagebus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">e</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">)</span>
+    <span class="tok-p">[</span><span class="tok-n">batch1</span><span class="tok-p">,</span> <span class="tok-n">batch2</span><span class="tok-p">]</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">products</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-s2">"INDIFFERENT-TABLE"</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">batches</span>
+    <span class="tok-k">assert</span> <span class="tok-n">batch1</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">==</span> <span class="tok-mi">10</span>
+    <span class="tok-k">assert</span> <span class="tok-n">batch2</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">==</span> <span class="tok-mi">50</span>
+
+    <span class="tok-n">messagebus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">BatchQuantityChanged</span><span class="tok-p">(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-mi">25</span><span class="tok-p">),</span> <span class="tok-n">uow</span><span class="tok-p">)</span>
+
+    <span class="tok-c1"># assert on new events emitted rather than downstream side-effects</span>
+    <span class="tok-p">[</span><span class="tok-n">reallocation_event</span><span class="tok-p">]</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">events_published</span>
+    <span class="tok-k">assert</span> <span class="tok-nb">isinstance</span><span class="tok-p">(</span><span class="tok-n">reallocation_event</span><span class="tok-p">,</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">AllocationRequired</span><span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">reallocation_event</span><span class="tok-o">.</span><span class="tok-n">orderid</span> <span class="tok-ow">in</span> <span class="tok-p">{</span><span class="tok-s1">'order1'</span><span class="tok-p">,</span> <span class="tok-s1">'order2'</span><span class="tok-p">}</span>
+    <span class="tok-k">assert</span> <span class="tok-n">reallocation_event</span><span class="tok-o">.</span><span class="tok-n">sku</span> <span class="tok-o">==</span> <span class="tok-s1">'INDIFFERENT-TABLE'</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Whether you want to do this or not depends on the complexity of your chain of
+events. We say, start out with edge-to-edge testing, and resort to
+this only if necessary.</p>
+</div>
+<div class="sidebarblock nobreakinside less_space">
+<div class="content">
+<div class="title">Exercise for the Reader</div>
+<div class="paragraph">
+<p>A great way to force yourself to really understand some code is to refactor it.
+In the discussion of testing handlers in isolation, we used something called
+<code>FakeUnitOfWorkWithFakeMessageBus</code>, which is unnecessarily complicated and
+violates the SRP.</p>
+</div>
+<div class="paragraph">
+<p>If we change the message bus to being a class,<sup class="footnote">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup>
+then building a <code>FakeMessageBus</code> is more straightforward:</p>
+</div>
+<div id="abc_for_fake_messagebus" class="exampleblock">
+<div class="title">An abstract message bus and its real and fake versions</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">AbstractMessageBus</span><span class="tok-p">:</span>
+    <span class="tok-n">HANDLERS</span><span class="tok-p">:</span> <span class="tok-n">Dict</span><span class="tok-p">[</span><span class="tok-n">Type</span><span class="tok-p">[</span><span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">Event</span><span class="tok-p">],</span> <span class="tok-n">List</span><span class="tok-p">[</span><span class="tok-n">Callable</span><span class="tok-p">]]</span>
+
+    <span class="tok-k">def</span> <span class="tok-nf">handle</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">Event</span><span class="tok-p">):</span>
+        <span class="tok-k">for</span> <span class="tok-n">handler</span> <span class="tok-ow">in</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">HANDLERS</span><span class="tok-p">[</span><span class="tok-nb">type</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">)]:</span>
+            <span class="tok-n">handler</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">)</span>
+
+
+<span class="tok-k">class</span> <span class="tok-nc">MessageBus</span><span class="tok-p">(</span><span class="tok-n">AbstractMessageBus</span><span class="tok-p">):</span>
+    <span class="tok-n">HANDLERS</span> <span class="tok-o">=</span> <span class="tok-p">{</span>
+        <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">OutOfStock</span><span class="tok-p">:</span> <span class="tok-p">[</span><span class="tok-n">send_out_of_stock_notification</span><span class="tok-p">],</span>
+
+    <span class="tok-p">}</span>
+
+
+<span class="tok-k">class</span> <span class="tok-nc">FakeMessageBus</span><span class="tok-p">(</span><span class="tok-n">messagebus</span><span class="tok-o">.</span><span class="tok-n">AbstractMessageBus</span><span class="tok-p">):</span>
+    <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">events_published</span> <span class="tok-o">=</span> <span class="tok-p">[]</span>  <span class="tok-c1"># type: List[events.Event]</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">handlers</span> <span class="tok-o">=</span> <span class="tok-p">{</span>
+            <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">OutOfStock</span><span class="tok-p">:</span> <span class="tok-p">[</span><span class="tok-k">lambda</span> <span class="tok-n">e</span><span class="tok-p">:</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">events_published</span><span class="tok-o">.</span><span class="tok-n">append</span><span class="tok-p">(</span><span class="tok-n">e</span><span class="tok-p">)]</span>
+        <span class="tok-p">}</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>So jump into the code on
+<a href="https://github.com/cosmicpython/code/tree/chapter_09_all_messagebus">GitHub</a> and see if you can get a class-based version
+working, and then write a version of <code>test_reallocates_if_necessary_isolated()</code>
+from earlier.</p>
+</div>
+<div class="paragraph">
+<p>We use a class-based message bus in <a href="/book/chapter_13_dependency_injection.html">[chapter_13_dependency_injection]</a>,
+if you need more inspiration.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_wrap_up">Wrap-Up</h3>
+<div class="paragraph">
+<p>Let&#8217;s look back at what we&#8217;ve achieved, and think about why we did it.</p>
+</div>
+<div class="sect3">
+<h4 id="_what_have_we_achieved">What Have We Achieved?</h4>
+<div class="paragraph">
+<p>Events are simple dataclasses that define the data structures for inputs
+  and internal messages within our system. This is quite powerful from a DDD
+  standpoint, since events often translate really well into business language
+  (look up <em>event storming</em> if you haven&#8217;t already).</p>
+</div>
+<div class="paragraph">
+<p>Handlers are the way we react to events. They can call down to our
+  model or call out to external services.  We can define multiple
+  handlers for a single event if we want to. Handlers can also raise other
+  events. This allows us to be very granular about what a handler does
+  and really stick to the SRP.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_why_have_we_achieved">Why Have We Achieved?</h4>
+<div class="paragraph">
+<p>Our ongoing objective with these architectural patterns is to try to have
+the complexity of our application grow more slowly than its size.  When we
+go all in on the message bus, as always we pay a price in terms of architectural
+complexity (see <a href="#chapter_09_all_messagebus_tradeoffs">Whole app is a message bus: the trade-offs</a>), but we buy ourselves a
+pattern that can handle almost arbitrarily complex requirements without needing
+any further conceptual or architectural change to the way we do things.</p>
+</div>
+<div class="paragraph">
+<p>Here we&#8217;ve added quite a complicated use case (change quantity, deallocate,
+start new transaction, reallocate, publish external notification), but
+architecturally, there&#8217;s been no cost in terms of complexity. We&#8217;ve added new
+events, new handlers, and a new external adapter (for email), all of which are
+existing categories of <em>things</em> in our architecture that we understand and know
+how to reason about, and that are easy to explain to newcomers.  Our moving
+parts each have one job, they&#8217;re connected to each other in well-defined ways,
+and there are no unexpected side effects.</p>
+</div>
+<table id="chapter_09_all_messagebus_tradeoffs" class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. Whole app is a message bus: the trade-offs</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Pros</th>
+<th class="tableblock halign-left valign-top">Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="ulist">
+<ul>
+<li>
+<p>Handlers and services are the same thing, so that&#8217;s simpler.</p>
+</li>
+<li>
+<p>We have a nice data structure for inputs to the system.</p>
+</li>
+</ul>
+</div></div></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="ulist">
+<ul>
+<li>
+<p>A message bus is still a slightly unpredictable way of doing things from
+a web point of view. You don&#8217;t know in advance when things are going to end.</p>
+</li>
+<li>
+<p>There will be duplication of fields and structure between model objects and events, which will have a maintenance cost. Adding a field to one usually means adding a field to at least
+one of the others.</p>
+</li>
+</ul>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>Now, you may be wondering, where are those <code>BatchQuantityChanged</code> events
+going to come from? The answer is revealed in a couple chapters' time.  But
+first, let&#8217;s talk about <a href="/book/chapter_10_commands.html">events versus commands</a>.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<hr>
+<div class="footnote" id="_footnotedef_1">
+<a href="#_footnoteref_1">1</a>. Event-based modeling is so popular that a practice called <em>event storming</em> has been developed for facilitating event-based requirements gathering and domain model elaboration.
+</div>
+<div class="footnote" id="_footnotedef_2">
+<a href="#_footnoteref_2">2</a>. If you&#8217;ve done a bit of reading about event-driven   architectures, you may be thinking, "Some of these events sound more like   commands!" Bear with us! We&#8217;re trying to introduce one concept at a time.   In the <a href="/book/chapter_10_commands.html">next chapter</a>, we&#8217;ll introduce the distinction   between commands and events.
+</div>
+<div class="footnote" id="_footnotedef_3">
+<a href="#_footnoteref_3">3</a>. The "simple" implementation in this chapter essentially uses the <em>messagebus.py</em> module itself to implement the Singleton Pattern.
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2020-03-16 11:03:29 UTC
+</div>
+</div>
+<style>
+pre.pygments .hll { background-color: #ffffcc }
+pre.pygments  { background: #f0f0f0; }
+pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
+pre.pygments .tok-err { border: 1px solid #FF0000 } /* Error */
+pre.pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
+pre.pygments .tok-o { color: #666666 } /* Operator */
+pre.pygments .tok-ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
+pre.pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
+pre.pygments .tok-cp { color: #007020 } /* Comment.Preproc */
+pre.pygments .tok-cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
+pre.pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
+pre.pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
+pre.pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
+pre.pygments .tok-ge { font-style: italic } /* Generic.Emph */
+pre.pygments .tok-gr { color: #FF0000 } /* Generic.Error */
+pre.pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
+pre.pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
+pre.pygments .tok-go { color: #888888 } /* Generic.Output */
+pre.pygments .tok-gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+pre.pygments .tok-gs { font-weight: bold } /* Generic.Strong */
+pre.pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+pre.pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
+pre.pygments .tok-kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+pre.pygments .tok-kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+pre.pygments .tok-kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+pre.pygments .tok-kp { color: #007020 } /* Keyword.Pseudo */
+pre.pygments .tok-kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+pre.pygments .tok-kt { color: #902000 } /* Keyword.Type */
+pre.pygments .tok-m { color: #40a070 } /* Literal.Number */
+pre.pygments .tok-s { color: #4070a0 } /* Literal.String */
+pre.pygments .tok-na { color: #4070a0 } /* Name.Attribute */
+pre.pygments .tok-nb { color: #007020 } /* Name.Builtin */
+pre.pygments .tok-nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+pre.pygments .tok-no { color: #60add5 } /* Name.Constant */
+pre.pygments .tok-nd { color: #555555; font-weight: bold } /* Name.Decorator */
+pre.pygments .tok-ni { color: #d55537; font-weight: bold } /* Name.Entity */
+pre.pygments .tok-ne { color: #007020 } /* Name.Exception */
+pre.pygments .tok-nf { color: #06287e } /* Name.Function */
+pre.pygments .tok-nl { color: #002070; font-weight: bold } /* Name.Label */
+pre.pygments .tok-nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+pre.pygments .tok-nt { color: #062873; font-weight: bold } /* Name.Tag */
+pre.pygments .tok-nv { color: #bb60d5 } /* Name.Variable */
+pre.pygments .tok-ow { color: #007020; font-weight: bold } /* Operator.Word */
+pre.pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
+pre.pygments .tok-mb { color: #40a070 } /* Literal.Number.Bin */
+pre.pygments .tok-mf { color: #40a070 } /* Literal.Number.Float */
+pre.pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
+pre.pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
+pre.pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
+pre.pygments .tok-sa { color: #4070a0 } /* Literal.String.Affix */
+pre.pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
+pre.pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
+pre.pygments .tok-dl { color: #4070a0 } /* Literal.String.Delimiter */
+pre.pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+pre.pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
+pre.pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+pre.pygments .tok-sh { color: #4070a0 } /* Literal.String.Heredoc */
+pre.pygments .tok-si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+pre.pygments .tok-sx { color: #c65d09 } /* Literal.String.Other */
+pre.pygments .tok-sr { color: #235388 } /* Literal.String.Regex */
+pre.pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
+pre.pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
+pre.pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
+pre.pygments .tok-fm { color: #06287e } /* Name.Function.Magic */
+pre.pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
+pre.pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
+pre.pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
+pre.pygments .tok-vm { color: #bb60d5 } /* Name.Variable.Magic */
+pre.pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
+</style>
+</body>
+</html>
