@@ -118,7 +118,9 @@ def fix_title(contents, chapter, chapter_info):
 
 def copy_chapters_across_with_fixes(chapter_info, fixed_toc):
     # comments_html = open('disqus_comments.html').read()
-    # buy_book_div = html.fromstring(open('buy_the_book_banner.html').read())
+    buy_book_div = html.fromstring(
+        Path('fragments/buy_the_book_banner.html').read_text()
+    )
     # analytics_div = html.fromstring(open('analytics.html').read())
 
     for chapter in CHAPTERS:
@@ -130,7 +132,7 @@ def copy_chapters_across_with_fixes(chapter_info, fixed_toc):
         if header := parsed.cssselect('#header'):
             body.set('class', 'article toc2 toc-left')
             header[0].append(fixed_toc)
-        # body.insert(0, buy_book_div)
+        body.insert(0, buy_book_div)
         # body.append(html.fromstring(
         #     comments_html.replace('CHAPTER_NAME', chapter.split('.')[0])
         # ))
