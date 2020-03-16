@@ -43,6 +43,11 @@
     text-align: right;
 }
 
+.book-cover {
+    border: 1px solid black;
+    box-shadow: 5px 5px;
+}
+
 /* fix bad milligram bulletpoint lists */
 ul {
     list-style: circle outside;
