@@ -93,7 +93,7 @@ def get_chapter_info():
 
 def fix_xrefs(contents, chapter, chapter_info):
     parsed = html.fromstring(contents)
-    links = parsed.cssselect('a[href^=\#]')
+    links = parsed.cssselect(r'a[href^=\#]')
     for link in links:
         for other_chap in CHAPTERS:
             if other_chap == chapter:
@@ -109,11 +109,17 @@ def fix_xrefs(contents, chapter, chapter_info):
     return html.tostring(parsed)
 
 
+def _strip_keeptogethers(el):
+    for child in el.cssselect('span.keep-together'):
+        el.remove(child)
+
+
 def fix_title(contents, chapter, chapter_info):
     parsed = html.fromstring(contents)
     titles = parsed.cssselect('h2')
-    if titles and titles[0].text.startswith('Appendix A'):
+    if titles:
         title = titles[0]
+        _strip_keeptogethers(title)
         title.text = chapter_info[chapter].chapter_title
     return html.tostring(parsed)
 
@@ -155,7 +161,7 @@ def extract_toc_from_book():
 
 def fix_toc(toc, chapter_info):
     href_mappings = {}
-    appendix_title_mappings = {}
+    title_mappings = {}
     for chapter in CHAPTERS:
         chapinfo = chapter_info[chapter]
         if chapinfo.href_id:
@@ -163,16 +169,22 @@ def fix_toc(toc, chapter_info):
         for subheader in chapinfo.subheaders:
             href_mappings['#' + subheader] = f'/book/{chapter}#{subheader}'
         if 'Appendix' in chapinfo.old_title:
-            appendix_title_mappings[chapinfo.old_title.partition(':')[2].strip()] = chapinfo.chapter_title
+            short_title = chapinfo.old_title.partition(':')[2].strip()
+            title_mappings[short_title] = chapinfo.chapter_title
+        if 'Part' in chapinfo.chapter_title:
+            short_title = chapinfo.chapter_title.partition(':')[2].strip()
+            title_mappings[short_title] = chapinfo.chapter_title
+            print(title_mappings)
+
 
     for (el, attr, link, pos) in list(toc.iterlinks()):
         el.set('href', href_mappings[link])
-        if 'Appendix' in el.text_content():
-            old_title = el.text_content().partition(':')[2].strip()
-            new_title = appendix_title_mappings[old_title]
-            for child in el.cssselect('span'):
-                el.remove(child)
+        short_title = el.text_content().split(':', 1)[-1].strip()
+        if 'Appendix' in el.text_content() or short_title in title_mappings:
+            new_title = title_mappings[short_title]
+            _strip_keeptogethers(el)
             el.text = new_title
+            print('fixed', new_title)
 
     toc.set('class', 'toc2')
     return toc
