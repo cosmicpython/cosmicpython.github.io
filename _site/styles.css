@@ -1,0 +1,45 @@
+.banner-image-container {
+    position: relative;
+}
+.banner-image-container .banner-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    text-align: center;
+}
+.banner-text h1 {
+    font-size: 3rem;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px grey;
+    font-family: 'Cousine', monospace;
+    margin-bottom: 0;
+}
+
+.banner-text h2 {
+    font-size: 1.5rem;
+    font-style: italic;
+    color: white;
+    letter-spacing: 0;
+    background-color: black
+}
+
+@media (min-width: 40.0rem) { 
+    .banner-text h1 {
+        font-size: 8rem;
+        text-shadow: 2px 2px grey;
+    }
+
+    .banner-text h2 {
+        font-size: 4.2rem;
+        text-shadow: 2px 2px grey;
+        background-color: transparent;
+    }
+}
+
+.align-right {
+    text-align: right;
+}
+
