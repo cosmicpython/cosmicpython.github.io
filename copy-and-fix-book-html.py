@@ -117,11 +117,13 @@ def fix_title(contents, chapter, chapter_info):
     return html.tostring(parsed)
 
 def copy_chapters_across_with_fixes(chapter_info, fixed_toc):
-    # comments_html = open('disqus_comments.html').read()
+    comments_html = Path('fragments/disqus_comments.html').read_text()
     buy_book_div = html.fromstring(
         Path('fragments/buy_the_book_banner.html').read_text()
     )
-    # analytics_div = html.fromstring(open('analytics.html').read())
+    analytics_div = html.fromstring(
+        Path('fragments/google_analytics.html').read_text()
+    )
 
     for chapter in CHAPTERS:
         old_contents = Path(f'book/{chapter}').read_text()
@@ -133,10 +135,10 @@ def copy_chapters_across_with_fixes(chapter_info, fixed_toc):
             body.set('class', 'article toc2 toc-left')
             header[0].append(fixed_toc)
         body.insert(0, buy_book_div)
-        # body.append(html.fromstring(
-        #     comments_html.replace('CHAPTER_NAME', chapter.split('.')[0])
-        # ))
-        # body.append(analytics_div)
+        body.append(html.fromstring(
+            comments_html.replace('PAGE_IDENTIFIER', chapter.split('.')[0])
+        ))
+        body.append(analytics_div)
         fixed_contents = html.tostring(parsed)
         target = DEST / chapter
         print('writing', target)
@@ -171,7 +173,6 @@ def fix_toc(toc, chapter_info):
             el.text = new_title
         print(el.text)
 
-    # toc.rewrite_links(lambda href: href_mappings.get(href, href))
     toc.set('class', 'toc2')
     return toc
 
