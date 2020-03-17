@@ -6,10 +6,13 @@
   <h1> {{ post.title }}</h1>
   <p>by {{ post.author }}, {{ post.date }}</p>
 
-  {% if post.image %}
+  {% if image %}
     <div class="row">
       <div class="column">
-        <img src="/images/{{ post.image }}" />
+        <img src="/images/{{ image[0] }}" />
+        {% if image_credit %}
+          <p class="float-right"><em><small><a href="{{ image_credit[0] }}">find out more about this image</a></small></em></p>
+        {% endif %}
       </div>
     </div>
   {% endif %}

@@ -1,7 +1,7 @@
 title: Repository and Unit of Work Pattern
 author: Bob
-
----
+image: spider_nebula.jpg
+image_credit: https://www.nasa.gov/image-feature/jpl/pia20357/the-spider-nebula
 
 In the previous part
 ([Introducing Command Handler]( ./blog/2017-09-07-introducing-command-handler.html))

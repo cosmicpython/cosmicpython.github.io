@@ -1,7 +1,7 @@
 title: Commands, Handlers, Queries and Views
 author: Bob
-
----
+image: crab_nebula.png
+image_credit: https://www.nasa.gov/image-feature/new-view-of-the-crab-nebula
 
 In the first and second parts of this series I introduced the
 [Command-Handler]({% post_url 2017-09-07-introducing-command-handler %})

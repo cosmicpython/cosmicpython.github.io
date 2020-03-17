@@ -21,7 +21,6 @@ class Post:
     author: str
     md_path: Path
     date: date
-    image: str
 
     @property
     def html_path(self):
@@ -50,10 +49,10 @@ def main():
             md_path=md_post_path, date=post_date,
             author=_md.Meta['author'][0],
             title=_md.Meta['title'][0],
-            image=_md.Meta.get('image', [None])[0],
         )
         post_html = env.get_template(TEMPLATE_FILE).render(
             content=html_content, url=post.url, post=post,
+            **_md.Meta,
         )
         print("writing", post.html_path)
         post.html_path.write_text(post_html)

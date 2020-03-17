@@ -1,7 +1,7 @@
 title: Why use domain events?
 author: Bob
-
----
+image: red_spider_nebula.jpg
+image_credit: https://www.nasa.gov/image-feature/goddard/2016/hubble-spins-a-web-into-a-giant-red-spider-nebula
 
 Nota bene: this instalment in the Ports and Adapters with Command Handlers
 series is code-heavy, and isn't going to make much sense unless you've read the
