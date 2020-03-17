@@ -2,25 +2,31 @@
 <html lang="en">
 
   <head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<meta name="author" content="Harry Percival and Bob Gregory">
-		<meta name="description" content="">
+    <title>{% block title %}cosmic_python{% endblock %}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Harry Percival and Bob Gregory">
+    <meta name="description" content="">
+    <meta property="og:title" content="cosmic_python" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.cosmicpython.com{% block url_path %}{% endblock %}" />
+    <meta property="og:image" content="https://www.cosmicpython.com/images/lobster-nebula.jpg" />
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/milligram/1.3.0/milligram.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pygments-css@1.0.0/friendly.css">
     <link rel="stylesheet" href="/styles.css">
+
   </head>
 
   <body>
-		<main class="wrapper">
+    <main class="wrapper">
 
-			<nav class="navigation">
-				<section class="container">
-					<a class="navigation-title" href="/">
-						<h1 class="title">Cosmic Python</h1>
-					</a>
+      <nav class="navigation">
+        <section class="container">
+          <a class="navigation-title" href="/">
+            <h1 class="title">Cosmic Python</h1>
+          </a>
         </section>
       </nav>
 

@@ -28,7 +28,7 @@ class Post:
 
     @property
     def url(self):
-        return f"blog/{self.html_path.name}"
+        return f"/blog/{self.html_path.name}"
 
 
 
@@ -51,7 +51,7 @@ def main():
             title=_md.Meta['title'][0],
         )
         post_html = env.get_template(TEMPLATE_FILE).render(
-            content=html_content, url=post.html_path, post=post,
+            content=html_content, url=post.url, post=post,
         )
         print("writing", post.html_path)
         post.html_path.write_text(post_html)
