@@ -123,8 +123,31 @@ def fix_title(contents, chapter, chapter_info):
         title.text = chapter_info[chapter].chapter_title
     return html.tostring(parsed)
 
+def _prep_prev_and_next_buttons(chapter, chapter_info, buttons_html):
+    buttons_div = html.fromstring(buttons_html)
+    # rely on python 3.7+ dict ordering
+    chap_index = list(chapter_info.keys()).index(chapter)
+    [prev_link] = buttons_div.cssselect('a.prev_chapter_link')
+    [next_link] = buttons_div.cssselect('a.next_chapter_link')
+    if chap_index >= 0:
+        prev_chapinfo = list(chapter_info.values())[chap_index - 1]
+        prev_link.set('href', f'/book/{prev_chapinfo.href_id}.html')
+        prev_link.text = f'<< Previous - {prev_chapinfo.chapter_title}'
+    else:
+        prev_link.getparent().remove(prev_link)
+    try:
+        next_chapinfo = list(chapter_info.values())[chap_index + 1]
+        next_link.set('href', f'/book/{next_chapinfo.href_id}.html')
+        next_link.text = f'Next - {next_chapinfo.chapter_title} >>'
+    except IndexError:
+        next_link.getparent().remove(next_link)
+    return buttons_div
+
+
+
 def copy_chapters_across_with_fixes(chapter_info, fixed_toc):
     comments_html = Path('fragments/disqus_comments.html').read_text()
+    buttons_html = Path('fragments/prev_and_next_chapter_buttons.html').read_text()
     buy_book_div = html.fromstring(
         Path('fragments/buy_the_book_banner.html').read_text()
     )
@@ -142,6 +165,10 @@ def copy_chapters_across_with_fixes(chapter_info, fixed_toc):
             body.set('class', 'article toc2 toc-left')
             header[0].append(fixed_toc)
         body.insert(0, buy_book_div)
+        [content_div] = parsed.cssselect('#content')
+        content_div.append(
+            _prep_prev_and_next_buttons(chapter, chapter_info, buttons_html)
+        )
         body.append(html.fromstring(
             comments_html.replace('PAGE_IDENTIFIER', chapter.split('.')[0])
         ))
@@ -174,7 +201,6 @@ def fix_toc(toc, chapter_info):
         if 'Part' in chapinfo.chapter_title:
             short_title = chapinfo.chapter_title.partition(':')[2].strip()
             title_mappings[short_title] = chapinfo.chapter_title
-            print(title_mappings)
 
 
     for (el, attr, link, pos) in list(toc.iterlinks()):
@@ -184,7 +210,6 @@ def fix_toc(toc, chapter_info):
             new_title = title_mappings[short_title]
             _strip_keeptogethers(el)
             el.text = new_title
-            print('fixed', new_title)
 
     toc.set('class', 'toc2')
     return toc
