@@ -46,6 +46,11 @@ class ChapterInfo:
     subheaders: list
     xrefs: list
 
+    @property
+    def url(self):
+        return f"/book/{self.href_id}.html"
+
+
 
 def get_chapter_info():
     chapter_info = {}
@@ -131,13 +136,13 @@ def _prep_prev_and_next_buttons(chapter, chapter_info, buttons_html):
     [next_link] = buttons_div.cssselect('a.next_chapter_link')
     if chap_index >= 0:
         prev_chapinfo = list(chapter_info.values())[chap_index - 1]
-        prev_link.set('href', f'/book/{prev_chapinfo.href_id}.html')
+        prev_link.set('href', prev_chapinfo.url)
         prev_link.text = f'<< Previous - {prev_chapinfo.chapter_title}'
     else:
         prev_link.getparent().remove(prev_link)
     try:
         next_chapinfo = list(chapter_info.values())[chap_index + 1]
-        next_link.set('href', f'/book/{next_chapinfo.href_id}.html')
+        next_link.set('href', next_chapinfo.url)
         next_link.text = f'Next - {next_chapinfo.chapter_title} >>'
     except IndexError:
         next_link.getparent().remove(next_link)
@@ -156,6 +161,7 @@ def copy_chapters_across_with_fixes(chapter_info, fixed_toc):
     )
 
     for chapter in CHAPTERS:
+        chapinfo = chapter_info[chapter]
         old_contents = (BOOK_SOURCE / chapter).read_text()
         new_contents = fix_xrefs(old_contents, chapter, chapter_info)
         new_contents = fix_title(new_contents, chapter, chapter_info)
@@ -170,7 +176,11 @@ def copy_chapters_across_with_fixes(chapter_info, fixed_toc):
             _prep_prev_and_next_buttons(chapter, chapter_info, buttons_html)
         )
         body.append(html.fromstring(
-            comments_html.replace('PAGE_IDENTIFIER', chapter.split('.')[0])
+            comments_html.replace(
+                'PAGE_IDENTIFIER', chapter.split('.')[0]
+            ).replace(
+                'PAGE_URL', chapinfo.url
+            )
         ))
         body.append(analytics_div)
         fixed_contents = html.tostring(parsed)
