@@ -1,7 +1,6 @@
 title: Writing tests for external API calls
 author: Harry
-
----
+image: veil_nebula.jpg
 
 
 Here's a common question from people doing testing in Python:

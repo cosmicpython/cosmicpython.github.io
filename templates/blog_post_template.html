@@ -1,8 +1,18 @@
 {% extends "templates/base.html" %}
 
+{% block url_path %}{{ url }}{% endblock %}
+
 {% block content_block %}
   <h1> {{ post.title }}</h1>
   <p>by {{ post.author }}, {{ post.date }}</p>
+
+  {% if post.image %}
+    <div class="row">
+      <div class="column">
+        <img src="/images/{{ post.image }}" />
+      </div>
+    </div>
+  {% endif %}
 
   <div class="content">
     {{content}}

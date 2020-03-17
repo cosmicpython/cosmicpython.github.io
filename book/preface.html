@@ -24,12 +24,12 @@
     border: 0;
     margin-bottom: 2em;
 }
-
 .exampleblock .title {
     text-align: right;
 }
 
-.prev_and_next_buttons {
+/* prev/next chapter links at bottom of page */
+.prev_and_next_chapter_links {
     margin: 10px;
 }
 .prev_chapter_link {
@@ -39,10 +39,18 @@
     float: right;
 }
 
+
+/* a few tweaks to existing styles */
+#toc li {
+    margin-top: 0.5em;
+}
+
 #footnotes hr {
     width: 100%;
 }
+
 /* end customisations by harry */
+
 
 /* CUSTOMISATIONS */
 
@@ -304,7 +312,7 @@ and the chapters they live in.</p>
 <h4 id="_part1"><a data-type="xref" data-xrefstyle="chap-num-title" href="/book/part1.html">#part1</a></h4>
 <div class="dlist">
 <dl>
-<dt class="hdlist1">Domain modeling and DDD (Chapters <a href="/book/chapter_01_domain_model.html">1</a> and <a href="/book/chapter_02_repository.html">2</a>)</dt>
+<dt class="hdlist1">Domain modeling and DDD (Chapters <a data-type="xref" data-xrefstyle="select:labelnumber" href="/book/chapter_01_domain_model.html">#chapter_01_domain_model</a> and <a data-type="xref" data-xrefstyle="select:labelnumber" href="/book/chapter_07_aggregate.html">#chapter_07_aggregate</a>)</dt>
 <dd>
 <p>At some level, everyone has learned the lesson that complex business
 problems need to be reflected in code, in the form of a model of the domain.
@@ -611,7 +619,7 @@ for being a tireless advocate of the reader. Similarly-superlative thanks to the
 </div>
 </div>
 </div>
-<div class="prev_and_next_buttons">
+<div class="prev_and_next_chapter_links">
   <hr>
   <a class="prev_chapter_link" href="/book/appendix_validation.html">&lt;&lt; Previous - Appendix E: Validation</a>
   <a class="next_chapter_link" href="/book/introduction.html">Next - Introduction &gt;&gt;</a>
@@ -625,7 +633,7 @@ for being a tireless advocate of the reader. Similarly-superlative thanks to the
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-17 09:07:44 UTC
+Last updated 2020-03-17 11:40:42 UTC
 </div>
 </div>
 <div><div id="disqus_thread" style="margin: 10px"></div>

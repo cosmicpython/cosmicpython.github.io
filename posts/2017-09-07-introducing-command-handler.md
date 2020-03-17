@@ -1,7 +1,7 @@
 title: Introducing Command Handler
 author: Bob
+image: tarantula_nebula.jpg
 
----
 
 The term DDD comes from the book by Eric Evans: ["Domain-Driven Design: Tackling
 Complexity in the Heart of Software"]([https://www.amazon.co.uk/Domain-driven-Design-Tackling-Complexity-Software/dp/0321125215).
