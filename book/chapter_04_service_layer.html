@@ -673,7 +673,9 @@ when the Flask app gives it a <code>SqlAlchemyRepository</code>.</p>
 this is what we mean when we say we should "depend on abstractions." Our
 <em>high-level module</em>, the service layer, depends on the repository abstraction.
 And the <em>details</em> of the implementation for our specific choice of persistent
-storage also depend on that same abstraction. See Figures <a data-type="xref" href="#service_layer_diagram_abstract_dependencies" data-xrefstyle="select:labelnumber">#service_layer_diagram_abstract_dependencies</a> and <a data-type="xref" href="#service_layer_diagram_test_dependencies" data-xrefstyle="select:labelnumber">#service_layer_diagram_test_dependencies</a>.</p>
+storage also depend on that same abstraction. See
+<a href="#service_layer_diagram_abstract_dependencies">Abstract dependencies of the service layer</a> and
+<a href="#service_layer_diagram_test_dependencies">Tests provide an implementation of the abstract dependency</a>.</p>
 </div>
 <div class="paragraph">
 <p>See also in <a href="/book/appendix_csvs.html">[appendix_csvs]</a> a worked example of swapping out the
@@ -1173,7 +1175,7 @@ You&#8217;ll see!</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-17 09:07:44 UTC
+Last updated 2020-03-17 17:37:09 UTC
 </div>
 </div>
 <style>
@@ -1251,7 +1253,7 @@ pre.pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
 <script>
 
 var disqus_config = function () {
-this.page.url = 'https://cosmicpython.com/book/chapter_04_service_layer.html';
+this.page.url = 'https://www.cosmicpython.com/book/chapter_04_service_layer.html';
 this.page.identifier = 'chapter_04_service_layer';
 };
 
