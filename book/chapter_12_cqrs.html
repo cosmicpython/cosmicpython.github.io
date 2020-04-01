@@ -131,7 +131,10 @@ table {
 <h2 id="chapter_12_cqrs">12: Command-Query Responsibility Segregation (CQRS)</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>In this chapter, we&#8217;re going to start with a fairly uncontroversial insight:
+<p>
+
+
+In this chapter, we&#8217;re going to start with a fairly uncontroversial insight:
 reads (queries) and writes (commands) are different, so they
 should be treated differently (or have their responsibilities segregated, if you will). Then we&#8217;re going to push that insight as far
 as we can.</p>
@@ -179,7 +182,9 @@ git checkout chapter_11_external_events</pre>
 <div class="sect2">
 <h3 id="_domain_models_are_for_writing">Domain Models Are for Writing</h3>
 <div class="paragraph">
-<p>We&#8217;ve spent a lot of time in this book talking about how to build software that
+<p>
+
+We&#8217;ve spent a lot of time in this book talking about how to build software that
 enforces the rules of our domain. These rules, or constraints, will be different
 for every application, and they make up the interesting core of our systems.</p>
 </div>
@@ -234,7 +239,8 @@ state of our system. We&#8217;ve built a flexible set of tools for writing data.
 <div class="sect2">
 <h3 id="_most_users_arent_going_to_buy_your_furniture">Most Users Aren&#8217;t Going to Buy Your Furniture</h3>
 <div class="paragraph">
-<p>At MADE.com, we have a system very like the allocation service. In a busy day, we
+<p>
+At MADE.com, we have a system very like the allocation service. In a busy day, we
 might process one hundred orders in an hour, and we have a big gnarly system for
 allocating stock to those orders.</p>
 </div>
@@ -245,7 +251,9 @@ to figure out whether the product is still in stock and how long it will take
 us to deliver it.</p>
 </div>
 <div class="paragraph">
-<p>The <em>domain</em> is the same&#8212;&#8203;we&#8217;re concerned with batches of stock, and their
+<p>
+
+The <em>domain</em> is the same&#8212;&#8203;we&#8217;re concerned with batches of stock, and their
 arrival date, and the amount that&#8217;s still available&#8212;&#8203;but the access pattern
 is very different. For example, our customers won&#8217;t notice if the query
 is a few seconds out of date, but if our allocate service is inconsistent,
@@ -256,7 +264,9 @@ making our reads <em>eventually consistent</em> in order to make them perform be
 <div class="content">
 <div class="title">Is Read Consistency Truly Attainable?</div>
 <div class="paragraph">
-<p>This idea of trading consistency against performance makes a lot of developers
+<p>
+
+This idea of trading consistency against performance makes a lot of developers
 <span class="keep-together">nervous</span> at first, so let&#8217;s talk quickly about that.</p>
 </div>
 <div class="paragraph">
@@ -307,7 +317,8 @@ read side, because stale data is essentially unavoidable.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>We can think of these requirements as forming two halves of a system:
+<p>
+We can think of these requirements as forming two halves of a system:
 the read side and the write side, shown in <a href="#read_and_write_table">Read versus write</a>.</p>
 </div>
 <div class="paragraph">
@@ -352,7 +363,11 @@ domain model are just bloat.</p>
 <div class="sect2">
 <h3 id="_postredirectget_and_cqs">Post/Redirect/Get and CQS</h3>
 <div class="paragraph">
-<p>If you do web development, you&#8217;re probably familiar with the
+<p>
+
+
+
+If you do web development, you&#8217;re probably familiar with the
 Post/Redirect/Get pattern. In this technique, a web endpoint accepts an
 HTTP POST and responds with a redirect to see the result. For example, we might
 accept a POST to <em>/batches</em> to create a new batch and redirect the user to
@@ -443,7 +458,9 @@ instead provide a new read-only endpoint to retrieve allocation state:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>OK, what might the Flask app look like?</p>
+<p>
+
+OK, what might the Flask app look like?</p>
 </div>
 <div id="flask_app_calls_view" class="exampleblock">
 <div class="title">Endpoint for viewing allocations (src/allocation/entrypoints/flask_app.py)</div>
@@ -477,7 +494,10 @@ to build read-only views of our data&#8230;&#8203;</p>
 <div class="sect2">
 <h3 id="hold-on-ch12">Hold On to Your Lunch, Folks</h3>
 <div class="paragraph">
-<p>Hmm, so we can probably just add a list method to our existing repository
+<p>
+
+
+Hmm, so we can probably just add a list method to our existing repository
 object:</p>
 </div>
 <div id="views_dot_py" class="exampleblock">
@@ -541,7 +561,10 @@ Splitting out your read-only views from your state-modifying
 <div class="sect2">
 <h3 id="_testing_cqrs_views">Testing CQRS Views</h3>
 <div class="paragraph">
-<p>Before we get into exploring various options, let&#8217;s talk about testing.
+<p>
+
+
+Before we get into exploring various options, let&#8217;s talk about testing.
 Whichever approaches you decide to go for, you&#8217;re probably going to need
 at least one integration test.  Something like this:</p>
 </div>
@@ -582,7 +605,10 @@ any implementation/infrastructure details about how things get stored.</p>
 <div class="sect2">
 <h3 id="_obvious_alternative_1_using_the_existing_repository">"Obvious" Alternative 1: Using the Existing Repository</h3>
 <div class="paragraph">
-<p>How about adding a helper method to our <code>products</code> repository?</p>
+<p>
+
+
+How about adding a helper method to our <code>products</code> repository?</p>
 </div>
 <div id="view_using_repo" class="exampleblock">
 <div class="title">A simple view that uses the repository (src/allocation/views.py)</div>
@@ -654,7 +680,9 @@ downside, it all feels quite clunky.</p>
 <div class="sect2">
 <h3 id="_your_domain_model_is_not_optimized_for_read_operations">Your Domain Model Is Not Optimized for Read Operations</h3>
 <div class="paragraph">
-<p>What we&#8217;re seeing here are the effects of having a domain model that
+<p>
+
+What we&#8217;re seeing here are the effects of having a domain model that
 is designed primarily for write operations, while our requirements for
 reads are often conceptually quite different.</p>
 </div>
@@ -693,7 +721,10 @@ more awkward to use for read operations.</p>
 <div class="sect2">
 <h3 id="_obvious_alternative_2_using_the_orm">"Obvious" Alternative 2: Using the ORM</h3>
 <div class="paragraph">
-<p>You may be thinking, OK, if our repository is clunky, and working with
+<p>
+
+
+You may be thinking, OK, if our repository is clunky, and working with
 <code>Products</code> is clunky, then I can at least  use my ORM and work with <code>Batches</code>.
 That&#8217;s what it&#8217;s for!</p>
 </div>
@@ -732,8 +763,10 @@ SQLAlchemy docs. SQL is just SQL.</p>
 <div class="sect2">
 <h3 id="_select_n1_and_other_performance_considerations">SELECT N+1 and Other Performance Considerations</h3>
 <div class="paragraph">
-<p>The so-called
-<a href="https://oreil.ly/OkBOS"><code>SELECT N+1</code></a>
+<p>
+
+
+The so-called <a href="https://oreil.ly/OkBOS"><code>SELECT N+1</code></a>
 problem is a common performance problem with ORMs: when retrieving a list of
 objects, your ORM will often perform an initial query to, say, get all the IDs
 of the objects it needs, and then issue individual queries for each object to
@@ -748,9 +781,10 @@ retrieve their attributes. This is especially likely if there are any foreign-ke
 <td class="content">
 In all fairness, we should say that SQLAlchemy is quite good at avoiding
     the <code>SELECT N+1</code> problem. It doesn&#8217;t display it in the preceding example, and
-    you can request
-    <a href="https://oreil.ly/XKDDm">eager loading</a>
+    you can request <a href="https://oreil.ly/XKDDm">eager loading</a>
     explicitly to avoid it when dealing with joined objects.
+    
+    
 </td>
 </tr>
 </table>
@@ -767,7 +801,9 @@ build read replicas, or even add caching layers.</p>
 <div class="sect2">
 <h3 id="_time_to_completely_jump_the_shark">Time to Completely Jump the Shark</h3>
 <div class="paragraph">
-<p>On that note: have we convinced you that our raw SQL version isn&#8217;t so weird as
+<p>
+
+On that note: have we convinced you that our raw SQL version isn&#8217;t so weird as
 it first seemed? Perhaps we were exaggerating for effect? Just you wait.</p>
 </div>
 <div class="paragraph">
@@ -818,7 +854,8 @@ isn&#8217;t uncommon, once you&#8217;ve reached the limits of what you can do wi
 joins. The fastest queries will always be <code>SELECT * from <em>mytable</em> WHERE <em>key</em> = :<em>value</em></code>.</p>
 </div>
 <div class="paragraph">
-<p>More than raw speed, though, this approach buys us scale. When we&#8217;re writing
+<p>
+More than raw speed, though, this approach buys us scale. When we&#8217;re writing
 data to a relational database, we need to make sure that we get a lock over the
 rows we&#8217;re changing so we don&#8217;t run into consistency problems.</p>
 </div>
@@ -843,7 +880,10 @@ Because read replicas can be inconsistent, there&#8217;s no limit to how many we
 </table>
 </div>
 <div class="paragraph">
-<p>Keeping the read model up to date is the challenge!  Database views
+<p>
+
+
+Keeping the read model up to date is the challenge!  Database views
 (materialized or otherwise) and triggers are a common solution, but that limits
 you to your database. We&#8217;d like to show you how to reuse our event-driven
 architecture instead.</p>
@@ -977,7 +1017,9 @@ to update the read model, which the GET/read operation can use.</p>
 <div class="content">
 <div class="title">Rebuilding from Scratch</div>
 <div class="paragraph">
-<p>"What happens when it breaks?" should be the first question we ask as engineers.</p>
+<p>
+
+"What happens when it breaks?" should be the first question we ask as engineers.</p>
 </div>
 <div class="paragraph">
 <p>How do we deal with a view model that hasn&#8217;t been updated because of a bug or
@@ -1015,7 +1057,9 @@ data.</p>
 <div class="sect2">
 <h3 id="_changing_our_read_model_implementation_is_easy">Changing Our Read Model Implementation Is Easy</h3>
 <div class="paragraph">
-<p>Let&#8217;s see the flexibility that our event-driven model buys us in action,
+<p>
+
+Let&#8217;s see the flexibility that our event-driven model buys us in action,
 by seeing what happens if we ever decide we want to implement a read model by
 using a totally separate storage engine, Redis.</p>
 </div>
@@ -1091,6 +1135,7 @@ are against our view.</p>
 Event handlers are a great way to manage updates to a read model,
     if you decide you need one.  They also make it easy to change the
     implementation of that read model at a later date.
+    
 </td>
 </tr>
 </table>
@@ -1113,10 +1158,13 @@ to Redis), and see which you prefer.</p>
 <div class="sect2">
 <h3 id="_wrap_up">Wrap-Up</h3>
 <div class="paragraph">
-<p><a href="#view_model_tradeoffs">Trade-offs of various view model options</a> proposes some pros and cons for each of our options.</p>
+<p>
+
+<a href="#view_model_tradeoffs">Trade-offs of various view model options</a> proposes some pros and cons for each of our options.</p>
 </div>
 <div class="paragraph">
-<p>As it happens, the allocation service at MADE.com does use "full-blown" CQRS,
+<p>
+As it happens, the allocation service at MADE.com does use "full-blown" CQRS,
 with a read model stored in Redis, and even a second layer of cache provided
 by Varnish. But its use cases are quite a bit different from what
 we&#8217;ve shown here. For the kind of allocation service we&#8217;re building, it seems
@@ -1182,7 +1230,8 @@ quite tempted to go with the raw-SQL view we showed right at the beginning of
 the chapter.</p>
 </div>
 <div class="paragraph">
-<p>On that note, let&#8217;s sally forth into our final chapter.</p>
+<p>On that note, let&#8217;s sally forth into our final chapter.
+</p>
 </div>
 </div>
 </div>
@@ -1195,7 +1244,7 @@ the chapter.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-17 09:07:44 UTC
+Last updated 2020-03-20 13:47:19 UTC
 </div>
 </div>
 <style>

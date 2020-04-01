@@ -131,7 +131,10 @@ table {
 <h2 id="chapter_11_external_events">11: Event-Driven Architecture: Using Events to Integrate Microservices</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>In the preceding chapter, we never actually spoke about <em>how</em> we would receive
+<p>
+
+
+In the preceding chapter, we never actually spoke about <em>how</em> we would receive
 the "batch quantity changed" events, or indeed, how we might notify the
 outside world about reallocations.</p>
 </div>
@@ -184,7 +187,11 @@ git checkout chapter_10_commands</pre>
 <div class="sect2">
 <h3 id="_distributed_ball_of_mud_and_thinking_in_nouns">Distributed Ball of Mud, and Thinking in Nouns</h3>
 <div class="paragraph">
-<p>Before we get into that, let&#8217;s talk about the alternatives. We regularly talk to
+<p>
+
+
+
+Before we get into that, let&#8217;s talk about the alternatives. We regularly talk to
 engineers who are trying to build out a microservices architecture. Often they
 are migrating from an existing application, and their first instinct is to
 split their system into <em>nouns</em>.</p>
@@ -223,7 +230,8 @@ Rel_D(batches, warehouse, "Sends instructions to")
 <p>Each "thing" in our system has an associated service, which exposes an HTTP API.</p>
 </div>
 <div class="paragraph">
-<p>Let&#8217;s work through an example happy-path flow in <a href="#command_flow_diagram_1">Command flow 1</a>:
+<p>
+Let&#8217;s work through an example happy-path flow in <a href="#command_flow_diagram_1">Command flow 1</a>:
 our users visit a website and can choose from products that are in stock. When
 they add an item to their basket, we will reserve some stock for them. When an
 order is complete, we confirm the reservation, which causes us to send dispatch
@@ -291,7 +299,8 @@ might mean we need to reallocate a customer&#8217;s order.</p>
 <p>Where does this logic go?</p>
 </div>
 <div class="paragraph">
-<p>Well, the Warehouse system knows that the stock has been damaged, so maybe it
+<p>
+Well, the Warehouse system knows that the stock has been damaged, so maybe it
 should own this process, as shown in <a href="#command_flow_diagram_2">Command flow 2</a>.</p>
 </div>
 <div id="command_flow_diagram_2" class="imageblock">
@@ -332,13 +341,19 @@ system drives Batches, which drives Orders.</p>
 </div>
 <div class="paragraph">
 <p>Multiply this by all the other workflows we need to provide, and you can see
-how services quickly get tangled up.</p>
+how services quickly get tangled up.
+
+
+
+</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_error_handling_in_distributed_systems">Error Handling in Distributed Systems</h3>
 <div class="paragraph">
-<p>"Things break" is a universal law of software engineering. What happens in our
+<p>
+
+"Things break" is a universal law of software engineering. What happens in our
 system when one of our requests fails? Let&#8217;s say that a network error happens
 right after we take a user&#8217;s order for three <code>MISBEGOTTEN-RUG</code>, as shown in
 <a href="#command_flow_diagram_with_error">Command flow with error</a>.</p>
@@ -350,7 +365,10 @@ guaranteed. The failure state of our batches service has bubbled up and is
 affecting the reliability of our order service.</p>
 </div>
 <div class="paragraph">
-<p>When two things have to be changed together, we say that they are <em>coupled</em>. We
+<p>
+
+
+When two things have to be changed together, we say that they are <em>coupled</em>. We
 can think of this failure cascade as a kind of <em>temporal coupling</em>: every part
 of the system has to work at the same time for any part of it to work. As the
 system gets bigger, there is an exponentially increasing probability that some
@@ -384,7 +402,8 @@ Orders --&gt; Customer: ???
 <div class="content">
 <div class="title">Connascence</div>
 <div class="paragraph">
-<p>We&#8217;re using the term <em>coupling</em> here, but there&#8217;s another way to describe
+<p>
+We&#8217;re using the term <em>coupling</em> here, but there&#8217;s another way to describe
 the relationships between our systems. <em>Connascence</em> is a term used by some
 authors to describe the different types of coupling.</p>
 </div>
@@ -410,7 +429,8 @@ components need to agree only on the name of an event and the names of fields
 it carries.</p>
 </div>
 <div class="paragraph">
-<p>We can never completely avoid coupling, except by having our software not talk
+<p>
+We can never completely avoid coupling, except by having our software not talk
 to any other software. What we want is to avoid <em>inappropriate</em> coupling.
 Connascence provides a mental model for understanding the strength and type of
 coupling inherent in different architectural styles. Read all about it at
@@ -422,7 +442,14 @@ coupling inherent in different architectural styles. Read all about it at
 <div class="sect2">
 <h3 id="_the_alternative_temporal_decoupling_using_asynchronous_messaging">The Alternative: Temporal Decoupling Using Asynchronous Messaging</h3>
 <div class="paragraph">
-<p>How do we get appropriate coupling? We&#8217;ve already seen part of the answer, which is that we should think in
+<p>
+
+
+
+
+
+
+How do we get appropriate coupling? We&#8217;ve already seen part of the answer, which is that we should think in
 terms of verbs, not nouns. Our domain model is about modeling a business
 process. It&#8217;s not a static data model about a thing; it&#8217;s a model of a verb.</p>
 </div>
@@ -451,14 +478,16 @@ If this sounds familiar, it should!  Segregating responsibilities is
 </table>
 </div>
 <div class="paragraph">
-<p>Like aggregates, microservices should be <em>consistency boundaries</em>. Between two
+<p>
+
+Like aggregates, microservices should be <em>consistency boundaries</em>. Between two
 services, we can accept eventual consistency, and that means we don&#8217;t need to
 rely on synchronous calls. Each service accepts commands from the outside world
 and raises events to record the result. Other services can listen to those
 events to trigger the next steps in the workflow.</p>
 </div>
 <div class="paragraph">
-<p>To avoid the Distributed Ball of Mud anti-pattern, instead of temporally coupled HTTP
+<p>To avoid the Distributed Ball of Mud antipattern, instead of temporally coupled HTTP
 API calls, we want to use asynchronous messaging to integrate our systems. We
 want our <code>BatchQuantityChanged</code> messages to come in as external messages from
 upstream systems, and we want our system to publish <code>Allocated</code> events for
@@ -478,7 +507,12 @@ we can do that locally.</p>
 <div class="sect2">
 <h3 id="_using_a_redis_pubsub_channel_for_integration">Using a Redis Pub/Sub Channel for Integration</h3>
 <div class="paragraph">
-<p>Let&#8217;s see how it will all work concretely. We&#8217;ll need some way of getting
+<p>
+
+
+
+
+Let&#8217;s see how it will all work concretely. We&#8217;ll need some way of getting
 events out of one system and into another, like our message bus, but for
 services. This piece of infrastructure is often called a <em>message broker</em>. The
 role of a message broker is to take messages from publishers and deliver them
@@ -544,7 +578,10 @@ MessageBus -&gt; Redis : publish to line_allocated channel
 <div class="sect2">
 <h3 id="_test_driving_it_all_using_an_end_to_end_test">Test-Driving It All Using an End-to-End Test</h3>
 <div class="paragraph">
-<p>Here&#8217;s how we might start with an end-to-end test.  We can use our existing
+<p>
+
+
+Here&#8217;s how we might start with an end-to-end test.  We can use our existing
 API to create batches, and then we&#8217;ll test both inbound and outbound messages:</p>
 </div>
 <div id="redis_e2e_test" class="exampleblock">
@@ -613,7 +650,9 @@ because it won&#8217;t be the only message on that channel.</p>
 <div class="sect3">
 <h4 id="_redis_is_another_thin_adapter_around_our_message_bus">Redis Is Another Thin Adapter Around Our Message Bus</h4>
 <div class="paragraph">
-<p>Our Redis pub/sub listener (we call it an <em>event consumer</em>) is very much like
+<p>
+
+Our Redis pub/sub listener (we call it an <em>event consumer</em>) is very much like
 Flask: it translates from the outside world to our events:</p>
 </div>
 <div id="redis_eventconsumer_first_cut" class="exampleblock">
@@ -686,7 +725,8 @@ allowing one or more message types to go to different channels.</p>
 <div class="sect3">
 <h4 id="_our_new_outgoing_event">Our New Outgoing Event</h4>
 <div class="paragraph">
-<p>Here&#8217;s what the <code>Allocated</code> event will look like:</p>
+<p>
+Here&#8217;s what the <code>Allocated</code> event will look like:</p>
 </div>
 <div id="allocated_event" class="exampleblock">
 <div class="title">New event (src/allocation/domain/events.py)</div>
@@ -733,7 +773,8 @@ first, naturally):</p>
 </div>
 </div>
 <div class="paragraph">
-<p>The handler for <code>ChangeBatchQuantity</code> already exists, so all we need to add
+<p>
+The handler for <code>ChangeBatchQuantity</code> already exists, so all we need to add
 is a handler that publishes the outgoing event:</p>
 </div>
 <div id="another_handler" class="exampleblock">
@@ -750,7 +791,8 @@ is a handler that publishes the outgoing event:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Publishing the event uses our helper function from the Redis wrapper:</p>
+<p>
+Publishing the event uses our helper function from the Redis wrapper:</p>
 </div>
 <div id="publish_event_handler" class="exampleblock">
 <div class="title">Publish to Redis (src/allocation/service_layer/handlers.py)</div>
@@ -770,7 +812,9 @@ is a handler that publishes the outgoing event:</p>
 <div class="sect2">
 <h3 id="_internal_versus_external_events">Internal Versus External Events</h3>
 <div class="paragraph">
-<p>It&#8217;s a good idea to keep the distinction between internal and external events
+<p>
+
+It&#8217;s a good idea to keep the distinction between internal and external events
 clear.  Some events may come from the outside, and some events may get upgraded
 and published externally, but not all of them will.  This is particularly important
 if you get into
@@ -800,7 +844,7 @@ via the API.</p>
 </div>
 <div class="paragraph">
 <p>You will likely want to add a new E2E test and feed through some changes into
-<span class="keep-together"><code>redis_eventconsumer.py</code></span>.</p>
+<span class="keep-together"><em>redis_eventconsumer.py</em></span>.</p>
 </div>
 </div>
 </div>
@@ -812,7 +856,8 @@ via the API.</p>
 externally&#8212;&#8203;our <code>publish</code> handler converts an event to a message on a Redis
 channel. We use events to talk to the outside world.  This kind of temporal
 decoupling buys us a lot of flexibility in our application integrations, but
-as always, it comes at a cost.</p>
+as always, it comes at a cost.
+</p>
 </div>
 <blockquote>
 
@@ -873,9 +918,13 @@ need thinking through.</p>
 </tbody>
 </table>
 <div class="paragraph">
-<p>More generally, if you&#8217;re moving from a model of synchronous messaging to an
+<p>
+More generally, if you&#8217;re moving from a model of synchronous messaging to an
 async one, you also open up a whole host of problems having to do with message
-reliability and eventual consistency. Read on to <a href="/book/epilogue_1_how_to_get_there_from_here.html#footguns">[footguns]</a>.</p>
+reliability and eventual consistency. Read on to <a href="/book/epilogue_1_how_to_get_there_from_here.html#footguns">[footguns]</a>.
+
+
+</p>
 </div>
 </div>
 </div>
@@ -888,7 +937,7 @@ reliability and eventual consistency. Read on to <a href="/book/epilogue_1_how_t
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-17 09:07:44 UTC
+Last updated 2020-03-20 13:47:19 UTC
 </div>
 </div>
 <style>

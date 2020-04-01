@@ -131,16 +131,21 @@ table {
 <h2 id="chapter_06_uow">6: Unit of Work Pattern</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>In this chapter we&#8217;ll introduce the final piece of the puzzle that ties
+<p>
+In this chapter we&#8217;ll introduce the final piece of the puzzle that ties
 together the Repository and Service Layer patterns: the <em>Unit of Work</em> pattern.</p>
 </div>
 <div class="paragraph">
-<p>If the Repository pattern is our abstraction over the idea of persistent storage,
+<p>
+
+If the Repository pattern is our abstraction over the idea of persistent storage,
 the Unit of Work (UoW) pattern is our abstraction over the idea of <em>atomic operations</em>. It
 will allow us to finally and fully decouple our service layer from the data layer.</p>
 </div>
 <div class="paragraph">
-<p><a href="#before_uow_diagram">Without UoW: API talks directly to three layers</a> shows that, currently, a lot of communication occurs
+<p>
+
+<a href="#before_uow_diagram">Without UoW: API talks directly to three layers</a> shows that, currently, a lot of communication occurs
 across the layers of our infrastructure: the API talks directly to the database
 layer to start a session, it talks to the repository layer to initialize
 <code>SQLAlchemyRepository</code>, and it talks to the service layer to ask it to allocate.</p>
@@ -176,14 +181,17 @@ git checkout chapter_04_service_layer</pre>
 <div class="title">Figure 1. Without UoW: API talks directly to three layers</div>
 </div>
 <div class="paragraph">
-<p><a href="#after_uow_diagram">With UoW: UoW now manages database state</a> shows our target state. The Flask API now does only two
+<p>
+
+<a href="#after_uow_diagram">With UoW: UoW now manages database state</a> shows our target state. The Flask API now does only two
 things: it initializes a unit of work, and it invokes a service. The service
 collaborates with the UoW (we like to think of the UoW as being part of the
 service layer), but neither the service function itself nor Flask now needs
 to talk directly to the database.</p>
 </div>
 <div class="paragraph">
-<p>And we&#8217;ll do it all using a lovely piece of Python syntax, a context manager.</p>
+<p>
+And we&#8217;ll do it all using a lovely piece of Python syntax, a context manager.</p>
 </div>
 <div id="after_uow_diagram" class="imageblock width-75">
 <div class="content">
@@ -194,7 +202,9 @@ to talk directly to the database.</p>
 <div class="sect2">
 <h3 id="_the_unit_of_work_collaborates_with_the_repository">The Unit of Work Collaborates with the Repository</h3>
 <div class="paragraph">
-<p>Let&#8217;s see the unit of work (or UoW, which we pronounce "you-wow") in action. Here&#8217;s how the service layer will look when we&#8217;re finished:</p>
+<p>
+
+Let&#8217;s see the unit of work (or UoW, which we pronounce "you-wow") in action. Here&#8217;s how the service layer will look when we&#8217;re finished:</p>
 </div>
 <div id="uow_preview" class="exampleblock">
 <div class="title">Preview of unit of work in action (src/allocation/service_layer/services.py)</div>
@@ -218,11 +228,13 @@ to talk directly to the database.</p>
 <div class="colist arabic">
 <ol>
 <li>
-<p>We&#8217;ll start a UoW as a context manager.</p>
+<p>We&#8217;ll start a UoW as a context manager.
+</p>
 </li>
 <li>
 <p><code>uow.batches</code> is the batches repo, so the UoW provides us
-access to our permanent storage.</p>
+access to our permanent storage.
+</p>
 </li>
 <li>
 <p>When we&#8217;re done, we commit or roll back our work, using the UoW.</p>
@@ -230,7 +242,9 @@ access to our permanent storage.</p>
 </ol>
 </div>
 <div class="paragraph">
-<p>The UoW acts as a single entrypoint to our persistent storage, and it
+<p>
+
+The UoW acts as a single entrypoint to our persistent storage, and it
  keeps track of what objects were loaded and of the latest state.<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup></p>
 </div>
 <div class="paragraph">
@@ -256,7 +270,10 @@ to get a repository</p>
 <div class="sect2">
 <h3 id="_test_driving_a_uow_with_integration_tests">Test-Driving a UoW with Integration Tests</h3>
 <div class="paragraph">
-<p>Here are our integration tests for the UOW:</p>
+<p>
+
+
+Here are our integration tests for the UOW:</p>
 </div>
 <div id="test_unit_of_work" class="exampleblock">
 <div class="title">A basic "round-trip" test for a UoW (tests/integration/test_uow.py)</div>
@@ -297,8 +314,9 @@ and get back a <code>uow</code> object to use in our <code>with</code> block.</p
 </ol>
 </div>
 <div class="paragraph">
-<p>For the curious, the <code>insert_batch</code> and <code>get_allocated_batch_ref</code> helpers
-look like this:</p>
+<p>
+For the curious, the <code>insert_batch</code> and <code>get_allocated_batch_ref</code> helpers look
+like this:</p>
 </div>
 <div id="sql_helpers" class="exampleblock">
 <div class="title">Helpers for doing SQL stuff (tests/integration/test_uow.py)</div>
@@ -332,7 +350,10 @@ look like this:</p>
 <div class="sect2">
 <h3 id="_unit_of_work_and_its_context_manager">Unit of Work and Its Context Manager</h3>
 <div class="paragraph">
-<p>In our tests we&#8217;ve implicitly defined an interface for what a UoW needs to do. Let&#8217;s make that explicit by using an abstract
+<p>
+
+
+In our tests we&#8217;ve implicitly defined an interface for what a UoW needs to do. Let&#8217;s make that explicit by using an abstract
 base class:</p>
 </div>
 <div id="abstract_unit_of_work" class="exampleblock">
@@ -366,7 +387,9 @@ to the batches repository.</p>
 <li>
 <p>If you&#8217;ve never seen a context manager, <code>__enter__</code> and <code>__exit__</code> are
 the two magic methods that execute when we enter the <code>with</code> block and
-when we exit it, respectively. They&#8217;re our setup and teardown phases.</p>
+when we exit it, respectively. They&#8217;re our setup and teardown phases.
+
+</p>
 </li>
 <li>
 <p>We&#8217;ll call this method to explicitly commit our work when we&#8217;re ready.</p>
@@ -374,14 +397,18 @@ when we exit it, respectively. They&#8217;re our setup and teardown phases.</p>
 <li>
 <p>If we don&#8217;t commit, or if we exit the context manager by raising an error,
 we do a <code>rollback</code>. (The rollback has no effect if <code>commit()</code> has been
-called. Read on for more discussion of this.)</p>
+called. Read on for more discussion of this.)
+</p>
 </li>
 </ol>
 </div>
 <div class="sect3">
 <h4 id="_the_real_unit_of_work_uses_sqlalchemy_sessions">The Real Unit of Work Uses SQLAlchemy Sessions</h4>
 <div class="paragraph">
-<p>The main thing that our concrete implementation adds is the
+<p>
+
+
+The main thing that our concrete implementation adds is the
 database session:</p>
 </div>
 <div id="unit_of_work" class="exampleblock">
@@ -425,14 +452,17 @@ can use SQLite instead.</p>
 </li>
 <li>
 <p>The <code>__enter__</code> method is responsible for starting a database session and instantiating
-a real repository that can use that session.</p>
+a real repository that can use that session.
+</p>
 </li>
 <li>
 <p>We close the session on exit.</p>
 </li>
 <li>
 <p>Finally, we provide concrete <code>commit()</code> and <code>rollback()</code> methods that
-use our database session.</p>
+use our database session.
+
+</p>
 </li>
 </ol>
 </div>
@@ -440,7 +470,10 @@ use our database session.</p>
 <div class="sect3">
 <h4 id="_fake_unit_of_work_for_testing">Fake Unit of Work for Testing</h4>
 <div class="paragraph">
-<p>Here&#8217;s how we use a fake UoW in our service-layer tests:</p>
+<p>
+
+
+Here&#8217;s how we use a fake UoW in our service-layer tests:</p>
 </div>
 <div id="fake_unit_of_work" class="exampleblock">
 <div class="title">Fake UoW (tests/unit/test_services.py)</div>
@@ -503,7 +536,9 @@ This is considerably less cumbersome.</p>
 <div class="content">
 <div class="title">Don&#8217;t Mock What You Don&#8217;t Own</div>
 <div class="paragraph">
-<p>Why do we feel more comfortable mocking the UoW than the session?
+<p>
+
+Why do we feel more comfortable mocking the UoW than the session?
 Both of our fakes achieve the same thing: they give us a way to swap out our
 persistence layer so we can run tests in memory instead of needing to
 talk to a real database. The difference is in the resulting design.</p>
@@ -528,7 +563,8 @@ start and stop units of work.</p>
 <p>"Don&#8217;t mock what you don&#8217;t own" is a rule of thumb that forces us to build
 these simple abstractions over messy subsystems. This has the same performance
 benefit as mocking the SQLAlchemy session but encourages us to think carefully
-about our designs.</p>
+about our designs.
+</p>
 </div>
 </div>
 </div>
@@ -537,7 +573,9 @@ about our designs.</p>
 <div class="sect2">
 <h3 id="_using_the_uow_in_the_service_layer">Using the UoW in the Service Layer</h3>
 <div class="paragraph">
-<p>Here&#8217;s what our new service layer looks like:</p>
+<p>
+
+Here&#8217;s what our new service layer looks like:</p>
 </div>
 <div id="service_layer_with_uow" class="exampleblock">
 <div class="title">Service layer using UoW (src/allocation/service_layer/services.py)</div>
@@ -573,7 +611,8 @@ about our designs.</p>
 <ol>
 <li>
 <p>Our service layer now has only the one dependency, once again
-on an <em>abstract</em> UoW.</p>
+on an <em>abstract</em> UoW.
+</p>
 </li>
 </ol>
 </div>
@@ -581,7 +620,11 @@ on an <em>abstract</em> UoW.</p>
 <div class="sect2">
 <h3 id="_explicit_tests_for_commitrollback_behavior">Explicit Tests for Commit/Rollback Behavior</h3>
 <div class="paragraph">
-<p>To convince ourselves that the commit/rollback behavior works, we wrote
+<p>
+
+
+
+To convince ourselves that the commit/rollback behavior works, we wrote
 a couple of tests:</p>
 </div>
 <div id="testing_rollback" class="exampleblock">
@@ -629,6 +672,7 @@ We haven&#8217;t shown it here, but it can be worth testing some of the more
     SQLite instead of Postgres, but in <a href="/book/chapter_07_aggregate.html">[chapter_07_aggregate]</a>, we&#8217;ll switch
     some of the tests to using the real database. It&#8217;s convenient that our UoW
     class makes that easy!
+    
 </td>
 </tr>
 </table>
@@ -637,7 +681,10 @@ We haven&#8217;t shown it here, but it can be worth testing some of the more
 <div class="sect2">
 <h3 id="_explicit_versus_implicit_commits">Explicit Versus Implicit Commits</h3>
 <div class="paragraph">
-<p>Now we briefly digress on different ways of implementing the UoW pattern.</p>
+<p>
+
+
+Now we briefly digress on different ways of implementing the UoW pattern.</p>
 </div>
 <div class="paragraph">
 <p>We could imagine a slightly different version of the UoW that commits by default
@@ -710,14 +757,18 @@ so either the user did one, or we blow their changes away. Harsh but simple.</p>
 <div class="sect2">
 <h3 id="_examples_using_uow_to_group_multiple_operations_into_an_atomic_unit">Examples: Using UoW to Group Multiple Operations into an Atomic Unit</h3>
 <div class="paragraph">
-<p>Here are a few examples showing the Unit of Work pattern in use. You can
+<p>
+
+Here are a few examples showing the Unit of Work pattern in use. You can
 see how it leads to simple reasoning about what blocks of code happen
 together.</p>
 </div>
 <div class="sect3">
 <h4 id="_example_1_reallocate">Example 1: Reallocate</h4>
 <div class="paragraph">
-<p>Suppose we want to be able to deallocate and then reallocate orders:</p>
+<p>
+
+Suppose we want to be able to deallocate and then reallocate orders:</p>
 </div>
 <div id="reallocate" class="exampleblock">
 <div class="title">Reallocate service function</div>
@@ -751,7 +802,8 @@ the <code>deallocate()</code> either.</p>
 <div class="sect3">
 <h4 id="_example_2_change_batch_quantity">Example 2: Change Batch Quantity</h4>
 <div class="paragraph">
-<p>Our shipping company gives us a call to say that one of the container doors
+<p>
+Our shipping company gives us a call to say that one of the container doors
 opened, and half our sofas have fallen into the Indian Ocean. Oops!</p>
 </div>
 <div id="change_batch_quantity" class="exampleblock">
@@ -774,7 +826,9 @@ opened, and half our sofas have fallen into the Indian Ocean. Oops!</p>
 <ol>
 <li>
 <p>Here we may need to deallocate any number of lines. If we get a failure
-at any stage, we probably want to commit none of the changes.</p>
+at any stage, we probably want to commit none of the changes.
+
+</p>
 </li>
 </ol>
 </div>
@@ -783,7 +837,9 @@ at any stage, we probably want to commit none of the changes.</p>
 <div class="sect2">
 <h3 id="_tidying_up_the_integration_tests">Tidying Up the Integration Tests</h3>
 <div class="paragraph">
-<p>We now have three sets of tests, all essentially pointing at the database:
+<p>
+
+We now have three sets of tests, all essentially pointing at the database:
 <em>test_orm.py</em>, <em>test_repository.py</em>, and <em>test_uow.py</em>. Should we throw any
 away?</p>
 </div>
@@ -854,12 +910,15 @@ This is another example of the lesson from <a href="/book/chapter_05_high_gear_l
 <div class="sect2">
 <h3 id="_wrap_up">Wrap-Up</h3>
 <div class="paragraph">
-<p>Hopefully we&#8217;ve convinced you that the Unit of Work pattern is useful, and
+<p>
+Hopefully we&#8217;ve convinced you that the Unit of Work pattern is useful, and
 that the context manager is a really nice Pythonic way
 of visually grouping code into blocks that we want to happen atomically.</p>
 </div>
 <div class="paragraph">
-<p>This pattern is so useful, in fact, that SQLAlchemy already uses a UoW
+<p>
+
+This pattern is so useful, in fact, that SQLAlchemy already uses a UoW
 in the shape of the <code>Session</code> object. The <code>Session</code> object in SQLAlchemy is the way
 that your application loads data from the database.</p>
 </div>
@@ -869,7 +928,8 @@ changes to the entity, and when the session is <em>flushed</em>, all your change
 persisted together. Why do we go to the effort of abstracting away the SQLAlchemy session if it already implements the pattern we want?</p>
 </div>
 <div class="paragraph">
-<p><a href="#chapter_06_uow_tradeoffs">Unit of Work pattern: the trade-offs</a> discusses some of the trade-offs.</p>
+<p>
+<a href="#chapter_06_uow_tradeoffs">Unit of Work pattern: the trade-offs</a> discusses some of the trade-offs.</p>
 </div>
 <table id="chapter_06_uow_tradeoffs" class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 1. Unit of Work pattern: the trade-offs</caption>
@@ -890,7 +950,9 @@ persisted together. Why do we go to the effort of abstracting away the SQLAlchem
 <li>
 <p>We have a nice abstraction over the concept of atomic operations, and the
 context manager makes it easy to see, visually, what blocks of code are
-grouped together atomically.</p>
+grouped together atomically.
+
+</p>
 </li>
 <li>
 <p>We have explicit control over when a transaction starts and finishes, and our
@@ -917,7 +979,8 @@ just passing a session around.</p>
 <p>We&#8217;ve made it look easy, but you have to think quite carefully about
 things like rollbacks, multithreading, and nested transactions. Perhaps just
 sticking to what Django or Flask-SQLAlchemy gives you will keep your life
-simpler.</p>
+simpler.
+</p>
 </li>
 </ul>
 </div></div></td>
@@ -937,6 +1000,9 @@ SQLAlchemy <code>Session</code>.</p>
 <div class="sidebarblock nobreakinside less_space">
 <div class="content">
 <div class="title">Unit of Work Pattern Recap</div>
+<div class="paragraph">
+<p></p>
+</div>
 <div class="dlist">
 <dl>
 <dt class="hdlist1">The Unit of Work pattern is an abstraction around data integrity</dt>
@@ -968,7 +1034,8 @@ to keep us loosely coupled.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Lastly, we&#8217;re motivated again by the dependency inversion principle: our
+<p>
+Lastly, we&#8217;re motivated again by the dependency inversion principle: our
 service layer depends on a thin abstraction, and we attach a concrete
 implementation at the outside edge of the system. This lines up nicely with
 SQLAlchemy&#8217;s own
@@ -1005,7 +1072,7 @@ its work.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-17 09:07:44 UTC
+Last updated 2020-03-20 13:47:19 UTC
 </div>
 </div>
 <style>

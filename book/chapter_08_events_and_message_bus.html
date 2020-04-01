@@ -131,7 +131,8 @@ table {
 <h2 id="chapter_08_events_and_message_bus">8: Events and the Message Bus</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>So far we&#8217;ve spent a lot of time and energy on a simple problem that we could
+<p>
+So far we&#8217;ve spent a lot of time and energy on a simple problem that we could
 easily have solved with Django. You might be asking if the increased testability
 and expressiveness are <em>really</em> worth all the effort.</p>
 </div>
@@ -157,7 +158,11 @@ mundane stuff that makes up so much of our systems.</p>
 why it&#8217;s exactly this kind of decision that leads us to the Big Ball of Mud.</p>
 </div>
 <div class="paragraph">
-<p>Then we&#8217;ll show how to use the <em>Domain Events</em> pattern to separate side effects from our
+<p>
+
+
+
+Then we&#8217;ll show how to use the <em>Domain Events</em> pattern to separate side effects from our
 use cases, and how to use a simple <em>Message Bus</em> pattern for triggering behavior
 based on those events. We&#8217;ll show a few options for creating
 those events and how to pass them to the message bus, and finally we&#8217;ll show
@@ -197,13 +202,17 @@ git checkout chapter_07_aggregate</pre>
 <div class="sect2">
 <h3 id="_avoiding_making_a_mess">Avoiding Making a Mess</h3>
 <div class="paragraph">
-<p>So. Email alerts when we run out of stock. When we have new requirements like ones that <em>really</em> have nothing to do with the core domain, it&#8217;s all too easy to
+<p>
+
+
+So. Email alerts when we run out of stock. When we have new requirements like ones that <em>really</em> have nothing to do with the core domain, it&#8217;s all too easy to
 start dumping these things into our web controllers.</p>
 </div>
 <div class="sect3">
 <h4 id="_first_lets_avoid_making_a_mess_of_our_web_controllers">First, Let&#8217;s Avoid Making a Mess of Our Web Controllers</h4>
 <div class="paragraph">
-<p>As a one-off hack, this <em>might</em> be OK:</p>
+<p>
+As a one-off hack, this <em>might</em> be OK:</p>
 </div>
 <div id="email_in_flask" class="exampleblock">
 <div class="title">Just whack it in the endpoint&#8212;what could go wrong? (src/allocation/entrypoints/flask_app.py)</div>
@@ -242,7 +251,9 @@ able to unit test this new feature.</p>
 <div class="sect3">
 <h4 id="_and_lets_not_make_a_mess_of_our_model_either">And Let&#8217;s Not Make a Mess of Our Model Either</h4>
 <div class="paragraph">
-<p>Assuming we don&#8217;t want to put this code into our web controllers, because
+<p>
+
+Assuming we don&#8217;t want to put this code into our web controllers, because
 we want them to be as thin as possible, we may look at putting it right at
 the source, in the model:</p>
 </div>
@@ -283,7 +294,9 @@ needing to change the rules of our domain model.</p>
 <div class="sect3">
 <h4 id="_or_the_service_layer">Or the Service Layer!</h4>
 <div class="paragraph">
-<p>The requirement "Try to allocate some stock, and send an email if it fails" is
+<p>
+
+The requirement "Try to allocate some stock, and send an email if it fails" is
 an example of workflow orchestration: it&#8217;s a set of steps that the system has
 to follow to <span class="keep-together">achieve</span> a goal.</p>
 </div>
@@ -317,7 +330,9 @@ the feature feels out of place:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Catching an exception and reraising it? It could be worse, but it&#8217;s
+<p>
+
+Catching an exception and reraising it? It could be worse, but it&#8217;s
 definitely making us unhappy. Why is it so hard to find a suitable home for
 this code?</p>
 </div>
@@ -326,9 +341,12 @@ this code?</p>
 <div class="sect2">
 <h3 id="_single_responsibility_principle">Single Responsibility Principle</h3>
 <div class="paragraph">
-<p>Really, this is a violation of the <em>single responsibility principle</em> (SRP).<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup>
+<p>
+
+Really, this is a violation of the <em>single responsibility principle</em> (SRP).<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup>
 Our use case is allocation. Our endpoint, service function, and domain methods
-are all called <code><span class="keep-together">allocate</span></code>, not <code>allocate_and_send_mail_if_out_of_stock</code>.</p>
+are all called <span class="keep-together"><code>allocate</code></span>, not
+<code>allocate_and_send_mail_if_out_of_stock</code>.</p>
 </div>
 <div class="admonitionblock tip">
 <table>
@@ -349,7 +367,9 @@ to change. When we switch from email to SMS, we shouldn&#8217;t have to update o
 <code>allocate()</code> function, because that&#8217;s clearly a separate responsibility.</p>
 </div>
 <div class="paragraph">
-<p>To solve the problem, we&#8217;re going to split the orchestration
+<p>
+
+To solve the problem, we&#8217;re going to split the orchestration
 into separate steps so that the different concerns don&#8217;t get tangled up.<sup class="footnote">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup> The
 domain model&#8217;s job is to know that we&#8217;re out of stock, but the responsibility
 of sending an alert belongs elsewhere. We should be able to turn this feature
@@ -372,14 +392,17 @@ We can implement them in a few ways, so we&#8217;ll show a couple before settlin
 <div class="sect3">
 <h4 id="_the_model_records_events">The Model Records Events</h4>
 <div class="paragraph">
-<p>First, rather than being concerned about emails, our model will be in charge of
+<p>
+First, rather than being concerned about emails, our model will be in charge of
 recording <em>events</em>&#8212;facts about things that have happened. We&#8217;ll use a message bus to respond to events and invoke a new operation.</p>
 </div>
 </div>
 <div class="sect3">
 <h4 id="_events_are_simple_dataclasses">Events Are Simple Dataclasses</h4>
 <div class="paragraph">
-<p>An <em>event</em> is a kind of <em>value object</em>. Events don&#8217;t have any behavior, because
+<p>
+
+An <em>event</em> is a kind of <em>value object</em>. Events don&#8217;t have any behavior, because
 they&#8217;re pure data structures. We always name events in the language of the
 domain, and we think of them as part of our domain model.</p>
 </div>
@@ -421,10 +444,13 @@ hints in our message bus, as you&#8217;ll see shortly.</p>
 <div class="sect3">
 <h4 id="_the_model_raises_events">The Model Raises Events</h4>
 <div class="paragraph">
-<p>When our domain model records a fact that happened, we say it <em>raises</em> an event.</p>
+<p>
+
+When our domain model records a fact that happened, we say it <em>raises</em> an event.</p>
 </div>
 <div class="paragraph">
-<p>Here&#8217;s what it will look like from the outside; if we ask <code>Product</code> to allocate
+<p>
+Here&#8217;s what it will look like from the outside; if we ask <code>Product</code> to allocate
 but it can&#8217;t, it should <em>raise</em> an event:</p>
 </div>
 <div id="test_raising_event" class="exampleblock">
@@ -507,6 +533,8 @@ We&#8217;re actually addressing a code smell we had until now, which is that we 
     events, don&#8217;t raise exceptions to describe the same domain concept.
     As you&#8217;ll see later when we handle events in the Unit of Work pattern, it&#8217;s
     confusing to have to reason about events and exceptions together.
+    
+    
 </td>
 </tr>
 </table>
@@ -515,7 +543,10 @@ We&#8217;re actually addressing a code smell we had until now, which is that we 
 <div class="sect3">
 <h4 id="_the_message_bus_maps_events_to_handlers">The Message Bus Maps Events to Handlers</h4>
 <div class="paragraph">
-<p>A message bus basically says, "When I see this event, I should invoke the following
+<p>
+
+
+A message bus basically says, "When I see this event, I should invoke the following
 handler function." In other words, it&#8217;s a simple publish-subscribe system.
 Handlers are <em>subscribed</em> to receive events, which we publish to the bus. It
 sounds harder than it is, and we usually implement it with a dict:</p>
@@ -553,12 +584,12 @@ sounds harder than it is, and we usually implement it with a dict:</p>
 </td>
 <td class="content">
 Note that the message bus as implemented doesn&#8217;t give us concurrency because
-    only one handler will run at a time.
-    Our objective isn&#8217;t to support parallel threads but to separate
-    tasks conceptually, and to keep each UoW as small as possible.
-    This helps us to understand the codebase because the "recipe" for how to
-    run each use case is written in a single place.
-    See the following sidebar.
+    only one handler will run at a time. Our objective isn&#8217;t to support
+    parallel threads but to separate tasks conceptually, and to keep each UoW
+    as small as possible. This helps us to understand the codebase because the
+    "recipe" for how to run each use case is written in a single place. See the
+    following sidebar.
+    
 </td>
 </tr>
 </table>
@@ -567,13 +598,15 @@ Note that the message bus as implemented doesn&#8217;t give us concurrency becau
 <div class="content">
 <div class="title">Is This Like Celery?</div>
 <div class="paragraph">
-<p><em>Celery</em> is a popular tool in the Python world for deferring self-contained
+<p>
+<em>Celery</em> is a popular tool in the Python world for deferring self-contained
 chunks of work to an asynchronous task queue. The message bus we&#8217;re
 presenting here is very different, so the short answer to the above question is no; our message bus
 has more in common with a Node.js app, a UI event loop, or an actor framework.</p>
 </div>
 <div class="paragraph">
-<p>If you do have a requirement for moving work off the main thread, you
+<p>
+If you do have a requirement for moving work off the main thread, you
 can still use our event-based metaphors, but we suggest you
 use <em>external events</em> for that. There&#8217;s more discussion in
 <a href="/book/chapter_11_external_events.html#chapter_11_external_events_tradeoffs">[chapter_11_external_events_tradeoffs]</a>, but essentially, if you
@@ -599,7 +632,12 @@ and Python-only.</p>
 <div class="sect2">
 <h3 id="_option_1_the_service_layer_takes_events_from_the_model_and_puts_them_on_the_message_bus">Option 1: The Service Layer Takes Events from the Model and Puts Them on the Message Bus</h3>
 <div class="paragraph">
-<p>Our domain model raises events, and our message bus will call the right
+<p>
+
+
+
+
+Our domain model raises events, and our message bus will call the right
 handlers whenever an event happens. Now all we need is to connect the two. We
 need something to catch events from the model and pass them to the message
 bus&#8212;&#8203;the <em>publishing</em> step.</p>
@@ -657,7 +695,10 @@ the message bus.</p>
 <div class="sect2">
 <h3 id="_option_2_the_service_layer_raises_its_own_events">Option 2: The Service Layer Raises Its Own Events</h3>
 <div class="paragraph">
-<p>Another variant on this that we&#8217;ve used is to have the service layer
+<p>
+
+
+Another variant on this that we&#8217;ve used is to have the service layer
 in charge of creating and raising events directly, rather than having them
 raised by the domain model:</p>
 </div>
@@ -705,7 +746,10 @@ put the unit of work in charge of collecting and raising events.</p>
 <div class="sect2">
 <h3 id="_option_3_the_uow_publishes_events_to_the_message_bus">Option 3: The UoW Publishes Events to the Message Bus</h3>
 <div class="paragraph">
-<p>The UoW already has a <code>try/finally</code>, and it knows about all the aggregates
+<p>
+
+
+The UoW already has a <code>try/finally</code>, and it knows about all the aggregates
 currently in play because it provides access to the repository. So it&#8217;s
 a good place to spot events and pass them to the message bus:</p>
 </div>
@@ -754,7 +798,9 @@ repository has seen and pass their events to the message bus.</p>
 </li>
 <li>
 <p>That relies on the repository keeping track of aggregates that have been loaded
-using a new attribute, <code>.seen</code>, as you&#8217;ll see in the next listing.</p>
+using a new attribute, <code>.seen</code>, as you&#8217;ll see in the next listing.
+
+</p>
 </li>
 </ol>
 </div>
@@ -822,7 +868,8 @@ Are you wondering what happens if one of the
 <p>For the UoW to be able to publish new events, it needs to be able to ask
 the repository for which <code>Product</code> objects have been used during this session.
 We use a <code>set</code> called <code>.seen</code> to store them. That means our implementations
-need to call <code>super().__init__()</code>.</p>
+need to call <code>super().__init__()</code>.
+</p>
 </li>
 <li>
 <p>The parent <code>add()</code> method adds things to <code>.seen</code>, and now requires subclasses
@@ -852,7 +899,8 @@ The use of <code><em>._underscorey()</em></code> methods and subclassing is defi
 <div class="paragraph">
 <p>After the UoW and repository collaborate in this way to automatically keep
 track of live objects and process their events, the service layer can be
-totally free of event-handling concerns:</p>
+totally free of event-handling concerns:
+</p>
 </div>
 <div id="services_clean" class="exampleblock">
 <div class="title">Service layer is clean again (src/allocation/service_layer/services.py)</div>
@@ -876,7 +924,11 @@ totally free of event-handling concerns:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>We do also have to remember to change the fakes in the service layer and make them
+<p>
+
+
+
+We do also have to remember to change the fakes in the service layer and make them
 call <code>super()</code> in the right places, and to implement underscorey methods, but the
 changes are minimal:</p>
 </div>
@@ -912,7 +964,11 @@ changes are minimal:</p>
 <div class="content">
 <div class="title">Exercise for the Reader</div>
 <div class="paragraph">
-<p>Are you finding all those <code>._add()</code> and <code>._commit()</code> methods "super-gross," in
+<p>
+
+
+
+Are you finding all those <code>._add()</code> and <code>._commit()</code> methods "super-gross," in
 the words of our beloved tech reviewer Hynek? Does it "make you want to beat
 Harry around the head with a plushie snake"? Hey, our code listings are
 only meant to be examples, not the perfect solution! Why not go see if you
@@ -956,11 +1012,15 @@ and <code>.get()</code> methods, avoiding weird underscorey methods.</p>
 </ol>
 </div>
 <div class="paragraph">
-<p>See if you can apply a similar pattern to our UoW class in
-order to get rid of those Java-y <code>_commit()</code> methods too. You can find the code on <a href="https://github.com/cosmicpython/code/tree/chapter_08_events_and_message_bus_exercise">GitHub</a>.</p>
+<p>
+See if you can apply a similar pattern to our UoW class in
+order to get rid of those Java-y <code>_commit()</code> methods too. You can find the code
+on <a href="https://github.com/cosmicpython/code/tree/chapter_08_events_and_message_bus_exercise">GitHub</a>.</p>
 </div>
 <div class="paragraph">
-<p>Switching all the ABCs to <code>typing.Protocol</code> is a good way to force yourself to avoid using inheritance. Let us know if you come up with something nice!</p>
+<p>
+Switching all the ABCs to <code>typing.Protocol</code> is a good way to force yourself to
+avoid using inheritance. Let us know if you come up with something nice!</p>
 </div>
 </div>
 </div>
@@ -986,7 +1046,9 @@ concrete in our system. Treating events as first-class things in our model helps
 us make our code more testable and observable, and it helps isolate concerns.</p>
 </div>
 <div class="paragraph">
-<p>And <a href="#chapter_08_events_and_message_bus_tradeoffs">Domain events: the trade-offs</a> shows the trade-offs as we
+<p>
+
+And <a href="#chapter_08_events_and_message_bus_tradeoffs">Domain events: the trade-offs</a> shows the trade-offs as we
 see them.</p>
 </div>
 <table id="chapter_08_events_and_message_bus_tradeoffs" class="tableblock frame-all grid-all stretch">
@@ -1032,7 +1094,8 @@ people.</p>
 meaning your service-layer function
 doesn&#8217;t finish until all the handlers for any events are finished. That
 could cause unexpected performance problems in your web endpoints
-(adding asynchronous processing is possible but makes things even <em>more</em> confusing).</p>
+(adding asynchronous processing is possible but makes things even <em>more</em> confusing).
+</p>
 </li>
 <li>
 <p>More generally, event-driven workflows can be confusing because after things
@@ -1041,7 +1104,9 @@ in the system where you can understand how a request will be fulfilled.</p>
 </li>
 <li>
 <p>You also open yourself up to the possibility of circular dependencies between your
-event handlers, and infinite loops.</p>
+event handlers, and infinite loops.
+
+</p>
 </li>
 </ul>
 </div></div></td>
@@ -1049,7 +1114,8 @@ event handlers, and infinite loops.</p>
 </tbody>
 </table>
 <div class="paragraph">
-<p>Events are useful for more than just sending email, though. In <a href="/book/chapter_07_aggregate.html">[chapter_07_aggregate]</a> we
+<p>
+Events are useful for more than just sending email, though. In <a href="/book/chapter_07_aggregate.html">[chapter_07_aggregate]</a> we
 spent a lot of time convincing you that you should define aggregates, or
 boundaries where we guarantee consistency. People often ask, "What
 should I do if I need to change multiple aggregates as part of a request?" Now
@@ -1064,6 +1130,10 @@ and remove the <span class="keep-together">allocations</span>.</p>
 <div class="sidebarblock nobreakinside less_space">
 <div class="content">
 <div class="title">Domain Events and the Message Bus Recap</div>
+<div class="paragraph">
+<p>
+</p>
+</div>
 <div class="dlist">
 <dl>
 <dt class="hdlist1">Events can help with the single responsibility principle</dt>
@@ -1084,14 +1154,16 @@ a piece of dumb infrastructure for getting messages around the system.</p>
 <dd>
 <p>The simplest way to start using events in your system is to raise them from
 handlers by calling <code>bus.handle(some_new_event)</code> after you commit your
-unit of work.</p>
+unit of work.
+</p>
 </dd>
 <dt class="hdlist1">Option 2: Domain model raises events, service layer passes them to message bus</dt>
 <dd>
 <p>The logic about when to raise an event really should live with the model, so
 we can improve our system&#8217;s design and testability by raising events from
 the domain model. It&#8217;s easy for our handlers to collect events off the model
-objects after <code>commit</code> and pass them to the bus.</p>
+objects after <code>commit</code> and pass them to the bus.
+</p>
 </dd>
 <dt class="hdlist1">Option 3: UoW collects events from aggregates and passes them to message bus</dt>
 <dd>
@@ -1099,7 +1171,9 @@ objects after <code>commit</code> and pass them to the bus.</p>
 can tidy up by making our unit of work responsible for raising events that
 were raised by loaded objects.
 This is the most complex design and might rely on ORM magic, but it&#8217;s clean
-and easy to use once it&#8217;s set up.</p>
+and easy to use once it&#8217;s set up.
+
+</p>
 </dd>
 </dl>
 </div>
@@ -1129,7 +1203,7 @@ detail as we build a more complex workflow with our new message bus.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-17 09:07:44 UTC
+Last updated 2020-03-20 13:47:19 UTC
 </div>
 </div>
 <style>

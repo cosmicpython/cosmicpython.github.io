@@ -131,7 +131,9 @@ table {
 <h2 id="chapter_01_domain_model">1: Domain Modeling</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>This chapter looks into how we can model business processes with code, in a way
+<p>
+
+This chapter looks into how we can model business processes with code, in a way
 that&#8217;s highly compatible with TDD.  We&#8217;ll discuss <em>why</em> domain modeling
 matters, and we&#8217;ll look at a few key patterns for modeling domains: Entity,
 Value Object, and Domain Service.</p>
@@ -151,29 +153,32 @@ always be able to find these little shapes at the core.</p>
 <div class="sect2 pagebreak-before less_space">
 <h3 id="_what_is_a_domain_model">What Is a Domain Model?</h3>
 <div class="paragraph">
-<p>In the <a href="/book/introduction.html">introduction</a>, we used the term <em>business logic layer</em> to describe the
-central layer of a three-layered architecture. For the rest of the book, we&#8217;re
-going to use the term <em>domain model</em> instead. This is a term from the DDD
-community that does a better job of capturing our intended meaning (see the
-next sidebar for more on DDD).</p>
+<p>
+In the <a href="/book/introduction.html">introduction</a>, we used the term <em>business logic layer</em>
+to describe the central layer of a three-layered architecture. For the rest of
+the book, we&#8217;re going to use the term <em>domain model</em> instead. This is a term
+from the DDD community that does a better job of capturing our intended meaning
+(see the next sidebar for more on DDD).</p>
 </div>
 <div class="paragraph">
-<p>The <em>domain</em> is a fancy way of saying <em>the problem you&#8217;re trying to solve.</em> Your
-authors currently work for an online retailer of furniture. Depending on which system
-you&#8217;re talking about, the domain might be purchasing and procurement, or product
-design, or logistics and delivery. Most programmers spend their days trying to
-improve or automate business processes; the domain is the set of activities
-that those processes support.</p>
+<p>
+The <em>domain</em> is a fancy way of saying <em>the problem you&#8217;re trying to solve.</em>
+Your authors currently work for an online retailer of furniture.  Depending on
+which system you&#8217;re talking about, the domain might be purchasing and
+procurement, or product design, or logistics and delivery. Most programmers
+spend their days trying to improve or automate business processes; the domain
+is the set of activities that those processes support.</p>
 </div>
 <div class="paragraph">
-<p>A <em>model</em> is a map of a process or phenomenon that captures a useful property.
+<p>
+A <em>model</em> is a map of a process or phenomenon that captures a useful property.
 Humans are exceptionally good at producing models of things in their heads. For
 example, when someone throws a ball toward you, you&#8217;re able to predict its
-movement almost unconsciously, because you have a model of the way objects move in
-space. Your model isn&#8217;t perfect by any means. Humans have terrible intuitions
-about how objects behave at near-light speeds or in a vacuum because our model
-was never designed to cover those cases. That doesn&#8217;t mean the model is wrong,
-but it does mean that some predictions fall outside of its domain.</p>
+movement almost unconsciously, because you have a model of the way objects move
+in space. Your model isn&#8217;t perfect by any means. Humans have terrible
+intuitions about how objects behave at near-light speeds or in a vacuum because
+our model was never designed to cover those cases. That doesn&#8217;t mean the model
+is wrong, but it does mean that some predictions fall outside of its domain.</p>
 </div>
 <div class="paragraph">
 <p>The domain model is the mental map that business owners have of their
@@ -210,7 +215,8 @@ to build a shared glossary.</p>
 <p>Domain-driven design, or DDD, popularized the concept of domain modeling,<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup>
 and it&#8217;s been a hugely successful movement in transforming the way people
 design software by focusing on the core business domain. Many of the
-architecture patterns that we cover in this book&#8212;including Entity, Aggregate, Value Object (see <a href="/book/chapter_07_aggregate.html">[chapter_07_aggregate]</a>), and Repository (in
+architecture patterns that we cover in this book&#8212;including Entity, Aggregate,
+Value Object (see <a href="/book/chapter_07_aggregate.html">[chapter_07_aggregate]</a>), and Repository (in
 <a href="/book/chapter_02_repository.html">the next chapter</a>)&#8212;come from the DDD tradition.</p>
 </div>
 <div class="paragraph">
@@ -324,7 +330,9 @@ Time for some domain modeling.</p>
 <div class="sect2">
 <h3 id="_exploring_the_domain_language">Exploring the Domain Language</h3>
 <div class="paragraph">
-<p>Understanding the domain model takes time, and patience, and Post-it notes. We
+<p>
+
+Understanding the domain model takes time, and patience, and Post-it notes. We
 have an initial conversation with our business experts and agree on a glossary
 and some rules for the first minimal version of the domain model. Wherever
 possible, we ask for concrete examples to illustrate each rule.</p>
@@ -409,7 +417,9 @@ have an available quantity of 8.</p>
 <div class="sect2">
 <h3 id="_unit_testing_domain_models">Unit Testing Domain Models</h3>
 <div class="paragraph">
-<p>We&#8217;re not going to show you how TDD works in this book, but we want to show you
+<p>
+
+We&#8217;re not going to show you how TDD works in this book, but we want to show you
 how we would construct a model from this business conversation.</p>
 </div>
 <div class="sidebarblock nobreakinside less_space">
@@ -500,7 +510,8 @@ its branch (e.g.,
 <p>Type hints are still a matter of controversy in the Python world. For
 domain models, they can sometimes help to clarify or document what the
 expected arguments are, and people with IDEs are often grateful for them.
-You may decide the price paid in terms of readability is too high.</p>
+You may decide the price paid in terms of readability is too high.
+</p>
 </li>
 </ol>
 </div>
@@ -706,8 +717,9 @@ so on.  A real business in the real world knows how to pile on complexity faster
 than we can show on the page!</p>
 </div>
 <div class="paragraph">
-<p>But taking this simple domain model as a placeholder for something more complex, we&#8217;re going to extend our simple domain model in the rest of the book and
-plug it into the real world of APIs and databases and spreadsheets. We&#8217;ll
+<p>But taking this simple domain model as a placeholder for something more
+complex, we&#8217;re going to extend our simple domain model in the rest of the book
+and plug it into the real world of APIs and databases and spreadsheets. We&#8217;ll
 see how sticking rigidly to our principles of encapsulation and careful
 layering will help us to avoid a ball of mud.</p>
 </div>
@@ -715,7 +727,8 @@ layering will help us to avoid a ball of mud.</p>
 <div class="content">
 <div class="title">More Types for More Type Hints</div>
 <div class="paragraph">
-<p>If you really want to go to town with type hints, you could go so far as
+<p>
+If you really want to go to town with type hints, you could go so far as
 wrapping primitive types by using <code>typing.NewType</code>:</p>
 </div>
 <div id="too_many_types" class="exampleblock">
@@ -752,7 +765,10 @@ wrapping primitive types by using <code>typing.NewType</code>:</p>
 <div class="sect3">
 <h4 id="_dataclasses_are_great_for_value_objects">Dataclasses Are Great for Value Objects</h4>
 <div class="paragraph">
-<p>We&#8217;ve used <code>line</code> liberally in the previous code listings, but what is a
+<p>
+
+
+We&#8217;ve used <code>line</code> liberally in the previous code listings, but what is a
 line? In our business language, an <em>order</em> has multiple <em>line</em> items, where
 each line has a SKU and a quantity. We can imagine that a simple YAML file
 containing order information might look like this:</p>
@@ -780,7 +796,8 @@ containing order information might look like this:</p>
 it&#8217;s not something that uniquely identifies the line itself.)</p>
 </div>
 <div class="paragraph">
-<p>Whenever we have a business concept that has data but no identity, we
+<p>
+Whenever we have a business concept that has data but no identity, we
 often choose to represent it using the <em>Value Object</em> pattern. A <em>value object</em> is any
 domain object that is uniquely identified by the data it holds; we usually
 make them immutable:</p>
@@ -800,7 +817,8 @@ make them immutable:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>One of the nice things that dataclasses (or namedtuples) give us is <em>value
+<p>
+One of the nice things that dataclasses (or namedtuples) give us is <em>value
 equality</em>, which is the fancy way of saying, "Two lines with the same <code>orderid</code>,
 <code>sku</code>, and <code>qty</code> are equal."</p>
 </div>
@@ -833,7 +851,8 @@ equality</em>, which is the fancy way of saying, "Two lines with the same <code>
 </div>
 </div>
 <div class="paragraph">
-<p>These value objects match our real-world intuition about how their values
+<p>
+These value objects match our real-world intuition about how their values
 work. It doesn&#8217;t matter <em>which</em> &#163;10 note we&#8217;re talking about, because they all
 have the same value. Likewise, two names are equal if both the first and last
 names match; and two lines are equivalent if they have the same customer order,
@@ -873,14 +892,17 @@ example, mathematical operators:</p>
 <div class="sect3">
 <h4 id="_value_objects_and_entities">Value Objects and Entities</h4>
 <div class="paragraph">
-<p>An order line is uniquely identified by its order ID, SKU, and quantity; if we
+<p>
+
+An order line is uniquely identified by its order ID, SKU, and quantity; if we
 change one of those values, we now have a new line. That&#8217;s the definition of a
 value object: any object that is identified only by its data and doesn&#8217;t have a
 long-lived identity. What about a batch, though? That <em>is</em> identified by a
 reference.</p>
 </div>
 <div class="paragraph">
-<p>We use the term <em>entity</em> to describe a domain object that has long-lived
+<p>
+We use the term <em>entity</em> to describe a domain object that has long-lived
 identity. On the previous page, we introduced a <code>Name</code> class as a value object.
 If we take the name Harry Percival and change one letter, we have the new
 <code>Name</code> object Barry Percival.</p>
@@ -928,13 +950,16 @@ same individual. That&#8217;s because humans, unlike names, have a persistent
 </div>
 </div>
 <div class="paragraph">
-<p>Entities, unlike values, have <em>identity equality</em>. We can change their values,
+<p>
+
+Entities, unlike values, have <em>identity equality</em>. We can change their values,
 and they are still recognizably the same thing. Batches, in our example, are
 entities. We can allocate lines to a batch, or change the date that we expect
 it to arrive, and it will still be the same entity.</p>
 </div>
 <div class="paragraph">
-<p>We usually make this explicit in code by implementing equality operators on
+<p>
+We usually make this explicit in code by implementing equality operators on
 entities:</p>
 </div>
 <div id="equality_on_batches" class="exampleblock">
@@ -957,11 +982,15 @@ entities:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Python&#8217;s <code>__eq__</code> magic method
+<p>
+
+Python&#8217;s <code>__eq__</code> magic method
 defines the behavior of the class for the <code>==</code> operator.<sup class="footnote">[<a id="_footnoteref_5" class="footnote" href="#_footnotedef_5" title="View footnote.">5</a>]</sup></p>
 </div>
 <div class="paragraph">
-<p>For both entity and value objects, it&#8217;s also worth thinking through how
+<p>
+
+For both entity and value objects, it&#8217;s also worth thinking through how
 <code>__hash__</code> will work.  It&#8217;s the magic method Python uses to control the
 behavior of objects when you add them to sets or use them as dict keys;
 you can find more info <a href="https://oreil.ly/YUzg5">in the Python docs</a>.</p>
@@ -986,10 +1015,13 @@ also try to somehow make <em>that</em> attribute read-only.</p>
 <div class="title">Warning</div>
 </td>
 <td class="content">
-This is tricky territory; you shouldn&#8217;t modify <code>__hash__</code> without
-    also modifying <code>__eq__</code>.  If you&#8217;re not sure what you&#8217;re doing,
-    further reading is suggested. <a href="https://oreil.ly/vxkgX">
-    "Python Hashes and Equality"</a> by our tech reviewer Hynek Schlawack is a good place to start.
+This is tricky territory; you shouldn&#8217;t modify <code>__hash__</code>
+    without also modifying <code>__eq__</code>.  If you&#8217;re not sure what
+    you&#8217;re doing, further reading is suggested.
+    <a href="https://oreil.ly/vxkgX">"Python Hashes and Equality"</a> by our tech reviewer
+    Hynek Schlawack is a good place to start.
+    
+    
 </td>
 </tr>
 </table>
@@ -999,7 +1031,9 @@ This is tricky territory; you shouldn&#8217;t modify <code>__hash__</code> witho
 <div class="sect2">
 <h3 id="_not_everything_has_to_be_an_object_a_domain_service_function">Not Everything Has to Be an Object: A Domain Service Function</h3>
 <div class="paragraph">
-<p>We&#8217;ve made a model to represent batches, but what we actually need
+<p>
+
+We&#8217;ve made a model to represent batches, but what we actually need
 to do is allocate order lines against a specific set of batches that
 represent all our stock.</p>
 </div>
@@ -1015,11 +1049,14 @@ represent all our stock.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Evans discusses the idea of Domain Service
-operations that don&#8217;t have a natural home in an entity or value object.<sup class="footnote">[<a id="_footnoteref_6" class="footnote" href="#_footnotedef_6" title="View footnote.">6</a>]</sup> A
+<p>
+Evans discusses the idea of Domain Service
+operations that don&#8217;t have a natural home in an entity or value
+object.<sup class="footnote">[<a id="_footnoteref_6" class="footnote" href="#_footnotedef_6" title="View footnote.">6</a>]</sup> A
 thing that allocates an order line, given a set of batches, sounds a lot like a
 function, and we can take advantage of the fact that Python is a multiparadigm
-language and just make it a function.</p>
+language and just make it a function.
+</p>
 </div>
 <div class="paragraph">
 <p>Let&#8217;s see how we might test-drive such a function:</p>
@@ -1064,7 +1101,8 @@ language and just make it a function.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>And our service might look like this:</p>
+<p>
+And our service might look like this:</p>
 </div>
 <div id="domain_service" class="exampleblock">
 <div class="title">A standalone function for our domain service (model.py)</div>
@@ -1084,7 +1122,9 @@ language and just make it a function.</p>
 <div class="sect3">
 <h4 id="_pythons_magic_methods_let_us_use_our_models_with_idiomatic_python">Python&#8217;s Magic Methods Let Us Use Our Models with Idiomatic Python</h4>
 <div class="paragraph">
-<p>You may or may not like the use of <code>next()</code> in the preceding code, but we&#8217;re pretty
+<p>
+
+You may or may not like the use of <code>next()</code> in the preceding code, but we&#8217;re pretty
 sure you&#8217;ll agree that being able to use <code>sorted()</code> on our list of
 batches is nice, idiomatic Python.</p>
 </div>
@@ -1116,11 +1156,12 @@ batches is nice, idiomatic Python.</p>
 <div class="sect3">
 <h4 id="_exceptions_can_express_domain_concepts_too">Exceptions Can Express Domain Concepts Too</h4>
 <div class="paragraph">
-<p>We have one final concept to cover: exceptions
-can be used to express domain concepts too. In our conversations
-with domain experts, we&#8217;ve learned about the possibility that
-an order cannot be allocated because we are <em>out of stock</em>, and
-we can capture that by using a <em>domain exception</em>:</p>
+<p>
+
+We have one final concept to cover: exceptions can be used to express domain
+concepts too. In our conversations with domain experts, we&#8217;ve learned about the
+possibility that an order cannot be allocated because we are <em>out of stock</em>,
+and we can capture that by using a <em>domain exception</em>:</p>
 </div>
 <div id="test_out_of_stock" class="exampleblock">
 <div class="title">Testing out-of-stock exception (test_allocate.py)</div>
@@ -1146,7 +1187,8 @@ we can capture that by using a <em>domain exception</em>:</p>
 <dd>
 <p>This is the part of your code that is closest to the business,
 the most likely to change, and the place where you deliver the
-most value to the business. Make it easy to understand and modify.</p>
+most value to the business. Make it easy to understand and modify.
+</p>
 </dd>
 <dt class="hdlist1">Distinguish entities from value objects</dt>
 <dd>
@@ -1155,19 +1197,23 @@ implemented as an immutable type. If you change an attribute on
 a Value Object, it represents a different object. In contrast,
 an entity has attributes that may vary over time and it will still be the
 same entity. It&#8217;s important to define what <em>does</em> uniquely identify
-an entity (usually some sort of name or reference field).</p>
+an entity (usually some sort of name or reference field).
+
+</p>
 </dd>
 <dt class="hdlist1">Not everything has to be an object</dt>
 <dd>
 <p>Python is a multiparadigm language, so let the "verbs" in your
 code be functions. For every <code>FooManager</code>, <code>BarBuilder</code>, or <code>BazFactory</code>,
 there&#8217;s often a more expressive and readable <code>manage_foo()</code>, <code>build_bar()</code>,
-or <code>get_baz()</code> waiting to happen.</p>
+or <code>get_baz()</code> waiting to happen.
+</p>
 </dd>
 <dt class="hdlist1">This is the time to apply your best OO design principles</dt>
 <dd>
 <p>Revisit the SOLID principles and all the other good heuristics like "has a versus is-a,"
-"prefer composition over inheritance," and so on.</p>
+"prefer composition over inheritance," and so on.
+</p>
 </dd>
 <dt class="hdlist1">You&#8217;ll also want to think about consistency boundaries and aggregates</dt>
 <dd>
@@ -1211,7 +1257,8 @@ language, just as we do our entities, value objects, and services:</p>
 <div class="title">Figure 4. Our domain model at the end of the chapter</div>
 </div>
 <div class="paragraph">
-<p>That&#8217;ll probably do for now! We have a domain service that we can use for our
+<p>
+That&#8217;ll probably do for now! We have a domain service that we can use for our
 first use case. But first we&#8217;ll need a database&#8230;&#8203;</p>
 </div>
 </div>
@@ -1247,7 +1294,7 @@ first use case. But first we&#8217;ll need a database&#8230;&#8203;</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-17 17:52:53 UTC
+Last updated 2020-03-20 13:47:19 UTC
 </div>
 </div>
 <style>

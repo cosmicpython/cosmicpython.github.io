@@ -131,7 +131,8 @@ table {
 <h2 id="chapter_13_dependency_injection">13: Dependency Injection (and Bootstrapping)</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Dependency injection (DI) is regarded with suspicion in the Python world.  And
+<p>
+Dependency injection (DI) is regarded with suspicion in the Python world.  And
 we&#8217;ve managed <em>just fine</em> without it so far in the example code for this
 book!</p>
 </div>
@@ -141,7 +142,9 @@ that lead us to consider using DI, and we&#8217;ll present some options
 for how to do it, leaving it to you to pick which you think is most Pythonic.</p>
 </div>
 <div class="paragraph">
-<p>We&#8217;ll also add a new component to our architecture called <em>bootstrap.py</em>;
+<p>
+
+We&#8217;ll also add a new component to our architecture called <em>bootstrap.py</em>;
 it will be in charge of dependency injection, as well as some other initialization
 stuff that we often need.  We&#8217;ll explain why this sort of thing is called
 a <em>composition root</em> in OO languages, and why <em>bootstrap script</em> is just fine
@@ -211,7 +214,8 @@ responsibilities.</p>
 <div class="sect2">
 <h3 id="_implicit_versus_explicit_dependencies">Implicit Versus Explicit Dependencies</h3>
 <div class="paragraph">
-<p>Depending on your particular brain type, you may have a slight
+<p>
+Depending on your particular brain type, you may have a slight
 feeling of unease at the back of your mind at this point.  Let&#8217;s bring it out
 into the open. We&#8217;ve shown you two ways of managing
 dependencies and testing them.</p>
@@ -292,7 +296,9 @@ SQLite one.</p>
 <div class="sect2">
 <h3 id="_arent_explicit_dependencies_totally_weird_and_java_y">Aren&#8217;t Explicit Dependencies Totally Weird and Java-y?</h3>
 <div class="paragraph">
-<p>If you&#8217;re used to the way things normally happen in Python, you&#8217;ll be thinking
+<p>
+
+If you&#8217;re used to the way things normally happen in Python, you&#8217;ll be thinking
 all this is a bit weird.  The standard way to do things is to declare our
 dependency implicitly by simply importing it, and then if we ever need to
 change it for tests, we can monkeypatch, as is Right and True in dynamic
@@ -328,7 +334,8 @@ languages:</p>
 </ol>
 </div>
 <div class="paragraph">
-<p>Why pollute our application code with unnecessary arguments just for the
+<p>
+Why pollute our application code with unnecessary arguments just for the
 sake of our tests? <code>mock.patch</code> makes monkeypatching nice and easy:</p>
 </div>
 <div id="mocking_is_easy" class="exampleblock">
@@ -363,7 +370,9 @@ more complex. But in return, we&#8217;d get tests that are easier to write and
 manage.</p>
 </div>
 <div class="paragraph">
-<p>On top of that, declaring an explicit dependency is an example of the
+<p>
+
+On top of that, declaring an explicit dependency is an example of the
 dependency inversion principle&#8212;rather than having an (implicit) dependency on
 a <em>specific</em> detail, we have an (explicit) dependency on an <em>abstraction</em>:</p>
 </div>
@@ -407,7 +416,9 @@ putting all the responsibility for passing dependencies to the right handler
 onto the message bus feels like a violation of the SRP.</p>
 </div>
 <div class="paragraph">
-<p>Instead, we&#8217;ll reach for a pattern called <em>Composition Root</em> (a bootstrap
+<p>
+
+Instead, we&#8217;ll reach for a pattern called <em>Composition Root</em> (a bootstrap
 script to you and me),<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup>
  and we&#8217;ll do a bit of "manual DI" (dependency injection without a
 framework). See <a href="#bootstrap_new_image">Bootstrapper between entrypoints and message bus</a>.<sup class="footnote">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup></p>
@@ -450,7 +461,10 @@ framework). See <a href="#bootstrap_new_image">Bootstrapper between entrypoints 
 <div class="sect2">
 <h3 id="_preparing_handlers_manual_di_with_closures_and_partials">Preparing Handlers: Manual DI with Closures and Partials</h3>
 <div class="paragraph">
-<p>One way to turn a function with dependencies into one that&#8217;s ready to be
+<p>
+
+
+One way to turn a function with dependencies into one that&#8217;s ready to be
 called later with those dependencies <em>already injected</em> is to use closures or
 partial functions to compose the function with its dependencies:</p>
 </div>
@@ -495,9 +509,10 @@ partial functions to compose the function with its dependencies:</p>
 <li>
 <p>The difference between closures (lambdas or named functions) and
 <code>functools.partial</code> is that the former use
-<a href="https://docs.python-guide.org/writing/gotchas/#late-binding-closures">late
-binding of variables</a>, which can be a source of confusion if
-any of the dependencies are mutable.</p>
+<a href="https://docs.python-guide.org/writing/gotchas/#late-binding-closures">late binding of variables</a>,
+which can be a source of confusion if any of the dependencies are mutable.
+
+</p>
 </li>
 </ol>
 </div>
@@ -532,7 +547,9 @@ which has different dependencies:</p>
 <div class="sect2">
 <h3 id="_an_alternative_using_classes">An Alternative Using Classes</h3>
 <div class="paragraph">
-<p>Closures and partial functions will feel familiar to people who&#8217;ve done a bit
+<p>
+
+Closures and partial functions will feel familiar to people who&#8217;ve done a bit
 of functional programming. Here&#8217;s an alternative using classes, which may
 appeal to others. It requires rewriting all our handler functions as
 classes, though:</p>
@@ -584,13 +601,15 @@ arguments.</p>
 </ol>
 </div>
 <div class="paragraph">
-<p>Use whichever you and your team feel more comfortable with.</p>
+<p>
+Use whichever you and your team feel more comfortable with.</p>
 </div>
 </div>
 <div class="sect2 pagebreak-before less_space">
 <h3 id="_a_bootstrap_script">A Bootstrap Script</h3>
 <div class="paragraph">
-<p>We want our bootstrap script to do the following:</p>
+<p>
+We want our bootstrap script to do the following:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -653,7 +672,8 @@ arguments.</p>
 <li>
 <p><code>orm.start_mappers()</code> is our example of initialization work that needs
 to be done once at the beginning of an app. We also see things like
-setting up the <code>logging</code> module.</p>
+setting up the <code>logging</code> module.
+</p>
 </li>
 <li>
 <p>We can use the argument defaults to define what the normal/production
@@ -671,7 +691,8 @@ a function called <code>inject_dependencies()</code>, which we&#8217;ll show nex
 </ol>
 </div>
 <div class="paragraph">
-<p>Here&#8217;s how we inject dependencies into a handler function by inspecting
+<p>
+Here&#8217;s how we inject dependencies into a handler function by inspecting
 it:</p>
 </div>
 <div id="di_by_inspection" class="exampleblock">
@@ -708,11 +729,13 @@ it:</p>
 <div class="content">
 <div class="title">Even-More-Manual DI with Less Magic</div>
 <div class="paragraph">
-<p>If you&#8217;re finding the preceding <code>inspect</code> code a little harder to grok, this
+<p>
+If you&#8217;re finding the preceding <code>inspect</code> code a little harder to grok, this
 even simpler version may appeal to you.</p>
 </div>
 <div class="paragraph">
-<p>Harry wrote the code for <code>inject_dependencies()</code> as a first cut of how to do
+<p>
+Harry wrote the code for <code>inject_dependencies()</code> as a first cut of how to do
 "manual" dependency injection, and when he saw it, Bob accused him of
 overengineering and writing his own DI framework.</p>
 </div>
@@ -762,7 +785,9 @@ injection in only one place, the handler functions, so this super-manual solutio
 and Harry&#8217;s <code>inspect()</code>-based one will both work fine.</p>
 </div>
 <div class="paragraph">
-<p>If you find yourself wanting to do DI in more things and at different times,
+<p>
+
+If you find yourself wanting to do DI in more things and at different times,
 or if you ever get into <em>dependency chains</em> (in which your dependencies have their
 own dependencies, and so on), you may get some mileage out of a "real" DI
 framework.</p>
@@ -779,7 +804,8 @@ DRY-Python crew&#8217;s <a href="https://github.com/dry-python/dependencies">dep
 <div class="sect2">
 <h3 id="_message_bus_is_given_handlers_at_runtime">Message Bus Is Given Handlers at Runtime</h3>
 <div class="paragraph">
-<p>Our message bus will no longer be static; it needs to have the already-injected
+<p>
+Our message bus will no longer be static; it needs to have the already-injected
 handlers given to it. So we turn it from being a module into a configurable
 class:</p>
 </div>
@@ -833,7 +859,11 @@ in the Flask app context as we&#8217;ve written it. Just something to watch out 
 </ol>
 </div>
 <div class="paragraph">
-<p>What else changes in the bus?</p>
+<p>
+
+
+
+What else changes in the bus?</p>
 </div>
 <div id="messagebus_handlers_change" class="exampleblock">
 <div class="title">Event and command handler logic stays the same (src/allocation/service_layer/messagebus.py)</div>
@@ -882,7 +912,9 @@ the specific event or command.</p>
 <div class="sect2">
 <h3 id="_using_bootstrap_in_our_entrypoints">Using Bootstrap in Our Entrypoints</h3>
 <div class="paragraph">
-<p>In our application&#8217;s entrypoints, we now just call <code>bootstrap.bootstrap()</code>
+<p>
+
+In our application&#8217;s entrypoints, we now just call <code>bootstrap.bootstrap()</code>
 and get a message bus that&#8217;s ready to go, rather than configuring a UoW and the
 rest of it:</p>
 </div>
@@ -931,7 +963,10 @@ script defaults take care of it.</p>
 <div class="sect2">
 <h3 id="_initializing_di_in_our_tests">Initializing DI in Our Tests</h3>
 <div class="paragraph">
-<p>In tests, we can use <code>bootstrap.bootstrap()</code> with overridden defaults to get a
+<p>
+
+
+In tests, we can use <code>bootstrap.bootstrap()</code> with overridden defaults to get a
 custom message bus. Here&#8217;s an example in an integration test:</p>
 </div>
 <div id="bootstrap_view_tests" class="exampleblock">
@@ -976,7 +1011,8 @@ custom message bus. Here&#8217;s an example in an integration test:</p>
 </ol>
 </div>
 <div class="paragraph">
-<p>In our unit tests, in contrast, we can reuse our <code>FakeUnitOfWork</code>:</p>
+<p>
+In our unit tests, in contrast, we can reuse our <code>FakeUnitOfWork</code>:</p>
 </div>
 <div id="bootstrap_tests" class="exampleblock">
 <div class="title">Bootstrap in unit test (tests/unit/test_handlers.py)</div>
@@ -1026,7 +1062,8 @@ it comes to your own projects.</p>
 <div class="sect2">
 <h3 id="_building_an_adapter_properly_a_worked_example">Building an Adapter "Properly": A Worked Example</h3>
 <div class="paragraph">
-<p>To really get a feel for how it all works, let&#8217;s work through an example of how
+<p>
+To really get a feel for how it all works, let&#8217;s work through an example of how
 you might "properly" build an adapter and do dependency injection for it.</p>
 </div>
 <div class="paragraph">
@@ -1084,7 +1121,9 @@ through how you might define a more complex dependency.</p>
 <div class="sect3">
 <h4 id="_define_the_abstract_and_concrete_implementations">Define the Abstract and Concrete Implementations</h4>
 <div class="paragraph">
-<p>We&#8217;ll imagine a more generic notifications API. Could be
+<p>
+
+We&#8217;ll imagine a more generic notifications API. Could be
 email, could be SMS, could be Slack posts one day.</p>
 </div>
 <div id="notifications_dot_py" class="exampleblock">
@@ -1118,7 +1157,8 @@ email, could be SMS, could be Slack posts one day.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>We change the dependency in the bootstrap script:</p>
+<p>
+We change the dependency in the bootstrap script:</p>
 </div>
 <div id="notifications_in_bus" class="exampleblock">
 <div class="title">Notifications in message bus (src/allocation/bootstrap.py)</div>
@@ -1140,7 +1180,8 @@ email, could be SMS, could be Slack posts one day.</p>
 <div class="sect3">
 <h4 id="_make_a_fake_version_for_your_tests">Make a Fake Version for Your Tests</h4>
 <div class="paragraph">
-<p>We work through and define a fake version for unit testing:</p>
+<p>
+We work through and define a fake version for unit testing:</p>
 </div>
 <div id="fake_notifications" class="exampleblock">
 <div class="title">Fake notifications (tests/unit/test_handlers.py)</div>
@@ -1188,7 +1229,8 @@ email, could be SMS, could be Slack posts one day.</p>
 <div class="sect3">
 <h4 id="_figure_out_how_to_integration_test_the_real_thing">Figure Out How to Integration Test the Real Thing</h4>
 <div class="paragraph">
-<p>Now we test the real thing, usually with an end-to-end or integration
+<p>
+Now we test the real thing, usually with an end-to-end or integration
 test.  We&#8217;ve used <a href="https://github.com/mailhog/MailHog">MailHog</a> as a
 real-ish email server for our Docker dev environment:</p>
 </div>
@@ -1230,7 +1272,8 @@ real-ish email server for our Docker dev environment:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>In our integration tests, we use the real <code>EmailNotifications</code> class,
+<p>
+In our integration tests, we use the real <code>EmailNotifications</code> class,
 talking to the MailHog server in the Docker cluster:</p>
 </div>
 <div id="integration_test_email" class="exampleblock">
@@ -1292,7 +1335,8 @@ real notifications class.</p>
 <div class="content">
 <div class="title">Exercise for the Reader 2</div>
 <div class="paragraph">
-<p>You could do two things for practice regarding adapters:</p>
+<p>
+You could do two things for practice regarding adapters:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -1319,7 +1363,9 @@ a <code>Callable</code> to some sort of more formal adapter/base class/protocol.
 <li>
 <p>Once you have more than one adapter, you&#8217;ll start to feel a lot of pain
 from passing dependencies around manually, unless you do some kind of
-<em>dependency injection.</em></p>
+<em>dependency injection.</em>
+
+</p>
 </li>
 <li>
 <p>Setting up dependency injection is just one of many typical
@@ -1368,14 +1414,18 @@ and fake implementations, and thinking through integration testing.</p>
 <p>Test the less fake "real" thing.</p>
 </li>
 <li>
-<p>Profit!</p>
+<p>Profit!
+</p>
 </li>
 </ol>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p>These were the last patterns we wanted to cover, which brings us to the end of <a href="/book/part2.html">[part2]</a>. In <a href="/book/epilogue_1_how_to_get_there_from_here.html">the epilogue</a>, we&#8217;ll try to give you some pointers for applying these techniques in the Real World<sup>TM</sup>.</p>
+<p>These were the last patterns we wanted to cover, which brings us to the end of
+<a href="/book/part2.html">[part2]</a>. In <a href="/book/epilogue_1_how_to_get_there_from_here.html">the epilogue</a>, we&#8217;ll
+try to give you some pointers for applying these techniques in the Real
+World<sup>TM</sup>.</p>
 </div>
 </div>
 </div>
@@ -1400,7 +1450,7 @@ and fake implementations, and thinking through integration testing.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-17 09:07:44 UTC
+Last updated 2020-03-20 13:47:19 UTC
 </div>
 </div>
 <style>

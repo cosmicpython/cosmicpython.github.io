@@ -131,7 +131,9 @@ table {
 <h2 id="chapter_09_all_messagebus">9: Going to Town on the Message Bus</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>In this chapter, we&#8217;ll start to make events more fundamental to the internal
+<p>
+
+In this chapter, we&#8217;ll start to make events more fundamental to the internal
 structure of our application. We&#8217;ll move from the current state in
 <a href="#maps_chapter_08_before">Before: the message bus is an optional add-on</a>, where events are an optional
 side effect&#8230;&#8203;</p>
@@ -143,7 +145,9 @@ side effect&#8230;&#8203;</p>
 <div class="title">Figure 1. Before: the message bus is an optional add-on</div>
 </div>
 <div class="paragraph">
-<p>&#8230;&#8203;to the situation in <a href="#map_chapter_08_after">The message bus is now the main entrypoint to the service layer</a>, where
+<p>
+
+&#8230;&#8203;to the situation in <a href="#map_chapter_08_after">The message bus is now the main entrypoint to the service layer</a>, where
 everything goes via the message bus, and our app has been transformed
 fundamentally into a message processor.</p>
 </div>
@@ -180,7 +184,9 @@ git checkout chapter_08_events_and_message_bus</pre>
 <div class="sect2 pagebreak-before less_space">
 <h3 id="_a_new_requirement_leads_us_to_a_new_architecture">A New Requirement Leads Us to a New Architecture</h3>
 <div class="paragraph">
-<p>Rich Hickey talks about <em>situated software,</em> meaning software that runs for
+<p>
+
+Rich Hickey talks about <em>situated software,</em> meaning software that runs for
 extended periods of time, managing a real-world process. Examples include
 warehouse-management systems, logistics schedulers, and payroll systems.</p>
 </div>
@@ -206,11 +212,13 @@ of <code>SPARKLY-BOOKCASE</code>.</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>In these types of situations, we learn about the need to change batch quantities
+<p>
+In these types of situations, we learn about the need to change batch quantities
 when they&#8217;re already in the system. Perhaps someone made a mistake on the number
 in the manifest, or perhaps some sofas fell off a truck. Following a
-conversation with the business,<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup> we model the situation as in
-<a href="#batch_changed_events_flow_diagram">Batch quantity changed means deallocate and reallocate</a>.</p>
+conversation with the business,<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup>
+
+we model the situation as in <a href="#batch_changed_events_flow_diagram">Batch quantity changed means deallocate and reallocate</a>.</p>
 </div>
 <div id="batch_changed_events_flow_diagram" class="imageblock">
 <div class="content">
@@ -250,7 +258,9 @@ transactions and data integrity.</p>
 <div class="sect3">
 <h4 id="_imagining_an_architecture_change_everything_will_be_an_event_handler">Imagining an Architecture Change: Everything Will Be an <span class="keep-together">Event Handler</span></h4>
 <div class="paragraph">
-<p>But before we jump in, think about where we&#8217;re headed.  There are two
+<p>
+
+But before we jump in, think about where we&#8217;re headed.  There are two
 kinds of flows through our system:</p>
 </div>
 <div class="ulist">
@@ -265,7 +275,8 @@ and their handlers (which in turn call service-layer functions)</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>Wouldn&#8217;t it be easier if everything was an event handler?  If we rethink our API
+<p>
+Wouldn&#8217;t it be easier if everything was an event handler?  If we rethink our API
 calls as capturing events, the service-layer functions can be event handlers
 too, and we no longer need to make a distinction between internal and external
 event handlers:</p>
@@ -278,7 +289,8 @@ event handlers:</p>
 </li>
 <li>
 <p><code>services.add_batch()</code> could be the handler for a <code>BatchCreated</code>
-event.<sup class="footnote">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup></p>
+event.<sup class="footnote">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup>
+</p>
 </li>
 </ul>
 </div>
@@ -289,21 +301,23 @@ event.<sup class="footnote">[<a id="_footnoteref_2" class="footnote" href="#_foo
 <ul>
 <li>
 <p>An event called <code>BatchQuantityChanged</code> can invoke a handler called
-<code>change_batch_quantity()</code>.</p>
+<code>change_batch_quantity()</code>.
+</p>
 </li>
 <li>
 <p>And the new <code>AllocationRequired</code> events that it may raise can be passed on to
 <code>services.allocate()</code> too, so there is no conceptual difference between a
 brand-new allocation coming from the API and a reallocation that&#8217;s
-internally triggered by a deallocation.</p>
+internally triggered by a deallocation.
+</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>All sound like a bit much? Let&#8217;s work toward it all gradually.  We&#8217;ll
-follow the
-<a href="https://oreil.ly/W3RZM">Preparatory
-Refactoring</a> workflow, aka "Make the change easy; then make the easy change":</p>
+<p>
+All sound like a bit much? Let&#8217;s work toward it all gradually.  We&#8217;ll
+follow the <a href="https://oreil.ly/W3RZM">Preparatory Refactoring</a> workflow, aka "Make
+the change easy; then make the easy change":</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -334,7 +348,12 @@ responsibility for putting new events on the message bus into the message bus it
 <div class="sect2">
 <h3 id="_refactoring_service_functions_to_message_handlers">Refactoring Service Functions to Message Handlers</h3>
 <div class="paragraph">
-<p>We start by defining the two events that capture our current API inputs&#8212;<code>AllocationRequired</code> and <code>BatchCreated</code>:</p>
+<p>
+
+
+
+We start by defining the two events that capture our current API
+inputs&#8212;AllocationRequired and <code>BatchCreated</code>:</p>
 </div>
 <div id="two_new_events" class="exampleblock">
 <div class="title">BatchCreated and AllocationRequired events (src/allocation/domain/events.py)</div>
@@ -441,12 +460,15 @@ primitives, and now it uses well-defined objects (see the following sidebar).</p
 <div class="content">
 <div class="title">From Domain Objects, via Primitive Obsession, to <span class="keep-together">Events as an Interface</span></div>
 <div class="paragraph">
-<p>Some of you may remember <a href="/book/chapter_05_high_gear_low_gear.html#primitive_obsession">[primitive_obsession]</a>, in which we changed our service-layer API
+<p>
+
+
+Some of you may remember <a href="/book/chapter_05_high_gear_low_gear.html#primitive_obsession">[primitive_obsession]</a>, in which we changed our service-layer API
 from being in terms of domain objects to primitives. And now we&#8217;re moving
 back, but to different objects?  What gives?</p>
 </div>
 <div class="paragraph">
-<p>In OO circles, people talk about <em>primitive obsession</em> as an anti-pattern: avoid
+<p>In OO circles, people talk about <em>primitive obsession</em> as an antipattern: avoid
 primitives in public APIs, and instead wrap them with custom value classes, they
 would say. In the Python world, a lot of people would be quite skeptical of
 that as a rule of thumb. When mindlessly applied, it&#8217;s certainly a recipe for
@@ -476,7 +498,10 @@ event classes can be a nice place to do some input validation.</p>
 <div class="sect3">
 <h4 id="_the_message_bus_now_collects_events_from_the_uow">The Message Bus Now Collects Events from the UoW</h4>
 <div class="paragraph">
-<p>Our event handlers now need a UoW. In addition, as our message bus becomes
+<p>
+
+
+Our event handlers now need a UoW. In addition, as our message bus becomes
 more central to our application, it makes sense to put it explicitly in charge of
 collecting and processing new events. There was a bit of a circular dependency
 between the UoW and message bus until now, so this will make it one-way:</p>
@@ -568,7 +593,9 @@ just makes them available.</p>
 <div class="sect3 pagebreak-before less_space">
 <h4 id="_our_tests_are_all_written_in_terms_of_events_too">Our Tests Are All Written in Terms of Events Too</h4>
 <div class="paragraph">
-<p>Our tests now operate by creating events and putting them on the
+<p>
+
+Our tests now operate by creating events and putting them on the
 message bus, rather than invoking service-layer functions directly:</p>
 </div>
 <div id="handler_tests" class="exampleblock">
@@ -610,7 +637,9 @@ message bus, rather than invoking service-layer functions directly:</p>
 <div class="sect3">
 <h4 id="temporary_ugly_hack">A Temporary Ugly Hack: The Message Bus Has to Return Results</h4>
 <div class="paragraph">
-<p>Our API and our service layer currently want to know the allocated batch reference
+<p>
+
+Our API and our service layer currently want to know the allocated batch reference
 when they invoke our <code>allocate()</code> handler. This means we need to put in
 a temporary hack on our message bus to let it return events:</p>
 </div>
@@ -634,7 +663,9 @@ a temporary hack on our message bus to let it return events:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>It&#8217;s because we&#8217;re mixing the read and write responsibilities in our system.
+<p>
+
+It&#8217;s because we&#8217;re mixing the read and write responsibilities in our system.
 We&#8217;ll come back to fix this wart in <a href="/book/chapter_12_cqrs.html">[chapter_12_cqrs]</a>.</p>
 </div>
 </div>
@@ -706,7 +737,9 @@ if you prefer.  We&#8217;ll talk about the distinction in the
 <div class="sect2">
 <h3 id="_implementing_our_new_requirement">Implementing Our New Requirement</h3>
 <div class="paragraph">
-<p>We&#8217;re done with our refactoring phase. Let&#8217;s see if we really have "made the
+<p>
+
+We&#8217;re done with our refactoring phase. Let&#8217;s see if we really have "made the
 change easy."  Let&#8217;s implement our new requirement, shown in <a href="#reallocation_sequence_diagram">Sequence diagram for reallocation flow</a>: we&#8217;ll receive as our
 inputs some new <code>BatchQuantityChanged</code> events and pass them to a handler, which in
 turn might emit some <code>AllocationRequired</code> events, and those in turn will go
@@ -752,6 +785,8 @@ When you split things out like this across two units of work,
     but the second one does not. You&#8217;ll need to think about whether this is acceptable,
     and whether you need to notice when it happens and do something about it.
     See <a href="/book/epilogue_1_how_to_get_there_from_here.html#footguns">[footguns]</a> for more discussion.
+    
+    
 </td>
 </tr>
 </table>
@@ -759,7 +794,8 @@ When you split things out like this across two units of work,
 <div class="sect3">
 <h4 id="_our_new_event">Our New Event</h4>
 <div class="paragraph">
-<p>The event that tells us a batch quantity has changed is simple; it just
+<p>
+The event that tells us a batch quantity has changed is simple; it just
 needs a batch reference and a new quantity:</p>
 </div>
 <div id="batch_quantity_changed_event" class="exampleblock">
@@ -780,7 +816,11 @@ needs a batch reference and a new quantity:</p>
 <div class="sect2">
 <h3 id="test-driving-ch9">Test-Driving a New Handler</h3>
 <div class="paragraph">
-<p>Following the lessons learned in <a href="/book/chapter_04_service_layer.html">[chapter_04_service_layer]</a>,
+<p>
+
+
+
+Following the lessons learned in <a href="/book/chapter_04_service_layer.html">[chapter_04_service_layer]</a>,
 we can operate in "high gear" and write our unit tests at the highest
 possible level of abstraction, in terms of events. Here&#8217;s what they might
 look like:</p>
@@ -845,7 +885,8 @@ and we expect to reallocate it to a new batch.</p>
 <div class="sect3">
 <h4 id="_implementation">Implementation</h4>
 <div class="paragraph">
-<p>Our new handler is very simple:</p>
+<p>
+Our new handler is very simple:</p>
 </div>
 <div id="change_quantity_handler" class="exampleblock">
 <div class="title">Handler delegates to model layer (src/allocation/service_layer/handlers.py)</div>
@@ -864,7 +905,8 @@ and we expect to reallocate it to a new batch.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>We realize we&#8217;ll need a new query type on our repository:</p>
+<p>
+We realize we&#8217;ll need a new query type on our repository:</p>
 </div>
 <div id="get_by_batchref" class="exampleblock">
 <div class="title">A new query type on our repository (src/allocation/adapters/repository.py)</div>
@@ -911,7 +953,8 @@ and we expect to reallocate it to a new batch.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>And on our <code>FakeRepository</code> too:</p>
+<p>
+And on our <code>FakeRepository</code> too:</p>
 </div>
 <div id="fakerepo_get_by_batchref" class="exampleblock">
 <div class="title">Updating the fake repo too (tests/unit/test_handlers.py)</div>
@@ -941,10 +984,14 @@ and we expect to reallocate it to a new batch.</p>
 </td>
 <td class="content">
 We&#8217;re adding a query to our repository to make this use case easier to
-implement. So long as our query is returning a single aggregate, we&#8217;re not
-bending any rules. If you find yourself writing complex queries on your
-repositories, you might want to consider a different design. Methods like <code>get_most_popular_products</code> or <code>find_products_by_order_id</code> in particular would
-definitely trigger our spidey sense. <a href="/book/chapter_11_external_events.html">[chapter_11_external_events]</a> and the <a href="/book/epilogue_1_how_to_get_there_from_here.html">epilogue</a> have some tips on managing complex queries.
+    implement. So long as our query is returning a single aggregate, we&#8217;re not
+    bending any rules. If you find yourself writing complex queries on your
+    repositories, you might want to consider a different design. Methods like
+    <code>get_most_popular_products</code> or <code>find_products_by_order_id</code> in particular
+    would definitely trigger our spidey sense. <a href="/book/chapter_11_external_events.html">[chapter_11_external_events]</a>
+    and the <a href="/book/epilogue_1_how_to_get_there_from_here.html">epilogue</a> have some tips
+    on managing complex queries.
+    
 </td>
 </tr>
 </table>
@@ -953,7 +1000,8 @@ definitely trigger our spidey sense. <a href="/book/chapter_11_external_events.h
 <div class="sect3">
 <h4 id="_a_new_method_on_the_domain_model">A New Method on the Domain Model</h4>
 <div class="paragraph">
-<p>We add the new method to the model, which does the quantity change and
+<p>
+We add the new method to the model, which does the quantity change and
 deallocation(s) inline and publishes a new event.  We also modify the existing
 allocate function to publish an event:</p>
 </div>
@@ -985,7 +1033,8 @@ allocate function to publish an event:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>We wire up our new handler:</p>
+<p>
+We wire up our new handler:</p>
 </div>
 <div id="full_messagebus" class="exampleblock">
 <div class="title">The message bus grows (src/allocation/service_layer/messagebus.py)</div>
@@ -1011,7 +1060,10 @@ allocate function to publish an event:</p>
 <div class="sect2">
 <h3 id="fake_message_bus">Optionally: Unit Testing Event Handlers in Isolation with a Fake Message Bus</h3>
 <div class="paragraph">
-<p>Our main test for the reallocation workflow is <em>edge-to-edge</em>
+<p>
+
+
+Our main test for the reallocation workflow is <em>edge-to-edge</em>
 (see the example code in <a href="#test-driving-ch9">Test-Driving a New Handler</a>). It uses
 the real message bus, and it tests the whole flow, where the <code>BatchQuantityChanged</code>
 event handler triggers deallocation, and emits new <code>AllocationRequired</code> events, which in
@@ -1024,7 +1076,8 @@ want to test some handlers in isolation from one another. You can do this
 using a "fake" message bus.</p>
 </div>
 <div class="paragraph">
-<p>In our case, we actually intervene by modifying the <code>publish_events()</code> method
+<p>
+In our case, we actually intervene by modifying the <code>publish_events()</code> method
 on <code>FakeUnitOfWork</code> and decoupling it from the real message bus, instead making
 it record what events it sees:</p>
 </div>
@@ -1048,7 +1101,8 @@ it record what events it sees:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Now when we invoke <code>messagebus.handle()</code> using the <code>FakeUnitOfWorkWithFakeMessageBus</code>,
+<p>
+Now when we invoke <code>messagebus.handle()</code> using the <code>FakeUnitOfWorkWithFakeMessageBus</code>,
 it runs only the handler for that event. So we can write a more isolated unit
 test: instead of checking all the side effects, we just check that
 <code>BatchQuantityChanged</code> leads to <code>AllocationRequired</code> if the quantity drops
@@ -1095,13 +1149,15 @@ this only if necessary.</p>
 <div class="content">
 <div class="title">Exercise for the Reader</div>
 <div class="paragraph">
-<p>A great way to force yourself to really understand some code is to refactor it.
+<p>
+A great way to force yourself to really understand some code is to refactor it.
 In the discussion of testing handlers in isolation, we used something called
 <code>FakeUnitOfWorkWithFakeMessageBus</code>, which is unnecessarily complicated and
 violates the SRP.</p>
 </div>
 <div class="paragraph">
-<p>If we change the message bus to being a class,<sup class="footnote">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup>
+<p>
+If we change the message bus to being a class,<sup class="footnote">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup>
 then building a <code>FakeMessageBus</code> is more straightforward:</p>
 </div>
 <div id="abc_for_fake_messagebus" class="exampleblock">
@@ -1171,7 +1227,9 @@ if you need more inspiration.</p>
 <div class="sect3">
 <h4 id="_why_have_we_achieved">Why Have We Achieved?</h4>
 <div class="paragraph">
-<p>Our ongoing objective with these architectural patterns is to try to have
+<p>
+
+Our ongoing objective with these architectural patterns is to try to have
 the complexity of our application grow more slowly than its size.  When we
 go all in on the message bus, as always we pay a price in terms of architectural
 complexity (see <a href="#chapter_09_all_messagebus_tradeoffs">Whole app is a message bus: the trade-offs</a>), but we buy ourselves a
@@ -1228,7 +1286,8 @@ one of the others.</p>
 </tbody>
 </table>
 <div class="paragraph">
-<p>Now, you may be wondering, where are those <code>BatchQuantityChanged</code> events
+<p>
+Now, you may be wondering, where are those <code>BatchQuantityChanged</code> events
 going to come from? The answer is revealed in a couple chapters' time.  But
 first, let&#8217;s talk about <a href="/book/chapter_10_commands.html">events versus commands</a>.</p>
 </div>
@@ -1248,7 +1307,7 @@ first, let&#8217;s talk about <a href="/book/chapter_10_commands.html">events ve
 <a href="#_footnoteref_1">1</a>. Event-based modeling is so popular that a practice called <em>event storming</em> has been developed for facilitating event-based requirements gathering and domain model elaboration.
 </div>
 <div class="footnote" id="_footnotedef_2">
-<a href="#_footnoteref_2">2</a>. If you&#8217;ve done a bit of reading about event-driven   architectures, you may be thinking, "Some of these events sound more like   commands!" Bear with us! We&#8217;re trying to introduce one concept at a time.   In the <a href="/book/chapter_10_commands.html">next chapter</a>, we&#8217;ll introduce the distinction   between commands and events.
+<a href="#_footnoteref_2">2</a>. If you&#8217;ve done a bit of reading about event-driven architectures, you may be thinking, "Some of these events sound more like commands!" Bear with us! We&#8217;re trying to introduce one concept at a time. In the <a href="/book/chapter_10_commands.html">next chapter</a>, we&#8217;ll introduce the distinction between commands and events.
 </div>
 <div class="footnote" id="_footnotedef_3">
 <a href="#_footnoteref_3">3</a>. The "simple" implementation in this chapter essentially uses the <em>messagebus.py</em> module itself to implement the Singleton Pattern.
@@ -1256,7 +1315,7 @@ first, let&#8217;s talk about <a href="/book/chapter_10_commands.html">events ve
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-17 09:07:44 UTC
+Last updated 2020-03-20 13:47:19 UTC
 </div>
 </div>
 <style>

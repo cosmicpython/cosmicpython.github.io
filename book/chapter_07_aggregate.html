@@ -131,7 +131,11 @@ table {
 <h2 id="chapter_07_aggregate">7: Aggregates and Consistency Boundaries</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>In this chapter, we&#8217;d like to revisit our domain model to talk about invariants
+<p>
+
+
+
+In this chapter, we&#8217;d like to revisit our domain model to talk about invariants
 and constraints, and see how our domain objects can maintain their own
 internal consistency, both conceptually and in persistent storage.  We&#8217;ll
 discuss the concept of a <em>consistency boundary</em> and show how making it
@@ -179,16 +183,19 @@ git checkout chapter_06_uow</pre>
 <div class="sect2">
 <h3 id="_why_not_just_run_everything_in_a_spreadsheet">Why Not Just Run Everything in a Spreadsheet?</h3>
 <div class="paragraph">
-<p>What&#8217;s the point of a domain model, anyway? What&#8217;s the fundamental problem
+<p>
+
+What&#8217;s the point of a domain model, anyway? What&#8217;s the fundamental problem
 we&#8217;re trying to address?</p>
 </div>
 <div class="paragraph">
 <p>Couldn&#8217;t we just run everything in a spreadsheet? Many of our users would be
-<span class="keep-together">delighted</span> by that. Business users <em>like</em> spreadsheets because they&#8217;re simple,
-familiar, and yet enormously powerful.</p>
+<span class="keep-together">delighted</span> by that. Business users <em>like</em> spreadsheets because
+they&#8217;re simple, familiar, and yet enormously powerful.</p>
 </div>
 <div class="paragraph">
-<p>In fact, an enormous number of business processes do operate by manually sending
+<p>
+In fact, an enormous number of business processes do operate by manually sending
 spreadsheets back and forth over email. This "CSV over SMTP" architecture has
 low initial complexity but tends not to scale very well because it&#8217;s difficult
 to apply logic and maintain consistency.</p>
@@ -208,17 +215,21 @@ an operation.</p>
 <div class="sect2">
 <h3 id="_invariants_constraints_and_consistency">Invariants, Constraints, and Consistency</h3>
 <div class="paragraph">
-<p>The two words are somewhat interchangeable, but a <em>constraint</em> is a
+<p>
+
+The two words are somewhat interchangeable, but a <em>constraint</em> is a
 rule that restricts the possible states our model can get into, while an <em>invariant</em>
 is defined a little more precisely as a condition that is always true.</p>
 </div>
 <div class="paragraph">
-<p>If we were writing a hotel-booking system, we might have the constraint that double
+<p>
+If we were writing a hotel-booking system, we might have the constraint that double
 bookings are not allowed. This supports the invariant that a room cannot have more
 than one booking for the same night.</p>
 </div>
 <div class="paragraph">
-<p>Of course, sometimes we might need to temporarily <em>bend</em> the rules. Perhaps we
+<p>
+Of course, sometimes we might need to temporarily <em>bend</em> the rules. Perhaps we
 need to shuffle the rooms around because of a VIP booking. While we&#8217;re moving
 bookings around in memory, we might be double booked, but our domain model
 should ensure that, when we&#8217;re finished, we end up in a final consistent state,
@@ -239,7 +250,8 @@ we should raise an error and refuse to complete the operation.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>This is a business rule that imposes an invariant. The invariant is that an
+<p>
+This is a business rule that imposes an invariant. The invariant is that an
 order line is allocated to either zero or one batch, but never more than one.
 We need to make sure that our code never accidentally calls <code>Batch.allocate()</code>
 on two different batches for the same line, and currently, there&#8217;s nothing
@@ -248,13 +260,14 @@ there to explicitly stop us from doing that.</p>
 <div class="sect3">
 <h4 id="_invariants_concurrency_and_locks">Invariants, Concurrency, and Locks</h4>
 <div class="paragraph">
-<p>Let&#8217;s look at another one of our business rules:</p>
+<p>
+Let&#8217;s look at another one of our business rules:</p>
 </div>
 <div class="quoteblock">
 <blockquote>
 <div class="paragraph">
 <p>We can&#8217;t allocate to a batch if the available quantity is less than the
-  quantity of the order line.</p>
+quantity of the order line.</p>
 </div>
 </blockquote>
 <div class="attribution">
@@ -262,7 +275,8 @@ there to explicitly stop us from doing that.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Here the constraint is that we can&#8217;t allocate more stock than is available to a
+<p>
+Here the constraint is that we can&#8217;t allocate more stock than is available to a
 batch, so we never oversell stock by allocating two customers to the same
 physical cushion, for example. Every time we update the state of the system, our code needs
 to ensure that we don&#8217;t break the invariant, which is that the available
@@ -274,13 +288,15 @@ maintain this invariant. We can just allocate stock one line at a time, and
 raise an error if there&#8217;s no stock available.</p>
 </div>
 <div class="paragraph">
-<p>This gets much harder when we introduce the idea of <em>concurrency</em>. Suddenly we
+<p>
+This gets much harder when we introduce the idea of <em>concurrency</em>. Suddenly we
 might be allocating stock for multiple order lines simultaneously. We might
 even be allocating order lines at the same time as processing changes to the
 batches <span class="keep-together">themselves</span>.</p>
 </div>
 <div class="paragraph">
-<p>We usually solve this problem by applying <em>locks</em> to our database tables. This
+<p>
+We usually solve this problem by applying <em>locks</em> to our database tables. This
 prevents two operations from happening simultaneously on the same row or same
 table.</p>
 </div>
@@ -296,7 +312,10 @@ every single one&#8212;&#8203;we&#8217;ll get deadlocks or performance problems 
 <div class="sect2">
 <h3 id="_what_is_an_aggregate">What Is an Aggregate?</h3>
 <div class="paragraph">
-<p>OK, so if we can&#8217;t lock the whole database every time we want to allocate an
+<p>
+
+
+OK, so if we can&#8217;t lock the whole database every time we want to allocate an
 order line, what should we do instead? We want to protect the invariants of our
 system but allow for the greatest degree of concurrency. Maintaining our
 invariants inevitably means preventing concurrent writes; if multiple users can
@@ -309,7 +328,9 @@ same time because there&#8217;s no invariant that covers them both. We don&#8217
 to be consistent with each other.</p>
 </div>
 <div class="paragraph">
-<p>The <em>Aggregate</em> pattern is a design pattern from the DDD community that helps us
+<p>
+
+The <em>Aggregate</em> pattern is a design pattern from the DDD community that helps us
 to resolve this tension. An <em>aggregate</em> is just a domain object that contains
 other domain objects and lets us treat the whole collection as a single unit.</p>
 </div>
@@ -318,7 +339,8 @@ other domain objects and lets us treat the whole collection as a single unit.</p
 thing, and to call methods on the aggregate itself.</p>
 </div>
 <div class="paragraph">
-<p>As a model gets more complex and grows more entity and value objects,
+<p>
+As a model gets more complex and grows more entity and value objects,
 referencing each other in a tangled graph, it can be hard to keep track of who
 can modify what. Especially when we have <em>collections</em> in the model as we do
 (our batches are a collection), it&#8217;s a good idea to nominate some entities to be
@@ -335,7 +357,8 @@ run the risk of weird concurrency errors. Instead, we want each change to the
 basket to run in a single database transaction.</p>
 </div>
 <div class="paragraph">
-<p>We don&#8217;t want to modify multiple baskets in a transaction, because there&#8217;s no
+<p>
+We don&#8217;t want to modify multiple baskets in a transaction, because there&#8217;s no
 use case for changing the baskets of several customers at the same time. Each
 basket is a single <em>consistency boundary</em> responsible for maintaining its own
 invariants.</p>
@@ -344,7 +367,8 @@ invariants.</p>
 <blockquote>
 <div class="paragraph">
 <p>An AGGREGATE is a cluster of associated objects that we treat as a unit for the
-purpose of data changes.</p>
+purpose of data changes.
+</p>
 </div>
 </blockquote>
 <div class="attribution">
@@ -375,7 +399,9 @@ Just as we sometimes use <code><em>_leading_underscores</em></code> to mark meth
 <div class="sect2">
 <h3 id="_choosing_an_aggregate">Choosing an Aggregate</h3>
 <div class="paragraph">
-<p>What aggregate should we use for our system? The choice is somewhat arbitrary,
+<p>
+
+What aggregate should we use for our system? The choice is somewhat arbitrary,
 but it&#8217;s important. The aggregate will be the boundary where we make sure
 every operation ends in a consistent state. This helps us to reason about our
 software and prevent weird race issues. We want to draw a boundary around a
@@ -383,7 +409,8 @@ small number of objects&#8212;the smaller, the better, for performance&#8212;tha
 be consistent with one another, and we need to give this boundary a good name.</p>
 </div>
 <div class="paragraph">
-<p>The object we&#8217;re manipulating under the covers is <code>Batch</code>. What do we call a
+<p>
+The object we&#8217;re manipulating under the covers is <code>Batch</code>. What do we call a
 collection of batches? How should we divide all the batches in the system into
 discrete islands of consistency?</p>
 </div>
@@ -409,7 +436,9 @@ that have the same SKU as the order line. Some sort of concept like
 domain language back in <a href="/book/chapter_01_domain_model.html">[chapter_01_domain_model]</a>.</p>
 </div>
 <div class="paragraph">
-<p>So the plan is this: when we want to allocate an order line, instead of
+<p>
+
+So the plan is this: when we want to allocate an order line, instead of
 <a href="#before_aggregates_diagram">Before: allocate against all batches using the domain service</a>, where we look up all the <code>Batch</code> objects in
 the world and pass them to the <code>allocate()</code> domain service&#8230;&#8203;</p>
 </div>
@@ -463,7 +492,9 @@ allocate --&gt; allocate_domain_service: allocate(orderline, batches)
 </div>
 </div>
 <div class="paragraph">
-<p>&#8230;&#8203;we&#8217;ll move to the world of <a href="#after_aggregates_diagram">After: ask Product to allocate against its batches</a>, in which there is a new
+<p>
+
+&#8230;&#8203;we&#8217;ll move to the world of <a href="#after_aggregates_diagram">After: ask Product to allocate against its batches</a>, in which there is a new
 <code>Product</code> object for the particular SKU of our order line, and it will be in charge
 of all the batches <em>for that SKU</em>, and we can call a <code>.allocate()</code> method on that
 instead.</p>
@@ -518,7 +549,8 @@ Product o- Batch: has
 </div>
 </div>
 <div class="paragraph">
-<p>Let&#8217;s see how that looks in code form:</p>
+<p>
+Let&#8217;s see how that looks in code form:</p>
 </div>
 <div id="product_aggregate" class="exampleblock pagebreak-before">
 <div class="title">Our chosen aggregate, Product (src/allocation/domain/model.py)</div>
@@ -550,11 +582,12 @@ Product o- Batch: has
 <p><code>Product&#8217;s main identifier is the `sku</code>.</p>
 </li>
 <li>
-<p>Our <code>Product</code> class holds a reference to a collection of <code>batches</code> for that SKU.</p>
+<p>Our <code>Product</code> class holds a reference to a collection of <code>batches</code> for that SKU.
+</p>
 </li>
 <li>
 <p>Finally, we can move the <code>allocate()</code> domain service to
-be a method on the <code><span class="keep-together">Product</span></code> aggregate.</p>
+be a method on the <span class="keep-together"><code>Product</code></span> aggregate.</p>
 </li>
 </ol>
 </div>
@@ -570,8 +603,8 @@ This <code>Product</code> might not look like what you&#8217;d expect a <code>Pr
     Our allocation service doesn&#8217;t care about any of those things.
     This is the power of bounded contexts; the concept
     of a product in one app can be very different from another.
-    See the following sidebar for more
-    discussion.
+    See the following sidebar for more discussion.
+    
 </td>
 </tr>
 </table>
@@ -580,12 +613,14 @@ This <code>Product</code> might not look like what you&#8217;d expect a <code>Pr
 <div class="content">
 <div class="title">Aggregates, Bounded Contexts, and Microservices</div>
 <div class="paragraph">
-<p>One of the most important contributions from Evans and the DDD community
+<p>
+One of the most important contributions from Evans and the DDD community
 is the concept of
 <a href="https://martinfowler.com/bliki/BoundedContext.html"><em>bounded contexts</em></a>.</p>
 </div>
 <div class="paragraph">
-<p>In essence, this was a reaction against attempts to capture entire businesses
+<p>
+In essence, this was a reaction against attempts to capture entire businesses
 into a single model. The word <em>customer</em> means different things to people
 in sales, customer service, logistics, support, and so on. Attributes
 needed in one context are irrelevant in another; more perniciously, concepts
@@ -596,7 +631,8 @@ around each context, and handle the translation between different contexts
 explicitly.</p>
 </div>
 <div class="paragraph">
-<p>This concept translates very well to the world of microservices, where each
+<p>
+This concept translates very well to the world of microservices, where each
 microservice is free to have its own concept of "customer" and its own rules for
 translating that to and from other microservices it integrates with.</p>
 </div>
@@ -613,7 +649,8 @@ will operate in. By restricting the context, you can keep your number of
 aggregates low and their size manageable.</p>
 </div>
 <div class="paragraph">
-<p>Once again, we find ourselves forced to say that we can&#8217;t give this issue
+<p>
+Once again, we find ourselves forced to say that we can&#8217;t give this issue
 the treatment it deserves here, and we can only encourage you to read up on it
 elsewhere. The Fowler link at the start of this sidebar is a good starting point, and either
 (or indeed, any) DDD book will have a chapter or more on bounded contexts.</p>
@@ -624,7 +661,9 @@ elsewhere. The Fowler link at the start of this sidebar is a good starting point
 <div class="sect2">
 <h3 id="_one_aggregate_one_repository">One Aggregate = One Repository</h3>
 <div class="paragraph">
-<p>Once you define certain entities to be aggregates, we need to apply the rule
+<p>
+
+Once you define certain entities to be aggregates, we need to apply the rule
 that they are the only entities that are publicly accessible to the outside
 world.  In other words, the only repositories we are allowed should be
 repositories that return aggregates.</p>
@@ -644,7 +683,9 @@ The rule that repositories should only return aggregates is the main place
 </table>
 </div>
 <div class="paragraph">
-<p>In our case, we&#8217;ll switch from <code>BatchRepository</code> to <code>ProductRepository</code>:</p>
+<p>
+
+In our case, we&#8217;ll switch from <code>BatchRepository</code> to <code>ProductRepository</code>:</p>
 </div>
 <div id="new_uow_and_repository" class="exampleblock">
 <div class="title">Our new UoW and repository (unit_of_work.py and repository.py)</div>
@@ -670,7 +711,10 @@ The rule that repositories should only return aggregates is the main place
 </div>
 </div>
 <div class="paragraph">
-<p>The ORM layer will need some tweaks so that the right batches automatically get
+<p>
+
+
+The ORM layer will need some tweaks so that the right batches automatically get
 loaded and associated with <code>Product</code> objects. The nice thing is, the Repository
 pattern means we don&#8217;t have to worry about that yet. We can just use
 our <code>FakeRepository</code> and then feed through the new model into our service
@@ -714,7 +758,9 @@ layer to see how it looks with <code>Product</code> as its main entrypoint:</p>
 <div class="sect2">
 <h3 id="_what_about_performance">What About Performance?</h3>
 <div class="paragraph">
-<p>We&#8217;ve mentioned a few times that we&#8217;re modeling with aggregates because we want
+<p>
+
+We&#8217;ve mentioned a few times that we&#8217;re modeling with aggregates because we want
 to have high-performance software, but here we are loading <em>all</em> the batches when
 we only need one. You might expect that to be inefficient, but there are a few
 reasons why we&#8217;re comfortable here.</p>
@@ -748,7 +794,8 @@ single batch with enough capacity for our order, this might work pretty well.</p
 <div class="content">
 <div class="title">Exercise for the Reader</div>
 <div class="paragraph">
-<p>You&#8217;ve just seen the main top layers of the code, so this shouldn&#8217;t be too hard,
+<p>
+You&#8217;ve just seen the main top layers of the code, so this shouldn&#8217;t be too hard,
 but we&#8217;d like you to implement the <code>Product</code> aggregate starting from <code>Batch</code>,
 just as we did.</p>
 </div>
@@ -759,14 +806,17 @@ like adding the model to the ORM and making sure all the moving parts can
 talk to each other, which we hope will be instructive.</p>
 </div>
 <div class="paragraph">
-<p>You&#8217;ll find the code <a href="https://github.com/cosmicpython/code/tree/chapter_07_aggregate_exercise">on GitHub</a>. We&#8217;ve put in a "cheating" implementation in the delegates to the existing
+<p>You&#8217;ll find the code <a href="https://github.com/cosmicpython/code/tree/chapter_07_aggregate_exercise">on GitHub</a>.
+We&#8217;ve put in a "cheating" implementation in the delegates to the existing
 <code>allocate()</code> function, so you should be able to evolve that toward the real
 thing.</p>
 </div>
 <div class="paragraph">
-<p>We&#8217;ve marked a couple of tests with <code>@pytest.skip()</code>. After you&#8217;ve read the rest of this chapter, come back to these tests to have a go
-at implementing version numbers. Bonus points if you can get SQLAlchemy to
-do them for you by magic!</p>
+<p>
+We&#8217;ve marked a couple of tests with <code>@pytest.skip()</code>. After you&#8217;ve read the
+rest of this chapter, come back to these tests to have a go at implementing
+version numbers. Bonus points if you can get SQLAlchemy to do them for you by
+magic!</p>
 </div>
 </div>
 </div>
@@ -782,7 +832,10 @@ minds if we find our boundaries are causing performance woes.</p>
 <div class="sect2">
 <h3 id="_optimistic_concurrency_with_version_numbers">Optimistic Concurrency with Version Numbers</h3>
 <div class="paragraph">
-<p>We have our new aggregate, so we&#8217;ve solved the conceptual problem of choosing
+<p>
+
+
+We have our new aggregate, so we&#8217;ve solved the conceptual problem of choosing
 an object to be in charge of consistency boundaries.  Let&#8217;s now spend a little
 time talking about how to enforce data integrity at the database level.</p>
 </div>
@@ -793,18 +846,24 @@ time talking about how to enforce data integrity at the database level.</p>
 <div class="title">Note</div>
 </td>
 <td class="content">
-This section has a lot of implementation details; for example, some of it is Postgres-specific. But more generally, we&#8217;re showing one way of managing concurrency issues, but it is just one approach. Real requirements in this area vary a lot from project to project. You
-    shouldn&#8217;t expect to be able to copy and paste code from here into production.
+This section has a lot of implementation details; for example, some of it
+    is Postgres-specific. But more generally, we&#8217;re showing one way of managing
+    concurrency issues, but it is just one approach. Real requirements in this
+    area vary a lot from project to project. You shouldn&#8217;t expect to be able to
+    copy and paste code from here into production.
+    
 </td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
-<p>We don&#8217;t want to hold a lock over the entire <code>batches</code> table, but how will we
+<p>
+We don&#8217;t want to hold a lock over the entire <code>batches</code> table, but how will we
 implement holding a lock over just the rows for a particular SKU?</p>
 </div>
 <div class="paragraph">
-<p>One answer is to have a single attribute on the <code>Product</code> model that acts as a marker for
+<p>
+One answer is to have a single attribute on the <code>Product</code> model that acts as a marker for
 the whole state change being complete and to use it as the single resource
 that concurrent workers can fight over. If two transactions read the
 state of the world for <code>batches</code> at the same time, and both want to update
@@ -813,7 +872,9 @@ the <code>allocations</code> tables, we force both to also try to update the
 can win and the world stays consistent.</p>
 </div>
 <div class="paragraph">
-<p><a href="#version_numbers_sequence_diagram">Sequence diagram: two transactions attempting a concurrent update on <code><span class="keep-together">Product</span></code></a> illustrates two concurrent
+<p>
+
+<a href="#version_numbers_sequence_diagram">Sequence diagram: two transactions attempting a concurrent update on <span class="keep-together"><code>Product</code></span></a> illustrates two concurrent
 transactions doing their read operations at the same time, so they see
 a <code>Product</code> with, for example, <code>version=3</code>.  They both call <code>Product.allocate()</code>
 in order to modify a state. But we set up our database integrity
@@ -831,6 +892,7 @@ Version numbers are just one way to implement optimistic locking. You
     could achieve the same thing by setting the Postgres transaction isolation
     level to <code>SERIALIZABLE</code>, but that often comes at a severe performance cost.
     Version numbers also make implicit concepts explicit.
+    
 </td>
 </tr>
 </table>
@@ -839,7 +901,7 @@ Version numbers are just one way to implement optimistic locking. You
 <div class="content">
 <img src="images/apwp_0704.png" alt="apwp 0704">
 </div>
-<div class="title">Figure 4. Sequence diagram: two transactions attempting a concurrent update on <code><span class="keep-together">Product</span></code></div>
+<div class="title">Figure 4. Sequence diagram: two transactions attempting a concurrent update on <span class="keep-together"><code>Product</code></span></div>
 </div>
 <div class="listingblock image-source">
 <div class="content">
@@ -880,7 +942,10 @@ with each other, so we let them go ahead and just make sure we have a way to
 notice if there is a <span class="keep-together">problem</span>.</p>
 </div>
 <div class="paragraph">
-<p><em>Pessimistic</em> concurrency control works under the assumption that two users
+<p>
+
+
+<em>Pessimistic</em> concurrency control works under the assumption that two users
 are going to cause conflicts, and we want to prevent conflicts in all cases, so
 we lock everything just to be safe. In our example, that would mean locking
 the whole <code>batches</code> table, or using SELECT FOR UPDATE&#8212;we&#8217;re pretending
@@ -888,13 +953,15 @@ that we&#8217;ve ruled those out for performance reasons, but in real life you&#
 want to do some evaluations and measurements of your own.</p>
 </div>
 <div class="paragraph">
-<p>With pessimistic locking, you don&#8217;t need to think about handling failures
+<p>
+With pessimistic locking, you don&#8217;t need to think about handling failures
 because the database will prevent them for you (although you do need to think
 about deadlocks). With optimistic locking, you need to explicitly handle
 the possibility of failures in the (hopefully unlikely) case of a clash.</p>
 </div>
 <div class="paragraph">
-<p>The usual way to handle a failure is to retry the failed operation from the
+<p>
+The usual way to handle a failure is to retry the failed operation from the
 beginning. Imagine we have two customers, Harry and Bob, and each submits an order
 for <code>SHINY-TABLE</code>. Both threads load the product at version 1 and allocate
 stock. The database prevents the concurrent update, and Bob&#8217;s order fails with
@@ -911,7 +978,9 @@ way in the case of a concurrency problem.</p>
 <div class="sect3">
 <h4 id="_implementation_options_for_version_numbers">Implementation Options for Version Numbers</h4>
 <div class="paragraph">
-<p>There are essentially three options for implementing version numbers:</p>
+<p>
+
+There are essentially three options for implementing version numbers:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -992,6 +1061,9 @@ If you&#8217;re scratching your head at this version number business, it might
     <code>Product</code> aggregate. The version number is a simple, human-comprehensible way
     to model a thing that changes on every write, but it could equally be a
     random UUID every time.
+    
+    
+    
 </td>
 </tr>
 </table>
@@ -1001,12 +1073,19 @@ If you&#8217;re scratching your head at this version number business, it might
 <div class="sect2">
 <h3 id="_testing_for_our_data_integrity_rules">Testing for Our Data Integrity Rules</h3>
 <div class="paragraph">
-<p>Now to make sure we can get the behavior we want: if we have two
+<p>
+
+
+Now to make sure we can get the behavior we want: if we have two
 concurrent attempts to do allocation against the same <code>Product</code>, one of them
 should fail, because they can&#8217;t both update the version number.</p>
 </div>
 <div class="paragraph">
-<p>First, let&#8217;s simulate a "slow" transaction using a function that does
+<p>
+
+
+
+First, let&#8217;s simulate a "slow" transaction using a function that does
 allocation and then does an explicit sleep:<sup class="footnote">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup></p>
 </div>
 <div id="time_sleep_thread" class="exampleblock">
@@ -1030,7 +1109,9 @@ allocation and then does an explicit sleep:<sup class="footnote">[<a id="_footno
 </div>
 </div>
 <div class="paragraph">
-<p>Then we have our test invoke this slow allocation twice, concurrently, using
+<p>
+
+Then we have our test invoke this slow allocation twice, concurrently, using
 threads:</p>
 </div>
 <div id="data_integrity_test" class="exampleblock">
@@ -1097,7 +1178,9 @@ want: <code>read1, read2, write1, write2</code>.</p>
 <div class="sect3">
 <h4 id="_enforcing_concurrency_rules_by_using_database_transaction_isolation_levels">Enforcing Concurrency Rules by Using Database Transaction <span class="keep-together">Isolation Levels</span></h4>
 <div class="paragraph">
-<p>To get the test to pass as it is, we can set the transaction isolation level
+<p>
+
+To get the test to pass as it is, we can set the transaction isolation level
 on our session:</p>
 </div>
 <div id="isolation_repeatable_read" class="exampleblock">
@@ -1121,7 +1204,9 @@ on our session:</p>
 </td>
 <td class="content">
 Transaction isolation levels are tricky stuff, so it&#8217;s worth spending time
-understanding <a href="https://oreil.ly/5vxJA">the Postgres documentation</a>.<sup class="footnote">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup>
+    understanding <a href="https://oreil.ly/5vxJA">the Postgres documentation</a>.<sup class="footnote">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup>
+    
+    
 </td>
 </tr>
 </table>
@@ -1130,12 +1215,16 @@ understanding <a href="https://oreil.ly/5vxJA">the Postgres documentation</a>.<s
 <div class="sect3">
 <h4 id="_pessimistic_concurrency_control_example_select_for_update">Pessimistic Concurrency Control Example: SELECT FOR UPDATE</h4>
 <div class="paragraph">
-<p>There are multiple ways to approach this, but we&#8217;ll show one. <a href="https://oreil.ly/i8wKL"><code>SELECT FOR UPDATE</code></a>
+<p>
+
+
+There are multiple ways to approach this, but we&#8217;ll show one. <a href="https://oreil.ly/i8wKL"><code>SELECT FOR UPDATE</code></a>
 produces different behavior; two concurrent transactions will not be allowed to
 do a read on the same rows at the same time:</p>
 </div>
 <div class="paragraph">
-<p><code>SELECT FOR UPDATE</code> is a way of picking a row or rows to use as a lock
+<p>
+<code>SELECT FOR UPDATE</code> is a way of picking a row or rows to use as a lock
 (although those rows don&#8217;t have to be the ones you update).  If two
 transactions both try to <code>SELECT FOR UPDATE</code> a row at the same time, one will
 win, and the other will wait until the lock is released. So this is an example
@@ -1176,11 +1265,15 @@ query time:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Some people refer to this as the "read-modify-write" failure mode.
+<p>
+
+Some people refer to this as the "read-modify-write" failure mode.
 Read <a href="https://oreil.ly/uXeZI">"PostgreSQL Anti-Patterns: Read-Modify-Write Cycles"</a> for a good <span class="keep-together">overview</span>.</p>
 </div>
 <div class="paragraph">
-<p>We don&#8217;t really have time to discuss all the trade-offs between <code>REPEATABLE READ</code>
+<p>
+
+We don&#8217;t really have time to discuss all the trade-offs between <code>REPEATABLE READ</code>
 and <code>SELECT FOR UPDATE</code>, or optimistic versus pessimistic locking in general.
 But if you have a test like the one we&#8217;ve shown, you can specify the behavior
 you want and see how it changes. You can also use the test as a basis for
@@ -1191,7 +1284,8 @@ performing some performance experiments.</p>
 <div class="sect2">
 <h3 id="_wrap_up">Wrap-Up</h3>
 <div class="paragraph">
-<p>Specific choices around concurrency control vary a lot based on business
+<p>
+Specific choices around concurrency control vary a lot based on business
 circumstances and storage technology choices, but we&#8217;d like to bring this
 chapter back to the conceptual idea of an aggregate: we explicitly model an
 object as being the main entrypoint to some subset of our model, and as being in
@@ -1199,14 +1293,18 @@ charge of enforcing the invariants and business rules that apply across all of
 those objects.</p>
 </div>
 <div class="paragraph">
-<p>Choosing the right aggregate is key, and it&#8217;s a decision you may revisit
+<p>
+
+
+Choosing the right aggregate is key, and it&#8217;s a decision you may revisit
 over time. You can read more about it in multiple DDD books.
 We also recommend these three online papers on
 <a href="https://dddcommunity.org/library/vernon_2011">effective aggregate design</a>
 by Vaughn Vernon (the "red book" author).</p>
 </div>
 <div class="paragraph">
-<p><a href="#chapter_07_aggregate_tradoffs">Aggregates: the trade-offs</a> has some thoughts on the trade-offs of implementing the Aggregate pattern.</p>
+<p>
+<a href="#chapter_07_aggregate_tradoffs">Aggregates: the trade-offs</a> has some thoughts on the trade-offs of implementing the Aggregate pattern.</p>
 </div>
 <table id="chapter_07_aggregate_tradoffs" class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 1. Aggregates: the trade-offs</caption>
@@ -1233,7 +1331,8 @@ are the public ones, and which aren&#8217;t.</p>
 </li>
 <li>
 <p>Modeling our operations around explicit consistency boundaries helps us avoid
-performance problems with our ORM.</p>
+performance problems with our ORM.
+</p>
 </li>
 <li>
 <p>Putting the aggregate in sole charge of state changes to its subsidiary models
@@ -1263,6 +1362,9 @@ big mental shift.</p>
 <div class="sidebarblock nobreakinside less_space">
 <div class="content">
 <div class="title">Aggregates and Consistency Boundaries Recap</div>
+<div class="paragraph">
+<p></p>
+</div>
 <div class="dlist">
 <dl>
 <dt class="hdlist1">Aggregates are your entrypoints into the domain model</dt>
@@ -1283,7 +1385,8 @@ to reject changes that would break the rules.</p>
 <p>When thinking about implementing these consistency checks, we
 end up thinking about transactions and locks.  Choosing the
 right aggregate is about performance as well as conceptual
-organization of your domain.</p>
+organization of your domain.
+</p>
 </dd>
 </dl>
 </div>
@@ -1293,7 +1396,8 @@ organization of your domain.</p>
 <div class="sect2 pagebreak-before less_space">
 <h3 id="_part_i_recap">Part I Recap</h3>
 <div class="paragraph">
-<p>Do you remember <a href="#recap_components_diagram">A component diagram for our app at the end of Part I</a>, the diagram we showed at the
+<p>
+Do you remember <a href="#recap_components_diagram">A component diagram for our app at the end of Part I</a>, the diagram we showed at the
 beginning of <a href="/book/part1.html">[part1]</a> to preview where we were heading?</p>
 </div>
 <div id="recap_components_diagram" class="imageblock width-75">
@@ -1319,10 +1423,13 @@ This helps us to keep our codebase well organized and stops us from building a
 big ball of mud.</p>
 </div>
 <div class="paragraph">
-<p>By applying the dependency inversion principle, and by using ports-and-adapters-inspired patterns like Repository and Unit of Work, we&#8217;ve made it possible to
-do TDD in both high gear and low gear and to maintain a healthy test pyramid.
-We can test our system edge to edge, and the need for integration and
-end-to-end tests is kept to a minimum.</p>
+<p>
+
+By applying the dependency inversion principle, and by using
+ports-and-adapters-inspired patterns like Repository and Unit of Work, we&#8217;ve
+made it possible to do TDD in both high gear and low gear and to maintain a
+healthy test pyramid. We can test our system edge to edge, and the need for
+integration and end-to-end tests is kept to a minimum.</p>
 </div>
 <div class="paragraph">
 <p>Lastly, we&#8217;ve talked about the idea of consistency boundaries. We don&#8217;t want to
@@ -1348,6 +1455,8 @@ At the risk of laboring the point&#8212;&#8203;we&#8217;ve been at pains to poin
     wrapper around a database and isn&#8217;t likely to be anything more than that
     in the foreseeable future, <em>you don&#8217;t need these patterns</em>. Go ahead and
     use Django, and save yourself a lot of bother.
+    
+    
 </td>
 </tr>
 </table>
@@ -1375,12 +1484,12 @@ cross consistency boundaries?</p>
 <a href="#_footnoteref_2">2</a>. <code>time.sleep()</code> works well in our use case, but it&#8217;s not the most reliable or efficient way to reproduce concurrency bugs.  Consider using semaphores or similar synchronization primitives shared between your threads to get better guarantees of behavior.
 </div>
 <div class="footnote" id="_footnotedef_3">
-<a href="#_footnoteref_3">3</a>. If you&#8217;re not using Postgres, you&#8217;ll need to read different documentation. Annoyingly, different databases all have quite different definitions. Oracle&#8217;s <code>SERIALIZABLE</code> is equivalent to Postgres&#8217;s <code>REPEATABLE READ</code>, for <span class="keep-together">example</span>.
+<a href="#_footnoteref_3">3</a>. If     you&#8217;re not using Postgres, you&#8217;ll need to read different documentation.     Annoyingly, different databases all have quite different definitions.     Oracle&#8217;s <code>SERIALIZABLE</code> is equivalent to Postgres&#8217;s <code>REPEATABLE READ</code>, for     <span class="keep-together">example</span>.
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-17 09:07:44 UTC
+Last updated 2020-03-20 13:47:19 UTC
 </div>
 </div>
 <style>

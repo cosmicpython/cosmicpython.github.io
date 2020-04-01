@@ -131,7 +131,9 @@ table {
 <h2 id="chapter_04_service_layer">4: Our First Use Case: Flask API and Service Layer</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Back to our allocations project! <a href="#maps_service_layer_before">Before: we drive our app by talking to repositories and the domain model</a> shows the point we reached at the end of <a href="/book/chapter_02_repository.html">[chapter_02_repository]</a>, which covered the Repository pattern.</p>
+<p>
+
+Back to our allocations project! <a href="#maps_service_layer_before">Before: we drive our app by talking to repositories and the domain model</a> shows the point we reached at the end of <a href="/book/chapter_02_repository.html">[chapter_02_repository]</a>, which covered the Repository pattern.</p>
 </div>
 <div id="maps_service_layer_before" class="imageblock width-75">
 <div class="content">
@@ -194,7 +196,9 @@ git checkout chapter_02_repository</pre>
 <div class="sect2">
 <h3 id="_connecting_our_application_to_the_real_world">Connecting Our Application to the Real World</h3>
 <div class="paragraph">
-<p>Like any good agile team, we&#8217;re hustling to try to get an MVP out and
+<p>
+
+Like any good agile team, we&#8217;re hustling to try to get an MVP out and
 in front of the users to start gathering feedback. We have the core
 of our domain model and the domain service we need to allocate orders,
 and we have the repository interface for permanent storage.</p>
@@ -210,7 +214,8 @@ plan:</p>
 <p>Use Flask to put an API endpoint in front of our <code>allocate</code> domain service.
 Wire up the database session and our repository. Test it with
 an end-to-end test and some quick-and-dirty SQL to prepare test
-data.</p>
+data.
+</p>
 </li>
 <li>
 <p>Refactor out a service layer that can serve as an abstraction to
@@ -229,7 +234,10 @@ clients (our tests and our Flask API) to be decoupled from the model layer.</p>
 <div class="sect2">
 <h3 id="_a_first_end_to_end_test">A First End-to-End Test</h3>
 <div class="paragraph">
-<p>No one is interested in getting into a long terminology debate about what
+<p>
+
+
+No one is interested in getting into a long terminology debate about what
 counts as an end-to-end (E2E) test versus a functional test versus an acceptance test versus
 an integration test versus a unit test. Different projects need different
 combinations of tests, and we&#8217;ve seen perfectly successful projects just split
@@ -287,7 +295,8 @@ way of doing this later in the chapter.</p>
 </ol>
 </div>
 <div class="paragraph">
-<p>Everyone solves these problems in different ways, but you&#8217;re going to need some
+<p>
+Everyone solves these problems in different ways, but you&#8217;re going to need some
 way of spinning up Flask, possibly in a container, and of talking to a
 Postgres database. If you want to see how we did it, check out
 <a href="/book/appendix_project_structure.html">[appendix_project_structure]</a>.</p>
@@ -296,7 +305,9 @@ Postgres database. If you want to see how we did it, check out
 <div class="sect2">
 <h3 id="_the_straightforward_implementation">The Straightforward Implementation</h3>
 <div class="paragraph">
-<p>Implementing things in the most obvious way, you might get something like this:</p>
+<p>
+
+Implementing things in the most obvious way, you might get something like this:</p>
 </div>
 <div id="first_cut_flask_app" class="exampleblock">
 <div class="title">First cut of Flask app (flask_app.py)</div>
@@ -339,7 +350,8 @@ Postgres database. If you want to see how we did it, check out
 nonsense, Bob and Harry, you may be thinking.</p>
 </div>
 <div class="paragraph">
-<p>But hang on a minute&#8212;&#8203;there&#8217;s no commit. We&#8217;re not actually saving our
+<p>
+But hang on a minute&#8212;&#8203;there&#8217;s no commit. We&#8217;re not actually saving our
 allocation to the database. Now we need a second test, either one that will
 inspect the database state after (not very black-boxy), or maybe one that
 checks that we can&#8217;t allocate a second line if a first should have already
@@ -377,13 +389,17 @@ depleted the batch:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Not quite so lovely, but that will force us to add the commit.</p>
+<p>
+
+Not quite so lovely, but that will force us to add the commit.</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_error_conditions_that_require_database_checks">Error Conditions That Require Database Checks</h3>
 <div class="paragraph">
-<p>If we keep going like this, though, things are going to get uglier and uglier.</p>
+<p>
+
+If we keep going like this, though, things are going to get uglier and uglier.</p>
 </div>
 <div class="paragraph">
 <p>Suppose we want to add a bit of error handling. What if the domain raises an
@@ -480,7 +496,10 @@ inverted test pyramid (or "ice-cream cone model," as Bob likes to call it).</p>
 <div class="sect2">
 <h3 id="_introducing_a_service_layer_and_using_fakerepository_to_unit_test_it">Introducing a Service Layer, and Using FakeRepository to Unit Test It</h3>
 <div class="paragraph">
-<p>If we look at what our Flask app is doing, there&#8217;s quite a lot of what we
+<p>
+
+
+If we look at what our Flask app is doing, there&#8217;s quite a lot of what we
 might call <em>orchestration</em>&#8212;fetching stuff out of our repository, validating
 our input against database state, handling errors, and committing in the
 happy path. Most of these things don&#8217;t have anything to do with having a
@@ -489,11 +508,14 @@ web API endpoint (you&#8217;d need them if you were building a CLI, for example;
 end-to-end tests.</p>
 </div>
 <div class="paragraph">
-<p>It often makes sense to split out a service layer, sometimes called an
+<p>
+
+It often makes sense to split out a service layer, sometimes called an
 <em>orchestration layer</em> or a <em>use-case layer</em>.</p>
 </div>
 <div class="paragraph">
-<p>Do you remember the <code>FakeRepository</code> that we prepared in <a href="/book/chapter_03_abstractions.html">[chapter_03_abstractions]</a>?</p>
+<p>
+Do you remember the <code>FakeRepository</code> that we prepared in <a href="/book/chapter_03_abstractions.html">[chapter_03_abstractions]</a>?</p>
 </div>
 <div id="fake_repo" class="exampleblock">
 <div class="title">Our fake repository, an in-memory collection of batches (test_services.py)</div>
@@ -518,7 +540,10 @@ end-to-end tests.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Here&#8217;s where it will come in useful; it lets us test our service layer with
+<p>
+
+
+Here&#8217;s where it will come in useful; it lets us test our service layer with
 nice, fast unit tests:</p>
 </div>
 <div id="first_services_tests" class="exampleblock">
@@ -558,7 +583,10 @@ function in the API layer and the <code>allocate()</code> domain service functio
 our domain model.<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup></p>
 </li>
 <li>
-<p>We also need a <code>FakeSession</code> to fake out the database session, as shown in the following code snippet.</p>
+<p>We also need a <code>FakeSession</code> to fake out the database session, as shown in
+the following code snippet.
+
+</p>
 </li>
 </ol>
 </div>
@@ -601,7 +629,11 @@ the fake <code>.commit()</code> lets us migrate a third test from the E2E layer:
 <div class="sect3">
 <h4 id="_a_typical_service_function">A Typical Service Function</h4>
 <div class="paragraph">
-<p>We&#8217;ll write a service function that looks something like this:</p>
+<p>
+
+
+
+We&#8217;ll write a service function that looks something like this:</p>
 </div>
 <div id="service_function" class="exampleblock">
 <div class="title">Basic allocation service (services.py)</div>
@@ -663,13 +695,16 @@ that in <a href="/book/chapter_06_uow.html">[chapter_06_uow]</a> with the Unit o
 </div>
 </div>
 <div class="paragraph">
-<p>It depends on a repository.  We&#8217;ve chosen to make the dependency explicit,
+<p>
+
+It depends on a repository.  We&#8217;ve chosen to make the dependency explicit,
 and we&#8217;ve used the type hint to say that we depend on <code>AbstractRepository</code>.
 This means it&#8217;ll work both when the tests give it a <code>FakeRepository</code> and
 when the Flask app gives it a <code>SqlAlchemyRepository</code>.</p>
 </div>
 <div class="paragraph">
-<p>If you remember <a href="/book/introduction.html#dip">[dip]</a>,
+<p>
+If you remember <a href="/book/introduction.html#dip">[dip]</a>,
 this is what we mean when we say we should "depend on abstractions." Our
 <em>high-level module</em>, the service layer, depends on the repository abstraction.
 And the <em>details</em> of the implementation for our specific choice of persistent
@@ -685,7 +720,9 @@ abstractions intact.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>But the essentials of the service layer are there, and our Flask
+<p>
+
+But the essentials of the service layer are there, and our Flask
 app now looks a lot cleaner:</p>
 </div>
 <div id="flask_app_using_service_layer" class="exampleblock">
@@ -733,7 +770,9 @@ codes, and JSON. All the orchestration logic is in the use case/service layer,
 and the domain logic stays in the domain.</p>
 </div>
 <div class="paragraph">
-<p>Finally, we can confidently strip down our E2E tests to just two, one for
+<p>
+
+Finally, we can confidently strip down our E2E tests to just two, one for
 the happy path and one for the unhappy path:</p>
 </div>
 <div id="fewer_e2e_tests" class="exampleblock">
@@ -780,7 +819,8 @@ we can test against the service layer in memory.</p>
 <div class="content">
 <div class="title">Exercise for the Reader</div>
 <div class="paragraph">
-<p>Now that we have an allocate service, why not build out a service for
+<p>
+Now that we have an allocate service, why not build out a service for
 <code>deallocate</code>? We&#8217;ve added <a href="https://github.com/cosmicpython/code/tree/chapter_04_service_layer_exercise">an E2E test and a few stub service-layer tests</a> for
 you to get started on GitHub.</p>
 </div>
@@ -811,15 +851,21 @@ If you decide you want to build a read-only endpoint for retrieving allocation
 <div class="sect2">
 <h3 id="why_is_everything_a_service">Why Is Everything Called a Service?</h3>
 <div class="paragraph">
-<p>Some of you are probably scratching your heads at this point trying to figure
+<p>
+
+
+
+Some of you are probably scratching your heads at this point trying to figure
 out exactly what the difference is between a domain service and a service layer.</p>
 </div>
 <div class="paragraph">
-<p>We&#8217;re sorry&#8212;we didn&#8217;t choose the names, or we&#8217;d have much cooler and friendlier
+<p>
+We&#8217;re sorry&#8212;we didn&#8217;t choose the names, or we&#8217;d have much cooler and friendlier
 ways to talk about this stuff.</p>
 </div>
 <div class="paragraph">
-<p>We&#8217;re using two things called a <em>service</em> in this chapter. The first is an
+<p>
+We&#8217;re using two things called a <em>service</em> in this chapter. The first is an
 <em>application service</em> (our service layer). Its job is to handle requests from the
 outside world and to <em>orchestrate</em> an operation. What we mean is that the
 service layer <em>drives</em> the application by following a bunch of simple steps:</p>
@@ -842,7 +888,8 @@ service layer <em>drives</em> the application by following a bunch of simple ste
 system, and keeping it separate from business logic helps to keep things tidy.</p>
 </div>
 <div class="paragraph">
-<p>The second type of service is a <em>domain service</em>. This is the name for a piece of
+<p>
+The second type of service is a <em>domain service</em>. This is the name for a piece of
 logic that belongs in the domain model but doesn&#8217;t sit naturally inside a
 stateful entity or value object. For example, if you were building a shopping
 cart application, you might choose to build taxation rules as a domain service.
@@ -855,7 +902,11 @@ can do the job.</p>
 <div class="sect2">
 <h3 id="_putting_things_in_folders_to_see_where_it_all_belongs">Putting Things in Folders to See Where It All Belongs</h3>
 <div class="paragraph">
-<p>As our application gets bigger, we&#8217;ll need to keep tidying our directory
+<p>
+
+
+
+As our application gets bigger, we&#8217;ll need to keep tidying our directory
 structure. The layout of our project gives us useful hints about what kinds of
 object we&#8217;ll find in each file.</p>
 </div>
@@ -905,28 +956,36 @@ object we&#8217;ll find in each file.</p>
 but for a more complex application, you might have one file per class; you
 might have helper parent classes for <code>Entity</code>, <code>ValueObject</code>, and
 <code>Aggregate</code>, and you might add an <em>exceptions.py</em> for domain-layer exceptions
-and, as you&#8217;ll see in <a href="/book/part2.html">[part2]</a>, <span class="keep-together"><em>commands.py</em></span> and <em>events.py</em>.</p>
+and, as you&#8217;ll see in <a href="/book/part2.html">[part2]</a>, <span class="keep-together"><em>commands.py</em></span> and <em>events.py</em>.
+</p>
 </li>
 <li>
 <p>We&#8217;ll distinguish the service layer. Currently that&#8217;s just one file
 called <em>services.py</em> for our service-layer functions.  You could
-add service-layer exceptions here, and as you&#8217;ll see in <a href="/book/chapter_05_high_gear_low_gear.html">[chapter_05_high_gear_low_gear]</a>, we&#8217;ll add <em>unit_of_work.py</em>.</p>
+add service-layer exceptions here, and as you&#8217;ll see in
+<a href="/book/chapter_05_high_gear_low_gear.html">[chapter_05_high_gear_low_gear]</a>, we&#8217;ll add <em>unit_of_work.py</em>.</p>
 </li>
 <li>
 <p><em>Adapters</em> is a nod to the ports and adapters terminology. This will fill
 up with any other abstractions around external I/O (e.g., a <em>redis_client.py</em>).
 Strictly speaking, you would call these <em>secondary</em> adapters or <em>driven</em>
-adapters, or sometimes <em>inward-facing</em> adapters.</p>
+adapters, or sometimes <em>inward-facing</em> adapters.
+
+
+
+</p>
 </li>
 <li>
 <p>Entrypoints are the places we drive our application from. In the
 official ports and adapters terminology, these are adapters too, and are
-referred to as <em>primary</em>, <em>driving</em>, or <em>outward-facing</em> adapters.</p>
+referred to as <em>primary</em>, <em>driving</em>, or <em>outward-facing</em> adapters.
+</p>
 </li>
 </ol>
 </div>
 <div class="paragraph">
-<p>What about ports?  As you may remember, they are the abstract interfaces that the
+<p>
+What about ports?  As you may remember, they are the abstract interfaces that the
 adapters implement. We tend to keep them in the same file as the adapters that
 implement them.</p>
 </div>
@@ -934,7 +993,9 @@ implement them.</p>
 <div class="sect2">
 <h3 id="_wrap_up">Wrap-Up</h3>
 <div class="paragraph">
-<p>Adding the service layer has really bought us quite a lot:</p>
+<p>
+
+Adding the service layer has really bought us quite a lot:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -965,17 +1026,24 @@ tests.</p>
 <div class="sect3">
 <h4 id="_the_dip_in_action">The DIP in Action</h4>
 <div class="paragraph">
-<p><a href="#service_layer_diagram_abstract_dependencies">Abstract dependencies of the service layer</a> shows the
+<p>
+
+
+<a href="#service_layer_diagram_abstract_dependencies">Abstract dependencies of the service layer</a> shows the
 dependencies of our service layer: the domain model
 and <code>AbstractRepository</code> (the port, in ports and adapters terminology).</p>
 </div>
 <div class="paragraph">
-<p>When we run the tests, <a href="#service_layer_diagram_test_dependencies">Tests provide an implementation of the abstract dependency</a> shows
+<p>
+
+When we run the tests, <a href="#service_layer_diagram_test_dependencies">Tests provide an implementation of the abstract dependency</a> shows
 how we implement the abstract dependencies by using <code>FakeRepository</code> (the
 adapter).</p>
 </div>
 <div class="paragraph">
-<p>And when we actually run our app, we swap in the "real" dependency shown in
+<p>
+
+And when we actually run our app, we swap in the "real" dependency shown in
 <a href="#service_layer_diagram_runtime_dependencies">Dependencies at runtime</a>.</p>
 </div>
 <div id="service_layer_diagram_abstract_dependencies" class="imageblock width-75">
@@ -1075,7 +1143,9 @@ adapter).</p>
 <p>Wonderful.</p>
 </div>
 <div class="paragraph">
-<p>Let&#8217;s pause for <a href="#chapter_04_service_layer_tradeoffs">Service layer: the trade-offs</a>,
+<p>
+
+Let&#8217;s pause for <a href="#chapter_04_service_layer_tradeoffs">Service layer: the trade-offs</a>,
 in which we consider the pros and cons of having a service layer at all.</p>
 </div>
 <table id="chapter_04_service_layer_tradeoffs" class="tableblock frame-all grid-all stretch">
@@ -1124,14 +1194,18 @@ the single place to capture all the use cases.</p>
 </li>
 <li>
 <p>Putting too much logic into the service layer can lead to the <em>Anemic Domain</em>
-anti-pattern. It&#8217;s better to introduce this layer after you spot orchestration
-logic creeping into your controllers.</p>
+antipattern. It&#8217;s better to introduce this layer after you spot orchestration
+logic creeping into your controllers.
+
+</p>
 </li>
 <li>
 <p>You can get a lot of the benefits that come from having rich domain models
 by simply pushing logic out of your controllers and down to the model layer,
 without needing to add an extra layer in between (aka "fat models, thin
-controllers").</p>
+controllers").
+
+</p>
 </li>
 </ul>
 </div></div></td>
@@ -1175,7 +1249,7 @@ You&#8217;ll see!</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-17 17:52:53 UTC
+Last updated 2020-03-20 13:47:19 UTC
 </div>
 </div>
 <style>

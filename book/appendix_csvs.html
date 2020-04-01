@@ -131,7 +131,8 @@ table {
 <h2 id="appendix_csvs">Appendix C: Swapping Out the Infrastructure: Do Everything with CSVs</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>This appendix is intended as a little illustration of the benefits of the
+<p>
+This appendix is intended as a little illustration of the benefits of the
 Repository, Unit of Work, and Service Layer patterns. It&#8217;s intended to
 follow from <a href="/book/chapter_06_uow.html">[chapter_06_uow]</a>.</p>
 </div>
@@ -310,7 +311,8 @@ with CSVs underlying them instead of a database. And as you&#8217;ll see, it rea
 <div class="sect2">
 <h3 id="_implementing_a_repository_and_unit_of_work_for_csvs">Implementing a Repository and Unit of Work for CSVs</h3>
 <div class="paragraph">
-<p>Here&#8217;s what a CSV-based repository could look like.  It abstracts away all the
+<p>
+Here&#8217;s what a CSV-based repository could look like.  It abstracts away all the
 logic for reading CSVs from disk, including the fact that it has to read <em>two
 different CSVs</em> (one for batches and one for allocations), and it gives us just
 the familiar <code>.list()</code> API, which provides the illusion of an in-memory
@@ -366,7 +368,8 @@ collection of domain objects:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>And here&#8217;s what a UoW for CSVs would look like:</p>
+<p>
+And here&#8217;s what a UoW for CSVs would look like:</p>
 </div>
 <div id="csvs_uow" class="exampleblock">
 <div class="title">A UoW for CSVs: commit = csv.writer (src/allocation/service_layer/csv_uow.py)</div>
@@ -419,7 +422,8 @@ of code for reading order lines, and a bit of code that invokes our
 </div>
 </div>
 <div class="paragraph">
-<p>Ta-da! <em>Now are y&#8217;all impressed or what</em>?</p>
+<p>
+Ta-da! <em>Now are y&#8217;all impressed or what</em>?</p>
 </div>
 <div class="paragraph">
 <p>Much love,</p>
@@ -438,7 +442,7 @@ of code for reading order lines, and a bit of code that invokes our
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-17 09:07:44 UTC
+Last updated 2020-03-20 13:47:19 UTC
 </div>
 </div>
 <style>

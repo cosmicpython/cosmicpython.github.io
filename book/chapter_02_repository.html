@@ -135,7 +135,10 @@ table {
 a way of decoupling our core logic from infrastructural concerns.</p>
 </div>
 <div class="paragraph">
-<p>We&#8217;ll introduce the <em>Repository</em> pattern, a simplifying abstraction over data storage,
+<p>
+
+
+We&#8217;ll introduce the <em>Repository</em> pattern, a simplifying abstraction over data storage,
 allowing us to decouple our model layer from the data layer. We&#8217;ll present a
 concrete example of how this simplifying abstraction makes our system more
 testable by hiding the complexities of the database.</p>
@@ -177,7 +180,8 @@ git checkout chapter_01_domain_model</pre>
 <div class="sect2">
 <h3 id="_persisting_our_domain_model">Persisting Our Domain Model</h3>
 <div class="paragraph">
-<p>In <a href="/book/chapter_01_domain_model.html">[chapter_01_domain_model]</a> we built a simple domain model that can allocate orders
+<p>
+In <a href="/book/chapter_01_domain_model.html">[chapter_01_domain_model]</a> we built a simple domain model that can allocate orders
 to batches of stock. It&#8217;s easy for us to write tests against this code because
 there aren&#8217;t any dependencies or infrastructure to set up. If we needed to run
 a database or an API and create test data, our tests would be harder to write
@@ -190,7 +194,8 @@ browsers and race conditions. For the next few chapters we&#8217;re going to loo
 how we can connect our idealized domain model to external state.</p>
 </div>
 <div class="paragraph">
-<p>We expect to be working in an agile manner, so our priority is to get to a
+<p>
+We expect to be working in an agile manner, so our priority is to get to a
 minimum viable product as quickly as possible. In our case, that&#8217;s going to be
 a web API. In a real project, you might dive straight in with some end-to-end
 tests and start plugging in a web framework, test-driving things outside-in.</p>
@@ -234,8 +239,9 @@ some code that looks more or less like the following.</p>
 </td>
 <td class="content">
 We&#8217;ve used Flask because it&#8217;s lightweight, but you don&#8217;t need
-to be a Flask user to understand this book. In fact, we&#8217;ll show you how
-to make your choice of framework a minor detail.
+    to be a Flask user to understand this book. In fact, we&#8217;ll show you how
+    to make your choice of framework a minor detail.
+    
 </td>
 </tr>
 </table>
@@ -252,7 +258,9 @@ database.</p>
 <div class="sect2">
 <h3 id="_applying_the_dip_to_data_access">Applying the DIP to Data Access</h3>
 <div class="paragraph">
-<p>As mentioned in the <a href="/book/introduction.html">introduction</a>, a layered architecture is a common
+<p>
+
+As mentioned in the <a href="/book/introduction.html">introduction</a>, a layered architecture is a common
  approach to structuring a system that has a UI, some logic, and a database (see
 <a href="#layered_architecture2">Layered architecture</a>).</p>
 </div>
@@ -269,12 +277,14 @@ separate (which is a good thing), and to have each layer depend only on the one
 below it.</p>
 </div>
 <div class="paragraph">
-<p>But we want our domain model to have <em>no dependencies whatsoever</em>.<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup>
+<p>
+But we want our domain model to have <em>no dependencies whatsoever</em>.<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup>
 We don&#8217;t want infrastructure concerns bleeding over into our domain model and
 slowing our unit tests or our ability to make changes.</p>
 </div>
 <div class="paragraph">
-<p>Instead, as discussed in the introduction, we&#8217;ll think of our model as being on the
+<p>
+Instead, as discussed in the introduction, we&#8217;ll think of our model as being on the
 "inside," and dependencies flowing inward to it; this is what people sometimes call
 <em>onion architecture</em> (see <a href="#onion_architecture">Onion architecture</a>).</p>
 </div>
@@ -317,7 +327,9 @@ yourself questions like this:</p>
 </blockquote>
 </div>
 <div class="paragraph">
-<p>Although some people like to nitpick over the differences, all these are
+<p>
+
+Although some people like to nitpick over the differences, all these are
 pretty much names for the same thing, and they all boil down to the
 dependency inversion principle: high-level modules (the domain) should
 not depend on low-level ones (the infrastructure).<sup class="footnote">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup></p>
@@ -333,7 +345,8 @@ and whether there is a Pythonic equivalent of interfaces,
 <div class="sect2">
 <h3 id="_reminder_our_model">Reminder: Our Model</h3>
 <div class="paragraph">
-<p>Let&#8217;s remind ourselves of our domain model (see <a href="#model_diagram_reminder">Our model</a>):
+<p>
+Let&#8217;s remind ourselves of our domain model (see <a href="#model_diagram_reminder">Our model</a>):
 an allocation is the concept of linking an <code>OrderLine</code> to a <code>Batch</code>.  We&#8217;re
 storing the allocations as a collection on our <code>Batch</code> object.</p>
 </div>
@@ -349,23 +362,29 @@ storing the allocations as a collection on our <code>Batch</code> object.</p>
 <div class="sect3">
 <h4 id="_the_normal_orm_way_model_depends_on_orm">The "Normal" ORM Way: Model Depends on ORM</h4>
 <div class="paragraph">
-<p>These days, it&#8217;s unlikely that your team members are hand-rolling their own SQL queries.
+<p>
+
+These days, it&#8217;s unlikely that your team members are hand-rolling their own SQL queries.
 Instead, you&#8217;re almost certainly using some kind of framework to generate
 SQL for you based on your model objects.</p>
 </div>
 <div class="paragraph">
-<p>These frameworks are called <em>object-relational mappers</em> (ORMs) because they exist to
+<p>
+These frameworks are called <em>object-relational mappers</em> (ORMs) because they exist to
 bridge the conceptual gap between the world of objects and domain modeling and
 the world of databases and relational algebra.</p>
 </div>
 <div class="paragraph">
-<p>The most important thing an ORM gives us is <em>persistence ignorance</em>: the idea
+<p>
+The most important thing an ORM gives us is <em>persistence ignorance</em>: the idea
 that our fancy domain model doesn&#8217;t need to know anything about how data is
 loaded or persisted. This helps keep our domain clean of direct dependencies
 on particular database technologies.<sup class="footnote">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup></p>
 </div>
 <div class="paragraph">
-<p>But if you follow the typical SQLAlchemy tutorial, you&#8217;ll end up with something
+<p>
+
+But if you follow the typical SQLAlchemy tutorial, you&#8217;ll end up with something
 like this:</p>
 </div>
 <div id="typical_sqlalchemy_example" class="exampleblock">
@@ -406,7 +425,9 @@ to database columns?</p>
 <div class="content">
 <div class="title">Django&#8217;s ORM Is Essentially the Same, but More Restrictive</div>
 <div class="paragraph">
-<p>If you&#8217;re more used to Django, the preceding "declarative" SQLAlchemy snippet
+<p>
+
+If you&#8217;re more used to Django, the preceding "declarative" SQLAlchemy snippet
 translates to something like this:</p>
 </div>
 <div id="django_orm_example" class="exampleblock">
@@ -444,7 +465,13 @@ inversion and the Repository pattern to Django.</p>
 <div class="sect3">
 <h4 id="_inverting_the_dependency_orm_depends_on_model">Inverting the Dependency: ORM Depends on Model</h4>
 <div class="paragraph">
-<p>Well, thankfully, that&#8217;s not the only way to use SQLAlchemy.  The alternative is
+<p>
+
+
+
+
+
+Well, thankfully, that&#8217;s not the only way to use SQLAlchemy.  The alternative is
 to define your schema separately, and to define an explicit <em>mapper</em> for how to convert
 between the schema and our domain model, what SQLAlchemy calls a
 <a href="https://oreil.ly/ZucTG">classical mapping</a>:</p>
@@ -505,7 +532,8 @@ unaware of the database.</p>
 domain classes, as we&#8217;ll see.</p>
 </div>
 <div class="paragraph">
-<p>When you&#8217;re first trying to build your ORM config, it can be useful to write
+<p>
+When you&#8217;re first trying to build your ORM config, it can be useful to write
 tests for it, as in the following example:</p>
 </div>
 <div id="orm_tests" class="exampleblock">
@@ -547,7 +575,8 @@ explaining. You don&#8217;t need to worry about the details of pytest or its
 fixtures for the purposes of this book, but the short explanation is that
 you can define common dependencies for your tests as "fixtures," and
 pytest will inject them to the tests that need them by looking at their
-function arguments. In this case, it&#8217;s a SQLAlchemy database session.</p>
+function arguments. In this case, it&#8217;s a SQLAlchemy database session.
+</p>
 </li>
 </ol>
 </div>
@@ -574,7 +603,8 @@ architectural decisions, you&#8217;ll need to consider a trade-off. As the
 Zen of Python says, "Practicality beats purity!"</p>
 </div>
 <div class="paragraph">
-<p>At this point, though, our API endpoint might look something like
+<p>
+At this point, though, our API endpoint might look something like
 the following, and we could get it to work just fine:</p>
 </div>
 <div id="api_endpoint_with_session" class="exampleblock">
@@ -612,7 +642,9 @@ the following, and we could get it to work just fine:</p>
 <div class="sect2">
 <h3 id="_introducing_the_repository_pattern">Introducing the Repository Pattern</h3>
 <div class="paragraph">
-<p>The <em>Repository</em> pattern is an abstraction over persistent storage. It hides the
+<p>
+
+The <em>Repository</em> pattern is an abstraction over persistent storage. It hides the
 boring details of data access by pretending that all of our data is in memory.</p>
 </div>
 <div class="paragraph">
@@ -647,14 +679,17 @@ list or a set. Because the objects are in memory, we never need to call a
 <div class="sect3">
 <h4 id="_the_repository_in_the_abstract">The Repository in the Abstract</h4>
 <div class="paragraph">
-<p>The simplest repository has just two methods: <code>add()</code> to put a new item in the
+<p>
+
+The simplest repository has just two methods: <code>add()</code> to put a new item in the
 repository, and <code>get()</code> to return a previously added item.<sup class="footnote">[<a id="_footnoteref_6" class="footnote" href="#_footnotedef_6" title="View footnote.">6</a>]</sup>.]
 We stick rigidly to using these methods for data access in our domain and our
 service layer. This self-imposed simplicity stops us from coupling our domain
 model to the database.</p>
 </div>
 <div class="paragraph">
-<p>Here&#8217;s what an abstract base class (ABC) for our repository would look like:</p>
+<p>
+Here&#8217;s what an abstract base class (ABC) for our repository would look like:</p>
 </div>
 <div id="abstract_repo" class="exampleblock">
 <div class="title">The simplest possible repository (repository.py)</div>
@@ -678,9 +713,11 @@ model to the database.</p>
 <ol>
 <li>
 <p>Python tip: <code>@abc.abstractmethod</code> is one of the only things that makes
-    ABCs actually "work" in Python. Python will refuse to let you instantiate
-    a class that does not implement all the <code>abstractmethods</code> defined in its
-    parent class.<sup class="footnote">[<a id="_footnoteref_7" class="footnote" href="#_footnotedef_7" title="View footnote.">7</a>]</sup></p>
+ABCs actually "work" in Python. Python will refuse to let you instantiate
+a class that does not implement all the <code>abstractmethods</code> defined in its
+parent class.<sup class="footnote">[<a id="_footnoteref_7" class="footnote" href="#_footnotedef_7" title="View footnote.">7</a>]</sup>
+
+</p>
 </li>
 <li>
 <p><code>raise NotImplementedError</code> is nice, but it&#8217;s neither necessary nor sufficient. In fact, your abstract methods can have real behavior that subclasses
@@ -692,20 +729,24 @@ can call out to, if you really want.</p>
 <div class="content">
 <div class="title">Abstract Base Classes, Duck Typing, and Protocols</div>
 <div class="paragraph">
-<p>We&#8217;re using abstract base classes in this book for didactic reasons: we hope
+<p>
+
+We&#8217;re using abstract base classes in this book for didactic reasons: we hope
 they help explain what the interface of the repository abstraction is.</p>
 </div>
 <div class="paragraph">
-<p>In real life, we&#8217;ve sometimes found ourselves deleting ABCs from our production
+<p>
+In real life, we&#8217;ve sometimes found ourselves deleting ABCs from our production
 code, because Python makes it too easy to ignore them, and they end up
 unmaintained and, at worst, misleading. In practice we often just rely on
 Python&#8217;s duck typing to enable abstractions. To a Pythonista, a repository is
 <em>any</em> object that has <code>add(<em>thing</em>)</code> and <code>get(<em>id</em>)</code> methods.</p>
 </div>
 <div class="paragraph">
-<p>An alternative to look into is <a href="https://oreil.ly/q9EPC">PEP
-544 protocols</a>. These give you typing without the possibility of inheritance,
-which "prefer composition over inheritance" fans will particularly like.</p>
+<p>
+An alternative to look into is <a href="https://oreil.ly/q9EPC">PEP 544 protocols</a>.
+These give you typing without the possibility of inheritance, which "prefer
+composition over inheritance" fans will particularly like.</p>
 </div>
 </div>
 </div>
@@ -725,7 +766,8 @@ of nothing.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Whenever we introduce an architectural pattern in this book, we&#8217;ll always
+<p>
+Whenever we introduce an architectural pattern in this book, we&#8217;ll always
 ask, "What do we get for this?  And what does it cost us?"</p>
 </div>
 <div class="paragraph">
@@ -749,7 +791,8 @@ it easy to make fundamental changes to the way we store things (see
 <a href="/book/appendix_csvs.html">[appendix_csvs]</a>), and as we&#8217;ll see, it is easy to fake out for unit tests.</p>
 </div>
 <div class="paragraph">
-<p>In addition, the Repository pattern is so common in the DDD world that, if you
+<p>
+In addition, the Repository pattern is so common in the DDD world that, if you
 do collaborate with programmers who have come to Python from the Java and C#
 worlds, they&#8217;re likely to recognize it. <a href="#repository_pattern_diagram">Repository pattern</a> illustrates the pattern.</p>
 </div>
@@ -782,7 +825,9 @@ worlds, they&#8217;re likely to recognize it. <a href="#repository_pattern_diagr
 </div>
 </div>
 <div class="paragraph">
-<p>As always, we start with a test. This would probably be classified as an
+<p>
+
+As always, we start with a test. This would probably be classified as an
 integration test, since we&#8217;re checking that our code (the repository) is
 correctly integrated with the database; hence, the tests tend to mix
 raw SQL with calls and assertions on our own code.</p>
@@ -838,7 +883,9 @@ this; some of our reasons will become clearer when we get to
 </ol>
 </div>
 <div class="paragraph">
-<p>The next test involves retrieving batches and allocations, so it&#8217;s more
+<p>
+
+The next test involves retrieving batches and allocations, so it&#8217;s more
 complex:</p>
 </div>
 <div id="repo_test_retrieve" class="exampleblock">
@@ -903,7 +950,8 @@ types match, and that the reference is the same (because, as you remember,
 </ol>
 </div>
 <div class="paragraph">
-<p>Whether or not you painstakingly write tests for every model is a judgment
+<p>
+Whether or not you painstakingly write tests for every model is a judgment
 call. Once you have one class tested for create/modify/save, you might be
 happy to go on and do the others with a minimal round-trip test, or even nothing
 at all, if they all follow a similar pattern. In our case, the ORM config
@@ -936,7 +984,10 @@ specific test.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>And now our Flask endpoint might look something like the following:</p>
+<p>
+
+
+And now our Flask endpoint might look something like the following:</p>
 </div>
 <div id="api_endpoint_with_repo" class="exampleblock">
 <div class="title">Using our repository directly in our API endpoint</div>
@@ -961,7 +1012,10 @@ specific test.</p>
 <div class="content">
 <div class="title">Exercise for the Reader</div>
 <div class="paragraph">
-<p>We bumped into a friend at a DDD conference the other day who said, "I haven&#8217;t
+<p>
+
+
+We bumped into a friend at a DDD conference the other day who said, "I haven&#8217;t
 used an ORM in 10 years." The Repository pattern and an ORM both act as abstractions
 in front of raw SQL, so using one behind the other isn&#8217;t really necessary.  Why
 not have a go at implementing our repository without using the ORM? You&#8217;ll find the code <a href="https://github.com/cosmicpython/code/tree/chapter_02_repository_exercise">on GitHub</a>.</p>
@@ -978,7 +1032,9 @@ But the nice thing is, the rest of your application just doesn&#8217;t care.</p>
 <div class="sect2">
 <h3 id="_building_a_fake_repository_for_tests_is_now_trivial">Building a Fake Repository for Tests Is Now Trivial!</h3>
 <div class="paragraph">
-<p>Here&#8217;s one of the biggest benefits of the Repository pattern:</p>
+<p>
+
+Here&#8217;s one of the biggest benefits of the Repository pattern:</p>
 </div>
 <div id="fake_repository" class="exampleblock">
 <div class="title">A simple fake repository using a set (repository.py)</div>
@@ -1040,7 +1096,9 @@ Building fakes for your abstractions is an excellent way to get design
 <div class="sect2">
 <h3 id="what_is_a_port_and_what_is_an_adapter">What Is a Port and What Is an Adapter, in Python?</h3>
 <div class="paragraph">
-<p>We don&#8217;t want to dwell on the terminology too much here because the main thing
+<p>
+
+We don&#8217;t want to dwell on the terminology too much here because the main thing
 we want to focus on is dependency inversion, and the specifics of the
 technique you use don&#8217;t matter too much. Also, we&#8217;re aware that different
 people use slightly different definitions.</p>
@@ -1052,11 +1110,14 @@ it is we wish to abstract away, and the <em>adapter</em> is the <em>implementati
 behind that interface or abstraction.</p>
 </div>
 <div class="paragraph">
-<p>Now Python doesn&#8217;t have interfaces per se, so although it&#8217;s
-usually easy to identify an adapter, defining the port can be harder. If
-you&#8217;re using an abstract base class, that&#8217;s the port. If not, the port
-is just the duck type that your adapters conform to and that your core application
-expects&#8212;the function and method names in use, and their argument names and types.</p>
+<p>
+
+
+Now Python doesn&#8217;t have interfaces per se, so although it&#8217;s usually easy to
+identify an adapter, defining the port can be harder. If you&#8217;re using an
+abstract base class, that&#8217;s the port. If not, the port is just the duck type
+that your adapters conform to and that your core application expects&#8212;the
+function and method names in use, and their argument names and types.</p>
 </div>
 <div class="paragraph">
 <p>Concretely, in this chapter, <code>AbstractRepository</code> is the port, and
@@ -1066,7 +1127,9 @@ expects&#8212;the function and method names in use, and their argument names and
 <div class="sect2">
 <h3 id="_wrap_up">Wrap-Up</h3>
 <div class="paragraph">
-<p>Bearing the Rich Hickey quote in mind, in each chapter we
+<p>
+
+Bearing the Rich Hickey quote in mind, in each chapter we
 summarize the costs and benefits of each architectural pattern we introduce.
 We want to be clear that we&#8217;re not saying every single application needs
 to be built this way; only sometimes does the complexity of the app and domain
@@ -1157,7 +1220,10 @@ If your app is just a simple CRUD (create-read-update-delete) wrapper
 </table>
 </div>
 <div class="paragraph">
-<p>But the more complex the domain, the more an investment in freeing
+<p>
+
+
+But the more complex the domain, the more an investment in freeing
 yourself from infrastructure concerns will pay off in terms of the ease of
 making changes.</p>
 </div>
@@ -1186,7 +1252,8 @@ needing to think about the database until later.</p>
 <dd>
 <p>Our domain model should be free of infrastructure concerns,
 so your ORM should import your model, and not the other way
-around.</p>
+around.
+</p>
 </dd>
 <dt class="hdlist1">The Repository pattern is a simple abstraction around permanent storage</dt>
 <dd>
@@ -1206,7 +1273,8 @@ real? What will our Flask app actually look like? You&#8217;ll find out in the n
 exciting installment, <a href="/book/chapter_04_service_layer.html">the Service Layer pattern</a>.</p>
 </div>
 <div class="paragraph">
-<p>But first, a brief digression.</p>
+<p>But first, a brief digression.
+</p>
 </div>
 </div>
 </div>
@@ -1246,7 +1314,7 @@ exciting installment, <a href="/book/chapter_04_service_layer.html">the Service 
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-17 09:07:44 UTC
+Last updated 2020-03-20 13:47:19 UTC
 </div>
 </div>
 <style>

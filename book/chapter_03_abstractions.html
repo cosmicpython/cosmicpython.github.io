@@ -131,7 +131,8 @@ table {
 <h2 id="chapter_03_abstractions">3: A Brief Interlude: On Coupling and Abstractions</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Allow us a brief digression on the subject of abstractions, dear reader.
+<p>
+Allow us a brief digression on the subject of abstractions, dear reader.
 We&#8217;ve talked about <em>abstractions</em> quite a lot. The Repository pattern is an
 abstraction over permanent storage, for example. But what makes a good
 abstraction?  What do we want from abstractions?  And how do they relate to testing?</p>
@@ -158,7 +159,8 @@ git checkout chapter_03_abstractions</pre>
 </table>
 </div>
 <div class="paragraph">
-<p>A key theme in this book, hidden among the fancy patterns, is that we can use
+<p>
+A key theme in this book, hidden among the fancy patterns, is that we can use
 simple abstractions to hide messy details. When we&#8217;re writing code for fun, or
 in a kata,<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup>
 we get to play with ideas freely, hammering things out and refactoring
@@ -166,14 +168,18 @@ aggressively. In a large-scale system, though, we become constrained by the
 decisions made elsewhere in the system.</p>
 </div>
 <div class="paragraph">
-<p>When we&#8217;re unable to change component A for fear of breaking component B, we say
+<p>
+
+When we&#8217;re unable to change component A for fear of breaking component B, we say
 that the components have become <em>coupled</em>. Locally, coupling is a good thing: it&#8217;s
 a sign that our code is working together, each component supporting the others, all of them
 fitting in place like the gears of a watch. In jargon, we say this works when
 there is high <em>cohesion</em> between the coupled elements.</p>
 </div>
 <div class="paragraph">
-<p>Globally, coupling is a nuisance: it increases the risk and the cost of changing
+<p>
+
+Globally, coupling is a nuisance: it increases the risk and the cost of changing
 our code, sometimes to the point where we feel unable to make any changes at
 all. This is the problem with the Ball of Mud pattern: as the application grows,
 if we&#8217;re unable to prevent coupling between elements that have no cohesion, that
@@ -181,7 +187,9 @@ coupling increases superlinearly until we are no longer able to effectively
 change our systems.</p>
 </div>
 <div class="paragraph">
-<p>We can reduce the degree of coupling within a system
+<p>
+
+We can reduce the degree of coupling within a system
 (<a href="#coupling_illustration1">Lots of coupling</a>) by abstracting away the details
 (<a href="#coupling_illustration2">Less coupling</a>).</p>
 </div>
@@ -238,7 +246,11 @@ does&#8212;we can change the arrows on the right without changing the ones on th
 <div class="sect2 pagebreak-before less_space">
 <h3 id="_abstracting_state_aids_testability">Abstracting State Aids Testability</h3>
 <div class="paragraph">
-<p>Let&#8217;s see an example. Imagine we want to write code for synchronizing two
+<p>
+
+
+
+Let&#8217;s see an example. Imagine we want to write code for synchronizing two
 file directories, which we&#8217;ll call the <em>source</em> and the <em>destination</em>:</p>
 </div>
 <div class="ulist">
@@ -256,7 +268,8 @@ rename the destination file to match.</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>Our first and third requirements are simple enough: we can just compare two
+<p>
+Our first and third requirements are simple enough: we can just compare two
 lists of paths. Our second is trickier, though. To detect renames,
 we&#8217;ll have to inspect the content of files. For this, we can use a hashing
 function like MD5 or SHA-1. The code to generate a SHA-1 hash from a file is simple
@@ -393,7 +406,9 @@ hard drive, maybe we should test it. How do we go about testing this sort of thi
 </div>
 </div>
 <div class="paragraph">
-<p>Wowsers, that&#8217;s a lot of setup for two simple cases! The problem is that
+<p>
+
+Wowsers, that&#8217;s a lot of setup for two simple cases! The problem is that
 our domain logic, "figure out the difference between two directories," is tightly
 coupled to the I/O code. We can&#8217;t run our difference algorithm without calling
 the <code>pathlib</code>, <code>shutil</code>, and <code>hashlib</code> modules.</p>
@@ -412,7 +427,12 @@ do, rather than actually do it.  Or what if we wanted to sync to a remote server
 or to cloud storage?</p>
 </div>
 <div class="paragraph">
-<p>Our high-level code is coupled to low-level details, and it&#8217;s making life hard.
+<p>
+
+
+
+
+Our high-level code is coupled to low-level details, and it&#8217;s making life hard.
 As the scenarios we consider get more complex, our tests will get more unwieldy.
 We can definitely refactor these tests (some of the cleanup could go into pytest
 fixtures, for example) but as long as we&#8217;re doing filesystem operations, they&#8217;re
@@ -422,10 +442,13 @@ going to stay slow and be hard to read and write.</p>
 <div class="sect2 pagebreak-before less_space">
 <h3 id="_choosing_the_right_abstractions">Choosing the Right Abstraction(s)</h3>
 <div class="paragraph">
-<p>What could we do to rewrite our code to make it more testable?</p>
+<p>
+
+What could we do to rewrite our code to make it more testable?</p>
 </div>
 <div class="paragraph">
-<p>First, we need to think about what our code needs from the filesystem.
+<p>
+First, we need to think about what our code needs from the filesystem.
 Reading through the code, we can see that three distinct things are happening.
 We can think of these as three distinct <em>responsibilities</em> that the code has:</p>
 </div>
@@ -445,7 +468,8 @@ destination cases.</p>
 </ol>
 </div>
 <div class="paragraph">
-<p>Remember that we want to find <em>simplifying abstractions</em> for each of these
+<p>
+Remember that we want to find <em>simplifying abstractions</em> for each of these
 responsibilities. That will let us hide the messy details so we can
 focus on the interesting logic.<sup class="footnote">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup></p>
 </div>
@@ -465,10 +489,13 @@ In this chapter, we&#8217;re refactoring some gnarly code into a more testable
 </table>
 </div>
 <div class="paragraph">
-<p>For steps 1 and 2, we&#8217;ve already intuitively started using an abstraction, a
-dictionary of hashes to paths. You may already have been thinking, "Why not build up a dictionary for the destination folder as well as the source, and
-then we just compare two dicts?" That seems like a nice way to abstract
-the current state of the filesystem:</p>
+<p>
+
+For steps 1 and 2, we&#8217;ve already intuitively started using an abstraction, a
+dictionary of hashes to paths. You may already have been thinking, "Why not
+build up a dictionary for the destination folder as well as the source, and
+then we just compare two dicts?" That seems like a nice way to abstract the
+current state of the filesystem:</p>
 </div>
 <div class="literalblock">
 <div class="content">
@@ -481,7 +508,8 @@ dest_files = {'hash1': 'path1', 'hash2': 'pathX'}</pre>
 actual move/copy/delete filesystem interaction?</p>
 </div>
 <div class="paragraph">
-<p>We&#8217;ll apply a trick here that we&#8217;ll employ on a grand scale later in
+<p>
+We&#8217;ll apply a trick here that we&#8217;ll employ on a grand scale later in
 the book. We&#8217;re going to separate <em>what</em> we want to do from <em>how</em> to do it.
 We&#8217;re going to make our program output a list of commands that look like this:</p>
 </div>
@@ -492,7 +520,8 @@ We&#8217;re going to make our program output a list of commands that look like t
 </div>
 </div>
 <div class="paragraph">
-<p>Now we could write tests that just use two filesystem dicts as inputs, and we would
+<p>
+Now we could write tests that just use two filesystem dicts as inputs, and we would
 expect lists of tuples of strings representing actions as outputs.</p>
 </div>
 <div class="paragraph">
@@ -524,11 +553,18 @@ what <em>abstraction</em> of filesystem actions will happen?"</p>
 <div class="sect2">
 <h3 id="_implementing_our_chosen_abstractions">Implementing Our Chosen Abstractions</h3>
 <div class="paragraph">
-<p>That&#8217;s all very well, but how do we <em>actually</em> write those new
+<p>
+
+
+
+That&#8217;s all very well, but how do we <em>actually</em> write those new
 tests, and how do we change our implementation to make it all work?</p>
 </div>
 <div class="paragraph">
-<p>Our goal is to isolate the clever part of our system, and to be able to test it
+<p>
+
+
+Our goal is to isolate the clever part of our system, and to be able to test it
 thoroughly without needing to set up a real filesystem. We&#8217;ll create a "core"
 of code that has no dependencies on external state and then see how it responds
 when we give it input from the outside world (this kind of approach was characterized
@@ -537,7 +573,10 @@ by Gary Bernhardt as
 Core, Imperative Shell</a>, or FCIS).</p>
 </div>
 <div class="paragraph">
-<p>Let&#8217;s start off by splitting the code to separate the stateful parts from
+<p>
+
+
+Let&#8217;s start off by splitting the code to separate the stateful parts from
 the logic.</p>
 </div>
 <div class="paragraph">
@@ -581,7 +620,8 @@ isolates the I/O part of our application.</p>
 </ol>
 </div>
 <div class="paragraph">
-<p>The code to build up the dictionary of paths and hashes is now trivially easy
+<p>
+The code to build up the dictionary of paths and hashes is now trivially easy
 to write:</p>
 </div>
 <div id="read_paths_and_hashes" class="exampleblock">
@@ -657,7 +697,8 @@ structures:</p>
 changes&#8212;&#8203;from the low-level details of I/O, we can easily test the core of our code.</p>
 </div>
 <div class="paragraph">
-<p>With this approach, we&#8217;ve switched from testing our main entrypoint function,
+<p>
+With this approach, we&#8217;ve switched from testing our main entrypoint function,
 <code>sync()</code>, to testing a lower-level function, <code>determine_actions()</code>. You might
 decide that&#8217;s fine because <code>sync()</code> is now so simple. Or you might decide to
 keep some integration/acceptance tests to test that <code>sync()</code>. But there&#8217;s
@@ -668,12 +709,16 @@ be unit tested <em>and</em> end-to-end tested; it&#8217;s an approach Bob calls
 <div class="sect3">
 <h4 id="_testing_edge_to_edge_with_fakes_and_dependency_injection">Testing Edge to Edge with Fakes and Dependency Injection</h4>
 <div class="paragraph">
-<p>When we start writing a new system, we often focus on the core logic first,
+<p>
+
+
+When we start writing a new system, we often focus on the core logic first,
 driving it with direct unit tests. At some point, though, we want to test bigger
 chunks of the system together.</p>
 </div>
 <div class="paragraph">
-<p>We <em>could</em> return to our end-to-end tests, but those are still as tricky to
+<p>
+We <em>could</em> return to our end-to-end tests, but those are still as tricky to
 write and maintain as before. Instead, we often write tests that invoke a whole
 system together but fake the I/O, sort of <em>edge to edge</em>:</p>
 </div>
@@ -781,11 +826,13 @@ Although we&#8217;re using dependency injection, there is no need
 <li>
 <p>Bob <em>loves</em> using lists to build simple test doubles, even though his
 coworkers get mad. It means we can write tests like
-assert 'foo' not in database.</p>
+assert 'foo' not in database.
+</p>
 </li>
 <li>
 <p>Each method in our <code>FakeFileSystem</code> just appends something to the list so we
-can inspect it later. This is an example of a spy object.</p>
+can inspect it later. This is an example of a spy object.
+</p>
 </li>
 </ol>
 </div>
@@ -797,14 +844,22 @@ David Heinemeier Hansson, the creator of Ruby on Rails, famously described this
 as "test-induced design damage."</p>
 </div>
 <div class="paragraph">
-<p>In either case, we can now work on fixing all the bugs in our implementation;
+<p>
+
+
+
+In either case, we can now work on fixing all the bugs in our implementation;
 enumerating tests for all the edge cases is now much easier.</p>
 </div>
 </div>
 <div class="sect3">
 <h4 id="_why_not_just_patch_it_out">Why Not Just Patch It Out?</h4>
 <div class="paragraph">
-<p>At this point you may be scratching your head and thinking,
+<p>
+
+
+
+At this point you may be scratching your head and thinking,
 "Why don&#8217;t you just use <code>mock.patch</code> and save yourself the effort?""</p>
 </div>
 <div class="paragraph">
@@ -847,7 +902,8 @@ server. For that, you&#8217;ll need to introduce abstractions.</p>
 <p>Tests that use mocks <em>tend</em> to be more coupled to the implementation details
 of the codebase. That&#8217;s because mock tests verify the interactions between
 things: did we call <code>shutil.copy</code> with the right arguments? This coupling between
-code and test <em>tends</em> to make tests more brittle, in our experience.</p>
+code and test <em>tends</em> to make tests more brittle, in our experience.
+</p>
 </li>
 <li>
 <p>Overuse of mocks leads to complicated test suites that fail to explain the
@@ -873,7 +929,10 @@ Designing for testability really means designing for
 <div class="content">
 <div class="title">Mocks Versus Fakes; Classic-Style Versus London-School TDD</div>
 <div class="paragraph">
-<p>Here&#8217;s a short and somewhat simplistic definition of the difference between
+<p>
+
+
+Here&#8217;s a short and somewhat simplistic definition of the difference between
 mocks and fakes:</p>
 </div>
 <div class="ulist">
@@ -893,18 +952,27 @@ our in-memory repository is a good example. But you can use them to make asserti
 </ul>
 </div>
 <div class="paragraph">
-<p>We&#8217;re slightly conflating mocks with spies and fakes with stubs here, and you
+<p>
+
+
+We&#8217;re slightly conflating mocks with spies and fakes with stubs here, and you
 can read the long, correct answer in Martin Fowler&#8217;s classic essay on the subject
 called <a href="https://oreil.ly/yYjBN">"Mocks Aren&#8217;t Stubs"</a>.</p>
 </div>
 <div class="paragraph">
-<p>It also probably doesn&#8217;t help that the <code>MagicMock</code> objects provided by
+<p>
+
+
+It also probably doesn&#8217;t help that the <code>MagicMock</code> objects provided by
 <code>unittest.mock</code> aren&#8217;t, strictly speaking, mocks; they&#8217;re spies, if anything.
 But they&#8217;re also often used as stubs or dummies. There, we promise we&#8217;re done with
 the test double terminology nitpicks now.</p>
 </div>
 <div class="paragraph">
-<p>What about London-school versus classic-style TDD? You can read more about those
+<p>
+
+
+What about London-school versus classic-style TDD? You can read more about those
 two in Martin Fowler&#8217;s article that we just cited, as well as on the
 <a href="https://oreil.ly/H2im_">Software Engineering Stack Exchange site</a>,
 but in this book we&#8217;re pretty firmly in the classicist camp.  We like to
@@ -923,17 +991,24 @@ act as a record of our design choices and serve to explain the system to us
 when we return to the code after a long absence.</p>
 </div>
 <div class="paragraph">
-<p>Tests that use too many mocks get overwhelmed with setup code that hides the
+<p>
+Tests that use too many mocks get overwhelmed with setup code that hides the
 story we care about.</p>
 </div>
 <div class="paragraph">
-<p>Steve Freeman has a great example of overmocked tests in his talk
+<p>
+
+
+
+Steve Freeman has a great example of overmocked tests in his talk
 <a href="https://oreil.ly/jAmtr">"Test-Driven Development"</a>.
 You should also check out this PyCon talk, <a href="https://oreil.ly/s3e05">"Mocking and Patching Pitfalls"</a>,
 by our esteemed tech reviewer, Ed Jung, which also addresses mocking and its
 alternatives. And while we&#8217;re recommending talks, don&#8217;t miss Brandon Rhodes talking about
 <a href="https://oreil.ly/oiXJM">"Hoisting Your I/O"</a>,
-which really nicely covers the issues we&#8217;re talking about, using another simple example.</p>
+which really nicely covers the issues we&#8217;re talking about, using another simple example.
+
+</p>
 </div>
 <div class="admonitionblock tip">
 <table>
@@ -948,6 +1023,8 @@ In this chapter, we&#8217;ve spent a lot of time replacing end-to-end tests with
     pyramid with as many unit tests as possible, and with the minimum number of E2E
     tests you need to feel confident. Read on to <a href="/book/chapter_05_high_gear_low_gear.html#types_of_test_rules_of_thumb">[types_of_test_rules_of_thumb]</a>
     for more details.
+    
+    
 </td>
 </tr>
 </table>
@@ -956,7 +1033,8 @@ In this chapter, we&#8217;ve spent a lot of time replacing end-to-end tests with
 <div class="content">
 <div class="title">So Which Do We Use In This Book? Functional or Object-Oriented Composition?</div>
 <div class="paragraph">
-<p>Both. Our domain model is entirely free of dependencies and side effects,
+<p>
+Both. Our domain model is entirely free of dependencies and side effects,
 so that&#8217;s our functional core. The service layer that we build around it
 (in <a href="/book/chapter_04_service_layer.html">[chapter_04_service_layer]</a>) allows us to drive the system edge to edge,
 and we use dependency injection to provide those services with stateful
@@ -973,7 +1051,14 @@ dependency injection more explicit and centralized.</p>
 <div class="sect2">
 <h3 id="_wrap_up">Wrap-Up</h3>
 <div class="paragraph">
-<p>We&#8217;ll see this idea come up again and again in the book: we can make our
+<p>
+
+
+
+
+
+
+We&#8217;ll see this idea come up again and again in the book: we can make our
 systems easier to test and maintain by simplifying the interface between our
 business logic and messy I/O. Finding the right abstraction is tricky, but here are
 a few heuristics and questions to ask yourself:</p>
@@ -987,8 +1072,8 @@ state?</p>
 </li>
 <li>
 <p>Where can I draw a line between my systems, where can I carve out a
-<a href="https://oreil.ly/zNUGG">seam</a>
-to stick that abstraction in?</p>
+<a href="https://oreil.ly/zNUGG">seam</a> to stick that abstraction in?
+</p>
 </li>
 <li>
 <p>What is a sensible way of dividing things into components with different
@@ -1000,7 +1085,8 @@ responsibilities?  What implicit concepts can I make explicit?</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>Practice makes less imperfect! And now back to our regular programming&#8230;&#8203;</p>
+<p>
+Practice makes less imperfect! And now back to our regular programming&#8230;&#8203;</p>
 </div>
 </div>
 </div>
@@ -1025,7 +1111,7 @@ responsibilities?  What implicit concepts can I make explicit?</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-17 09:07:44 UTC
+Last updated 2020-03-20 13:47:19 UTC
 </div>
 </div>
 <style>

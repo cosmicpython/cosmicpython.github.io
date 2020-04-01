@@ -131,7 +131,9 @@ table {
 <h2 id="appendix_django">Appendix D: Repository and Unit of Work Patterns with Django</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Suppose you wanted to use Django instead of SQLAlchemy and Flask. How
+<p>
+
+Suppose you wanted to use Django instead of SQLAlchemy and Flask. How
 might things look? The first thing is to choose where to install it. We put it in a separate
 package next to our main allocation code:</p>
 </div>
@@ -197,7 +199,10 @@ git checkout appendix_django</pre>
 <div class="sect2">
 <h3 id="_repository_pattern_with_django">Repository Pattern with Django</h3>
 <div class="paragraph">
-<p>We used a plug-in called
+<p>
+
+
+We used a plugin called
 <a href="https://github.com/pytest-dev/pytest-django"><code>pytest-django</code></a> to help with test
 database management.</p>
 </div>
@@ -299,7 +304,9 @@ some custom methods for translating to and from our domain model.<sup class="foo
 <div class="sect3">
 <h4 id="_custom_methods_on_django_orm_classes_to_translate_tofrom_our_domain_model">Custom Methods on Django ORM Classes to Translate to/from Our Domain Model</h4>
 <div class="paragraph">
-<p>Those custom methods look something like this:</p>
+<p>
+
+Those custom methods look something like this:</p>
 </div>
 <div id="django_models" class="exampleblock">
 <div class="title">Django ORM with custom methods for domain model conversion (src/djangoproject/alloc/models.py)</div>
@@ -372,6 +379,8 @@ complex boilerplate.</p>
 <td class="content">
 As in <a href="/book/chapter_02_repository.html">[chapter_02_repository]</a>, we use dependency inversion.
     The ORM (Django) depends on the model and not the other way around.
+    
+    
 </td>
 </tr>
 </table>
@@ -381,7 +390,9 @@ As in <a href="/book/chapter_02_repository.html">[chapter_02_repository]</a>, we
 <div class="sect2">
 <h3 id="_unit_of_work_pattern_with_django">Unit of Work Pattern with Django</h3>
 <div class="paragraph">
-<p>The tests don&#8217;t change too much:</p>
+<p>
+
+The tests don&#8217;t change too much:</p>
 </div>
 <div id="test_uow_django" class="exampleblock">
 <div class="title">Adapted UoW tests (tests/integration/test_uow.py)</div>
@@ -483,7 +494,9 @@ begin a transaction.</p>
 instrumenting the domain model instances themselves, the
 <code>commit()</code> command needs to explicitly go through all the
 objects that have been touched by every repository and manually
-update them back to the ORM.</p>
+update them back to the ORM.
+
+</p>
 </li>
 </ol>
 </div>
@@ -491,7 +504,11 @@ update them back to the ORM.</p>
 <div class="sect2">
 <h3 id="_api_django_views_are_adapters">API: Django Views Are Adapters</h3>
 <div class="paragraph">
-<p>The Django <em>views.py</em> file ends up being almost identical to the
+<p>
+
+
+
+The Django <em>views.py</em> file ends up being almost identical to the
 old <em>flask_app.py</em>, because our architecture means it&#8217;s a very
 thin wrapper around our service layer (which didn&#8217;t change at all, by the way):</p>
 </div>
@@ -537,7 +554,8 @@ thin wrapper around our service layer (which didn&#8217;t change at all, by the 
 <div class="sect2">
 <h3 id="_why_was_this_all_so_hard">Why Was This All So Hard?</h3>
 <div class="paragraph">
-<p>OK, it works, but it does feel like more effort than Flask/SQLAlchemy. Why is
+<p>
+OK, it works, but it does feel like more effort than Flask/SQLAlchemy. Why is
 that?</p>
 </div>
 <div class="paragraph">
@@ -549,7 +567,8 @@ work (although once it&#8217;s done, the ongoing maintenance burden shouldn&#821
 high).</p>
 </div>
 <div class="paragraph">
-<p>Because Django is so tightly coupled to the database, you have to use helpers
+<p>
+Because Django is so tightly coupled to the database, you have to use helpers
 like <code>pytest-django</code> and think carefully about test databases, right from
 the very first line of code, in a way that we didn&#8217;t have to when we started
 out with our pure domain model.</p>
@@ -570,7 +589,8 @@ around the workflow of state changes.  The Django admin bypasses all of that.</p
 <div class="sect2">
 <h3 id="_what_to_do_if_you_already_have_django">What to Do If You Already Have Django</h3>
 <div class="paragraph">
-<p>So what should you do if you want to apply some of the patterns in this book
+<p>
+So what should you do if you want to apply some of the patterns in this book
 to a Django app? We&#8217;d say the following:</p>
 </div>
 <div class="ulist">
@@ -610,7 +630,8 @@ your <em>models.py</em>, which you can then keep as minimal as possible.</p>
 <div class="sect2">
 <h3 id="_steps_along_the_way">Steps Along the Way</h3>
 <div class="paragraph">
-<p>Suppose you&#8217;re working on a Django project that you&#8217;re not sure is going
+<p>
+Suppose you&#8217;re working on a Django project that you&#8217;re not sure is going
 to get complex enough to warrant the patterns we recommend, but you still
 want to put a few steps in place to make your life easier, both in the medium
 term and if you want to migrate to some of our patterns later. Consider the following:</p>
@@ -657,7 +678,8 @@ We&#8217;d like to give a shout-out to David Seddon and Ashia Zawaduk for
 </table>
 </div>
 <div class="paragraph">
-<p>For more thoughts and actual lived experience dealing with existing
+<p>
+For more thoughts and actual lived experience dealing with existing
 applications, refer to the <a href="/book/epilogue_1_how_to_get_there_from_here.html">epilogue</a>.</p>
 </div>
 </div>
@@ -680,7 +702,7 @@ applications, refer to the <a href="/book/epilogue_1_how_to_get_there_from_here.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-17 09:07:44 UTC
+Last updated 2020-03-20 13:47:19 UTC
 </div>
 </div>
 <style>

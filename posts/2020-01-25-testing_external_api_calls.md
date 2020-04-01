@@ -308,7 +308,8 @@ Now how do our tests look?
 
 ```python
 def test_create_shipment_syncs_to_api():
-    with mock.patch('controllers.cargo_api') as mock_cargo_api:
+    with mock.patch('controllers.RealCargoAPI') as mock_RealCargoAPI:
+        mock_cargo_api = mock_RealCargoAPI.return_value
         shipment = create_shipment({'sku1': 10}, incoterm='EXW')
         assert mock_cargo_api.sync.call_args == mock.call(shipment)
 ```
