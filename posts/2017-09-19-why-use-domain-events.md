@@ -19,54 +19,55 @@ use-cases and start to flesh things out.
 
 Back to our domain expert:
 
-So when we've added a reported issue to the issue log, what happens next?
+_So when we've added a reported issue to the issue log, what happens next?_
 
-Well we need to triage the problem and decide how urgent it is. Then we might
-assign it to a particular engineer, or we might leave it on the queue to be
-picked up by anyone.
+> Well we need to triage the problem and decide how urgent it is. Then we might
+> assign it to a particular engineer, or we might leave it on the queue to be
+> picked up by anyone.
 
-Wait, the queue? I thought you had an issue log, are they the same thing, or is
-there a difference?
+_Wait, the queue? I thought you had an issue log, are they the same thing, or is
+there a difference?_
 
-Oh, yes. The issue log is just a record of all the issues we have received, but
-we work from the queue.
+> Oh, yes. The issue log is just a record of all the issues we have received, but
+> we work from the queue.
 
-I see, and how do things get into the queue?
+_I see, and how do things get into the queue?_
 
-We triage the new items in the issue log to decide how urgent they are, and what
-categories they should be in. When we know how to categorise them, and how
-urgent they are, we treat the issues as a queue, and work through them in
-priority order.
+> We triage the new items in the issue log to decide how urgent they are, and what
+> categories they should be in. When we know how to categorise them, and how
+> urgent they are, we treat the issues as a queue, and work through them in
+> priority order.
 
-This is because users always set things to "Extremely urgent"?
+_This is because users always set things to "Extremely urgent"_?
 
-Yeah, it's just easier for us to triage the issues ourselves.
+> Yeah, it's just easier for us to triage the issues ourselves.
 
-And what does that actually mean, like, do you just read the ticket and say "oh,
-this is 5 important, and it's in the broken mouse category"?
+_And what does that actually mean, like, do you just read the ticket and say "oh,
+this is 5 important, and it's in the broken mouse category"?_
 
-Mmmm... more or less, sometimes we need to ask more questions from the user so
-we'll email them, or call them. Most things are first-come, first-served, but
-occasionally someone needs a fix before they can go to a meeting or something.
+> Mmmm... more or less, sometimes we need to ask more questions from the user so
+> we'll email them, or call them. Most things are first-come, first-served, but
+> occasionally someone needs a fix before they can go to a meeting or something.
 
-So you email the user to get more information, or you call them up, and then you
-use that information to assess the priority of the issue - sorry triage the
+_So you email the user to get more information, or you call them up, and then you
+use that information to assess the priority of the issue - sorry *triage* the
 issue, and work out what category it should go in... what do the categories
-achieve? Why categorise?
+achieve? Why categorise?_
 
-Partly for reporting, so we can see what stuff is taking up the most time, or if
-there are clusters of similar problems on a particular batch of laptops for
-example. Mostly because different engineers have different skills, like if you
-have a problem with the Active Directory domain, then you should send that to
-Barry, or if it's an Exchange problem, then George can sort it out, and Mike has
-the equipment log so he can give you a temporary laptop and so on, and so on.
+> Partly for reporting, so we can see what stuff is taking up the most time, or if
+> there are clusters of similar problems on a particular batch of laptops for
+> example. Mostly because different engineers have different skills, like if you
+> have a problem with the Active Directory domain, then you should send that to
+> Barry, or if it's an Exchange problem, then George can sort it out, and Mike has
+> the equipment log so he can give you a temporary laptop and so on, and so on.
 
-Okay, and where do I find this "queue"?
+_Okay, and where do I find this "queue"?_
 
-Your customer grins and gestures at the wall where a large whiteboard is covered
-in post-its and stickers of different colours.
+> Your customer grins and gestures at the wall where a large whiteboard is covered
+> in post-its and stickers of different colours.
 
-Mapping our requirements to our domain
+## Mapping our requirements to our domain
+
 How can we map these requirements back to our system? Looking back over our
 notes with the domain expert, there's a few obvious verbs that we should use to
 model our use cases. We can triage  an issue, which means we prioritise and

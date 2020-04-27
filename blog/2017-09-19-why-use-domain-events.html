@@ -61,41 +61,55 @@ have any domain logic at all. All we have is a whole bunch of complicated crap
 where we could just have a tiny Django app. Let&rsquo;s work through some more
 use-cases and start to flesh things out.</p>
 <p>Back to our domain expert:</p>
-<p>So when we&rsquo;ve added a reported issue to the issue log, what happens next?</p>
+<p><em>So when we&rsquo;ve added a reported issue to the issue log, what happens next?</em></p>
+<blockquote>
 <p>Well we need to triage the problem and decide how urgent it is. Then we might
 assign it to a particular engineer, or we might leave it on the queue to be
 picked up by anyone.</p>
-<p>Wait, the queue? I thought you had an issue log, are they the same thing, or is
-there a difference?</p>
+</blockquote>
+<p><em>Wait, the queue? I thought you had an issue log, are they the same thing, or is
+there a difference?</em></p>
+<blockquote>
 <p>Oh, yes. The issue log is just a record of all the issues we have received, but
 we work from the queue.</p>
-<p>I see, and how do things get into the queue?</p>
+</blockquote>
+<p><em>I see, and how do things get into the queue?</em></p>
+<blockquote>
 <p>We triage the new items in the issue log to decide how urgent they are, and what
 categories they should be in. When we know how to categorise them, and how
 urgent they are, we treat the issues as a queue, and work through them in
 priority order.</p>
-<p>This is because users always set things to &ldquo;Extremely urgent&rdquo;?</p>
+</blockquote>
+<p><em>This is because users always set things to &ldquo;Extremely urgent&rdquo;</em>?</p>
+<blockquote>
 <p>Yeah, it&rsquo;s just easier for us to triage the issues ourselves.</p>
-<p>And what does that actually mean, like, do you just read the ticket and say &ldquo;oh,
-this is 5 important, and it&rsquo;s in the broken mouse category&rdquo;?</p>
+</blockquote>
+<p><em>And what does that actually mean, like, do you just read the ticket and say &ldquo;oh,
+this is 5 important, and it&rsquo;s in the broken mouse category&rdquo;?</em></p>
+<blockquote>
 <p>Mmmm&hellip; more or less, sometimes we need to ask more questions from the user so
 we&rsquo;ll email them, or call them. Most things are first-come, first-served, but
 occasionally someone needs a fix before they can go to a meeting or something.</p>
-<p>So you email the user to get more information, or you call them up, and then you
-use that information to assess the priority of the issue - sorry triage the
+</blockquote>
+<p><em>So you email the user to get more information, or you call them up, and then you
+use that information to assess the priority of the issue - sorry <em>triage</em> the
 issue, and work out what category it should go in&hellip; what do the categories
-achieve? Why categorise?</p>
+achieve? Why categorise?</em></p>
+<blockquote>
 <p>Partly for reporting, so we can see what stuff is taking up the most time, or if
 there are clusters of similar problems on a particular batch of laptops for
 example. Mostly because different engineers have different skills, like if you
 have a problem with the Active Directory domain, then you should send that to
 Barry, or if it&rsquo;s an Exchange problem, then George can sort it out, and Mike has
 the equipment log so he can give you a temporary laptop and so on, and so on.</p>
-<p>Okay, and where do I find this &ldquo;queue&rdquo;?</p>
+</blockquote>
+<p><em>Okay, and where do I find this &ldquo;queue&rdquo;?</em></p>
+<blockquote>
 <p>Your customer grins and gestures at the wall where a large whiteboard is covered
 in post-its and stickers of different colours.</p>
-<p>Mapping our requirements to our domain
-How can we map these requirements back to our system? Looking back over our
+</blockquote>
+<h2>Mapping our requirements to our domain</h2>
+<p>How can we map these requirements back to our system? Looking back over our
 notes with the domain expert, there&rsquo;s a few obvious verbs that we should use to
 model our use cases. We can triage  an issue, which means we prioritise and
 categorise it; we can assign  a triaged issue to an engineer, or an engineer can
