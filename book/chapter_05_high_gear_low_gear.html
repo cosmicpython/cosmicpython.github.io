@@ -13,6 +13,14 @@
 
 /* customisations by harry */
 
+h1, h2, h3, h4, h5, h6 {
+    position: relative;
+}
+
+a.anchor {
+    top: 0;
+}
+
 /* hide inline ditaa/plantuml source listings for images */
 .image-source {
     display: none
@@ -70,7 +78,9 @@
 
 /* Text styles */
 h1{color:var(--primarycolor) !important;}
+
 h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+
 .title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
 p{font-family: "Noto Sans",sans-serif !important}
 
@@ -128,7 +138,7 @@ table {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="chapter_05_high_gear_low_gear">5: TDD in High Gear and Low Gear</h2>
+<h2 id="chapter_05_high_gear_low_gear">5: TDD in High Gear and Low Gear<a class="anchor" href="#chapter_05_high_gear_low_gear"></a>TDD in High Gear and Low Gear</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -171,7 +181,7 @@ my testing life.</em></p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_how_is_our_test_pyramid_looking">How Is Our Test Pyramid Looking?</h3>
+<h3 id="_how_is_our_test_pyramid_looking"><a class="anchor" href="#_how_is_our_test_pyramid_looking"></a>How Is Our Test Pyramid Looking?</h3>
 <div class="paragraph">
 <p>
 
@@ -202,7 +212,7 @@ already a healthy-looking test pyramid.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_should_domain_layer_tests_move_to_the_service_layer">Should Domain Layer Tests Move to the Service Layer?</h3>
+<h3 id="_should_domain_layer_tests_move_to_the_service_layer"><a class="anchor" href="#_should_domain_layer_tests_move_to_the_service_layer"></a>Should Domain Layer Tests Move to the Service Layer?</h3>
 <div class="paragraph">
 <p>
 
@@ -292,7 +302,7 @@ Every line of code that we put in a test is like a blob of glue, holding
 </div>
 </div>
 <div class="sect2">
-<h3 id="kinds_of_tests">On Deciding What Kind of Tests to Write</h3>
+<h3 id="kinds_of_tests"><a class="anchor" href="#kinds_of_tests"></a>On Deciding What Kind of Tests to Write</h3>
 <div class="paragraph">
 <p>
 
@@ -357,7 +367,7 @@ or delete these tests, because they are tightly coupled to a particular
 </div>
 </div>
 <div class="sect2">
-<h3 id="_high_and_low_gear">High and Low Gear</h3>
+<h3 id="_high_and_low_gear"><a class="anchor" href="#_high_and_low_gear"></a>High and Low Gear</h3>
 <div class="paragraph">
 <p>
 Most of the time, when we are adding a new feature or fixing a bug, we don&#8217;t
@@ -385,7 +395,7 @@ hazard, we again drop down to a low gear until we can pick up speed again.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="primitive_obsession">Fully Decoupling the Service-Layer Tests from the Domain</h3>
+<h3 id="primitive_obsession"><a class="anchor" href="#primitive_obsession"></a>Fully Decoupling the Service-Layer Tests from the Domain</h3>
 <div class="paragraph">
 <p>
 
@@ -450,7 +460,7 @@ rewrite its API to work in terms of primitives.</p>
 model works, we&#8217;ll have to change a bunch of tests.</p>
 </div>
 <div class="sect3">
-<h4 id="_mitigation_keep_all_domain_dependencies_in_fixture_functions">Mitigation: Keep All Domain Dependencies in Fixture Functions</h4>
+<h4 id="_mitigation_keep_all_domain_dependencies_in_fixture_functions"><a class="anchor" href="#_mitigation_keep_all_domain_dependencies_in_fixture_functions"></a>Mitigation: Keep All Domain Dependencies in Fixture Functions</h4>
 <div class="paragraph">
 <p>
 
@@ -490,7 +500,7 @@ into one place.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_adding_a_missing_service">Adding a Missing Service</h4>
+<h4 id="_adding_a_missing_service"><a class="anchor" href="#_adding_a_missing_service"></a>Adding a Missing Service</h4>
 <div class="paragraph">
 <p>
 We could go one step further, though. If we had a service to add stock,
@@ -603,7 +613,7 @@ we see fit.</p>
 </div>
 </div>
 <div class="sect2 pagebreak-before less_space">
-<h3 id="_carrying_the_improvement_through_to_the_e2e_tests">Carrying the Improvement Through to the E2E Tests</h3>
+<h3 id="_carrying_the_improvement_through_to_the_e2e_tests"><a class="anchor" href="#_carrying_the_improvement_through_to_the_e2e_tests"></a>Carrying the Improvement Through to the E2E Tests</h3>
 <div class="paragraph">
 <p>
 
@@ -695,7 +705,7 @@ which is also nice:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_wrap_up">Wrap-Up</h3>
+<h3 id="_wrap_up"><a class="anchor" href="#_wrap_up"></a>Wrap-Up</h3>
 <div class="paragraph">
 <p>
 

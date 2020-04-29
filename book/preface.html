@@ -13,6 +13,14 @@
 
 /* customisations by harry */
 
+h1, h2, h3, h4, h5, h6 {
+    position: relative;
+}
+
+a.anchor {
+    top: 0;
+}
+
 /* hide inline ditaa/plantuml source listings for images */
 .image-source {
     display: none
@@ -70,7 +78,9 @@
 
 /* Text styles */
 h1{color:var(--primarycolor) !important;}
+
 h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+
 .title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
 p{font-family: "Noto Sans",sans-serif !important}
 
@@ -128,7 +138,7 @@ table {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="preface">Preface</h2>
+<h2 id="preface">Preface<a class="anchor" href="#preface"></a>Preface</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>You may be wondering who we are and why we wrote this book.</p>
@@ -154,7 +164,7 @@ doing it. He turned out to be pretty bad at it, but <em>he</em> was lucky enough
 into Ian Cooper, who taught him new ways of writing and thinking about code.</p>
 </div>
 <div class="sect2">
-<h3 id="_managing_complexity_solving_business_problems">Managing Complexity, Solving Business Problems</h3>
+<h3 id="_managing_complexity_solving_business_problems"><a class="anchor" href="#_managing_complexity_solving_business_problems"></a>Managing Complexity, Solving Business Problems</h3>
 <div class="paragraph">
 <p>We both work for MADE.com, a European ecommerce company that sells furniture
 online; there, we apply the techniques in this book to build distributed systems
@@ -183,7 +193,7 @@ much of the business as possible.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_why_python">Why Python?</h3>
+<h3 id="_why_python"><a class="anchor" href="#_why_python"></a>Why Python?</h3>
 <div class="paragraph">
 <p>If you&#8217;re reading this book, we probably don&#8217;t need to convince you that Python
 is great, so the real question is "Why does the <em>Python</em> community need a book
@@ -219,7 +229,7 @@ quite&#8230;&#8203;trying. There&#8217;s a reason the latest edition of that oth
 </div>
 </div>
 <div class="sect2 pagebreak-before less_space">
-<h3 id="_tdd_ddd_and_event_driven_architecture">TDD, DDD, and Event-Driven Architecture</h3>
+<h3 id="_tdd_ddd_and_event_driven_architecture"><a class="anchor" href="#_tdd_ddd_and_event_driven_architecture"></a>TDD, DDD, and Event-Driven Architecture</h3>
 <div class="paragraph">
 <p>In order of notoriety, we know of three tools for managing complexity:</p>
 </div>
@@ -267,7 +277,7 @@ people can use it as a first step toward further research  in this field.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_who_should_read_this_book">Who Should Read This Book</h3>
+<h3 id="_who_should_read_this_book"><a class="anchor" href="#_who_should_read_this_book"></a>Who Should Read This Book</h3>
 <div class="paragraph">
 <p>Here are a few things we assume about you, dear reader:</p>
 </div>
@@ -303,13 +313,13 @@ technology choices become minor implementation details.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_a_brief_overview_of_what_youll_learn">A Brief Overview of What You&#8217;ll Learn</h3>
+<h3 id="_a_brief_overview_of_what_youll_learn"><a class="anchor" href="#_a_brief_overview_of_what_youll_learn"></a>A Brief Overview of What You&#8217;ll Learn</h3>
 <div class="paragraph">
 <p>The book is divided into two parts; here&#8217;s a look at the topics we&#8217;ll cover
 and the chapters they live in.</p>
 </div>
 <div class="sect3">
-<h4 id="_part1"><a data-type="xref" data-xrefstyle="chap-num-title" href="/book/part1.html">#part1</a></h4>
+<h4 id="_part1"><a class="anchor" href="#_part1"></a><a data-type="xref" data-xrefstyle="chap-num-title" href="/book/part1.html">#part1</a></h4>
 <div class="dlist">
 <dl>
 <dt class="hdlist1">Domain modeling and DDD (Chapters <a href="/book/chapter_01_domain_model.html">1</a>, <a href="/book/chapter_02_repository.html">2</a> and <a href="/book/chapter_07_aggregate.html">7</a>)</dt>
@@ -350,7 +360,7 @@ and writing unit tests at the highest possible level of abstraction.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_part2"><a data-type="xref" data-xrefstyle="chap-num-title" href="/book/part2.html">#part2</a></h4>
+<h4 id="_part2"><a class="anchor" href="#_part2"></a><a data-type="xref" data-xrefstyle="chap-num-title" href="/book/part2.html">#part2</a></h4>
 <div class="dlist">
 <dl>
 <dt class="hdlist1">Event-driven architecture (Chapters <a href="/book/chapter_08_events_and_message_bus.html">8</a>-<a href="/book/chapter_11_external_events.html">11</a>)</dt>
@@ -376,7 +386,7 @@ simple dependency injection framework.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_addtional_content">Addtional Content</h4>
+<h4 id="_addtional_content"><a class="anchor" href="#_addtional_content"></a>Addtional Content</h4>
 <div class="dlist">
 <dl>
 <dt class="hdlist1">How do I get there from here? (<a href="/book/epilogue_1_how_to_get_there_from_here.html">[epilogue_1_how_to_get_there_from_here]</a>)</dt>
@@ -391,7 +401,7 @@ few pointers in the epilogue and some links to further reading.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_example_code_and_coding_along">Example Code and Coding Along</h3>
+<h3 id="_example_code_and_coding_along"><a class="anchor" href="#_example_code_and_coding_along"></a>Example Code and Coding Along</h3>
 <div class="paragraph">
 <p>You&#8217;re reading a book, but you&#8217;ll probably agree with us when we say that
 the best way to learn about code is to code.  We learned most of what we know
@@ -457,7 +467,7 @@ At the very least, do a <code>git checkout</code> of the code from our repo as y
 </div>
 </div>
 <div class="sect2">
-<h3 id="_license">License</h3>
+<h3 id="_license"><a class="anchor" href="#_license"></a>License</h3>
 <div class="paragraph">
 <p>The code (and the online version of the book) is licensed under a Creative
 Commons CC BY-NC-ND license, which means you are free to copy and share it with
@@ -470,7 +480,7 @@ worries about the license, contact O&#8217;Reilly at <a class="email" href="mail
 </div>
 </div>
 <div class="sect2">
-<h3 id="_conventions_used_in_this_book">Conventions Used in This Book</h3>
+<h3 id="_conventions_used_in_this_book"><a class="anchor" href="#_conventions_used_in_this_book"></a>Conventions Used in This Book</h3>
 <div class="paragraph">
 <p>The following typographical conventions are used in this book:</p>
 </div>
@@ -538,7 +548,7 @@ worries about the license, contact O&#8217;Reilly at <a class="email" href="mail
 </div>
 </div>
 <div class="sect2">
-<h3 id="_oreilly_online_learning">O&#8217;Reilly Online Learning</h3>
+<h3 id="_oreilly_online_learning"><a class="anchor" href="#_oreilly_online_learning"></a>O&#8217;Reilly Online Learning</h3>
 <div class="admonitionblock note ormenabled">
 <table>
 <tr>
@@ -558,7 +568,7 @@ worries about the license, contact O&#8217;Reilly at <a class="email" href="mail
 </div>
 </div>
 <div class="sect2">
-<h3 id="_how_to_contact_oreilly">How to Contact O&#8217;Reilly</h3>
+<h3 id="_how_to_contact_oreilly"><a class="anchor" href="#_how_to_contact_oreilly"></a>How to Contact O&#8217;Reilly</h3>
 <div class="paragraph">
 <p>Please address comments and questions concerning this book to the publisher:</p>
 </div>
@@ -591,7 +601,7 @@ worries about the license, contact O&#8217;Reilly at <a class="email" href="mail
 </div>
 </div>
 <div class="sect2">
-<h3 id="_acknowledgments">Acknowledgments</h3>
+<h3 id="_acknowledgments"><a class="anchor" href="#_acknowledgments"></a>Acknowledgments</h3>
 <div class="paragraph">
 <p>To our tech reviewers, David Seddon, Ed Jung, and Hynek Schlawack: we absolutely
 do not deserve you. You are all incredibly dedicated, conscientious, and
@@ -600,13 +610,13 @@ view were both useful and complementary to each other. Thank you from the
 bottom of our hearts.</p>
 </div>
 <div class="paragraph">
-<p>Gigantic thanks also to our Early Release readers for their comments and
+<p>Gigantic thanks also to all our readers so far for their comments and
 suggestions:
 Ian Cooper, Abdullah Ariff, Jonathan Meier, Gil Gon&#231;alves, Matthieu Choplin,
 Ben Judson, James Gregory, &#321;ukasz Lechowicz, Clinton Roy, Vitorino Ara&#250;jo,
 Susan Goodbody, Josh Harwood, Daniel Butler, Liu Haibin, Jimmy Davies, Ignacio
 Vergara Kausel, Gaia Canestrani, Renne Rocha, pedroabi, Ashia Zawaduk, Jostein
-Leira, Brandon Rhodes, Jazeps Basko, simkimsia,
+Leira, Brandon Rhodes, Jazeps Basko, simkimsia, Adrien Brunet,
 and many more; our apologies if we missed you on this list.</p>
 </div>
 <div class="paragraph">
@@ -636,7 +646,7 @@ detail. This book is immeasurably improved thanks to you.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-04-10 15:15:42 +0100
+Last updated 2020-04-14 09:44:22 +0100
 </div>
 </div>
 <div><div id="disqus_thread" style="margin: 10px"></div>

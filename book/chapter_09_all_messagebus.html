@@ -13,6 +13,14 @@
 
 /* customisations by harry */
 
+h1, h2, h3, h4, h5, h6 {
+    position: relative;
+}
+
+a.anchor {
+    top: 0;
+}
+
 /* hide inline ditaa/plantuml source listings for images */
 .image-source {
     display: none
@@ -70,7 +78,9 @@
 
 /* Text styles */
 h1{color:var(--primarycolor) !important;}
+
 h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+
 .title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
 p{font-family: "Noto Sans",sans-serif !important}
 
@@ -128,7 +138,7 @@ table {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="chapter_09_all_messagebus">9: Going to Town on the Message Bus</h2>
+<h2 id="chapter_09_all_messagebus">9: Going to Town on the Message Bus<a class="anchor" href="#chapter_09_all_messagebus"></a>Going to Town on the Message Bus</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -182,7 +192,7 @@ git checkout chapter_08_events_and_message_bus</pre>
 </table>
 </div>
 <div class="sect2 pagebreak-before less_space">
-<h3 id="_a_new_requirement_leads_us_to_a_new_architecture">A New Requirement Leads Us to a New Architecture</h3>
+<h3 id="_a_new_requirement_leads_us_to_a_new_architecture"><a class="anchor" href="#_a_new_requirement_leads_us_to_a_new_architecture"></a>A New Requirement Leads Us to a New Architecture</h3>
 <div class="paragraph">
 <p>
 
@@ -256,7 +266,7 @@ enforce the single responsibility principle, and it allows us to make choices ab
 transactions and data integrity.</p>
 </div>
 <div class="sect3">
-<h4 id="_imagining_an_architecture_change_everything_will_be_an_event_handler">Imagining an Architecture Change: Everything Will Be an <span class="keep-together">Event Handler</span></h4>
+<h4 id="_imagining_an_architecture_change_everything_will_be_an_event_handler"><a class="anchor" href="#_imagining_an_architecture_change_everything_will_be_an_event_handler"></a>Imagining an Architecture Change: Everything Will Be an <span class="keep-together">Event Handler</span></h4>
 <div class="paragraph">
 <p>
 
@@ -346,7 +356,7 @@ responsibility for putting new events on the message bus into the message bus it
 </div>
 </div>
 <div class="sect2">
-<h3 id="_refactoring_service_functions_to_message_handlers">Refactoring Service Functions to Message Handlers</h3>
+<h3 id="_refactoring_service_functions_to_message_handlers"><a class="anchor" href="#_refactoring_service_functions_to_message_handlers"></a>Refactoring Service Functions to Message Handlers</h3>
 <div class="paragraph">
 <p>
 
@@ -496,7 +506,7 @@ event classes can be a nice place to do some input validation.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_the_message_bus_now_collects_events_from_the_uow">The Message Bus Now Collects Events from the UoW</h4>
+<h4 id="_the_message_bus_now_collects_events_from_the_uow"><a class="anchor" href="#_the_message_bus_now_collects_events_from_the_uow"></a>The Message Bus Now Collects Events from the UoW</h4>
 <div class="paragraph">
 <p>
 
@@ -591,7 +601,7 @@ just makes them available.</p>
 </div>
 </div>
 <div class="sect3 pagebreak-before less_space">
-<h4 id="_our_tests_are_all_written_in_terms_of_events_too">Our Tests Are All Written in Terms of Events Too</h4>
+<h4 id="_our_tests_are_all_written_in_terms_of_events_too"><a class="anchor" href="#_our_tests_are_all_written_in_terms_of_events_too"></a>Our Tests Are All Written in Terms of Events Too</h4>
 <div class="paragraph">
 <p>
 
@@ -635,7 +645,7 @@ message bus, rather than invoking service-layer functions directly:</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="temporary_ugly_hack">A Temporary Ugly Hack: The Message Bus Has to Return Results</h4>
+<h4 id="temporary_ugly_hack"><a class="anchor" href="#temporary_ugly_hack"></a>A Temporary Ugly Hack: The Message Bus Has to Return Results</h4>
 <div class="paragraph">
 <p>
 
@@ -670,7 +680,7 @@ We&#8217;ll come back to fix this wart in <a href="/book/chapter_12_cqrs.html">[
 </div>
 </div>
 <div class="sect3">
-<h4 id="_modifying_our_api_to_work_with_events">Modifying Our API to Work with Events</h4>
+<h4 id="_modifying_our_api_to_work_with_events"><a class="anchor" href="#_modifying_our_api_to_work_with_events"></a>Modifying Our API to Work with Events</h4>
 <div id="flask_uses_messagebus" class="exampleblock">
 <div class="title">Flask changing to message bus as a diff (src/allocation/entrypoints/flask_app.py)</div>
 <div class="content">
@@ -735,7 +745,7 @@ if you prefer.  We&#8217;ll talk about the distinction in the
 </div>
 </div>
 <div class="sect2">
-<h3 id="_implementing_our_new_requirement">Implementing Our New Requirement</h3>
+<h3 id="_implementing_our_new_requirement"><a class="anchor" href="#_implementing_our_new_requirement"></a>Implementing Our New Requirement</h3>
 <div class="paragraph">
 <p>
 
@@ -792,7 +802,7 @@ When you split things out like this across two units of work,
 </table>
 </div>
 <div class="sect3">
-<h4 id="_our_new_event">Our New Event</h4>
+<h4 id="_our_new_event"><a class="anchor" href="#_our_new_event"></a>Our New Event</h4>
 <div class="paragraph">
 <p>
 The event that tells us a batch quantity has changed is simple; it just
@@ -814,7 +824,7 @@ needs a batch reference and a new quantity:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="test-driving-ch9">Test-Driving a New Handler</h3>
+<h3 id="test-driving-ch9"><a class="anchor" href="#test-driving-ch9"></a>Test-Driving a New Handler</h3>
 <div class="paragraph">
 <p>
 
@@ -883,7 +893,7 @@ and we expect to reallocate it to a new batch.</p>
 </ol>
 </div>
 <div class="sect3">
-<h4 id="_implementation">Implementation</h4>
+<h4 id="_implementation"><a class="anchor" href="#_implementation"></a>Implementation</h4>
 <div class="paragraph">
 <p>
 Our new handler is very simple:</p>
@@ -998,7 +1008,7 @@ We&#8217;re adding a query to our repository to make this use case easier to
 </div>
 </div>
 <div class="sect3">
-<h4 id="_a_new_method_on_the_domain_model">A New Method on the Domain Model</h4>
+<h4 id="_a_new_method_on_the_domain_model"><a class="anchor" href="#_a_new_method_on_the_domain_model"></a>A New Method on the Domain Model</h4>
 <div class="paragraph">
 <p>
 We add the new method to the model, which does the quantity change and
@@ -1058,7 +1068,7 @@ We wire up our new handler:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="fake_message_bus">Optionally: Unit Testing Event Handlers in Isolation with a Fake Message Bus</h3>
+<h3 id="fake_message_bus"><a class="anchor" href="#fake_message_bus"></a>Optionally: Unit Testing Event Handlers in Isolation with a Fake Message Bus</h3>
 <div class="paragraph">
 <p>
 
@@ -1183,7 +1193,7 @@ then building a <code>FakeMessageBus</code> is more straightforward:</p>
 <span class="tok-k">class</span> <span class="tok-nc">FakeMessageBus</span><span class="tok-p">(</span><span class="tok-n">messagebus</span><span class="tok-o">.</span><span class="tok-n">AbstractMessageBus</span><span class="tok-p">):</span>
     <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">events_published</span> <span class="tok-o">=</span> <span class="tok-p">[]</span>  <span class="tok-c1"># type: List[events.Event]</span>
-        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">handlers</span> <span class="tok-o">=</span> <span class="tok-p">{</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">HANDLERS</span> <span class="tok-o">=</span> <span class="tok-p">{</span>
             <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">OutOfStock</span><span class="tok-p">:</span> <span class="tok-p">[</span><span class="tok-k">lambda</span> <span class="tok-n">e</span><span class="tok-p">:</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">events_published</span><span class="tok-o">.</span><span class="tok-n">append</span><span class="tok-p">(</span><span class="tok-n">e</span><span class="tok-p">)]</span>
         <span class="tok-p">}</span></code></pre>
 </div>
@@ -1204,12 +1214,12 @@ if you need more inspiration.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_wrap_up">Wrap-Up</h3>
+<h3 id="_wrap_up"><a class="anchor" href="#_wrap_up"></a>Wrap-Up</h3>
 <div class="paragraph">
 <p>Let&#8217;s look back at what we&#8217;ve achieved, and think about why we did it.</p>
 </div>
 <div class="sect3">
-<h4 id="_what_have_we_achieved">What Have We Achieved?</h4>
+<h4 id="_what_have_we_achieved"><a class="anchor" href="#_what_have_we_achieved"></a>What Have We Achieved?</h4>
 <div class="paragraph">
 <p>Events are simple dataclasses that define the data structures for inputs
   and internal messages within our system. This is quite powerful from a DDD
@@ -1225,7 +1235,7 @@ if you need more inspiration.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_why_have_we_achieved">Why Have We Achieved?</h4>
+<h4 id="_why_have_we_achieved"><a class="anchor" href="#_why_have_we_achieved"></a>Why Have We Achieved?</h4>
 <div class="paragraph">
 <p>
 
@@ -1315,7 +1325,7 @@ first, let&#8217;s talk about <a href="/book/chapter_10_commands.html">events ve
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-20 13:47:19 UTC
+Last updated 2020-04-28 10:44:37 +0100
 </div>
 </div>
 <style>

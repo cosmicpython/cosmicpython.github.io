@@ -13,6 +13,14 @@
 
 /* customisations by harry */
 
+h1, h2, h3, h4, h5, h6 {
+    position: relative;
+}
+
+a.anchor {
+    top: 0;
+}
+
 /* hide inline ditaa/plantuml source listings for images */
 .image-source {
     display: none
@@ -70,7 +78,9 @@
 
 /* Text styles */
 h1{color:var(--primarycolor) !important;}
+
 h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+
 .title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
 p{font-family: "Noto Sans",sans-serif !important}
 
@@ -128,7 +138,7 @@ table {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="chapter_12_cqrs">12: Command-Query Responsibility Segregation (CQRS)</h2>
+<h2 id="chapter_12_cqrs">12: Command-Query Responsibility Segregation (CQRS)<a class="anchor" href="#chapter_12_cqrs"></a>Command-Query Responsibility Segregation (CQRS)</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -180,7 +190,7 @@ git checkout chapter_11_external_events</pre>
 <div class="title">Figure 1. Separating reads from writes</div>
 </div>
 <div class="sect2">
-<h3 id="_domain_models_are_for_writing">Domain Models Are for Writing</h3>
+<h3 id="_domain_models_are_for_writing"><a class="anchor" href="#_domain_models_are_for_writing"></a>Domain Models Are for Writing</h3>
 <div class="paragraph">
 <p>
 
@@ -237,7 +247,7 @@ state of our system. We&#8217;ve built a flexible set of tools for writing data.
 </div>
 </div>
 <div class="sect2">
-<h3 id="_most_users_arent_going_to_buy_your_furniture">Most Users Aren&#8217;t Going to Buy Your Furniture</h3>
+<h3 id="_most_users_arent_going_to_buy_your_furniture"><a class="anchor" href="#_most_users_arent_going_to_buy_your_furniture"></a>Most Users Aren&#8217;t Going to Buy Your Furniture</h3>
 <div class="paragraph">
 <p>
 At MADE.com, we have a system very like the allocation service. In a busy day, we
@@ -361,7 +371,7 @@ domain model are just bloat.</p>
 </table>
 </div>
 <div class="sect2">
-<h3 id="_postredirectget_and_cqs">Post/Redirect/Get and CQS</h3>
+<h3 id="_postredirectget_and_cqs"><a class="anchor" href="#_postredirectget_and_cqs"></a>Post/Redirect/Get and CQS</h3>
 <div class="paragraph">
 <p>
 
@@ -492,7 +502,7 @@ to build read-only views of our data&#8230;&#8203;</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="hold-on-ch12">Hold On to Your Lunch, Folks</h3>
+<h3 id="hold-on-ch12"><a class="anchor" href="#hold-on-ch12"></a>Hold On to Your Lunch, Folks</h3>
 <div class="paragraph">
 <p>
 
@@ -559,7 +569,7 @@ Splitting out your read-only views from your state-modifying
 </div>
 </div>
 <div class="sect2">
-<h3 id="_testing_cqrs_views">Testing CQRS Views</h3>
+<h3 id="_testing_cqrs_views"><a class="anchor" href="#_testing_cqrs_views"></a>Testing CQRS Views</h3>
 <div class="paragraph">
 <p>
 
@@ -603,7 +613,7 @@ any implementation/infrastructure details about how things get stored.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_obvious_alternative_1_using_the_existing_repository">"Obvious" Alternative 1: Using the Existing Repository</h3>
+<h3 id="_obvious_alternative_1_using_the_existing_repository"><a class="anchor" href="#_obvious_alternative_1_using_the_existing_repository"></a>"Obvious" Alternative 1: Using the Existing Repository</h3>
 <div class="paragraph">
 <p>
 
@@ -678,7 +688,7 @@ downside, it all feels quite clunky.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_your_domain_model_is_not_optimized_for_read_operations">Your Domain Model Is Not Optimized for Read Operations</h3>
+<h3 id="_your_domain_model_is_not_optimized_for_read_operations"><a class="anchor" href="#_your_domain_model_is_not_optimized_for_read_operations"></a>Your Domain Model Is Not Optimized for Read Operations</h3>
 <div class="paragraph">
 <p>
 
@@ -719,7 +729,7 @@ more awkward to use for read operations.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_obvious_alternative_2_using_the_orm">"Obvious" Alternative 2: Using the ORM</h3>
+<h3 id="_obvious_alternative_2_using_the_orm"><a class="anchor" href="#_obvious_alternative_2_using_the_orm"></a>"Obvious" Alternative 2: Using the ORM</h3>
 <div class="paragraph">
 <p>
 
@@ -761,7 +771,7 @@ SQLAlchemy docs. SQL is just SQL.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_select_n1_and_other_performance_considerations">SELECT N+1 and Other Performance Considerations</h3>
+<h3 id="_select_n1_and_other_performance_considerations"><a class="anchor" href="#_select_n1_and_other_performance_considerations"></a>SELECT N+1 and Other Performance Considerations</h3>
 <div class="paragraph">
 <p>
 
@@ -799,7 +809,7 @@ build read replicas, or even add caching layers.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_time_to_completely_jump_the_shark">Time to Completely Jump the Shark</h3>
+<h3 id="_time_to_completely_jump_the_shark"><a class="anchor" href="#_time_to_completely_jump_the_shark"></a>Time to Completely Jump the Shark</h3>
 <div class="paragraph">
 <p>
 
@@ -889,7 +899,7 @@ you to your database. We&#8217;d like to show you how to reuse our event-driven
 architecture instead.</p>
 </div>
 <div class="sect3">
-<h4 id="_updating_a_read_model_table_using_an_event_handler">Updating a Read Model Table Using an Event Handler</h4>
+<h4 id="_updating_a_read_model_table_using_an_event_handler"><a class="anchor" href="#_updating_a_read_model_table_using_an_event_handler"></a>Updating a Read Model Table Using an Event Handler</h4>
 <div class="paragraph">
 <p>We add a second handler to the <code>Allocated</code> event:</p>
 </div>
@@ -1042,7 +1052,7 @@ update our view model, we can write a tool that does the following:</p>
 allocated</p>
 </li>
 <li>
-<p>Calls the <code>add_allocate_to_read_model</code> handler for each allocated item</p>
+<p>Calls the <code>add_allocation_to_read_model</code> handler for each allocated item</p>
 </li>
 </ul>
 </div>
@@ -1055,7 +1065,7 @@ data.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_changing_our_read_model_implementation_is_easy">Changing Our Read Model Implementation Is Easy</h3>
+<h3 id="_changing_our_read_model_implementation_is_easy"><a class="anchor" href="#_changing_our_read_model_implementation_is_easy"></a>Changing Our Read Model Implementation Is Easy</h3>
 <div class="paragraph">
 <p>
 
@@ -1156,7 +1166,7 @@ to Redis), and see which you prefer.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_wrap_up">Wrap-Up</h3>
+<h3 id="_wrap_up"><a class="anchor" href="#_wrap_up"></a>Wrap-Up</h3>
 <div class="paragraph">
 <p>
 
@@ -1244,7 +1254,7 @@ the chapter.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-20 13:47:19 UTC
+Last updated 2020-04-28 10:44:37 +0100
 </div>
 </div>
 <style>

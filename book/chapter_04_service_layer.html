@@ -13,6 +13,14 @@
 
 /* customisations by harry */
 
+h1, h2, h3, h4, h5, h6 {
+    position: relative;
+}
+
+a.anchor {
+    top: 0;
+}
+
 /* hide inline ditaa/plantuml source listings for images */
 .image-source {
     display: none
@@ -70,7 +78,9 @@
 
 /* Text styles */
 h1{color:var(--primarycolor) !important;}
+
 h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+
 .title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
 p{font-family: "Noto Sans",sans-serif !important}
 
@@ -128,7 +138,7 @@ table {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="chapter_04_service_layer">4: Our First Use Case: Flask API and Service Layer</h2>
+<h2 id="chapter_04_service_layer">4: Our First Use Case: Flask API and Service Layer<a class="anchor" href="#chapter_04_service_layer"></a>Our First Use Case: </h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -194,7 +204,7 @@ git checkout chapter_02_repository</pre>
 </table>
 </div>
 <div class="sect2">
-<h3 id="_connecting_our_application_to_the_real_world">Connecting Our Application to the Real World</h3>
+<h3 id="_connecting_our_application_to_the_real_world"><a class="anchor" href="#_connecting_our_application_to_the_real_world"></a>Connecting Our Application to the Real World</h3>
 <div class="paragraph">
 <p>
 
@@ -232,7 +242,7 @@ clients (our tests and our Flask API) to be decoupled from the model layer.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_a_first_end_to_end_test">A First End-to-End Test</h3>
+<h3 id="_a_first_end_to_end_test"><a class="anchor" href="#_a_first_end_to_end_test"></a>A First End-to-End Test</h3>
 <div class="paragraph">
 <p>
 
@@ -303,7 +313,7 @@ Postgres database. If you want to see how we did it, check out
 </div>
 </div>
 <div class="sect2">
-<h3 id="_the_straightforward_implementation">The Straightforward Implementation</h3>
+<h3 id="_the_straightforward_implementation"><a class="anchor" href="#_the_straightforward_implementation"></a>The Straightforward Implementation</h3>
 <div class="paragraph">
 <p>
 
@@ -395,7 +405,7 @@ Not quite so lovely, but that will force us to add the commit.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_error_conditions_that_require_database_checks">Error Conditions That Require Database Checks</h3>
+<h3 id="_error_conditions_that_require_database_checks"><a class="anchor" href="#_error_conditions_that_require_database_checks"></a>Error Conditions That Require Database Checks</h3>
 <div class="paragraph">
 <p>
 
@@ -494,7 +504,7 @@ inverted test pyramid (or "ice-cream cone model," as Bob likes to call it).</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_introducing_a_service_layer_and_using_fakerepository_to_unit_test_it">Introducing a Service Layer, and Using FakeRepository to Unit Test It</h3>
+<h3 id="_introducing_a_service_layer_and_using_fakerepository_to_unit_test_it"><a class="anchor" href="#_introducing_a_service_layer_and_using_fakerepository_to_unit_test_it"></a>Introducing a Service Layer, and Using FakeRepository to Unit Test It</h3>
 <div class="paragraph">
 <p>
 
@@ -627,7 +637,7 @@ the fake <code>.commit()</code> lets us migrate a third test from the E2E layer:
 </div>
 </div>
 <div class="sect3">
-<h4 id="_a_typical_service_function">A Typical Service Function</h4>
+<h4 id="_a_typical_service_function"><a class="anchor" href="#_a_typical_service_function"></a>A Typical Service Function</h4>
 <div class="paragraph">
 <p>
 
@@ -849,7 +859,7 @@ If you decide you want to build a read-only endpoint for retrieving allocation
 </div>
 </div>
 <div class="sect2">
-<h3 id="why_is_everything_a_service">Why Is Everything Called a Service?</h3>
+<h3 id="why_is_everything_a_service"><a class="anchor" href="#why_is_everything_a_service"></a>Why Is Everything Called a Service?</h3>
 <div class="paragraph">
 <p>
 
@@ -900,7 +910,7 @@ can do the job.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_putting_things_in_folders_to_see_where_it_all_belongs">Putting Things in Folders to See Where It All Belongs</h3>
+<h3 id="_putting_things_in_folders_to_see_where_it_all_belongs"><a class="anchor" href="#_putting_things_in_folders_to_see_where_it_all_belongs"></a>Putting Things in Folders to See Where It All Belongs</h3>
 <div class="paragraph">
 <p>
 
@@ -991,7 +1001,7 @@ implement them.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_wrap_up">Wrap-Up</h3>
+<h3 id="_wrap_up"><a class="anchor" href="#_wrap_up"></a>Wrap-Up</h3>
 <div class="paragraph">
 <p>
 
@@ -1024,7 +1034,7 @@ tests.</p>
 </ul>
 </div>
 <div class="sect3">
-<h4 id="_the_dip_in_action">The DIP in Action</h4>
+<h4 id="_the_dip_in_action"><a class="anchor" href="#_the_dip_in_action"></a>The DIP in Action</h4>
 <div class="paragraph">
 <p>
 

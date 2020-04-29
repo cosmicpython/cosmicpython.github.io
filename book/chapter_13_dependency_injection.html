@@ -13,6 +13,14 @@
 
 /* customisations by harry */
 
+h1, h2, h3, h4, h5, h6 {
+    position: relative;
+}
+
+a.anchor {
+    top: 0;
+}
+
 /* hide inline ditaa/plantuml source listings for images */
 .image-source {
     display: none
@@ -70,7 +78,9 @@
 
 /* Text styles */
 h1{color:var(--primarycolor) !important;}
+
 h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+
 .title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
 p{font-family: "Noto Sans",sans-serif !important}
 
@@ -128,7 +138,7 @@ table {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="chapter_13_dependency_injection">13: Dependency Injection (and Bootstrapping)</h2>
+<h2 id="chapter_13_dependency_injection">13: Dependency Injection (and Bootstrapping)<a class="anchor" href="#chapter_13_dependency_injection"></a>Dependency Injection (and Bootstrapping)</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -212,7 +222,7 @@ responsibilities.</p>
 <div class="title">Figure 2. Bootstrap takes care of all that in one place</div>
 </div>
 <div class="sect2">
-<h3 id="_implicit_versus_explicit_dependencies">Implicit Versus Explicit Dependencies</h3>
+<h3 id="_implicit_versus_explicit_dependencies"><a class="anchor" href="#_implicit_versus_explicit_dependencies"></a>Implicit Versus Explicit Dependencies</h3>
 <div class="paragraph">
 <p>
 Depending on your particular brain type, you may have a slight
@@ -294,7 +304,7 @@ SQLite one.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_arent_explicit_dependencies_totally_weird_and_java_y">Aren&#8217;t Explicit Dependencies Totally Weird and Java-y?</h3>
+<h3 id="_arent_explicit_dependencies_totally_weird_and_java_y"><a class="anchor" href="#_arent_explicit_dependencies_totally_weird_and_java_y"></a>Aren&#8217;t Explicit Dependencies Totally Weird and Java-y?</h3>
 <div class="paragraph">
 <p>
 
@@ -459,7 +469,7 @@ framework). See <a href="#bootstrap_new_image">Bootstrapper between entrypoints 
 </div>
 </div>
 <div class="sect2">
-<h3 id="_preparing_handlers_manual_di_with_closures_and_partials">Preparing Handlers: Manual DI with Closures and Partials</h3>
+<h3 id="_preparing_handlers_manual_di_with_closures_and_partials"><a class="anchor" href="#_preparing_handlers_manual_di_with_closures_and_partials"></a>Preparing Handlers: Manual DI with Closures and Partials</h3>
 <div class="paragraph">
 <p>
 
@@ -545,7 +555,7 @@ which has different dependencies:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_an_alternative_using_classes">An Alternative Using Classes</h3>
+<h3 id="_an_alternative_using_classes"><a class="anchor" href="#_an_alternative_using_classes"></a>An Alternative Using Classes</h3>
 <div class="paragraph">
 <p>
 
@@ -606,7 +616,7 @@ Use whichever you and your team feel more comfortable with.</p>
 </div>
 </div>
 <div class="sect2 pagebreak-before less_space">
-<h3 id="_a_bootstrap_script">A Bootstrap Script</h3>
+<h3 id="_a_bootstrap_script"><a class="anchor" href="#_a_bootstrap_script"></a>A Bootstrap Script</h3>
 <div class="paragraph">
 <p>
 We want our bootstrap script to do the following:</p>
@@ -802,7 +812,7 @@ DRY-Python crew&#8217;s <a href="https://github.com/dry-python/dependencies">dep
 </div>
 </div>
 <div class="sect2">
-<h3 id="_message_bus_is_given_handlers_at_runtime">Message Bus Is Given Handlers at Runtime</h3>
+<h3 id="_message_bus_is_given_handlers_at_runtime"><a class="anchor" href="#_message_bus_is_given_handlers_at_runtime"></a>Message Bus Is Given Handlers at Runtime</h3>
 <div class="paragraph">
 <p>
 Our message bus will no longer be static; it needs to have the already-injected
@@ -910,7 +920,7 @@ the specific event or command.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_using_bootstrap_in_our_entrypoints">Using Bootstrap in Our Entrypoints</h3>
+<h3 id="_using_bootstrap_in_our_entrypoints"><a class="anchor" href="#_using_bootstrap_in_our_entrypoints"></a>Using Bootstrap in Our Entrypoints</h3>
 <div class="paragraph">
 <p>
 
@@ -961,7 +971,7 @@ script defaults take care of it.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_initializing_di_in_our_tests">Initializing DI in Our Tests</h3>
+<h3 id="_initializing_di_in_our_tests"><a class="anchor" href="#_initializing_di_in_our_tests"></a>Initializing DI in Our Tests</h3>
 <div class="paragraph">
 <p>
 
@@ -1060,7 +1070,7 @@ it comes to your own projects.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_building_an_adapter_properly_a_worked_example">Building an Adapter "Properly": A Worked Example</h3>
+<h3 id="_building_an_adapter_properly_a_worked_example"><a class="anchor" href="#_building_an_adapter_properly_a_worked_example"></a>Building an Adapter "Properly": A Worked Example</h3>
 <div class="paragraph">
 <p>
 To really get a feel for how it all works, let&#8217;s work through an example of how
@@ -1119,7 +1129,7 @@ as a single function: read and write, GET and POST, and so on.</p>
 through how you might define a more complex dependency.</p>
 </div>
 <div class="sect3">
-<h4 id="_define_the_abstract_and_concrete_implementations">Define the Abstract and Concrete Implementations</h4>
+<h4 id="_define_the_abstract_and_concrete_implementations"><a class="anchor" href="#_define_the_abstract_and_concrete_implementations"></a>Define the Abstract and Concrete Implementations</h4>
 <div class="paragraph">
 <p>
 
@@ -1178,7 +1188,7 @@ We change the dependency in the bootstrap script:</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_make_a_fake_version_for_your_tests">Make a Fake Version for Your Tests</h4>
+<h4 id="_make_a_fake_version_for_your_tests"><a class="anchor" href="#_make_a_fake_version_for_your_tests"></a>Make a Fake Version for Your Tests</h4>
 <div class="paragraph">
 <p>
 We work through and define a fake version for unit testing:</p>
@@ -1227,7 +1237,7 @@ We work through and define a fake version for unit testing:</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_figure_out_how_to_integration_test_the_real_thing">Figure Out How to Integration Test the Real Thing</h4>
+<h4 id="_figure_out_how_to_integration_test_the_real_thing"><a class="anchor" href="#_figure_out_how_to_integration_test_the_real_thing"></a>Figure Out How to Integration Test the Real Thing</h4>
 <div class="paragraph">
 <p>
 Now we test the real thing, usually with an end-to-end or integration
@@ -1357,7 +1367,7 @@ a <code>Callable</code> to some sort of more formal adapter/base class/protocol.
 </div>
 </div>
 <div class="sect2">
-<h3 id="_wrap_up">Wrap-Up</h3>
+<h3 id="_wrap_up"><a class="anchor" href="#_wrap_up"></a>Wrap-Up</h3>
 <div class="ulist">
 <ul>
 <li>

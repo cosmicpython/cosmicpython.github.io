@@ -13,6 +13,14 @@
 
 /* customisations by harry */
 
+h1, h2, h3, h4, h5, h6 {
+    position: relative;
+}
+
+a.anchor {
+    top: 0;
+}
+
 /* hide inline ditaa/plantuml source listings for images */
 .image-source {
     display: none
@@ -70,7 +78,9 @@
 
 /* Text styles */
 h1{color:var(--primarycolor) !important;}
+
 h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+
 .title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
 p{font-family: "Noto Sans",sans-serif !important}
 
@@ -128,7 +138,7 @@ table {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="appendix_validation">Appendix E: Validation</h2>
+<h2 id="appendix_validation">Appendix E: Validation<a class="anchor" href="#appendix_validation"></a>Appendix A: Validation</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -145,7 +155,7 @@ so that each part of the system is simple. We don&#8217;t want to clutter our co
 with irrelevant detail.</p>
 </div>
 <div class="sect2">
-<h3 id="_what_is_validation_anyway">What Is Validation, Anyway?</h3>
+<h3 id="_what_is_validation_anyway"><a class="anchor" href="#_what_is_validation_anyway"></a>What Is Validation, Anyway?</h3>
 <div class="paragraph">
 <p>When people use the word <em>validation</em>, they usually mean a process whereby they
 test the inputs of an operation to make sure that they match certain criteria.
@@ -160,7 +170,7 @@ pragmatics.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_validating_syntax">Validating Syntax</h3>
+<h3 id="_validating_syntax"><a class="anchor" href="#_validating_syntax"></a>Validating Syntax</h3>
 <div class="paragraph">
 <p>In linguistics, the <em>syntax</em> of a language is the set of rules that govern the
 structure of grammatical sentences. For example, in English, the sentence
@@ -249,8 +259,8 @@ declaration of our message types:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">command</span><span class="tok-p">(</span><span class="tok-n">name</span><span class="tok-p">,</span> <span class="tok-o">**</span><span class="tok-n">fields</span><span class="tok-p">):</span>  #<b class="conum">(1)</b>
-    <span class="tok-n">schema</span> <span class="tok-o">=</span> <span class="tok-n">Schema</span><span class="tok-p">(</span><span class="tok-n">And</span><span class="tok-p">(</span><span class="tok-n">Use</span><span class="tok-p">(</span><span class="tok-n">json</span><span class="tok-o">.</span><span class="tok-n">loads</span><span class="tok-p">),</span> <span class="tok-n">fields</span><span class="tok-p">),</span> <span class="tok-n">ignore_extra_keys</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">)</span>  #<b class="conum">(2)</b>
-    <span class="tok-bp">cls</span> <span class="tok-o">=</span> <span class="tok-n">make_dataclass</span><span class="tok-p">(</span><span class="tok-n">name</span><span class="tok-p">,</span> <span class="tok-n">fields</span><span class="tok-o">.</span><span class="tok-n">keys</span><span class="tok-p">())</span>
+    <span class="tok-n">schema</span> <span class="tok-o">=</span> <span class="tok-n">Schema</span><span class="tok-p">(</span><span class="tok-n">And</span><span class="tok-p">(</span><span class="tok-n">Use</span><span class="tok-p">(</span><span class="tok-n">json</span><span class="tok-o">.</span><span class="tok-n">loads</span><span class="tok-p">),</span> <span class="tok-n">fields</span><span class="tok-p">),</span> <span class="tok-n">ignore_extra_keys</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">)</span>
+    <span class="tok-bp">cls</span> <span class="tok-o">=</span> <span class="tok-n">make_dataclass</span><span class="tok-p">(</span><span class="tok-n">name</span><span class="tok-p">,</span> <span class="tok-n">fields</span><span class="tok-o">.</span><span class="tok-n">keys</span><span class="tok-p">())</span>  #<b class="conum">(2)</b>
     <span class="tok-bp">cls</span><span class="tok-o">.</span><span class="tok-n">from_json</span> <span class="tok-o">=</span> <span class="tok-k">lambda</span> <span class="tok-n">s</span><span class="tok-p">:</span> <span class="tok-bp">cls</span><span class="tok-p">(</span><span class="tok-o">**</span><span class="tok-n">schema</span><span class="tok-o">.</span><span class="tok-n">validate</span><span class="tok-p">(</span><span class="tok-n">s</span><span class="tok-p">))</span>  #<b class="conum">(3)</b>
     <span class="tok-k">return</span> <span class="tok-bp">cls</span>
 
@@ -300,7 +310,7 @@ trade-off in mind.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_postels_law_and_the_tolerant_reader_pattern">Postel&#8217;s Law and the Tolerant Reader Pattern</h3>
+<h3 id="_postels_law_and_the_tolerant_reader_pattern"><a class="anchor" href="#_postels_law_and_the_tolerant_reader_pattern"></a>Postel&#8217;s Law and the Tolerant Reader Pattern</h3>
 <div class="paragraph">
 <p><em>Postel&#8217;s law</em>, or the <em>robustness principle</em>, tells us, "Be liberal in what you
 accept, and conservative in what you emit." We think this applies particularly
@@ -389,7 +399,7 @@ inputs you allow.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_validating_at_the_edge">Validating at the Edge</h3>
+<h3 id="_validating_at_the_edge"><a class="anchor" href="#_validating_at_the_edge"></a>Validating at the Edge</h3>
 <div class="paragraph">
 <p>Earlier, we said that we want to avoid cluttering our code with irrelevant
 details. In particular, we don&#8217;t want to code defensively inside our domain model.
@@ -500,7 +510,7 @@ When you receive an invalid message, there&#8217;s usually little you can do but
 </div>
 </div>
 <div class="sect2">
-<h3 id="_validating_semantics">Validating Semantics</h3>
+<h3 id="_validating_semantics"><a class="anchor" href="#_validating_semantics"></a>Validating Semantics</h3>
 <div class="paragraph">
 <p>While syntax is concerned with the structure of messages, <em>semantics</em> is the study
 of <em>meaning</em> in messages. The sentence "Undo no dogs from ellipsis four" is
@@ -590,9 +600,9 @@ error.</p>
 <span class="tok-kn">from</span> <span class="tok-nn">allocation</span> <span class="tok-kn">import</span> <span class="tok-n">ensure</span>
 
 <span class="tok-k">def</span> <span class="tok-nf">allocate</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">):</span>
-    <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">mode</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">qty</span><span class="tok-p">)</span>
+    <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">qty</span><span class="tok-p">)</span>
     <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
-<span class="hll">        <span class="tok-n">ensure</span><span class="tok-o">.</span><span class="tok-n">product_exists</span><span class="tok-p">(</span><span class="tok-n">uow</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">)</span>
+<span class="hll">        <span class="tok-n">ensure</span><span class="tok-o">.</span><span class="tok-n">product_exists</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">)</span>
 </span>
         <span class="tok-n">product</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">products</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">)</span>
         <span class="tok-n">product</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">)</span>
@@ -665,7 +675,7 @@ domain model, then it <em>should</em> be tested in the domain model.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_validating_pragmatics">Validating Pragmatics</h3>
+<h3 id="_validating_pragmatics"><a class="anchor" href="#_validating_pragmatics"></a>Validating Pragmatics</h3>
 <div class="paragraph">
 <p><em>Pragmatics</em> is the study of how we understand language in context. After we have
 parsed a message and grasped its meaning, we still need to process it in
@@ -748,7 +758,7 @@ available.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-20 13:47:19 UTC
+Last updated 2020-04-29 15:00:16 +0100
 </div>
 </div>
 <style>

@@ -13,6 +13,14 @@
 
 /* customisations by harry */
 
+h1, h2, h3, h4, h5, h6 {
+    position: relative;
+}
+
+a.anchor {
+    top: 0;
+}
+
 /* hide inline ditaa/plantuml source listings for images */
 .image-source {
     display: none
@@ -70,7 +78,9 @@
 
 /* Text styles */
 h1{color:var(--primarycolor) !important;}
+
 h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+
 .title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
 p{font-family: "Noto Sans",sans-serif !important}
 
@@ -128,7 +138,7 @@ table {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="chapter_06_uow">6: Unit of Work Pattern</h2>
+<h2 id="chapter_06_uow">6: Unit of Work Pattern<a class="anchor" href="#chapter_06_uow"></a>Unit of Work Pattern</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -200,7 +210,7 @@ And we&#8217;ll do it all using a lovely piece of Python syntax, a context manag
 <div class="title">Figure 2. With UoW: UoW now manages database state</div>
 </div>
 <div class="sect2">
-<h3 id="_the_unit_of_work_collaborates_with_the_repository">The Unit of Work Collaborates with the Repository</h3>
+<h3 id="_the_unit_of_work_collaborates_with_the_repository"><a class="anchor" href="#_the_unit_of_work_collaborates_with_the_repository"></a>The Unit of Work Collaborates with the Repository</h3>
 <div class="paragraph">
 <p>
 
@@ -268,7 +278,7 @@ to get a repository</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_test_driving_a_uow_with_integration_tests">Test-Driving a UoW with Integration Tests</h3>
+<h3 id="_test_driving_a_uow_with_integration_tests"><a class="anchor" href="#_test_driving_a_uow_with_integration_tests"></a>Test-Driving a UoW with Integration Tests</h3>
 <div class="paragraph">
 <p>
 
@@ -348,7 +358,7 @@ like this:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_unit_of_work_and_its_context_manager">Unit of Work and Its Context Manager</h3>
+<h3 id="_unit_of_work_and_its_context_manager"><a class="anchor" href="#_unit_of_work_and_its_context_manager"></a>Unit of Work and Its Context Manager</h3>
 <div class="paragraph">
 <p>
 
@@ -403,7 +413,7 @@ called. Read on for more discussion of this.)
 </ol>
 </div>
 <div class="sect3">
-<h4 id="_the_real_unit_of_work_uses_sqlalchemy_sessions">The Real Unit of Work Uses SQLAlchemy Sessions</h4>
+<h4 id="_the_real_unit_of_work_uses_sqlalchemy_sessions"><a class="anchor" href="#_the_real_unit_of_work_uses_sqlalchemy_sessions"></a>The Real Unit of Work Uses SQLAlchemy Sessions</h4>
 <div class="paragraph">
 <p>
 
@@ -468,7 +478,7 @@ use our database session.
 </div>
 </div>
 <div class="sect3">
-<h4 id="_fake_unit_of_work_for_testing">Fake Unit of Work for Testing</h4>
+<h4 id="_fake_unit_of_work_for_testing"><a class="anchor" href="#_fake_unit_of_work_for_testing"></a>Fake Unit of Work for Testing</h4>
 <div class="paragraph">
 <p>
 
@@ -571,7 +581,7 @@ about our designs.
 </div>
 </div>
 <div class="sect2">
-<h3 id="_using_the_uow_in_the_service_layer">Using the UoW in the Service Layer</h3>
+<h3 id="_using_the_uow_in_the_service_layer"><a class="anchor" href="#_using_the_uow_in_the_service_layer"></a>Using the UoW in the Service Layer</h3>
 <div class="paragraph">
 <p>
 
@@ -618,7 +628,7 @@ on an <em>abstract</em> UoW.
 </div>
 </div>
 <div class="sect2">
-<h3 id="_explicit_tests_for_commitrollback_behavior">Explicit Tests for Commit/Rollback Behavior</h3>
+<h3 id="_explicit_tests_for_commitrollback_behavior"><a class="anchor" href="#_explicit_tests_for_commitrollback_behavior"></a>Explicit Tests for Commit/Rollback Behavior</h3>
 <div class="paragraph">
 <p>
 
@@ -679,7 +689,7 @@ We haven&#8217;t shown it here, but it can be worth testing some of the more
 </div>
 </div>
 <div class="sect2">
-<h3 id="_explicit_versus_implicit_commits">Explicit Versus Implicit Commits</h3>
+<h3 id="_explicit_versus_implicit_commits"><a class="anchor" href="#_explicit_versus_implicit_commits"></a>Explicit Versus Implicit Commits</h3>
 <div class="paragraph">
 <p>
 
@@ -755,7 +765,7 @@ so either the user did one, or we blow their changes away. Harsh but simple.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_examples_using_uow_to_group_multiple_operations_into_an_atomic_unit">Examples: Using UoW to Group Multiple Operations into an Atomic Unit</h3>
+<h3 id="_examples_using_uow_to_group_multiple_operations_into_an_atomic_unit"><a class="anchor" href="#_examples_using_uow_to_group_multiple_operations_into_an_atomic_unit"></a>Examples: Using UoW to Group Multiple Operations into an Atomic Unit</h3>
 <div class="paragraph">
 <p>
 
@@ -764,7 +774,7 @@ see how it leads to simple reasoning about what blocks of code happen
 together.</p>
 </div>
 <div class="sect3">
-<h4 id="_example_1_reallocate">Example 1: Reallocate</h4>
+<h4 id="_example_1_reallocate"><a class="anchor" href="#_example_1_reallocate"></a>Example 1: Reallocate</h4>
 <div class="paragraph">
 <p>
 
@@ -800,7 +810,7 @@ the <code>deallocate()</code> either.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_example_2_change_batch_quantity">Example 2: Change Batch Quantity</h4>
+<h4 id="_example_2_change_batch_quantity"><a class="anchor" href="#_example_2_change_batch_quantity"></a>Example 2: Change Batch Quantity</h4>
 <div class="paragraph">
 <p>
 Our shipping company gives us a call to say that one of the container doors
@@ -835,7 +845,7 @@ at any stage, we probably want to commit none of the changes.
 </div>
 </div>
 <div class="sect2">
-<h3 id="_tidying_up_the_integration_tests">Tidying Up the Integration Tests</h3>
+<h3 id="_tidying_up_the_integration_tests"><a class="anchor" href="#_tidying_up_the_integration_tests"></a>Tidying Up the Integration Tests</h3>
 <div class="paragraph">
 <p>
 
@@ -908,7 +918,7 @@ This is another example of the lesson from <a href="/book/chapter_05_high_gear_l
 </div>
 </div>
 <div class="sect2">
-<h3 id="_wrap_up">Wrap-Up</h3>
+<h3 id="_wrap_up"><a class="anchor" href="#_wrap_up"></a>Wrap-Up</h3>
 <div class="paragraph">
 <p>
 Hopefully we&#8217;ve convinced you that the Unit of Work pattern is useful, and
@@ -1072,7 +1082,7 @@ its work.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-20 13:47:19 UTC
+Last updated 2020-04-14 09:49:00 +0100
 </div>
 </div>
 <style>

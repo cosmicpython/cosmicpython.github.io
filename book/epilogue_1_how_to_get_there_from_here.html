@@ -13,6 +13,14 @@
 
 /* customisations by harry */
 
+h1, h2, h3, h4, h5, h6 {
+    position: relative;
+}
+
+a.anchor {
+    top: 0;
+}
+
 /* hide inline ditaa/plantuml source listings for images */
 .image-source {
     display: none
@@ -70,7 +78,9 @@
 
 /* Text styles */
 h1{color:var(--primarycolor) !important;}
+
 h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+
 .title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
 p{font-family: "Noto Sans",sans-serif !important}
 
@@ -128,10 +138,10 @@ table {
 </div>
 <div id="content">
 <div class="sect1 afterword">
-<h2 id="epilogue_1_how_to_get_there_from_here">Epilogue: Epilogue</h2>
+<h2 id="epilogue_1_how_to_get_there_from_here">Epilogue: Epilogue<a class="anchor" href="#epilogue_1_how_to_get_there_from_here"></a>Appendix A: Epilogue</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_what_now">What Now?</h3>
+<h3 id="_what_now"><a class="anchor" href="#_what_now"></a>What Now?</h3>
 <div class="paragraph">
 <p>Phew! We&#8217;ve covered a lot of ground in this book, and for most of our audience
 all of these ideas are new. With that in mind, we can&#8217;t hope to make you experts
@@ -152,7 +162,7 @@ some basic firearms safety.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_how_do_i_get_there_from_here">How Do I Get There from Here?</h3>
+<h3 id="_how_do_i_get_there_from_here"><a class="anchor" href="#_how_do_i_get_there_from_here"></a>How Do I Get There from Here?</h3>
 <div class="paragraph">
 <p>Chances are that a lot of you are thinking something like this:</p>
 </div>
@@ -197,7 +207,7 @@ tax</em>.
 </div>
 </div>
 <div class="sect2">
-<h3 id="_separating_entangled_responsibilities">Separating Entangled Responsibilities</h3>
+<h3 id="_separating_entangled_responsibilities"><a class="anchor" href="#_separating_entangled_responsibilities"></a>Separating Entangled Responsibilities</h3>
 <div class="paragraph">
 <p>At the beginning of the book, we said that the main characteristic of a big ball
 of mud is homogeneity: every part of the system looks the same, because we
@@ -388,7 +398,7 @@ under test and starting separating responsibilities.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_identifying_aggregates_and_bounded_contexts">Identifying Aggregates and Bounded Contexts</h3>
+<h3 id="_identifying_aggregates_and_bounded_contexts"><a class="anchor" href="#_identifying_aggregates_and_bounded_contexts"></a>Identifying Aggregates and Bounded Contexts</h3>
 <div class="paragraph">
 <p>Part of the problem with the codebase in our case study was that the object
 graph was highly connected. Each account had many workspaces, and each workspace had
@@ -717,7 +727,7 @@ we locked an account, we could first query for all the affected workspaces via
 </div>
 </div>
 <div class="sect2">
-<h3 id="_an_event_driven_approach_to_go_to_microservices_via_strangler_pattern">An Event-Driven Approach to Go to Microservices via Strangler Pattern</h3>
+<h3 id="_an_event_driven_approach_to_go_to_microservices_via_strangler_pattern"><a class="anchor" href="#_an_event_driven_approach_to_go_to_microservices_via_strangler_pattern"></a>An Event-Driven Approach to Go to Microservices via Strangler Pattern</h3>
 <div class="paragraph">
 <p>The <em>Strangler Fig</em> pattern involves creating a new system around the edges
 of an old system, while keeping it running. Bits of old functionality
@@ -889,7 +899,7 @@ real customers.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_convincing_your_stakeholders_to_try_something_new">Convincing Your Stakeholders to Try Something New</h3>
+<h3 id="_convincing_your_stakeholders_to_try_something_new"><a class="anchor" href="#_convincing_your_stakeholders_to_try_something_new"></a>Convincing Your Stakeholders to Try Something New</h3>
 <div class="paragraph">
 <p>If you&#8217;re thinking about carving a new system out of a big ball of mud, you&#8217;re
 probably suffering problems with reliability, performance, maintainability, or
@@ -1036,7 +1046,7 @@ right&#8212;and others will too.</em></p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_questions_our_tech_reviewers_asked_that_we_couldnt_work_into_prose">Questions Our Tech Reviewers Asked That We Couldn&#8217;t Work into Prose</h3>
+<h3 id="_questions_our_tech_reviewers_asked_that_we_couldnt_work_into_prose"><a class="anchor" href="#_questions_our_tech_reviewers_asked_that_we_couldnt_work_into_prose"></a>Questions Our Tech Reviewers Asked That We Couldn&#8217;t Work into Prose</h3>
 <div class="paragraph">
 <p>Here are some questions we heard during drafting that we couldn&#8217;t find a good place to address elsewhere in the book:</p>
 </div>
@@ -1135,7 +1145,7 @@ that&#8217;s not a requirement.</p>
 </div>
 </div>
 <div class="sect2 pagebreak-before less_space">
-<h3 id="footguns">Footguns</h3>
+<h3 id="footguns"><a class="anchor" href="#footguns"></a>Footguns</h3>
 <div class="paragraph">
 <p>OK, so we&#8217;ve given you a whole bunch of new toys to play with. Here&#8217;s the
 fine print. Harry and Bob do not recommend that you copy and paste our code into
@@ -1193,7 +1203,7 @@ there is other prior art. Greg Young wrote an entire book on managing event-driv
 </div>
 </div>
 <div class="sect2">
-<h3 id="_more_required_reading">More Required Reading</h3>
+<h3 id="_more_required_reading"><a class="anchor" href="#_more_required_reading"></a>More Required Reading</h3>
 <div class="paragraph">
 <p>A few more books we&#8217;d like to recommend to help you on your way:</p>
 </div>
@@ -1216,7 +1226,7 @@ of async messaging-based <span class="keep-together">integration</span>.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_wrap_up">Wrap-Up</h3>
+<h3 id="_wrap_up"><a class="anchor" href="#_wrap_up"></a>Wrap-Up</h3>
 <div class="paragraph">
 <p>Phew! That&#8217;s a lot of warnings and reading suggestions; we hope we
 haven&#8217;t scared you off completely. Our goal with this book is to give you

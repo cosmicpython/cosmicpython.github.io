@@ -13,6 +13,14 @@
 
 /* customisations by harry */
 
+h1, h2, h3, h4, h5, h6 {
+    position: relative;
+}
+
+a.anchor {
+    top: 0;
+}
+
 /* hide inline ditaa/plantuml source listings for images */
 .image-source {
     display: none
@@ -70,7 +78,9 @@
 
 /* Text styles */
 h1{color:var(--primarycolor) !important;}
+
 h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+
 .title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
 p{font-family: "Noto Sans",sans-serif !important}
 
@@ -128,7 +138,7 @@ table {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="chapter_08_events_and_message_bus">8: Events and the Message Bus</h2>
+<h2 id="chapter_08_events_and_message_bus">8: Events and the Message Bus<a class="anchor" href="#chapter_08_events_and_message_bus"></a>Events and the Message Bus</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -200,7 +210,7 @@ git checkout chapter_07_aggregate</pre>
 </table>
 </div>
 <div class="sect2">
-<h3 id="_avoiding_making_a_mess">Avoiding Making a Mess</h3>
+<h3 id="_avoiding_making_a_mess"><a class="anchor" href="#_avoiding_making_a_mess"></a>Avoiding Making a Mess</h3>
 <div class="paragraph">
 <p>
 
@@ -209,7 +219,7 @@ So. Email alerts when we run out of stock. When we have new requirements like on
 start dumping these things into our web controllers.</p>
 </div>
 <div class="sect3">
-<h4 id="_first_lets_avoid_making_a_mess_of_our_web_controllers">First, Let&#8217;s Avoid Making a Mess of Our Web Controllers</h4>
+<h4 id="_first_lets_avoid_making_a_mess_of_our_web_controllers"><a class="anchor" href="#_first_lets_avoid_making_a_mess_of_our_web_controllers"></a>First, Let&#8217;s Avoid Making a Mess of Our Web Controllers</h4>
 <div class="paragraph">
 <p>
 As a one-off hack, this <em>might</em> be OK:</p>
@@ -249,7 +259,7 @@ able to unit test this new feature.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_and_lets_not_make_a_mess_of_our_model_either">And Let&#8217;s Not Make a Mess of Our Model Either</h4>
+<h4 id="_and_lets_not_make_a_mess_of_our_model_either"><a class="anchor" href="#_and_lets_not_make_a_mess_of_our_model_either"></a>And Let&#8217;s Not Make a Mess of Our Model Either</h4>
 <div class="paragraph">
 <p>
 
@@ -284,15 +294,9 @@ infrastructure concerns like <code>email.send_mail</code>.</p>
 of our system. What we&#8217;d like is to keep our domain model focused on the rule
 "You can&#8217;t allocate more stuff than is actually available."</p>
 </div>
-<div class="paragraph">
-<p>The domain model&#8217;s job is to know that we&#8217;re out of stock, but the
-responsibility of sending an alert belongs elsewhere. We should be able to turn
-this feature on or off, or to switch to SMS notifications instead, without
-needing to change the rules of our domain model.</p>
-</div>
 </div>
 <div class="sect3">
-<h4 id="_or_the_service_layer">Or the Service Layer!</h4>
+<h4 id="_or_the_service_layer"><a class="anchor" href="#_or_the_service_layer"></a>Or the Service Layer!</h4>
 <div class="paragraph">
 <p>
 
@@ -339,7 +343,7 @@ this code?</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_single_responsibility_principle">Single Responsibility Principle</h3>
+<h3 id="_single_responsibility_principle"><a class="anchor" href="#_single_responsibility_principle"></a>Single Responsibility Principle</h3>
 <div class="paragraph">
 <p>
 
@@ -384,21 +388,23 @@ on the database by using a unit of work.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_all_aboard_the_message_bus">All Aboard the Message Bus!</h3>
+<h3 id="_all_aboard_the_message_bus"><a class="anchor" href="#_all_aboard_the_message_bus"></a>All Aboard the Message Bus!</h3>
 <div class="paragraph">
 <p>The patterns we&#8217;re going to introduce here are <em>Domain Events</em> and the <em>Message Bus</em>.
-We can implement them in a few ways, so we&#8217;ll show a couple before settling on the one we like most.</p>
+We can implement them in a few ways, so we&#8217;ll show a couple before settling on
+the one we like most.</p>
 </div>
 <div class="sect3">
-<h4 id="_the_model_records_events">The Model Records Events</h4>
+<h4 id="_the_model_records_events"><a class="anchor" href="#_the_model_records_events"></a>The Model Records Events</h4>
 <div class="paragraph">
 <p>
 First, rather than being concerned about emails, our model will be in charge of
-recording <em>events</em>&#8212;facts about things that have happened. We&#8217;ll use a message bus to respond to events and invoke a new operation.</p>
+recording <em>events</em>&#8212;facts about things that have happened. We&#8217;ll use a message
+bus to respond to events and invoke a new operation.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_events_are_simple_dataclasses">Events Are Simple Dataclasses</h4>
+<h4 id="_events_are_simple_dataclasses"><a class="anchor" href="#_events_are_simple_dataclasses"></a>Events Are Simple Dataclasses</h4>
 <div class="paragraph">
 <p>
 
@@ -442,7 +448,7 @@ hints in our message bus, as you&#8217;ll see shortly.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_the_model_raises_events">The Model Raises Events</h4>
+<h4 id="_the_model_raises_events"><a class="anchor" href="#_the_model_raises_events"></a>The Model Raises Events</h4>
 <div class="paragraph">
 <p>
 
@@ -541,7 +547,7 @@ We&#8217;re actually addressing a code smell we had until now, which is that we 
 </div>
 </div>
 <div class="sect3">
-<h4 id="_the_message_bus_maps_events_to_handlers">The Message Bus Maps Events to Handlers</h4>
+<h4 id="_the_message_bus_maps_events_to_handlers"><a class="anchor" href="#_the_message_bus_maps_events_to_handlers"></a>The Message Bus Maps Events to Handlers</h4>
 <div class="paragraph">
 <p>
 
@@ -602,7 +608,7 @@ Note that the message bus as implemented doesn&#8217;t give us concurrency becau
 <em>Celery</em> is a popular tool in the Python world for deferring self-contained
 chunks of work to an asynchronous task queue. The message bus we&#8217;re
 presenting here is very different, so the short answer to the above question is no; our message bus
-has more in common with a Node.js app, a UI event loop, or an actor framework.</p>
+has more in common with a Express.js app, a UI event loop, or an actor framework.</p>
 </div>
 <div class="paragraph">
 <p>
@@ -630,7 +636,7 @@ and Python-only.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_option_1_the_service_layer_takes_events_from_the_model_and_puts_them_on_the_message_bus">Option 1: The Service Layer Takes Events from the Model and Puts Them on the Message Bus</h3>
+<h3 id="_option_1_the_service_layer_takes_events_from_the_model_and_puts_them_on_the_message_bus"><a class="anchor" href="#_option_1_the_service_layer_takes_events_from_the_model_and_puts_them_on_the_message_bus"></a>Option 1: The Service Layer Takes Events from the Model and Puts Them on the Message Bus</h3>
 <div class="paragraph">
 <p>
 
@@ -693,7 +699,7 @@ the message bus.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_option_2_the_service_layer_raises_its_own_events">Option 2: The Service Layer Raises Its Own Events</h3>
+<h3 id="_option_2_the_service_layer_raises_its_own_events"><a class="anchor" href="#_option_2_the_service_layer_raises_its_own_events"></a>Option 2: The Service Layer Raises Its Own Events</h3>
 <div class="paragraph">
 <p>
 
@@ -744,7 +750,7 @@ put the unit of work in charge of collecting and raising events.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_option_3_the_uow_publishes_events_to_the_message_bus">Option 3: The UoW Publishes Events to the Message Bus</h3>
+<h3 id="_option_3_the_uow_publishes_events_to_the_message_bus"><a class="anchor" href="#_option_3_the_uow_publishes_events_to_the_message_bus"></a>Option 3: The UoW Publishes Events to the Message Bus</h3>
 <div class="paragraph">
 <p>
 
@@ -1033,7 +1039,7 @@ using ABCs, they&#8217;ll help remind you when things get out of sync.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_wrap_up">Wrap-Up</h3>
+<h3 id="_wrap_up"><a class="anchor" href="#_wrap_up"></a>Wrap-Up</h3>
 <div class="paragraph">
 <p>Domain events give us a way to handle workflows in our system. We often find,
 listening to our domain experts, that they express requirements in a causal or
@@ -1203,7 +1209,7 @@ detail as we build a more complex workflow with our new message bus.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-20 13:47:19 UTC
+Last updated 2020-04-28 10:44:39 +0100
 </div>
 </div>
 <style>

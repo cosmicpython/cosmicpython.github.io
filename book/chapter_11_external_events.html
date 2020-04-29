@@ -13,6 +13,14 @@
 
 /* customisations by harry */
 
+h1, h2, h3, h4, h5, h6 {
+    position: relative;
+}
+
+a.anchor {
+    top: 0;
+}
+
 /* hide inline ditaa/plantuml source listings for images */
 .image-source {
     display: none
@@ -70,7 +78,9 @@
 
 /* Text styles */
 h1{color:var(--primarycolor) !important;}
+
 h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+
 .title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
 p{font-family: "Noto Sans",sans-serif !important}
 
@@ -128,7 +138,7 @@ table {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="chapter_11_external_events">11: Event-Driven Architecture: Using Events to Integrate Microservices</h2>
+<h2 id="chapter_11_external_events">11: Event-Driven Architecture: Using Events to Integrate Microservices<a class="anchor" href="#chapter_11_external_events"></a>Event-Driven Architecture: Using Events to Integrate Microservices</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -185,7 +195,7 @@ git checkout chapter_10_commands</pre>
 </table>
 </div>
 <div class="sect2">
-<h3 id="_distributed_ball_of_mud_and_thinking_in_nouns">Distributed Ball of Mud, and Thinking in Nouns</h3>
+<h3 id="_distributed_ball_of_mud_and_thinking_in_nouns"><a class="anchor" href="#_distributed_ball_of_mud_and_thinking_in_nouns"></a>Distributed Ball of Mud, and Thinking in Nouns</h3>
 <div class="paragraph">
 <p>
 
@@ -349,7 +359,7 @@ how services quickly get tangled up.
 </div>
 </div>
 <div class="sect2">
-<h3 id="_error_handling_in_distributed_systems">Error Handling in Distributed Systems</h3>
+<h3 id="_error_handling_in_distributed_systems"><a class="anchor" href="#_error_handling_in_distributed_systems"></a>Error Handling in Distributed Systems</h3>
 <div class="paragraph">
 <p>
 
@@ -440,7 +450,7 @@ coupling inherent in different architectural styles. Read all about it at
 </div>
 </div>
 <div class="sect2">
-<h3 id="_the_alternative_temporal_decoupling_using_asynchronous_messaging">The Alternative: Temporal Decoupling Using Asynchronous Messaging</h3>
+<h3 id="_the_alternative_temporal_decoupling_using_asynchronous_messaging"><a class="anchor" href="#_the_alternative_temporal_decoupling_using_asynchronous_messaging"></a>The Alternative: Temporal Decoupling Using Asynchronous Messaging</h3>
 <div class="paragraph">
 <p>
 
@@ -505,7 +515,7 @@ we can do that locally.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_using_a_redis_pubsub_channel_for_integration">Using a Redis Pub/Sub Channel for Integration</h3>
+<h3 id="_using_a_redis_pubsub_channel_for_integration"><a class="anchor" href="#_using_a_redis_pubsub_channel_for_integration"></a>Using a Redis Pub/Sub Channel for Integration</h3>
 <div class="paragraph">
 <p>
 
@@ -576,7 +586,7 @@ MessageBus -&gt; Redis : publish to line_allocated channel
 </div>
 </div>
 <div class="sect2">
-<h3 id="_test_driving_it_all_using_an_end_to_end_test">Test-Driving It All Using an End-to-End Test</h3>
+<h3 id="_test_driving_it_all_using_an_end_to_end_test"><a class="anchor" href="#_test_driving_it_all_using_an_end_to_end_test"></a>Test-Driving It All Using an End-to-End Test</h3>
 <div class="paragraph">
 <p>
 
@@ -648,7 +658,7 @@ because it won&#8217;t be the only message on that channel.</p>
 </ol>
 </div>
 <div class="sect3">
-<h4 id="_redis_is_another_thin_adapter_around_our_message_bus">Redis Is Another Thin Adapter Around Our Message Bus</h4>
+<h4 id="_redis_is_another_thin_adapter_around_our_message_bus"><a class="anchor" href="#_redis_is_another_thin_adapter_around_our_message_bus"></a>Redis Is Another Thin Adapter Around Our Message Bus</h4>
 <div class="paragraph">
 <p>
 
@@ -723,7 +733,7 @@ allowing one or more message types to go to different channels.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_our_new_outgoing_event">Our New Outgoing Event</h4>
+<h4 id="_our_new_outgoing_event"><a class="anchor" href="#_our_new_outgoing_event"></a>Our New Outgoing Event</h4>
 <div class="paragraph">
 <p>
 Here&#8217;s what the <code>Allocated</code> event will look like:</p>
@@ -810,7 +820,7 @@ Publishing the event uses our helper function from the Redis wrapper:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_internal_versus_external_events">Internal Versus External Events</h3>
+<h3 id="_internal_versus_external_events"><a class="anchor" href="#_internal_versus_external_events"></a>Internal Versus External Events</h3>
 <div class="paragraph">
 <p>
 
@@ -850,7 +860,7 @@ via the API.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_wrap_up">Wrap-Up</h3>
+<h3 id="_wrap_up"><a class="anchor" href="#_wrap_up"></a>Wrap-Up</h3>
 <div class="paragraph">
 <p>Events can come <em>from</em> the outside, but they can also be published
 externally&#8212;&#8203;our <code>publish</code> handler converts an event to a message on a Redis

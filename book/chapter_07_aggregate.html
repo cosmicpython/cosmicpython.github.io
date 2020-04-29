@@ -13,6 +13,14 @@
 
 /* customisations by harry */
 
+h1, h2, h3, h4, h5, h6 {
+    position: relative;
+}
+
+a.anchor {
+    top: 0;
+}
+
 /* hide inline ditaa/plantuml source listings for images */
 .image-source {
     display: none
@@ -70,7 +78,9 @@
 
 /* Text styles */
 h1{color:var(--primarycolor) !important;}
+
 h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+
 .title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
 p{font-family: "Noto Sans",sans-serif !important}
 
@@ -128,7 +138,7 @@ table {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="chapter_07_aggregate">7: Aggregates and Consistency Boundaries</h2>
+<h2 id="chapter_07_aggregate">7: Aggregates and Consistency Boundaries<a class="anchor" href="#chapter_07_aggregate"></a>Aggregates and Consistency Boundaries</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -164,14 +174,14 @@ the old <code>allocate()</code> domain service available as a method on <code>Pr
 </td>
 <td class="content">
 <div class="paragraph">
-<p>The code for this chapter is in the appendix_csvs branch
-<a href="https://oreil.ly/vlnGg">on <span class="keep-together">GitHub</span></a>:</p>
+<p>The code for this chapter is in the chapter_07_aggregate branch
+<a href="https://github.com/cosmicpython/code/tree/chapter_07_aggregate">on <span class="keep-together">GitHub</span></a>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre>git clone https://github.com/cosmicpython/code.git
 cd code
-git checkout appendix_csvs
+git checkout chapter_07_aggregate
 # or to code along, checkout the previous chapter:
 git checkout chapter_06_uow</pre>
 </div>
@@ -181,7 +191,7 @@ git checkout chapter_06_uow</pre>
 </table>
 </div>
 <div class="sect2">
-<h3 id="_why_not_just_run_everything_in_a_spreadsheet">Why Not Just Run Everything in a Spreadsheet?</h3>
+<h3 id="_why_not_just_run_everything_in_a_spreadsheet"><a class="anchor" href="#_why_not_just_run_everything_in_a_spreadsheet"></a>Why Not Just Run Everything in a Spreadsheet?</h3>
 <div class="paragraph">
 <p>
 
@@ -213,7 +223,7 @@ an operation.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_invariants_constraints_and_consistency">Invariants, Constraints, and Consistency</h3>
+<h3 id="_invariants_constraints_and_consistency"><a class="anchor" href="#_invariants_constraints_and_consistency"></a>Invariants, Constraints, and Consistency</h3>
 <div class="paragraph">
 <p>
 
@@ -258,7 +268,7 @@ on two different batches for the same line, and currently, there&#8217;s nothing
 there to explicitly stop us from doing that.</p>
 </div>
 <div class="sect3">
-<h4 id="_invariants_concurrency_and_locks">Invariants, Concurrency, and Locks</h4>
+<h4 id="_invariants_concurrency_and_locks"><a class="anchor" href="#_invariants_concurrency_and_locks"></a>Invariants, Concurrency, and Locks</h4>
 <div class="paragraph">
 <p>
 Let&#8217;s look at another one of our business rules:</p>
@@ -310,7 +320,7 @@ every single one&#8212;&#8203;we&#8217;ll get deadlocks or performance problems 
 </div>
 </div>
 <div class="sect2">
-<h3 id="_what_is_an_aggregate">What Is an Aggregate?</h3>
+<h3 id="_what_is_an_aggregate"><a class="anchor" href="#_what_is_an_aggregate"></a>What Is an Aggregate?</h3>
 <div class="paragraph">
 <p>
 
@@ -397,7 +407,7 @@ Just as we sometimes use <code><em>_leading_underscores</em></code> to mark meth
 </div>
 </div>
 <div class="sect2">
-<h3 id="_choosing_an_aggregate">Choosing an Aggregate</h3>
+<h3 id="_choosing_an_aggregate"><a class="anchor" href="#_choosing_an_aggregate"></a>Choosing an Aggregate</h3>
 <div class="paragraph">
 <p>
 
@@ -432,7 +442,8 @@ that have the same SKU as the order line. Some sort of concept like
 </div>
 <div class="paragraph">
 <p>It&#8217;s an unwieldy name, though, so after some bikeshedding via <code>SkuStock</code>, <code>Stock</code>,
-<code>ProductStock</code>, and so on, we decided to simply call it <code>Product</code>&#8212;after all, that was the first concept we came across in our exploration of the
+<code>ProductStock</code>, and so on, we decided to simply call it <code>Product</code>&#8212;after all,
+that was the first concept we came across in our exploration of the
 domain language back in <a href="/book/chapter_01_domain_model.html">[chapter_01_domain_model]</a>.</p>
 </div>
 <div class="paragraph">
@@ -659,7 +670,7 @@ elsewhere. The Fowler link at the start of this sidebar is a good starting point
 </div>
 </div>
 <div class="sect2">
-<h3 id="_one_aggregate_one_repository">One Aggregate = One Repository</h3>
+<h3 id="_one_aggregate_one_repository"><a class="anchor" href="#_one_aggregate_one_repository"></a>One Aggregate = One Repository</h3>
 <div class="paragraph">
 <p>
 
@@ -756,7 +767,7 @@ layer to see how it looks with <code>Product</code> as its main entrypoint:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_what_about_performance">What About Performance?</h3>
+<h3 id="_what_about_performance"><a class="anchor" href="#_what_about_performance"></a>What About Performance?</h3>
 <div class="paragraph">
 <p>
 
@@ -830,7 +841,7 @@ minds if we find our boundaries are causing performance woes.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_optimistic_concurrency_with_version_numbers">Optimistic Concurrency with Version Numbers</h3>
+<h3 id="_optimistic_concurrency_with_version_numbers"><a class="anchor" href="#_optimistic_concurrency_with_version_numbers"></a>Optimistic Concurrency with Version Numbers</h3>
 <div class="paragraph">
 <p>
 
@@ -976,7 +987,7 @@ way in the case of a concurrency problem.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_implementation_options_for_version_numbers">Implementation Options for Version Numbers</h4>
+<h4 id="_implementation_options_for_version_numbers"><a class="anchor" href="#_implementation_options_for_version_numbers"></a>Implementation Options for Version Numbers</h4>
 <div class="paragraph">
 <p>
 
@@ -1071,7 +1082,7 @@ If you&#8217;re scratching your head at this version number business, it might
 </div>
 </div>
 <div class="sect2">
-<h3 id="_testing_for_our_data_integrity_rules">Testing for Our Data Integrity Rules</h3>
+<h3 id="_testing_for_our_data_integrity_rules"><a class="anchor" href="#_testing_for_our_data_integrity_rules"></a>Testing for Our Data Integrity Rules</h3>
 <div class="paragraph">
 <p>
 
@@ -1176,7 +1187,7 @@ want: <code>read1, read2, write1, write2</code>.</p>
 </ol>
 </div>
 <div class="sect3">
-<h4 id="_enforcing_concurrency_rules_by_using_database_transaction_isolation_levels">Enforcing Concurrency Rules by Using Database Transaction <span class="keep-together">Isolation Levels</span></h4>
+<h4 id="_enforcing_concurrency_rules_by_using_database_transaction_isolation_levels"><a class="anchor" href="#_enforcing_concurrency_rules_by_using_database_transaction_isolation_levels"></a>Enforcing Concurrency Rules by Using Database Transaction <span class="keep-together">Isolation Levels</span></h4>
 <div class="paragraph">
 <p>
 
@@ -1213,7 +1224,7 @@ Transaction isolation levels are tricky stuff, so it&#8217;s worth spending time
 </div>
 </div>
 <div class="sect3">
-<h4 id="_pessimistic_concurrency_control_example_select_for_update">Pessimistic Concurrency Control Example: SELECT FOR UPDATE</h4>
+<h4 id="_pessimistic_concurrency_control_example_select_for_update"><a class="anchor" href="#_pessimistic_concurrency_control_example_select_for_update"></a>Pessimistic Concurrency Control Example: SELECT FOR UPDATE</h4>
 <div class="paragraph">
 <p>
 
@@ -1282,7 +1293,7 @@ performing some performance experiments.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_wrap_up">Wrap-Up</h3>
+<h3 id="_wrap_up"><a class="anchor" href="#_wrap_up"></a>Wrap-Up</h3>
 <div class="paragraph">
 <p>
 Specific choices around concurrency control vary a lot based on business
@@ -1394,7 +1405,7 @@ organization of your domain.
 </div>
 </div>
 <div class="sect2 pagebreak-before less_space">
-<h3 id="_part_i_recap">Part I Recap</h3>
+<h3 id="_part_i_recap"><a class="anchor" href="#_part_i_recap"></a>Part I Recap</h3>
 <div class="paragraph">
 <p>
 Do you remember <a href="#recap_components_diagram">A component diagram for our app at the end of Part I</a>, the diagram we showed at the
@@ -1489,7 +1500,7 @@ cross consistency boundaries?</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-20 13:47:19 UTC
+Last updated 2020-04-28 10:44:39 +0100
 </div>
 </div>
 <style>

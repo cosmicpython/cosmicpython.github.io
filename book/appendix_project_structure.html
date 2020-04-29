@@ -13,6 +13,14 @@
 
 /* customisations by harry */
 
+h1, h2, h3, h4, h5, h6 {
+    position: relative;
+}
+
+a.anchor {
+    top: 0;
+}
+
 /* hide inline ditaa/plantuml source listings for images */
 .image-source {
     display: none
@@ -70,7 +78,9 @@
 
 /* Text styles */
 h1{color:var(--primarycolor) !important;}
+
 h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+
 .title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
 p{font-family: "Noto Sans",sans-serif !important}
 
@@ -128,7 +138,7 @@ table {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="appendix_project_structure">Appendix B: A Template Project Structure</h2>
+<h2 id="appendix_project_structure">Appendix B: A Template Project Structure<a class="anchor" href="#appendix_project_structure"></a>Appendix A: A Template Project Structure</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -257,7 +267,7 @@ The <a href="https://oreil.ly/QVb9Q">pytest docs</a> are really good on test lay
 <p>Let&#8217;s look at a few of these files and concepts in more detail.</p>
 </div>
 <div class="sect2">
-<h3 id="_env_vars_12_factor_and_config_inside_and_outside_containers">Env Vars, 12-Factor, and Config, Inside and Outside Containers</h3>
+<h3 id="_env_vars_12_factor_and_config_inside_and_outside_containers"><a class="anchor" href="#_env_vars_12_factor_and_config_inside_and_outside_containers"></a>Env Vars, 12-Factor, and Config, Inside and Outside Containers</h3>
 <div class="paragraph">
 <p>The basic problem we&#8217;re trying to solve here is that we need different
 config settings for the following:</p>
@@ -283,7 +293,7 @@ but concretely, how do we implement it in our code and our containers?</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_config_py">Config.py</h3>
+<h3 id="_config_py"><a class="anchor" href="#_config_py"></a>Config.py</h3>
 <div class="paragraph">
 <p>Whenever our application code needs access to some config, it&#8217;s going to
 get it from a file called <em>config.py</em>. Here are a couple of examples from our
@@ -347,7 +357,7 @@ Don&#8217;t let this config module become a dumping ground that is full of thing
 </div>
 </div>
 <div class="sect2">
-<h3 id="_docker_compose_and_containers_config">Docker-Compose and Containers Config</h3>
+<h3 id="_docker_compose_and_containers_config"><a class="anchor" href="#_docker_compose_and_containers_config"></a>Docker-Compose and Containers Config</h3>
 <div class="paragraph">
 <p>We use a lightweight Docker container orchestration tool called <em>docker-compose</em>.
 It&#8217;s main configuration is via a YAML file (sigh):<sup class="footnote">[<a id="_footnoteref_5" class="footnote" href="#_footnotedef_5" title="View footnote.">5</a>]</sup></p>
@@ -448,7 +458,7 @@ Inside Docker, other containers are available through hostnames named after
 </div>
 </div>
 <div class="sect2">
-<h3 id="_installing_your_source_as_a_package">Installing Your Source as a Package</h3>
+<h3 id="_installing_your_source_as_a_package"><a class="anchor" href="#_installing_your_source_as_a_package"></a>Installing Your Source as a Package</h3>
 <div class="paragraph">
 <p>All our application code (everything except tests, really) lives inside an
 <em>src</em> folder:</p>
@@ -501,7 +511,7 @@ do fine.<sup class="footnote">[<a id="_footnoteref_7" class="footnote" href="#_f
 </div>
 </div>
 <div class="sect2">
-<h3 id="_dockerfile">Dockerfile</h3>
+<h3 id="_dockerfile"><a class="anchor" href="#_dockerfile"></a>Dockerfile</h3>
 <div class="paragraph">
 <p>Dockerfiles are going to be very project-specific, but here are a few key stages
 you&#8217;ll expect to see:</p>
@@ -573,7 +583,7 @@ One thing to note is that we install things in the order of how frequently they
 </div>
 </div>
 <div class="sect2">
-<h3 id="_tests">Tests</h3>
+<h3 id="_tests"><a class="anchor" href="#_tests"></a>Tests</h3>
 <div class="paragraph">
 <p>
 Our tests are kept alongside everything else, as shown here:</p>
@@ -611,7 +621,7 @@ import paths, you might find it helps.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_wrap_up">Wrap-Up</h3>
+<h3 id="_wrap_up"><a class="anchor" href="#_wrap_up"></a>Wrap-Up</h3>
 <div class="paragraph">
 <p>These are our basic building blocks:</p>
 </div>

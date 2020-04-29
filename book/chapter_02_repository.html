@@ -13,6 +13,14 @@
 
 /* customisations by harry */
 
+h1, h2, h3, h4, h5, h6 {
+    position: relative;
+}
+
+a.anchor {
+    top: 0;
+}
+
 /* hide inline ditaa/plantuml source listings for images */
 .image-source {
     display: none
@@ -70,7 +78,9 @@
 
 /* Text styles */
 h1{color:var(--primarycolor) !important;}
+
 h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+
 .title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
 p{font-family: "Noto Sans",sans-serif !important}
 
@@ -128,7 +138,7 @@ table {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="chapter_02_repository">2: Repository Pattern</h2>
+<h2 id="chapter_02_repository">2: Repository Pattern<a class="anchor" href="#chapter_02_repository"></a>Repository Pattern</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>It&#8217;s time to make good on our promise to use the dependency inversion principle as
@@ -178,7 +188,7 @@ git checkout chapter_01_domain_model</pre>
 </table>
 </div>
 <div class="sect2">
-<h3 id="_persisting_our_domain_model">Persisting Our Domain Model</h3>
+<h3 id="_persisting_our_domain_model"><a class="anchor" href="#_persisting_our_domain_model"></a>Persisting Our Domain Model</h3>
 <div class="paragraph">
 <p>
 In <a href="/book/chapter_01_domain_model.html">[chapter_01_domain_model]</a> we built a simple domain model that can allocate orders
@@ -207,7 +217,7 @@ bottom-up development and start to think about storage and databases.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_some_pseudocode_what_are_we_going_to_need">Some Pseudocode: What Are We Going to Need?</h3>
+<h3 id="_some_pseudocode_what_are_we_going_to_need"><a class="anchor" href="#_some_pseudocode_what_are_we_going_to_need"></a>Some Pseudocode: What Are We Going to Need?</h3>
 <div class="paragraph">
 <p>When we build our first API endpoint, we know we&#8217;re going to have
 some code that looks more or less like the following.</p>
@@ -256,7 +266,7 @@ database.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_applying_the_dip_to_data_access">Applying the DIP to Data Access</h3>
+<h3 id="_applying_the_dip_to_data_access"><a class="anchor" href="#_applying_the_dip_to_data_access"></a>Applying the DIP to Data Access</h3>
 <div class="paragraph">
 <p>
 
@@ -343,7 +353,7 @@ and whether there is a Pythonic equivalent of interfaces,
 </div>
 </div>
 <div class="sect2">
-<h3 id="_reminder_our_model">Reminder: Our Model</h3>
+<h3 id="_reminder_our_model"><a class="anchor" href="#_reminder_our_model"></a>Reminder: Our Model</h3>
 <div class="paragraph">
 <p>
 Let&#8217;s remind ourselves of our domain model (see <a href="#model_diagram_reminder">Our model</a>):
@@ -360,7 +370,7 @@ storing the allocations as a collection on our <code>Batch</code> object.</p>
 <p>Let&#8217;s see how we might translate this to a relational database.</p>
 </div>
 <div class="sect3">
-<h4 id="_the_normal_orm_way_model_depends_on_orm">The "Normal" ORM Way: Model Depends on ORM</h4>
+<h4 id="_the_normal_orm_way_model_depends_on_orm"><a class="anchor" href="#_the_normal_orm_way_model_depends_on_orm"></a>The "Normal" ORM Way: Model Depends on ORM</h4>
 <div class="paragraph">
 <p>
 
@@ -463,7 +473,7 @@ inversion and the Repository pattern to Django.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_inverting_the_dependency_orm_depends_on_model">Inverting the Dependency: ORM Depends on Model</h4>
+<h4 id="_inverting_the_dependency_orm_depends_on_model"><a class="anchor" href="#_inverting_the_dependency_orm_depends_on_model"></a>Inverting the Dependency: ORM Depends on Model</h4>
 <div class="paragraph">
 <p>
 
@@ -640,7 +650,7 @@ the following, and we could get it to work just fine:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_introducing_the_repository_pattern">Introducing the Repository Pattern</h3>
+<h3 id="_introducing_the_repository_pattern"><a class="anchor" href="#_introducing_the_repository_pattern"></a>Introducing the Repository Pattern</h3>
 <div class="paragraph">
 <p>
 
@@ -677,7 +687,7 @@ list or a set. Because the objects are in memory, we never need to call a
 <code>.save()</code> method; we just fetch the object we care about and modify it in memory.</p>
 </div>
 <div class="sect3">
-<h4 id="_the_repository_in_the_abstract">The Repository in the Abstract</h4>
+<h4 id="_the_repository_in_the_abstract"><a class="anchor" href="#_the_repository_in_the_abstract"></a>The Repository in the Abstract</h4>
 <div class="paragraph">
 <p>
 
@@ -752,7 +762,7 @@ composition over inheritance" fans will particularly like.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_what_is_the_trade_off">What Is the Trade-Off?</h4>
+<h4 id="_what_is_the_trade_off"><a class="anchor" href="#_what_is_the_trade_off"></a>What Is the Trade-Off?</h4>
 <div class="quoteblock">
 <blockquote>
 <div class="paragraph">
@@ -911,7 +921,7 @@ complex:</p>
     <span class="tok-n">orderline_id</span> <span class="tok-o">=</span> <span class="tok-n">insert_order_line</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">)</span>
     <span class="tok-n">batch1_id</span> <span class="tok-o">=</span> <span class="tok-n">insert_batch</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">,</span> <span class="tok-s2">"batch1"</span><span class="tok-p">)</span>
     <span class="tok-n">insert_batch</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">,</span> <span class="tok-s2">"batch2"</span><span class="tok-p">)</span>
-    <span class="tok-n">insert_allocation</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">,</span> <span class="tok-n">orderline_id</span><span class="tok-p">,</span> <span class="tok-n">batch1_id</span><span class="tok-p">)</span>  #<b class="conum">(3)</b>
+    <span class="tok-n">insert_allocation</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">,</span> <span class="tok-n">orderline_id</span><span class="tok-p">,</span> <span class="tok-n">batch1_id</span><span class="tok-p">)</span>  #<b class="conum">(2)</b>
 
     <span class="tok-n">repo</span> <span class="tok-o">=</span> <span class="tok-n">repository</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyRepository</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">)</span>
     <span class="tok-n">retrieved</span> <span class="tok-o">=</span> <span class="tok-n">repo</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s2">"batch1"</span><span class="tok-p">)</span>
@@ -1030,7 +1040,7 @@ But the nice thing is, the rest of your application just doesn&#8217;t care.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_building_a_fake_repository_for_tests_is_now_trivial">Building a Fake Repository for Tests Is Now Trivial!</h3>
+<h3 id="_building_a_fake_repository_for_tests_is_now_trivial"><a class="anchor" href="#_building_a_fake_repository_for_tests_is_now_trivial"></a>Building a Fake Repository for Tests Is Now Trivial!</h3>
 <div class="paragraph">
 <p>
 
@@ -1094,7 +1104,7 @@ Building fakes for your abstractions is an excellent way to get design
 </div>
 </div>
 <div class="sect2">
-<h3 id="what_is_a_port_and_what_is_an_adapter">What Is a Port and What Is an Adapter, in Python?</h3>
+<h3 id="what_is_a_port_and_what_is_an_adapter"><a class="anchor" href="#what_is_a_port_and_what_is_an_adapter"></a>What Is a Port and What Is an Adapter, in Python?</h3>
 <div class="paragraph">
 <p>
 
@@ -1125,7 +1135,7 @@ function and method names in use, and their argument names and types.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_wrap_up">Wrap-Up</h3>
+<h3 id="_wrap_up"><a class="anchor" href="#_wrap_up"></a>Wrap-Up</h3>
 <div class="paragraph">
 <p>
 
@@ -1314,7 +1324,7 @@ exciting installment, <a href="/book/chapter_04_service_layer.html">the Service 
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-20 13:47:19 UTC
+Last updated 2020-04-14 09:46:37 +0100
 </div>
 </div>
 <style>

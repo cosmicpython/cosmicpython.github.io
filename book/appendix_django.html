@@ -13,6 +13,14 @@
 
 /* customisations by harry */
 
+h1, h2, h3, h4, h5, h6 {
+    position: relative;
+}
+
+a.anchor {
+    top: 0;
+}
+
 /* hide inline ditaa/plantuml source listings for images */
 .image-source {
     display: none
@@ -70,7 +78,9 @@
 
 /* Text styles */
 h1{color:var(--primarycolor) !important;}
+
 h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+
 .title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
 p{font-family: "Noto Sans",sans-serif !important}
 
@@ -128,7 +138,7 @@ table {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="appendix_django">Appendix D: Repository and Unit of Work Patterns with Django</h2>
+<h2 id="appendix_django">Appendix D: Repository and Unit of Work Patterns with Django<a class="anchor" href="#appendix_django"></a>Appendix A: Repository and Unit of Work </h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -197,7 +207,7 @@ git checkout appendix_django</pre>
 </table>
 </div>
 <div class="sect2">
-<h3 id="_repository_pattern_with_django">Repository Pattern with Django</h3>
+<h3 id="_repository_pattern_with_django"><a class="anchor" href="#_repository_pattern_with_django"></a>Repository Pattern with Django</h3>
 <div class="paragraph">
 <p>
 
@@ -302,7 +312,7 @@ but it is still made up of familiar-looking Django code:</p>
 some custom methods for translating to and from our domain model.<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup></p>
 </div>
 <div class="sect3">
-<h4 id="_custom_methods_on_django_orm_classes_to_translate_tofrom_our_domain_model">Custom Methods on Django ORM Classes to Translate to/from Our Domain Model</h4>
+<h4 id="_custom_methods_on_django_orm_classes_to_translate_tofrom_our_domain_model"><a class="anchor" href="#_custom_methods_on_django_orm_classes_to_translate_tofrom_our_domain_model"></a>Custom Methods on Django ORM Classes to Translate to/from Our Domain Model</h4>
 <div class="paragraph">
 <p>
 
@@ -388,7 +398,7 @@ As in <a href="/book/chapter_02_repository.html">[chapter_02_repository]</a>, we
 </div>
 </div>
 <div class="sect2">
-<h3 id="_unit_of_work_pattern_with_django">Unit of Work Pattern with Django</h3>
+<h3 id="_unit_of_work_pattern_with_django"><a class="anchor" href="#_unit_of_work_pattern_with_django"></a>Unit of Work Pattern with Django</h3>
 <div class="paragraph">
 <p>
 
@@ -502,7 +512,7 @@ update them back to the ORM.
 </div>
 </div>
 <div class="sect2">
-<h3 id="_api_django_views_are_adapters">API: Django Views Are Adapters</h3>
+<h3 id="_api_django_views_are_adapters"><a class="anchor" href="#_api_django_views_are_adapters"></a>API: Django Views Are Adapters</h3>
 <div class="paragraph">
 <p>
 
@@ -552,7 +562,7 @@ thin wrapper around our service layer (which didn&#8217;t change at all, by the 
 </div>
 </div>
 <div class="sect2">
-<h3 id="_why_was_this_all_so_hard">Why Was This All So Hard?</h3>
+<h3 id="_why_was_this_all_so_hard"><a class="anchor" href="#_why_was_this_all_so_hard"></a>Why Was This All So Hard?</h3>
 <div class="paragraph">
 <p>
 OK, it works, but it does feel like more effort than Flask/SQLAlchemy. Why is
@@ -587,7 +597,7 @@ around the workflow of state changes.  The Django admin bypasses all of that.</p
 </div>
 </div>
 <div class="sect2">
-<h3 id="_what_to_do_if_you_already_have_django">What to Do If You Already Have Django</h3>
+<h3 id="_what_to_do_if_you_already_have_django"><a class="anchor" href="#_what_to_do_if_you_already_have_django"></a>What to Do If You Already Have Django</h3>
 <div class="paragraph">
 <p>
 So what should you do if you want to apply some of the patterns in this book
@@ -628,7 +638,7 @@ your <em>models.py</em>, which you can then keep as minimal as possible.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_steps_along_the_way">Steps Along the Way</h3>
+<h3 id="_steps_along_the_way"><a class="anchor" href="#_steps_along_the_way"></a>Steps Along the Way</h3>
 <div class="paragraph">
 <p>
 Suppose you&#8217;re working on a Django project that you&#8217;re not sure is going

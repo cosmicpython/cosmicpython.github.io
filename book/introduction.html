@@ -13,6 +13,14 @@
 
 /* customisations by harry */
 
+h1, h2, h3, h4, h5, h6 {
+    position: relative;
+}
+
+a.anchor {
+    top: 0;
+}
+
 /* hide inline ditaa/plantuml source listings for images */
 .image-source {
     display: none
@@ -70,7 +78,9 @@
 
 /* Text styles */
 h1{color:var(--primarycolor) !important;}
+
 h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+
 .title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
 p{font-family: "Noto Sans",sans-serif !important}
 
@@ -128,10 +138,10 @@ table {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="introduction">Introduction</h2>
+<h2 id="introduction">Introduction<a class="anchor" href="#introduction"></a>Introduction</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_why_do_our_designs_go_wrong">Why Do Our Designs Go Wrong?</h3>
+<h3 id="_why_do_our_designs_go_wrong"><a class="anchor" href="#_why_do_our_designs_go_wrong"></a>Why Do Our Designs Go Wrong?</h3>
 <div class="paragraph">
 <p>What comes to mind when you hear the word <em>chaos?</em> Perhaps you think of a noisy
 stock exchange, or your kitchen in the morning&#8212;&#8203;everything confused and
@@ -185,7 +195,7 @@ A big ball of mud is the natural state of software in the same way that wilderne
 </div>
 </div>
 <div class="sect2">
-<h3 id="_encapsulation_and_abstractions">Encapsulation and Abstractions</h3>
+<h3 id="_encapsulation_and_abstractions"><a class="anchor" href="#_encapsulation_and_abstractions"></a>Encapsulation and Abstractions</h3>
 <div class="paragraph">
 <p>Encapsulation and abstraction are tools that we all instinctively reach for
 as programmers, even if we don&#8217;t all use these exact words.  Allow us to dwell
@@ -306,7 +316,7 @@ for choosing abstractions.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_layering">Layering</h3>
+<h3 id="_layering"><a class="anchor" href="#_layering"></a>Layering</h3>
 <div class="paragraph">
 <p>Encapsulation and abstraction help us by hiding details and protecting the
 consistency of our data, but we also need to pay attention to the interactions
@@ -364,7 +374,7 @@ model inside out by obeying one simple principle.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="dip">The Dependency Inversion Principle</h3>
+<h3 id="dip"><a class="anchor" href="#dip"></a>The Dependency Inversion Principle</h3>
 <div class="paragraph">
 <p>You might be familiar with the <em>dependency inversion principle</em> (DIP) already, because
 it&#8217;s the <em>D</em> in SOLID.<sup class="footnote">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup></p>
@@ -457,7 +467,7 @@ we&#8217;ll have a concrete example that should make this all a bit clearer.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_a_place_for_all_our_business_logic_the_domain_model">A Place for All Our Business Logic: The Domain Model</h3>
+<h3 id="_a_place_for_all_our_business_logic_the_domain_model"><a class="anchor" href="#_a_place_for_all_our_business_logic_the_domain_model"></a>A Place for All Our Business Logic: The Domain Model</h3>
 <div class="paragraph">
 <p>But before we can turn our three-layered architecture inside out, we need to
 talk more about that middle layer: the high-level modules or business

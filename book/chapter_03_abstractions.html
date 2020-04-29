@@ -13,6 +13,14 @@
 
 /* customisations by harry */
 
+h1, h2, h3, h4, h5, h6 {
+    position: relative;
+}
+
+a.anchor {
+    top: 0;
+}
+
 /* hide inline ditaa/plantuml source listings for images */
 .image-source {
     display: none
@@ -70,7 +78,9 @@
 
 /* Text styles */
 h1{color:var(--primarycolor) !important;}
+
 h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+
 .title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
 p{font-family: "Noto Sans",sans-serif !important}
 
@@ -128,7 +138,7 @@ table {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="chapter_03_abstractions">3: A Brief Interlude: On Coupling and Abstractions</h2>
+<h2 id="chapter_03_abstractions">3: A Brief Interlude: On Coupling and Abstractions<a class="anchor" href="#chapter_03_abstractions"></a>A Brief Interlude: On Coupling </h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -244,7 +254,7 @@ protect us from change by hiding away the complex details of whatever system B
 does&#8212;we can change the arrows on the right without changing the ones on the left.</p>
 </div>
 <div class="sect2 pagebreak-before less_space">
-<h3 id="_abstracting_state_aids_testability">Abstracting State Aids Testability</h3>
+<h3 id="_abstracting_state_aids_testability"><a class="anchor" href="#_abstracting_state_aids_testability"></a>Abstracting State Aids Testability</h3>
 <div class="paragraph">
 <p>
 
@@ -440,7 +450,7 @@ going to stay slow and be hard to read and write.</p>
 </div>
 </div>
 <div class="sect2 pagebreak-before less_space">
-<h3 id="_choosing_the_right_abstractions">Choosing the Right Abstraction(s)</h3>
+<h3 id="_choosing_the_right_abstractions"><a class="anchor" href="#_choosing_the_right_abstractions"></a>Choosing the Right Abstraction(s)</h3>
 <div class="paragraph">
 <p>
 
@@ -551,7 +561,7 @@ what <em>abstraction</em> of filesystem actions will happen?"</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_implementing_our_chosen_abstractions">Implementing Our Chosen Abstractions</h3>
+<h3 id="_implementing_our_chosen_abstractions"><a class="anchor" href="#_implementing_our_chosen_abstractions"></a>Implementing Our Chosen Abstractions</h3>
 <div class="paragraph">
 <p>
 
@@ -707,7 +717,7 @@ be unit tested <em>and</em> end-to-end tested; it&#8217;s an approach Bob calls
 <em>edge-to-edge testing</em>.</p>
 </div>
 <div class="sect3">
-<h4 id="_testing_edge_to_edge_with_fakes_and_dependency_injection">Testing Edge to Edge with Fakes and Dependency Injection</h4>
+<h4 id="_testing_edge_to_edge_with_fakes_and_dependency_injection"><a class="anchor" href="#_testing_edge_to_edge_with_fakes_and_dependency_injection"></a>Testing Edge to Edge with Fakes and Dependency Injection</h4>
 <div class="paragraph">
 <p>
 
@@ -794,7 +804,7 @@ Although we&#8217;re using dependency injection, there is no need
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">append</span><span class="tok-p">((</span><span class="tok-s1">'MOVE'</span><span class="tok-p">,</span> <span class="tok-n">src</span><span class="tok-p">,</span> <span class="tok-n">dest</span><span class="tok-p">))</span>
 
     <span class="tok-k">def</span> <span class="tok-nf">delete</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">dest</span><span class="tok-p">):</span>
-        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">append</span><span class="tok-p">((</span><span class="tok-s1">'DELETE'</span><span class="tok-p">,</span> <span class="tok-n">src</span><span class="tok-p">,</span> <span class="tok-n">dest</span><span class="tok-p">))</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">append</span><span class="tok-p">((</span><span class="tok-s1">'DELETE'</span><span class="tok-p">,</span> <span class="tok-n">dest</span><span class="tok-p">))</span>
 
 
 <span class="tok-k">def</span> <span class="tok-nf">test_when_a_file_exists_in_the_source_but_not_the_destination</span><span class="tok-p">():</span>
@@ -853,14 +863,14 @@ enumerating tests for all the edge cases is now much easier.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_why_not_just_patch_it_out">Why Not Just Patch It Out?</h4>
+<h4 id="_why_not_just_patch_it_out"><a class="anchor" href="#_why_not_just_patch_it_out"></a>Why Not Just Patch It Out?</h4>
 <div class="paragraph">
 <p>
 
 
 
 At this point you may be scratching your head and thinking,
-"Why don&#8217;t you just use <code>mock.patch</code> and save yourself the effort?""</p>
+"Why don&#8217;t you just use <code>mock.patch</code> and save yourself the effort?"</p>
 </div>
 <div class="paragraph">
 <p>We avoid using mocks in this book and in our production code too. We&#8217;re not
@@ -1049,7 +1059,7 @@ dependency injection more explicit and centralized.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_wrap_up">Wrap-Up</h3>
+<h3 id="_wrap_up"><a class="anchor" href="#_wrap_up"></a>Wrap-Up</h3>
 <div class="paragraph">
 <p>
 
@@ -1111,7 +1121,7 @@ Practice makes less imperfect! And now back to our regular programming&#8230;&#8
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-20 13:47:19 UTC
+Last updated 2020-04-28 10:44:37 +0100
 </div>
 </div>
 <style>

@@ -13,6 +13,14 @@
 
 /* customisations by harry */
 
+h1, h2, h3, h4, h5, h6 {
+    position: relative;
+}
+
+a.anchor {
+    top: 0;
+}
+
 /* hide inline ditaa/plantuml source listings for images */
 .image-source {
     display: none
@@ -70,7 +78,9 @@
 
 /* Text styles */
 h1{color:var(--primarycolor) !important;}
+
 h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+
 .title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
 p{font-family: "Noto Sans",sans-serif !important}
 
@@ -128,7 +138,7 @@ table {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="chapter_10_commands">10: Commands and Command Handler</h2>
+<h2 id="chapter_10_commands">10: Commands and Command Handler<a class="anchor" href="#chapter_10_commands"></a>Commands and Command Handler</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -170,7 +180,7 @@ git checkout chapter_09_all_messagebus</pre>
 </table>
 </div>
 <div class="sect2">
-<h3 id="_commands_and_events">Commands and Events</h3>
+<h3 id="_commands_and_events"><a class="anchor" href="#_commands_and_events"></a>Commands and Events</h3>
 <div class="paragraph">
 <p>
 
@@ -285,7 +295,7 @@ What kinds of commands do we have in our system right now?</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_differences_in_exception_handling">Differences in Exception Handling</h3>
+<h3 id="_differences_in_exception_handling"><a class="anchor" href="#_differences_in_exception_handling"></a>Differences in Exception Handling</h3>
 <div class="paragraph">
 <p>
 
@@ -437,7 +447,7 @@ to our convention:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_discussion_events_commands_and_error_handling">Discussion: Events, Commands, and Error Handling</h3>
+<h3 id="_discussion_events_commands_and_error_handling"><a class="anchor" href="#_discussion_events_commands_and_error_handling"></a>Discussion: Events, Commands, and Error Handling</h3>
 <div class="paragraph">
 <p>
 
@@ -525,7 +535,7 @@ events when rules are met. We will structure the code like this:</p>
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">History</span><span class="tok-p">:</span>  <span class="tok-c1"># Aggregate</span>
 
     <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">customer_id</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">):</span>
-        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">orders</span> <span class="tok-o">=</span> <span class="tok-nb">set</span><span class="tok-p">()</span> <span class="tok-c1"># Set[HistoryEntry]</span>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">orders</span> <span class="tok-o">=</span> <span class="tok-nb">set</span><span class="tok-p">()</span>  <span class="tok-c1"># Set[HistoryEntry]</span>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">customer_id</span> <span class="tok-o">=</span> <span class="tok-n">customer_id</span>
 
     <span class="tok-k">def</span> <span class="tok-nf">record_order</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">order_id</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">order_amount</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">):</span> #<b class="conum">(1)</b>
@@ -546,14 +556,14 @@ events when rules are met. We will structure the code like this:</p>
     <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
         <span class="tok-n">order</span> <span class="tok-o">=</span> <span class="tok-n">Order</span><span class="tok-o">.</span><span class="tok-n">from_basket</span><span class="tok-p">(</span><span class="tok-n">cmd</span><span class="tok-o">.</span><span class="tok-n">customer_id</span><span class="tok-p">,</span> <span class="tok-n">cmd</span><span class="tok-o">.</span><span class="tok-n">basket_items</span><span class="tok-p">)</span>
         <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">orders</span><span class="tok-o">.</span><span class="tok-n">add</span><span class="tok-p">(</span><span class="tok-n">order</span><span class="tok-p">)</span>
-        <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span> <span class="tok-c1"># raises OrderCreated</span>
+        <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span>  <span class="tok-c1"># raises OrderCreated</span>
 
 
 <span class="tok-k">def</span> <span class="tok-nf">update_customer_history</span><span class="tok-p">(</span><span class="tok-n">uow</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">OrderCreated</span><span class="tok-p">):</span> #<b class="conum">(3)</b>
     <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
         <span class="tok-n">history</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">order_history</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">customer_id</span><span class="tok-p">)</span>
         <span class="tok-n">history</span><span class="tok-o">.</span><span class="tok-n">record_order</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">order_id</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">order_amount</span><span class="tok-p">)</span>
-        <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span> <span class="tok-c1"># raises CustomerBecameVIP</span>
+        <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span>  <span class="tok-c1"># raises CustomerBecameVIP</span>
 
 
 <span class="tok-k">def</span> <span class="tok-nf">congratulate_vip_customer</span><span class="tok-p">(</span><span class="tok-n">uow</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">CustomerBecameVip</span><span class="tok-p">):</span> #<b class="conum">(4)</b>
@@ -627,7 +637,7 @@ complex.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="recovering_from_errors">Recovering from Errors Synchronously</h3>
+<h3 id="recovering_from_errors"><a class="anchor" href="#recovering_from_errors"></a>Recovering from Errors Synchronously</h3>
 <div class="paragraph">
 <p>
 
@@ -771,7 +781,7 @@ At some point, regardless of <code>tenacity</code>, we&#8217;ll have to give up 
 </div>
 </div>
 <div class="sect2 pagebreak-before less_space">
-<h3 id="_wrap_up">Wrap-Up</h3>
+<h3 id="_wrap_up"><a class="anchor" href="#_wrap_up"></a>Wrap-Up</h3>
 <div class="paragraph">
 <p>
 
@@ -845,7 +855,7 @@ This can make the system harder to reason about and requires better monitoring.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-04-01 20:08:03 +0100
+Last updated 2020-04-28 10:44:37 +0100
 </div>
 </div>
 <style>

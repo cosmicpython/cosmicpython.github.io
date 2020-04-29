@@ -13,6 +13,14 @@
 
 /* customisations by harry */
 
+h1, h2, h3, h4, h5, h6 {
+    position: relative;
+}
+
+a.anchor {
+    top: 0;
+}
+
 /* hide inline ditaa/plantuml source listings for images */
 .image-source {
     display: none
@@ -70,7 +78,9 @@
 
 /* Text styles */
 h1{color:var(--primarycolor) !important;}
+
 h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;}
+
 .title{color:var(--tertiarycolor) !important; font-family:"Noto Sans",sans-serif !important;font-style: normal !important; font-weight: normal !important;}
 p{font-family: "Noto Sans",sans-serif !important}
 
@@ -128,7 +138,7 @@ table {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="chapter_01_domain_model">1: Domain Modeling</h2>
+<h2 id="chapter_01_domain_model">1: Domain Modeling<a class="anchor" href="#chapter_01_domain_model"></a>Domain Modeling</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -151,7 +161,7 @@ always be able to find these little shapes at the core.</p>
 <div class="title">Figure 1. A placeholder illustration of our domain model</div>
 </div>
 <div class="sect2 pagebreak-before less_space">
-<h3 id="_what_is_a_domain_model">What Is a Domain Model?</h3>
+<h3 id="_what_is_a_domain_model"><a class="anchor" href="#_what_is_a_domain_model"></a>What Is a Domain Model?</h3>
 <div class="paragraph">
 <p>
 In the <a href="/book/introduction.html">introduction</a>, we used the term <em>business logic layer</em>
@@ -328,7 +338,7 @@ Time for some domain modeling.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_exploring_the_domain_language">Exploring the Domain Language</h3>
+<h3 id="_exploring_the_domain_language"><a class="anchor" href="#_exploring_the_domain_language"></a>Exploring the Domain Language</h3>
 <div class="paragraph">
 <p>
 
@@ -415,7 +425,7 @@ have an available quantity of 8.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_unit_testing_domain_models">Unit Testing Domain Models</h3>
+<h3 id="_unit_testing_domain_models"><a class="anchor" href="#_unit_testing_domain_models"></a>Unit Testing Domain Models</h3>
 <div class="paragraph">
 <p>
 
@@ -763,7 +773,7 @@ wrapping primitive types by using <code>typing.NewType</code>:</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_dataclasses_are_great_for_value_objects">Dataclasses Are Great for Value Objects</h4>
+<h4 id="_dataclasses_are_great_for_value_objects"><a class="anchor" href="#_dataclasses_are_great_for_value_objects"></a>Dataclasses Are Great for Value Objects</h4>
 <div class="paragraph">
 <p>
 
@@ -890,7 +900,7 @@ example, mathematical operators:</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_value_objects_and_entities">Value Objects and Entities</h4>
+<h4 id="_value_objects_and_entities"><a class="anchor" href="#_value_objects_and_entities"></a>Value Objects and Entities</h4>
 <div class="paragraph">
 <p>
 
@@ -1029,7 +1039,7 @@ This is tricky territory; you shouldn&#8217;t modify <code>__hash__</code>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_not_everything_has_to_be_an_object_a_domain_service_function">Not Everything Has to Be an Object: A Domain Service Function</h3>
+<h3 id="_not_everything_has_to_be_an_object_a_domain_service_function"><a class="anchor" href="#_not_everything_has_to_be_an_object_a_domain_service_function"></a>Not Everything Has to Be an Object: A Domain Service Function</h3>
 <div class="paragraph">
 <p>
 
@@ -1120,7 +1130,7 @@ And our service might look like this:</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_pythons_magic_methods_let_us_use_our_models_with_idiomatic_python">Python&#8217;s Magic Methods Let Us Use Our Models with Idiomatic Python</h4>
+<h4 id="_pythons_magic_methods_let_us_use_our_models_with_idiomatic_python"><a class="anchor" href="#_pythons_magic_methods_let_us_use_our_models_with_idiomatic_python"></a>Python&#8217;s Magic Methods Let Us Use Our Models with Idiomatic Python</h4>
 <div class="paragraph">
 <p>
 
@@ -1154,7 +1164,7 @@ batches is nice, idiomatic Python.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_exceptions_can_express_domain_concepts_too">Exceptions Can Express Domain Concepts Too</h4>
+<h4 id="_exceptions_can_express_domain_concepts_too"><a class="anchor" href="#_exceptions_can_express_domain_concepts_too"></a>Exceptions Can Express Domain Concepts Too</h4>
 <div class="paragraph">
 <p>
 
