@@ -1,8 +1,10 @@
-serve:
-	python -m http.server
+all: build update-book serve
 
 build:
 	./generate-html.py
+
+serve:
+	python -m http.server
 
 watch-build:
 	ls **/*.md **/*.html *.py | entr ./generate-html.py
