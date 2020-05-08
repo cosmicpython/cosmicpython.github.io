@@ -7,7 +7,7 @@
             Simple patterns for building complex apps
         </description>
         <link>https://cosmicpython.com</link>
-        <lastBuildDate>Mon, 27 Apr 2020 15:55:24 -0000</lastBuildDate>
+        <lastBuildDate>Fri, 08 May 2020 18:41:28 -0000</lastBuildDate>
         <pubDate>Sat, 4 Jan 2020 19:15:54 -0500</pubDate>
         <atom:link href="https://cosmicpython.com/rss.xml" rel="self" type="application/rss+xml" />
         
@@ -19,6 +19,28 @@
             <link></link>
             <pubDate></pubDate>
             <dc:creator>Harry</dc:creator>
+            <guid></guid>
+        </item>
+        
+        <item>
+            <title>Three Techniques for Inverting Control, in Python</title>
+            <description>
+                
+            </description>
+            <link></link>
+            <pubDate></pubDate>
+            <dc:creator></dc:creator>
+            <guid></guid>
+        </item>
+        
+        <item>
+            <title>What is Inversion of Control and Why Does it Matter?</title>
+            <description>
+                
+            </description>
+            <link></link>
+            <pubDate></pubDate>
+            <dc:creator>David</dc:creator>
             <guid></guid>
         </item>
         

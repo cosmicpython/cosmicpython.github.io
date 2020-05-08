@@ -57,7 +57,19 @@
 
 <ul>
   {% for post in posts %}
-    {% if post.date.year != 2017 %}
+    {% if post.date.year >= 2020 %}
+      <li>
+        <a href="{{ post.url }}">{{ post.date }} {{ post.title }}</a>
+      </li>
+    {% endif %}
+  {% endfor %}
+</ul>
+
+<h3>Guest Posts By David</h3>
+
+<ul>
+  {% for post in posts %}
+    {% if post.date.year == 2019 %}
       <li>
         <a href="{{ post.url }}">{{ post.date }} {{ post.title }}</a>
       </li>

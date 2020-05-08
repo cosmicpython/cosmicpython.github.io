@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <title>cosmic_python</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Harry Percival and Bob Gregory">
+    <meta name="description" content="">
+    <meta property="og:title" content="cosmic_python" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.cosmicpython.com/blog/2019-04-15-inversion-of-control.html" />
+    <meta property="og:image" content="https://www.cosmicpython.com/images/lobster_nebula.jpg" />
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/milligram/1.3.0/milligram.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pygments-css@1.0.0/friendly.css">
+    <link rel="stylesheet" href="/styles.css">
+
+  </head>
+
+  <body>
+    <main class="wrapper">
+
+      <nav class="navigation">
+        <section class="container">
+          <a class="navigation-title" href="/">
+            <h1 class="title">Cosmic Python</h1>
+          </a>
+        </section>
+      </nav>
+
+      <section class="container">
+        
+  <h1> What is Inversion of Control and Why Does it Matter?</h1>
+  <p>by David, 2019-04-15</p>
+
+  
+    <div class="row">
+      <div class="column">
+        <img src="/images/upside-down.jpg" />
+        
+      </div>
+    </div>
+  
+
+  <div class="content">
+    <p>When I first learned to program, the code I wrote all followed a particular pattern: I wrote instructions to the computer
+that it would execute, one by one. If I wanted to make use of utilities written elsewhere, such as in a third party library,
+I would call those utilities directly from my code. Code like this could be described as employing the &lsquo;traditional flow of control&rsquo;.
+Perhaps it&rsquo;s just my bias, but this still seems to me to be the <em>obvious</em> way to program.</p>
+<p>Despite this, there is a wider context that the majority of the code I write today runs in; a context where <em>control is being inverted</em>.
+This is because I&rsquo;m usually using some kind of framework, which is passing control to my code, despite having no direct dependency on it.
+Rather than my code calling the more generic code, the framework allows me to plug in custom behaviour.
+Systems designed like this are using what is known as <em><a href="https://en.wikipedia.org/wiki/Inversion_of_control">Inversion of Control</a></em>
+(IoC for short).</p>
+<p>This situation can be depicted like so: the generic framework providing points where the custom code can insert its behaviour.</p>
+<p><img src="/images/why-di/framework-plugins.png" alt="Framework with custom behaviours plugged in" /></p>
+<p>Even though many of us are familiar with coding in the context of such a framework, we tend to be reticent to apply the
+same ideas in the software that <em>we</em> design. Indeed, it may seem a bizarre or even impossible thing to do. It is certainly
+not the &lsquo;obvious&rsquo; way to program.</p>
+<p>But IoC need not be limited to frameworks &mdash; on the contrary, it is a particularly useful tool in a programmer&rsquo;s belt. 
+For more complex systems, it&rsquo;s one of the best ways to avoid our code getting into a mess. Let me tell you why.</p>
+<h1>Striving for modularity</h1>
+<p>Software gets complicated easily. Every programmer has experienced tangled, difficult-to-work with code.
+Here&rsquo;s a diagram of such a system:</p>
+<p><img src="/images/why-di/big.png" alt="A single complicated system" /></p>
+<p>Perhaps not such a helpful diagram, but some systems can feel like this to work with: a forbidding mass
+of code that feels impossible to wrap one&rsquo;s head around.</p>
+<p>A common approach to tackling such complexity is to break up the system into smaller, more manageable parts.
+By separating it into simpler subsystems, the aim is to reduce complexity and allow us to think more clearly
+about each one in turn.</p>
+<p><img src="/images/why-di/modular.png" alt="A system composed of small simple modules" /></p>
+<p>We call this quality of a system its <em>modularity</em>, and we can refer to these subsystems as <em>modules</em>.</p>
+<h1>Separation of concerns</h1>
+<p>Most of us recognise the value of modularity, and put effort into organising our code into smaller parts. We have to
+decide what goes into which part, and the way we do this is by the <em>separation of concerns</em>.</p>
+<p>This separation can take different forms. We might organize things by feature area
+(the authentication system, the shopping cart, the blog) or by level of detail
+(the user interface, the business logic, the database), or both.</p>
+<p>When we do this, we tend to be aiming at modularity. Except for some reason, the system remains complicated.
+In practice, working on one module needs to ask questions of another part of the system,
+which calls another, which calls back to the original one. Soon our heads hurt and we need to have
+a lie down. What&rsquo;s going wrong?</p>
+<h2>Separation of concerns is not enough</h2>
+<p>The sad fact is, if the only organizing factor of code is separation of concerns, a system will not be
+modular after all. Instead, separate parts will tangle together.</p>
+<p>Pretty quickly, our efforts to organise what goes into each module are undermined by the <em>relationships between those
+modules</em>.</p>
+<p>This is naturally what happens to software if you don&rsquo;t think about relationships. This is because in the real world
+things <em>are</em> a messy, interconnected web. As we build functionality, we realise that one module needs to know about
+another. Later on, that other module needs to know about the first. Soon, everything knows about everything else.</p>
+<p><img src="/images/why-di/complicated-modular.png" alt="A complicated system with lots of arrows between the modules" /></p>
+<p>The problem with software like this is that, because of the web of relationships, it is not a collection of smaller
+subsystems. Instead, it is a single, large system - and large systems tend to be more complicated than smaller ones.</p>
+<h1>Improving modularity through decoupling</h1>
+<p>The crucial problem here is that the modules, while appearing separate, are <em>tightly coupled</em> by their dependencies
+upon one other. Let&rsquo;s take two modules as an example:</p>
+<p><img src="/images/why-di/a-b-cycle.png" alt="Arrows pointing in both directions between A and B" /></p>
+<p>In this diagram we see that <code>A</code> depends on <code>B</code>, but <code>B</code> also depends upon <code>A</code>. It&rsquo;s a
+circular dependency. As a result, these two modules are in fact no less complicated than a single module.
+How can we improve things?</p>
+<h2>Removing cycles by inverting control</h2>
+<p>There are a few ways to tackle a circular dependency. You may be able to extract a shared dependency into a separate
+module, that the other two modules depend on. You may be able to create an extra module that coordinates the two modules,
+instead of them calling each other. Or you can use inversion of control.</p>
+<p>At the moment, each module calls each other. We can pick one of the calls (let&rsquo;s say <code>A</code>&lsquo;s call to <code>B</code>) and invert
+control so that <code>A</code> no longer needs to know anything about <code>B</code>. Instead, it exposes a way of plugging into its
+behaviour, that <code>B</code> can then exploit. This can be diagrammed like so:</p>
+<p><img src="/images/why-di/plugin.png" alt="B plugging into A" /></p>
+<p>Now that <code>A</code> has no specific knowledge of <code>B</code>, we think about <code>A</code> in isolation. We&rsquo;ve just reduced our mental overhead,
+and made the system more modular.</p>
+<p>The tactic remains useful for larger groups of modules. For example, three modules may depend upon each other, in
+a cycle:</p>
+<p><img src="/images/why-di/abc_cycle.png" alt="Arrows pointing from A to B to C, and back to A" /></p>
+<p>In this case, we can invert one of the dependencies, gaining us a single direction of flow:</p>
+<p><img src="/images/why-di/plugin-3.png" alt="B plugging into A" /></p>
+<p>Again, inversion of control has come to the rescue.</p>
+<h1>Inversion of control in practice</h1>
+<p>In practice, inverting control can sometimes feel impossible. Surely, if a module needs to call another, there is no way
+to reverse this merely by refactoring? But I have good news. You should <em>always</em> be able to avoid circular dependencies
+through some form of inversion (if you think you&rsquo;ve found an example where it isn&rsquo;t, please tell me).
+It&rsquo;s not always the most obvious way to write code, but it can make your code base significantly easier to work with.</p>
+<p>There are several different techniques for <em>how</em> you do this. One such technique that is often
+ talked about is dependency injection. I will cover some of these techniques in <a href="/blog/2019-08-03-ioc-techniques.html">part two of this series</a>.</p>
+<p>There is also more to be said about how to apply this approach across the wider code base: if the system consists of
+more than a handful of files, where do we start? Again, I&rsquo;ll cover this later in the series.</p>
+<h1>Conclusion: complex is better than complicated</h1>
+<p>If you want to avoid your code getting into a mess, it&rsquo;s not enough merely to separate concerns. You must control the
+<em>relationships</em> between those concerns. In order to gain the benefits of a more modular system, you will sometimes need
+to use inversion of control to make control flow in the opposite direction to what comes naturally.</p>
+<p>The <a href="https://en.wikipedia.org/wiki/Zen_of_Python">Zen of Python</a> states:</p>
+<div class="codehilite"><pre><span></span><code>Simple is better than complex.
+</code></pre></div>
+
+
+<p>But also that</p>
+<div class="codehilite"><pre><span></span><code>Complex is better than complicated.
+</code></pre></div>
+
+
+<p>I think of inversion of control as an example of choosing the complex over the complicated. If we don&rsquo;t use it when
+it&rsquo;s needed, our efforts to create a simple system will tangle into complications. Inverting dependencies allows us,
+at the cost of a small amount of complexity, to make our systems less complicated.</p>
+<h1>Further information</h1>
+<ul>
+<li>Part two of this series: <a href="/blog/2019-08-03-ioc-techniques.html">Three Techniques for Inverting Control, in Python</a>.</li>
+</ul>
+  </div>
+
+  <div id="disqus_thread" style="margin: 10px"></div>
+  <script>
+
+  var disqus_config = function () {
+    this.page.url = 'https://www.cosmicpython.com/blog/2019-04-15-inversion-of-control.html';
+    this.page.identifier = 'cosmic-python--blog-2019-04-15-inversion-of-control';
+  };
+
+  (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = 'https://cosmic-python.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-40928035-3"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-40928035-3');
+  </script>
+
+      </section>
+    </main>
+  </body>
+</html>

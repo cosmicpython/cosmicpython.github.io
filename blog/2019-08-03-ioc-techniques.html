@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <title>cosmic_python</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Harry Percival and Bob Gregory">
+    <meta name="description" content="">
+    <meta property="og:title" content="cosmic_python" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.cosmicpython.com/blog/2019-08-03-ioc-techniques.html" />
+    <meta property="og:image" content="https://www.cosmicpython.com/images/lobster_nebula.jpg" />
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/milligram/1.3.0/milligram.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pygments-css@1.0.0/friendly.css">
+    <link rel="stylesheet" href="/styles.css">
+
+  </head>
+
+  <body>
+    <main class="wrapper">
+
+      <nav class="navigation">
+        <section class="container">
+          <a class="navigation-title" href="/">
+            <h1 class="title">Cosmic Python</h1>
+          </a>
+        </section>
+      </nav>
+
+      <section class="container">
+        
+  <h1> Three Techniques for Inverting Control, in Python</h1>
+  <p>by , 2019-08-03</p>
+
+  
+    <div class="row">
+      <div class="column">
+        <img src="/images/ioc-techniques.jpg" />
+        
+      </div>
+    </div>
+  
+
+  <div class="content">
+    <p>In <a href="/2019/04/15/inversion-of-control/">my previous post</a> we learned how Inversion of Control can
+be visualised as follows:</p>
+<p><img src="/images/ioc-techniques/a-b-plugin.png" alt="B plugging into A"></p>
+<p><code>B</code> plugs into <code>A</code>.  <code>A</code> provides a mechanism for <code>B</code> to do this &mdash; but otherwise <code>A</code> need know nothing about <code>B</code>.</p>
+<p>The diagram provides a high level view of the mechanism, but how is this actually implemented?</p>
+<h2>A pattern for inverting control</h2>
+<p>Getting a little closer to the code structure, we can use this powerful pattern:</p>
+<p><img src="/images/ioc-techniques/di-pattern.png" alt="main pointing to A and B, A pointing to &lt;B&gt;, B pointing (open arrow) to &lt;B&gt;"></p>
+<p>This is the basic shape of inversion of control. Captured within the notation, which may or may not be familiar
+to you, are the concepts of <em>abstraction</em>, <em>implementation</em> and <em>interface</em>. These concepts are all important
+to understanding the techniques we&rsquo;ll be employing. Let&rsquo;s make sure we understand what they mean when applied
+to Python.</p>
+<h3>Abstractions, implementations and interfaces &mdash; in Python</h3>
+<p>Consider three Python classes:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">Animal</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">speak</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+<span class="k">class</span> <span class="nc">Cat</span><span class="p">(</span><span class="n">Animal</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">speak</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Meow.&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">Dog</span><span class="p">(</span><span class="n">Animal</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">speak</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Woof.&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>In this example, <code>Animal</code> is an <em>abstraction</em>: it declares its <code>speak</code> method, but it&rsquo;s not intended to be run (as
+is signalled by the <code>NotImplementedError</code>).</p>
+<p><code>Cat</code> and <code>Dog</code>, however, are <em>implementations</em>: they both implement the <code>speak</code> method, each in their own way.</p>
+<p>The <code>speak</code> method can be thought of as an <em>interface</em>: a common way in which other code may interact with
+these classes.</p>
+<p>This relationship of classes is often drawn like this, with an open arrow indicating that <code>Cat</code> and <code>Dog</code> are concrete
+implementations of <code>Animal</code>.</p>
+<p><img src="/images/ioc-techniques/animal-cat-dog.png" alt="Diagram of Cat and Dog subclassing Animal" /></p>
+<h4>Polymorphism and duck typing</h4>
+<p>Because <code>Cat</code> and <code>Dog</code> implement a shared interface, we can interact with either class without knowing which one it is:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">make_animal_speak</span><span class="p">(</span><span class="n">animal</span><span class="p">):</span>
+    <span class="n">animal</span><span class="o">.</span><span class="n">speak</span><span class="p">()</span>
+
+
+<span class="n">make_animal_speak</span><span class="p">(</span><span class="n">Cat</span><span class="p">())</span>
+<span class="n">make_animal_speak</span><span class="p">(</span><span class="n">Dog</span><span class="p">())</span>
+</code></pre></div>
+
+
+<p>The <code>make_animal_speak</code> function need not know anything about cats or dogs; all it has to know is how to interact
+with the abstract concept of an animal. Interacting with objects without knowing
+their specific type, only their interface, is known as &lsquo;polymorphism&rsquo;.</p>
+<p>Of course, in Python we don&rsquo;t actually <em>need</em> the base class:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">Cat</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">speak</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Meow.&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">Dog</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">speak</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Woof.&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>Even if <code>Cat</code> and <code>Dog</code> don&rsquo;t inherit <code>Animal</code>, they can still be passed to <code>make_animal_speak</code> and things
+will work just fine. This informal ability to interact with an object without it explicitly declaring an interface
+is known as &lsquo;duck typing&rsquo;.</p>
+<p>We aren&rsquo;t limited to classes; functions may also be used in this way:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">notify_by_email</span><span class="p">(</span><span class="n">customer</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="o">...</span>
+
+
+<span class="k">def</span> <span class="nf">notify_by_text_message</span><span class="p">(</span><span class="n">customer</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="o">...</span>
+
+
+<span class="k">for</span> <span class="n">notify</span> <span class="ow">in</span> <span class="p">(</span><span class="n">notify_by_email</span><span class="p">,</span> <span class="n">notify_by_text_message</span><span class="p">):</span>
+    <span class="n">notify</span><span class="p">(</span><span class="n">customer</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>We may even use Python modules:</p>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span> <span class="nn">email</span>
+<span class="kn">import</span> <span class="nn">text_message</span>
+
+
+<span class="k">for</span> <span class="n">notification_method</span> <span class="ow">in</span> <span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">text_message</span><span class="p">):</span>
+    <span class="n">notification_method</span><span class="o">.</span><span class="n">notify</span><span class="p">(</span><span class="n">customer</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>Whether a shared interface is manifested in a formal, object oriented manner, or more implicitly, we can
+generalise the separation between the interface and the implementation like so:</p>
+<p><img src="/images/ioc-techniques/interface-implementation.png" alt="Diagram of implementation inheriting abstract interface" /></p>
+<p>This separation will give us a lot of power, as we&rsquo;ll see now.</p>
+<h2>A second look at the pattern</h2>
+<p>Let&rsquo;s look again at the Inversion of Control pattern.</p>
+<p><img src="/images/ioc-techniques/di-pattern.png" alt="main pointing to A and B, A pointing to &lt;B&gt;, B pointing (open arrow) to &lt;B&gt;" /></p>
+<p>In order to invert control between <code>A</code> and <code>B</code>, we&rsquo;ve added two things to our design.</p>
+<p>The first is <code>&amp;lt;B&amp;gt;</code>. We&rsquo;ve separated out into its abstraction (which <code>A</code> will continue to depend on and know about),
+from its implementation (of which <code>A</code> is blissfully ignorant).</p>
+<p>However, somehow the software will need to make sure that <code>B</code> is used in place of its abstraction. We therefore need
+some orchestration code that knows about both <code>A</code> and <code>B</code>, and does the final linking of them together. I&rsquo;ve called
+this <code>main</code>.</p>
+<p>It&rsquo;s now time to look at the techniques we may use for doing this.</p>
+<h2>Technique One: Dependency Injection</h2>
+<p>Dependency Injection is where a piece of code allows the calling code to control its dependencies.</p>
+<p>Let&rsquo;s begin with the following function, which doesn&rsquo;t yet support dependency injection:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># hello_world.py</span>
+
+
+<span class="k">def</span> <span class="nf">hello_world</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hello, world.&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>This function is called from a top level function like so:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># main.py</span>
+
+<span class="kn">from</span> <span class="nn">hello_world</span> <span class="kn">import</span> <span class="n">hello_world</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">hello_world</span><span class="p">()</span>
+</code></pre></div>
+
+
+<p><code>hello_world</code> has one dependency that is of interest to us: the built in function <code>print</code>. We can draw a diagram
+of these dependencies like this:</p>
+<p><img src="/images/ioc-techniques/main-hw-print.png" alt="Main pointing to hello_world pointing to print" /></p>
+<p>The first step is to identify the abstraction that  <code>print</code> implements. We could think of this simply as a
+function that outputs a message it is supplied &mdash; let&rsquo;s call it <code>output_function</code>.</p>
+<p>Now, we adjust <code>hello_world</code> so it supports the injection of the implementation of <code>output_function</code>.  Drum roll please&hellip;</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># hello_world.py</span>
+
+
+<span class="k">def</span> <span class="nf">hello_world</span><span class="p">(</span><span class="n">output_function</span><span class="p">):</span>
+    <span class="n">output_function</span><span class="p">(</span><span class="s2">&quot;Hello, world.&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>All we do is allow it to receive the output function as an argument. The orchestration code then passes in the <code>print</code> function via the argument:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># main.py</span>
+
+<span class="kn">import</span> <span class="nn">hello_world</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">hello_world</span><span class="o">.</span><span class="n">hello_world</span><span class="p">(</span><span class="n">output_function</span><span class="o">=</span><span class="nb">print</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>That&rsquo;s it. It couldn&rsquo;t get much simpler, could it? In this example, we&rsquo;re injecting a callable, but other
+implementations could expect a class, an instance or even a module.</p>
+<p>With very little code, we have moved the dependency out of <code>hello_world</code>, into the top level function:</p>
+<p><img src="/images/ioc-techniques/main-hw-print-output.png" alt="Main pointing to hello_world and print, hello_world pointing to &lt;output&gt;, print pointing (open arrow) to &lt;output&gt;." /></p>
+<p>Notice that although there isn&rsquo;t a formally declared abstract <code>output_function</code>, that concept is implicitly there, so
+I&rsquo;ve included it in the diagram.</p>
+<h2>Technique Two: Registry</h2>
+<p>A <em>Registry</em> is a store that one piece of code reads from to decide how to behave, which may be
+written to by other parts of the system. Registries require a bit more machinery that dependency injection.</p>
+<p>They take two forms: <em>Configuration</em> and <em>Subscriber</em>:</p>
+<h3>The Configuration Registry</h3>
+<p>A configuration registry gets populated once, and only once. A piece of code uses one
+to allow its behaviour to be configured from outside.</p>
+<p>Although this needs more machinery than dependency injection, it doesn&rsquo;t need much:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># hello_world.py</span>
+
+
+<span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
+
+
+<span class="k">def</span> <span class="nf">hello_world</span><span class="p">():</span>
+    <span class="n">output_function</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;OUTPUT_FUNCTION&quot;</span><span class="p">]</span>
+    <span class="n">output_function</span><span class="p">(</span><span class="s2">&quot;Hello, world.&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>To complete the picture, here&rsquo;s how it could be configured externally:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># main.py</span>
+
+<span class="kn">import</span> <span class="nn">hello_world</span>
+
+
+<span class="n">hello_world</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;OUTPUT_FUNCTION&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">print</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">hello_world</span><span class="o">.</span><span class="n">hello_world</span><span class="p">()</span>
+</code></pre></div>
+
+
+<p>The machinery in this case is simply a dictionary that is written to from outside the module. In a real world system,
+we might want a slightly more sophisticated config system (making it immutable for example, is a good idea). But at heart,
+any key-value store will do.</p>
+<p>As with dependency injection, the output function&rsquo;s implementation has been lifted out, so <code>hello_world</code> no longer depends on it.</p>
+<p><img src="/images/ioc-techniques/configuration-registry.png" alt="Configuration registry" /></p>
+<h3>The Subscriber Registry</h3>
+<p>In contrast to a configuration registry, which should only be populated once, a
+subscriber registry may be populated an arbitrary number of times by different parts
+of the system.</p>
+<p>Let&rsquo;s develop our ultra-trivial example to use this pattern. Instead of saying &ldquo;Hello, world&rdquo;, we want
+to greet an arbitrary number of people: &ldquo;Hello, John.&rdquo;, &ldquo;Hello, Martha.&rdquo;, etc. Other parts of the system should be
+able to add people to the list of those we should greet.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># hello_people.py</span>
+
+<span class="n">people</span> <span class="o">=</span> <span class="p">[]</span>
+
+
+<span class="k">def</span> <span class="nf">hello_people</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">person</span> <span class="ow">in</span> <span class="n">people</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Hello, </span><span class="si">{</span><span class="n">person</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="c1"># john.py</span>
+
+<span class="kn">import</span> <span class="nn">hello_people</span>
+
+
+<span class="n">hello_people</span><span class="o">.</span><span class="n">people</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;John&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="c1"># martha.py</span>
+
+<span class="kn">import</span> <span class="nn">hello_people</span>
+
+
+<span class="n">hello_people</span><span class="o">.</span><span class="n">people</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Martha&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+
+<p>As with the configuration registry, there is a store that can be written to from outside. But instead of
+being a dictionary, it&rsquo;s a list. This list is populated, typically
+at startup, by other components scattered throughout the system. When the time is right,
+the code works through each item one by one.</p>
+<p>A diagram of this system would be:</p>
+<p><img src="/images/ioc-techniques/subscriber-registry.png" alt="Subscriber registry" /></p>
+<p>Notice that in this case, <code>main</code> doesn&rsquo;t need to know about the registry &mdash; instead, it&rsquo;s the subscribers elsewhere
+in the system that write to it.</p>
+<h4>Subscribing to events</h4>
+<p>A common reason for using a subscriber registry is to allow other parts of a system to react to events
+that happen one place, without that place directly calling them. This is often solved by the <a href="https://sourcemaking.com/design_patterns/observer">Observer Pattern</a>,
+a.k.a. pub/sub.</p>
+<p>We may implement this in much the same way as above, except instead of adding strings to a list, we add callables:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># hello_world.py</span>
+
+<span class="n">subscribers</span> <span class="o">=</span> <span class="p">[]</span>
+
+
+<span class="k">def</span> <span class="nf">hello_world</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hello, world.&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">subscriber</span> <span class="ow">in</span> <span class="n">subscribers</span><span class="p">:</span>
+        <span class="n">subscriber</span><span class="p">()</span>
+</code></pre></div>
+
+
+<div class="codehilite"><pre><span></span><code><span class="c1"># log.py</span>
+
+<span class="kn">import</span> <span class="nn">hello_world</span>
+
+
+<span class="k">def</span> <span class="nf">write_to_log</span><span class="p">():</span>
+    <span class="o">...</span>
+
+
+<span class="n">hello_world</span><span class="o">.</span><span class="n">subscribers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">write_to_log</span><span class="p">)</span>
+</code></pre></div>
+
+
+<h2>Technique Three: Monkey Patching</h2>
+<p>Our final technique, <em>Monkey Patching</em>, is very different to the others, as it doesn&rsquo;t use the Inversion of Control
+pattern described above.</p>
+<p>If our <code>hello_world</code> function doesn&rsquo;t implement any hooks for injecting its output function, we <em>could</em> monkey patch the
+built in <code>print</code> function with something different:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># main.py</span>
+
+<span class="kn">import</span> <span class="nn">hello_world</span>
+<span class="kn">from</span> <span class="nn">print_twice</span> <span class="kn">import</span> <span class="n">print_twice</span>
+
+
+<span class="n">hello_world</span><span class="o">.</span><span class="n">print</span> <span class="o">=</span> <span class="n">print_twice</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">hello_world</span><span class="o">.</span><span class="n">hello_world</span><span class="p">()</span>
+</code></pre></div>
+
+
+<p>Monkey patching takes other forms. You could manipulate to your heart&rsquo;s content some hapless class defined elsewhere
+&mdash; changing attributes, swapping in other methods, and generally doing whatever you like to it.</p>
+<h2>Choosing a technique</h2>
+<p>Given these three techniques, which should you choose, and when?</p>
+<h3>When to use monkey patching</h3>
+<p>Code that abuses the Python&rsquo;s dynamic power can be extremely
+difficult to understand or maintain. The problem is that if you are reading monkey patched code, you have no clue
+to tell you that it is being manipulated elsewhere.</p>
+<p>Monkey patching should be reserved for desperate times, where you don&rsquo;t have the ability to change the code you&rsquo;re
+patching, and it&rsquo;s really, truly impractical to do anything else.</p>
+<p>Instead of monkey patching, it&rsquo;s much better to use one of the other inversion of control techniques.
+These expose an API that formally provides the hooks that other code can use to change behaviour, which is easier
+to reason about and predict.</p>
+<p>A legitimate exception is testing, where you can make use of <code>unittest.mock.patch</code>. This <em>is</em> monkey patching, but it&rsquo;s
+a pragmatic way to manipulate dependencies when testing code. Even then, some people view testing like this as
+a code smell.</p>
+<h3>When to use dependency injection</h3>
+<p>If your dependencies change at runtime, you&rsquo;ll need dependency injection. Its alternative, the registry,
+is best kept immutable. You don&rsquo;t want to be changing what&rsquo;s in a registry, except at application start up.</p>
+<p><a href="https://docs.python.org/3/library/json.html"><code>json.dumps</code></a> is a good example from the standard library which uses
+dependency injection. It serializes a Python object to a JSON string, but if the default encoding doesn&rsquo;t support what
+you&rsquo;re trying to serialize, it allows you to pass in a custom encoder class.</p>
+<p>Even if you don&rsquo;t need dependencies to change, dependency injection is a good technique if you want a really simple way
+of overriding dependencies, and don&rsquo;t want the extra machinery of configuration.</p>
+<p>However, if you are having to inject the same dependency a lot, you might find your code becomes rather unwieldy and
+repetitive. This can also happen if you only need the dependency quite deep in the call stack, and are having to pass
+it around a lot of functions.</p>
+<h3>When to use registries</h3>
+<p>Registries are a good choice if the dependency can be fixed at start up time. While you could use dependency injection
+instead, the registry is a good way to keep configuration separate from the control flow code.</p>
+<p>Use a configuration registry when you need something configured to a single value. If there is already a
+configuration system in place (e.g. if you&rsquo;re using a framework that has a way of providing global configuration) then
+there&rsquo;s even less extra machinery to set up. A good example of this is Django&rsquo;s ORM, which provides a Python API around different database engines. The ORM does not depend on any one database engine; instead,
+you <a href="https://docs.djangoproject.com/en/2.2/ref/settings/#databases">configure your project to use a particular database engine</a>
+via Django&rsquo;s configuration system.  </p>
+<p>Use a subscriber registry for pub/sub, or when you depend on an arbitrary number of values. Django <a href="https://docs.djangoproject.com/en/2.2/topics/signals/">signals</a>,
+which are a pub/sub mechanism, use this pattern. A rather different use case, also from Django,
+is its <a href="https://docs.djangoproject.com/en/2.2/ref/contrib/admin/">admin site</a>. This uses a subscriber registry to
+allow different database tables to be registered with it, exposing a CRUD interface in the UI.</p>
+<p>Configuration registries <em>may</em> be used in place of subscriber registries for configuring,
+say, a list &mdash; if you prefer doing your linking up in single place, rather than scattering it throughout the application.</p>
+<h2>Conclusion</h2>
+<p>I hope these examples, which were as simple as I could think of, have shown how easy it is to invert control in Python.
+While it&rsquo;s not always the most obvious way to structure things, it can be achieved with very little extra code.</p>
+<p>In the real world, you may prefer to employ these techniques with a bit more structure. I often choose classes rather
+than functions as the swappable dependencies, as they allow you to declare the interface in a more formal way.
+Dependency injection, too, has more sophisticated implementations, and there are even some third party frameworks available.</p>
+<p>There are costs as well as benefits. Locally, code that employs IoC may be harder to understand and debug, so be sure that it
+is reducing complication overall.</p>
+<p>Whichever approaches you take, the important thing to remember is that the relationship of dependencies in a software package is
+crucial to how easy it will be to understand and change. Following the path of least resistance can result in dependencies
+being structured in ways that are, in fact, unnecessarily difficult to work with. These techniques give you the power
+to invert dependencies where appropriate, allowing you to create more maintainable, modular code. Use them wisely!</p>
+  </div>
+
+  <div id="disqus_thread" style="margin: 10px"></div>
+  <script>
+
+  var disqus_config = function () {
+    this.page.url = 'https://www.cosmicpython.com/blog/2019-08-03-ioc-techniques.html';
+    this.page.identifier = 'cosmic-python--blog-2019-08-03-ioc-techniques';
+  };
+
+  (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = 'https://cosmic-python.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-40928035-3"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-40928035-3');
+  </script>
+
+      </section>
+    </main>
+  </body>
+</html>
