@@ -7,8 +7,9 @@ description: >
     Let's examine three different techniques for doing this.
 image: ioc-techniques.jpg
 
-_David was a tech reviewer for the <a href="/">book</a> and he wrote these two excellent articles on inversion of control
-are cross-posted from <a href="https://seddonym.me/blog/">his blog where you can find lots more excellent content</a>._
+_David was a tech reviewer for the <a href="/">book</a> and these two excellent
+articles on inversion of control are cross-posted from
+<a href="https://seddonym.me/blog/">his blog where you can find lots more excellent content</a>._
 
 In <a href="/blog/2019-04-15-inversion-of-control.html">the previous post</a> we learned how Inversion of Control can
 be visualised as follows:
