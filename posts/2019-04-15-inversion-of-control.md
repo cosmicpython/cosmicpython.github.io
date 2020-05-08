@@ -6,6 +6,9 @@ description: >
 image: upside-down.jpg
 
 
+_David was a tech reviewer for the <a href="/">book</a> and he wrote these two excellent articles on inversion of control
+are cross-posted from <a href="https://seddonym.me/blog/">his blog where you can find lots more excellent content</a>._
+
 When I first learned to program, the code I wrote all followed a particular pattern: I wrote instructions to the computer
 that it would execute, one by one. If I wanted to make use of utilities written elsewhere, such as in a third party library,
 I would call those utilities directly from my code. Code like this could be described as employing the 'traditional flow of control'.

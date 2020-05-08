@@ -1,13 +1,16 @@
 layout: post
 title: Three Techniques for Inverting Control, in Python
-author:
+author: David
 description: >
     Inversion of Control, in which code delegates control using plugins, is a powerful way of
     modularising software. It may sound complicated, but it can be achieved in Python with very little work.
     Let's examine three different techniques for doing this.
 image: ioc-techniques.jpg
 
-In <a href="/2019/04/15/inversion-of-control/">my previous post</a> we learned how Inversion of Control can
+_David was a tech reviewer for the <a href="/">book</a> and he wrote these two excellent articles on inversion of control
+are cross-posted from <a href="https://seddonym.me/blog/">his blog where you can find lots more excellent content</a>._
+
+In <a href="/blog/2019-04-15-inversion-of-control.html">the previous post</a> we learned how Inversion of Control can
 be visualised as follows:
 
 <img src="/images/ioc-techniques/a-b-plugin.png" alt="B plugging into A">
