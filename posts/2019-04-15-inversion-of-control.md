@@ -1,4 +1,3 @@
-layout: post
 title: What is Inversion of Control and Why Does it Matter?
 author: David
 description: >
@@ -20,7 +19,7 @@ Systems designed like this are using what is known as *[Inversion of Control](ht
 
 This situation can be depicted like so: the generic framework providing points where the custom code can insert its behaviour.
 
-{% include content_illustration.html image="why-di/framework-plugins.png" alt="Framework with custom behaviours plugged in" %}
+<img src="/images/why-di/framework-plugins.png" alt="Framework with custom behaviours plugged in" />
 
 Even though many of us are familiar with coding in the context of such a framework, we tend to be reticent to apply the
 same ideas in the software that *we* design. Indeed, it may seem a bizarre or even impossible thing to do. It is certainly
@@ -34,7 +33,7 @@ For more complex systems, it's one of the best ways to avoid our code getting in
 Software gets complicated easily. Every programmer has experienced tangled, difficult-to-work with code.
 Here's a diagram of such a system:
 
-{% include content_illustration.html image="why-di/big.png" alt="A single complicated system" %}
+<img src="/images/why-di/big.png" alt="A single complicated system" />
 
 Perhaps not such a helpful diagram, but some systems can feel like this to work with: a forbidding mass
 of code that feels impossible to wrap one's head around.
@@ -43,7 +42,7 @@ A common approach to tackling such complexity is to break up the system into sma
 By separating it into simpler subsystems, the aim is to reduce complexity and allow us to think more clearly
 about each one in turn.
 
-{% include content_illustration.html image="why-di/modular.png" alt="A system composed of small simple modules" %}
+<img src="/images/why-di/modular.png" alt="A system composed of small simple modules" />
 
 We call this quality of a system its *modularity*, and we can refer to these subsystems as *modules*.
 
@@ -73,7 +72,7 @@ This is naturally what happens to software if you don't think about relationship
 things *are* a messy, interconnected web. As we build functionality, we realise that one module needs to know about
 another. Later on, that other module needs to know about the first. Soon, everything knows about everything else.
 
-{% include content_illustration.html image="why-di/complicated-modular.png" alt="A complicated system with lots of arrows between the modules" %}
+<img src="/images/why-di/complicated-modular.png" alt="A complicated system with lots of arrows between the modules" />
 
 The problem with software like this is that, because of the web of relationships, it is not a collection of smaller
 subsystems. Instead, it is a single, large system - and large systems tend to be more complicated than smaller ones.
@@ -83,7 +82,7 @@ subsystems. Instead, it is a single, large system - and large systems tend to be
 The crucial problem here is that the modules, while appearing separate, are *tightly coupled* by their dependencies
 upon one other. Let's take two modules as an example:
 
-{% include content_illustration.html image="why-di/a-b-cycle.png" alt="Arrows pointing in both directions between A and B" %}
+<img src="/images/why-di/a-b-cycle.png" alt="Arrows pointing in both directions between A and B" />
 
 In this diagram we see that ``A`` depends on ``B``, but ``B`` also depends upon ``A``. It's a
 circular dependency. As a result, these two modules are in fact no less complicated than a single module.
@@ -99,7 +98,7 @@ At the moment, each module calls each other. We can pick one of the calls (let's
 control so that ``A`` no longer needs to know anything about ``B``. Instead, it exposes a way of plugging into its
 behaviour, that ``B`` can then exploit. This can be diagrammed like so:
 
-{% include content_illustration.html image="why-di/plugin.png" alt="B plugging into A" %}
+<img src="/images/why-di/plugin.png" alt="B plugging into A" />
 
 Now that ``A`` has no specific knowledge of ``B``, we think about ``A`` in isolation. We've just reduced our mental overhead,
 and made the system more modular.
@@ -107,11 +106,11 @@ and made the system more modular.
 The tactic remains useful for larger groups of modules. For example, three modules may depend upon each other, in
 a cycle:
 
-{% include content_illustration.html image="why-di/abc_cycle.png" alt="Arrows pointing from A to B to C, and back to A" %}
+<img src="/images/why-di/abc_cycle.png" alt="Arrows pointing from A to B to C, and back to A" />
 
 In this case, we can invert one of the dependencies, gaining us a single direction of flow:
 
-{% include content_illustration.html image="why-di/plugin-3.png" alt="B plugging into A" %}
+<img src="/images/why-di/plugin-3.png" alt="B plugging into A" />
 
 Again, inversion of control has come to the rescue.
 
@@ -123,7 +122,7 @@ through some form of inversion (if you think you've found an example where it is
 It's not always the most obvious way to write code, but it can make your code base significantly easier to work with.
 
 There are several different techniques for *how* you do this. One such technique that is often
- talked about is dependency injection. I will cover some of these techniques in [part two of this series]({% link _posts/2019-08-03-ioc-techniques.md %}).
+ talked about is dependency injection. I will cover some of these techniques in [part two of this series](/blog/2019-08-03-ioc-techniques.html).
 
 There is also more to be said about how to apply this approach across the wider code base: if the system consists of
 more than a handful of files, where do we start? Again, I'll cover this later in the series.
@@ -136,11 +135,15 @@ to use inversion of control to make control flow in the opposite direction to wh
 
 The [Zen of Python](https://en.wikipedia.org/wiki/Zen_of_Python) states:
 
-    Simple is better than complex.
+```text
+Simple is better than complex.
+```
 
 But also that
 
-    Complex is better than complicated.
+```text
+Complex is better than complicated.
+```
 
 I think of inversion of control as an example of choosing the complex over the complicated. If we don't use it when
 it's needed, our efforts to create a simple system will tangle into complications. Inverting dependencies allows us,
@@ -148,7 +151,7 @@ at the cost of a small amount of complexity, to make our systems less complicate
 
 # Further information
 
-- Part two of this series: [Three Techniques for Inverting Control, in Python]({% link _posts/2019-08-03-ioc-techniques.md %}).
+- Part two of this series: [Three Techniques for Inverting Control, in Python](/blog/2019-08-03-ioc-techniques.html).
 
 
 

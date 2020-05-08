@@ -10,7 +10,7 @@ image: ioc-techniques.jpg
 In <a href="/2019/04/15/inversion-of-control/">my previous post</a> we learned how Inversion of Control can
 be visualised as follows:
 
-{% include content_illustration.html image="ioc-techniques/a-b-plugin.png" alt="B plugging into A" %}
+<img src="/images/ioc-techniques/a-b-plugin.png" alt="B plugging into A">
 
 ``B`` plugs into ``A``.  ``A`` provides a mechanism for ``B`` to do this --- but otherwise ``A`` need know nothing about ``B``.
 
@@ -20,7 +20,7 @@ The diagram provides a high level view of the mechanism, but how is this actuall
 
 Getting a little closer to the code structure, we can use this powerful pattern:
 
-{% include content_illustration.html image="ioc-techniques/di-pattern.png" alt="main pointing to A and B, A pointing to <<B>>, B pointing (open arrow) to <<B>>" %}
+<img src="/images/ioc-techniques/di-pattern.png" alt="main pointing to A and B, A pointing to &lt;B&gt;, B pointing (open arrow) to &lt;B&gt;">
 
 This is the basic shape of inversion of control. Captured within the notation, which may or may not be familiar
 to you, are the concepts of *abstraction*, *implementation* and *interface*. These concepts are all important
@@ -31,7 +31,7 @@ to Python.
 
 Consider three Python classes:
 
-{% highlight python %}
+```python
 class Animal:
     def speak(self):
         raise NotImplementedError
@@ -45,7 +45,7 @@ class Cat(Animal):
 class Dog(Animal):
     def speak(self):
         print("Woof.")
-{% endhighlight %}
+```
 
 
 In this example, ``Animal`` is an *abstraction*: it declares its ``speak`` method, but it's not intended to be run (as
@@ -59,20 +59,20 @@ these classes.
 This relationship of classes is often drawn like this, with an open arrow indicating that ``Cat`` and ``Dog`` are concrete
 implementations of ``Animal``.
 
-{% include content_illustration.html image="ioc-techniques/animal-cat-dog.png" alt="Diagram of Cat and Dog subclassing Animal" %}
+<img src="/images/ioc-techniques/animal-cat-dog.png" alt="Diagram of Cat and Dog subclassing Animal" />
 
 #### Polymorphism and duck typing
 
 Because ``Cat`` and ``Dog`` implement a shared interface, we can interact with either class without knowing which one it is:
 
-{% highlight python %}
+```python
 def make_animal_speak(animal):
     animal.speak()
 
 
 make_animal_speak(Cat())
 make_animal_speak(Dog())
-{% endhighlight %}
+```
 
 The ``make_animal_speak`` function need not know anything about cats or dogs; all it has to know is how to interact
 with the abstract concept of an animal. Interacting with objects without knowing
@@ -80,7 +80,7 @@ their specific type, only their interface, is known as 'polymorphism'.
 
 Of course, in Python we don't actually *need* the base class:
 
-{% highlight python %}
+```python
 class Cat:
     def speak(self):
         print("Meow.")
@@ -89,7 +89,7 @@ class Cat:
 class Dog:
     def speak(self):
         print("Woof.")
-{% endhighlight %}
+```
 
 Even if ``Cat`` and ``Dog`` don't inherit ``Animal``, they can still be passed to ``make_animal_speak`` and things
 will work just fine. This informal ability to interact with an object without it explicitly declaring an interface
@@ -97,7 +97,7 @@ is known as 'duck typing'.
 
 We aren't limited to classes; functions may also be used in this way:
 
-{% highlight python %}
+```python
 def notify_by_email(customer, event):
     ...
 
@@ -108,23 +108,23 @@ def notify_by_text_message(customer, event):
 
 for notify in (notify_by_email, notify_by_text_message):
     notify(customer, event)
-{% endhighlight %}
+```
 
 We may even use Python modules:
 
-{% highlight python %}
+```python
 import email
 import text_message
 
 
 for notification_method in (email, text_message):
     notification_method.notify(customer, event)
-{% endhighlight %}
+```
 
 Whether a shared interface is manifested in a formal, object oriented manner, or more implicitly, we can
 generalise the separation between the interface and the implementation like so:
 
-{% include content_illustration.html image="ioc-techniques/interface-implementation.png" alt="Diagram of implementation inheriting abstract interface" %}
+<img src="/images/ioc-techniques/interface-implementation.png" alt="Diagram of implementation inheriting abstract interface" />
 
 This separation will give us a lot of power, as we'll see now.
 
@@ -132,11 +132,11 @@ This separation will give us a lot of power, as we'll see now.
 
 Let's look again at the Inversion of Control pattern.
 
-{% include content_illustration.html image="ioc-techniques/di-pattern.png" alt="main pointing to A and B, A pointing to <<B>>, B pointing (open arrow) to <<B>>" %}
+<img src="/images/ioc-techniques/di-pattern.png" alt="main pointing to A and B, A pointing to &lt;B&gt;, B pointing (open arrow) to &lt;B&gt;" />
 
 In order to invert control between ``A`` and ``B``, we've added two things to our design.
 
-The first is ``<<B>>``. We've separated out into its abstraction (which ``A`` will continue to depend on and know about),
+The first is ``&lt;B&gt;``. We've separated out into its abstraction (which ``A`` will continue to depend on and know about),
 from its implementation (of which ``A`` is blissfully ignorant).
 
 However, somehow the software will need to make sure that ``B`` is used in place of its abstraction. We therefore need
@@ -151,17 +151,17 @@ Dependency Injection is where a piece of code allows the calling code to control
 
 Let's begin with the following function, which doesn't yet support dependency injection:
 
-{% highlight python %}
+```python
 # hello_world.py
 
 
 def hello_world():
     print("Hello, world.")
-{% endhighlight %}
+```
 
 This function is called from a top level function like so:
 
-{% highlight python %}
+```python
 # main.py
 
 from hello_world import hello_world
@@ -169,29 +169,29 @@ from hello_world import hello_world
 
 if __name__ == "__main__":
     hello_world()
-{% endhighlight %}
+```
 
 ``hello_world`` has one dependency that is of interest to us: the built in function ``print``. We can draw a diagram
 of these dependencies like this:
 
-{% include content_illustration.html image="ioc-techniques/main-hw-print.png" alt="Main pointing to hello_world pointing to print" %}
+<img src="/images/ioc-techniques/main-hw-print.png" alt="Main pointing to hello_world pointing to print" />
 
 The first step is to identify the abstraction that  ``print`` implements. We could think of this simply as a
 function that outputs a message it is supplied --- let's call it ``output_function``.
 
 Now, we adjust ``hello_world`` so it supports the injection of the implementation of ``output_function``.  Drum roll please...
 
-{% highlight python %}
+```python
 # hello_world.py
 
 
 def hello_world(output_function):
     output_function("Hello, world.")
-{% endhighlight %}
+```
 
 All we do is allow it to receive the output function as an argument. The orchestration code then passes in the ``print`` function via the argument:
 
-{% highlight python %}
+```python
 # main.py
 
 import hello_world
@@ -199,14 +199,14 @@ import hello_world
 
 if __name__ == "__main__":
     hello_world.hello_world(output_function=print)
-{% endhighlight %}
+```
 
 That's it. It couldn't get much simpler, could it? In this example, we're injecting a callable, but other
 implementations could expect a class, an instance or even a module.
 
 With very little code, we have moved the dependency out of ``hello_world``, into the top level function:
 
-{% include content_illustration.html image="ioc-techniques/main-hw-print-output.png" alt="Main pointing to hello_world and print, hello_world pointing to <<output>>, print pointing (open arrow) to <<output>>." %}
+<img src="/images/ioc-techniques/main-hw-print-output.png" alt="Main pointing to hello_world and print, hello_world pointing to &lt;output&gt;, print pointing (open arrow) to &lt;output&gt;." />
 
 Notice that although there isn't a formally declared abstract ``output_function``, that concept is implicitly there, so
 I've included it in the diagram.
@@ -225,7 +225,7 @@ to allow its behaviour to be configured from outside.
 
 Although this needs more machinery than dependency injection, it doesn't need much:
 
-{% highlight python %}
+```python
 # hello_world.py
 
 
@@ -235,11 +235,11 @@ config = {}
 def hello_world():
     output_function = config["OUTPUT_FUNCTION"]
     output_function("Hello, world.")
-{% endhighlight %}
+```
 
 To complete the picture, here's how it could be configured externally:
 
-{% highlight python %}
+```python
 # main.py
 
 import hello_world
@@ -251,7 +251,7 @@ hello_world.config["OUTPUT_FUNCTION"] = print
 if __name__ == "__main__":
     hello_world.hello_world()
 
-{% endhighlight %}
+```
 
 The machinery in this case is simply a dictionary that is written to from outside the module. In a real world system,
 we might want a slightly more sophisticated config system (making it immutable for example, is a good idea). But at heart,
@@ -259,7 +259,7 @@ any key-value store will do.
 
 As with dependency injection, the output function's implementation has been lifted out, so ``hello_world`` no longer depends on it.
 
-{% include content_illustration.html image="ioc-techniques/configuration-registry.png" alt="Configuration registry" %}
+<img src="/images/ioc-techniques/configuration-registry.png" alt="Configuration registry" />
 
 ### The Subscriber Registry
 
@@ -271,7 +271,7 @@ Let's develop our ultra-trivial example to use this pattern. Instead of saying "
 to greet an arbitrary number of people: "Hello, John.", "Hello, Martha.", etc. Other parts of the system should be
 able to add people to the list of those we should greet.
 
-{% highlight python %}
+```python
 # hello_people.py
 
 people = []
@@ -280,23 +280,23 @@ people = []
 def hello_people():
     for person in people:
         print(f"Hello, {person}.")
-{% endhighlight %}
-{% highlight python %}
+```
+```python
 # john.py
 
 import hello_people
 
 
 hello_people.people.append("John")
-{% endhighlight %}
-{% highlight python %}
+```
+```python
 # martha.py
 
 import hello_people
 
 
 hello_people.people.append("Martha")
-{% endhighlight %}
+```
 
 As with the configuration registry, there is a store that can be written to from outside. But instead of
 being a dictionary, it's a list. This list is populated, typically
@@ -305,7 +305,7 @@ the code works through each item one by one.
 
 A diagram of this system would be:
 
-{% include content_illustration.html image="ioc-techniques/subscriber-registry.png" alt="Subscriber registry" %}
+<img src="/images/ioc-techniques/subscriber-registry.png" alt="Subscriber registry" />
 
 Notice that in this case, ``main`` doesn't need to know about the registry --- instead, it's the subscribers elsewhere
 in the system that write to it.
@@ -318,7 +318,7 @@ a.k.a. pub/sub.
 
 We may implement this in much the same way as above, except instead of adding strings to a list, we add callables:
 
-{% highlight python %}
+```python
 # hello_world.py
 
 subscribers = []
@@ -328,9 +328,9 @@ def hello_world():
     print("Hello, world.")
     for subscriber in subscribers:
         subscriber()
-{% endhighlight %}
+```
 
-{% highlight python %}
+```python
 # log.py
 
 import hello_world
@@ -341,7 +341,7 @@ def write_to_log():
 
 
 hello_world.subscribers.append(write_to_log)
-{% endhighlight %}
+```
 
 ## Technique Three: Monkey Patching
 
@@ -351,7 +351,7 @@ pattern described above.
 If our ``hello_world`` function doesn't implement any hooks for injecting its output function, we *could* monkey patch the
 built in ``print`` function with something different:
 
-{% highlight python %}
+```python
 # main.py
 
 import hello_world
@@ -363,7 +363,7 @@ hello_world.print = print_twice
 
 if __name__ == "__main__":
     hello_world.hello_world()
-{% endhighlight %}
+```
 
 Monkey patching takes other forms. You could manipulate to your heart's content some hapless class defined elsewhere
 --- changing attributes, swapping in other methods, and generally doing whatever you like to it.
