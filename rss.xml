@@ -7,9 +7,20 @@
             Simple patterns for building complex apps
         </description>
         <link>https://cosmicpython.com</link>
-        <lastBuildDate>Fri, 08 May 2020 18:55:15 -0000</lastBuildDate>
+        <lastBuildDate>Tue, 12 May 2020 19:23:37 -0000</lastBuildDate>
         <pubDate>Sat, 4 Jan 2020 19:15:54 -0500</pubDate>
         <atom:link href="https://cosmicpython.com/rss.xml" rel="self" type="application/rss+xml" />
+        
+        <item>
+            <title>Book review: Designing Data-Intensive Applications, by Martin Kleppmann</title>
+            <description>
+                
+            </description>
+            <link></link>
+            <pubDate></pubDate>
+            <dc:creator>Harry</dc:creator>
+            <guid></guid>
+        </item>
         
         <item>
             <title>Writing tests for external API calls</title>

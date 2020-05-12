@@ -11,7 +11,10 @@
       <div class="column">
         <img src="/images/{{ image[0] }}" />
         {% if image_credit %}
-          <p class="float-right"><em><small><a href="{{ image_credit[0] }}">find out more about this image</a></small></em></p>
+          <p class="float-right">
+            <em><small><a href="{{ image_credit[0] }}">
+              {{ image_credit_words[0] if image_credit_words else "find out more about this image" }}
+            </a></small></em></p>
         {% endif %}
       </div>
     </div>
