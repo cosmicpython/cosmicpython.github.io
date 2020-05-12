@@ -59,6 +59,9 @@ def main():
 
         all_posts.append(post)  # TODO rfc2822_date=format_datetime(post_date),
 
+    # Order blog posts by date published
+    all_posts.sort(key=lambda p: p.date, reverse=True)
+
     # index
     # print("rendering index.html")
     index_html = env.get_template('pages/index.html').render(
@@ -68,8 +71,6 @@ def main():
     print("writing", index_html_path)
     index_html_path.write_text(index_html)
 
-    # Order blog posts by date published
-    all_posts.sort(key=lambda p: p.date, reverse=True)
 
     # Make the RSS feed
     rss_path = OUTPUT_DIR / "rss.xml"
