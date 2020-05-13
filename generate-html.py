@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # copied from https://github.com/tonybaloney/tonybaloney.github.io/blob/master/blog-gen.py
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date, datetime, time
 from email.utils import formatdate, format_datetime  # for RFC2822 formatting
 from pathlib import Path
 
@@ -30,6 +30,9 @@ class Post:
     def url(self):
         return f"/blog/{self.html_path.name}"
 
+    @property
+    def rfc2822_date(self):
+        return format_datetime(datetime.combine(self.date, time(12, 00)))
 
 
 def main():
@@ -57,7 +60,7 @@ def main():
         print("writing", post.html_path)
         post.html_path.write_text(post_html)
 
-        all_posts.append(post)  # TODO rfc2822_date=format_datetime(post_date),
+        all_posts.append(post)
 
     # Order blog posts by date published
     all_posts.sort(key=lambda p: p.date, reverse=True)

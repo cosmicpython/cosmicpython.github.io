@@ -6,8 +6,8 @@
         <description>
             Simple patterns for building complex apps
         </description>
-        <link>https://cosmicpython.com</link>
-        <lastBuildDate>Tue, 12 May 2020 19:29:59 -0000</lastBuildDate>
+        <link>https://www.cosmicpython.com</link>
+        <lastBuildDate>Wed, 13 May 2020 19:49:31 -0000</lastBuildDate>
         <pubDate>Sat, 4 Jan 2020 19:15:54 -0500</pubDate>
         <atom:link href="https://cosmicpython.com/rss.xml" rel="self" type="application/rss+xml" />
         
@@ -16,8 +16,8 @@
             <description>
                 
             </description>
-            <link></link>
-            <pubDate></pubDate>
+            <link>https://www.cosmicpython.com/blog/2020-05-12-ddia-review.html</link>
+            <pubDate>Tue, 12 May 2020 12:00:00 -0000</pubDate>
             <dc:creator>Harry</dc:creator>
             <guid></guid>
         </item>
@@ -27,8 +27,8 @@
             <description>
                 
             </description>
-            <link></link>
-            <pubDate></pubDate>
+            <link>https://www.cosmicpython.com/blog/2020-01-25-testing_external_api_calls.html</link>
+            <pubDate>Sat, 25 Jan 2020 12:00:00 -0000</pubDate>
             <dc:creator>Harry</dc:creator>
             <guid></guid>
         </item>
@@ -38,8 +38,8 @@
             <description>
                 
             </description>
-            <link></link>
-            <pubDate></pubDate>
+            <link>https://www.cosmicpython.com/blog/2019-08-03-ioc-techniques.html</link>
+            <pubDate>Sat, 03 Aug 2019 12:00:00 -0000</pubDate>
             <dc:creator>David</dc:creator>
             <guid></guid>
         </item>
@@ -49,8 +49,8 @@
             <description>
                 
             </description>
-            <link></link>
-            <pubDate></pubDate>
+            <link>https://www.cosmicpython.com/blog/2019-04-15-inversion-of-control.html</link>
+            <pubDate>Mon, 15 Apr 2019 12:00:00 -0000</pubDate>
             <dc:creator>David</dc:creator>
             <guid></guid>
         </item>
@@ -60,8 +60,8 @@
             <description>
                 
             </description>
-            <link></link>
-            <pubDate></pubDate>
+            <link>https://www.cosmicpython.com/blog/2017-09-19-why-use-domain-events.html</link>
+            <pubDate>Tue, 19 Sep 2017 12:00:00 -0000</pubDate>
             <dc:creator>Bob</dc:creator>
             <guid></guid>
         </item>
@@ -71,8 +71,8 @@
             <description>
                 
             </description>
-            <link></link>
-            <pubDate></pubDate>
+            <link>https://www.cosmicpython.com/blog/2017-09-13-commands-and-queries-handlers-and-views.html</link>
+            <pubDate>Wed, 13 Sep 2017 12:00:00 -0000</pubDate>
             <dc:creator>Bob</dc:creator>
             <guid></guid>
         </item>
@@ -82,8 +82,8 @@
             <description>
                 
             </description>
-            <link></link>
-            <pubDate></pubDate>
+            <link>https://www.cosmicpython.com/blog/2017-09-08-repository-and-unit-of-work-pattern-in-python.html</link>
+            <pubDate>Fri, 08 Sep 2017 12:00:00 -0000</pubDate>
             <dc:creator>Bob</dc:creator>
             <guid></guid>
         </item>
@@ -93,8 +93,8 @@
             <description>
                 
             </description>
-            <link></link>
-            <pubDate></pubDate>
+            <link>https://www.cosmicpython.com/blog/2017-09-07-introducing-command-handler.html</link>
+            <pubDate>Thu, 07 Sep 2017 12:00:00 -0000</pubDate>
             <dc:creator>Bob</dc:creator>
             <guid></guid>
         </item>

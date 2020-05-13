@@ -7,7 +7,7 @@ serve:
 	python -m http.server
 
 watch-build:
-	ls **/*.md **/*.html *.py | entr ./generate-html.py
+	ls **/*.md **/*.html **/*.xml *.py | entr ./generate-html.py
 
 update-book:  ## assumes book repo is at ../book
 	cd ../book && make html

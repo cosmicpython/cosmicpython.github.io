@@ -6,20 +6,20 @@
         <description>
             Simple patterns for building complex apps
         </description>
-        <link>https://cosmicpython.com</link>
+        <link>https://www.cosmicpython.com</link>
         <lastBuildDate>{{date}}</lastBuildDate>
         <pubDate>Sat, 4 Jan 2020 19:15:54 -0500</pubDate>
         <atom:link href="https://cosmicpython.com/rss.xml" rel="self" type="application/rss+xml" />
-        {% for item in posts %}
+        {% for post in posts %}
         <item>
-            <title>{{ item.title }}</title>
+            <title>{{ post.title }}</title>
             <description>
-                {{item.blog_subheading}}
+                {{post.description}}
             </description>
-            <link>{{item.link}}</link>
-            <pubDate>{{item.rfc2822_date}}</pubDate>
-            <dc:creator>{{ item.author }}</dc:creator>
-            <guid>{{item.link}}</guid>
+            <link>https://www.cosmicpython.com{{post.url}}</link>
+            <pubDate>{{post.rfc2822_date}}</pubDate>
+            <dc:creator>{{ post.author }}</dc:creator>
+            <guid>{{post.link}}</guid>
         </item>
         {% endfor %}
     </channel>
