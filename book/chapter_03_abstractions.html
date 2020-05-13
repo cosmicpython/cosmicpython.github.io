@@ -813,7 +813,7 @@ Although we&#8217;re using dependency injection, there is no need
     <span class="tok-n">filesystem</span> <span class="tok-o">=</span> <span class="tok-n">FakeFileSystem</span><span class="tok-p">()</span>
 
     <span class="tok-n">reader</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s2">"/source"</span><span class="tok-p">:</span> <span class="tok-n">source</span><span class="tok-p">,</span> <span class="tok-s2">"/dest"</span><span class="tok-p">:</span> <span class="tok-n">dest</span><span class="tok-p">}</span>
-    <span class="tok-n">synchronise_dirs</span><span class="tok-p">(</span><span class="tok-n">reader</span><span class="tok-o">.</span><span class="tok-n">pop</span><span class="tok-p">,</span> <span class="tok-n">filesystem</span><span class="tok-p">,</span> <span class="tok-s2">"/source"</span><span class="tok-p">,</span> <span class="tok-s2">"/dest"</span><span class="tok-p">)</span>
+    <span class="tok-n">sync</span><span class="tok-p">(</span><span class="tok-n">reader</span><span class="tok-o">.</span><span class="tok-n">pop</span><span class="tok-p">,</span> <span class="tok-n">filesystem</span><span class="tok-p">,</span> <span class="tok-s2">"/source"</span><span class="tok-p">,</span> <span class="tok-s2">"/dest"</span><span class="tok-p">)</span>
 
     <span class="tok-k">assert</span> <span class="tok-n">filesystem</span> <span class="tok-o">==</span> <span class="tok-p">[(</span><span class="tok-s2">"COPY"</span><span class="tok-p">,</span> <span class="tok-s2">"/source/my-file"</span><span class="tok-p">,</span> <span class="tok-s2">"/dest/my-file"</span><span class="tok-p">)]</span>
 
@@ -824,7 +824,7 @@ Although we&#8217;re using dependency injection, there is no need
     <span class="tok-n">filesystem</span> <span class="tok-o">=</span> <span class="tok-n">FakeFileSystem</span><span class="tok-p">()</span>
 
     <span class="tok-n">reader</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s2">"/source"</span><span class="tok-p">:</span> <span class="tok-n">source</span><span class="tok-p">,</span> <span class="tok-s2">"/dest"</span><span class="tok-p">:</span> <span class="tok-n">dest</span><span class="tok-p">}</span>
-    <span class="tok-n">synchronise_dirs</span><span class="tok-p">(</span><span class="tok-n">reader</span><span class="tok-o">.</span><span class="tok-n">pop</span><span class="tok-p">,</span> <span class="tok-n">filesystem</span><span class="tok-p">,</span> <span class="tok-s2">"/source"</span><span class="tok-p">,</span> <span class="tok-s2">"/dest"</span><span class="tok-p">)</span>
+    <span class="tok-n">sync</span><span class="tok-p">(</span><span class="tok-n">reader</span><span class="tok-o">.</span><span class="tok-n">pop</span><span class="tok-p">,</span> <span class="tok-n">filesystem</span><span class="tok-p">,</span> <span class="tok-s2">"/source"</span><span class="tok-p">,</span> <span class="tok-s2">"/dest"</span><span class="tok-p">)</span>
 
     <span class="tok-k">assert</span> <span class="tok-n">filesystem</span> <span class="tok-o">==</span> <span class="tok-p">[(</span><span class="tok-s2">"MOVE"</span><span class="tok-p">,</span> <span class="tok-s2">"/dest/original-file"</span><span class="tok-p">,</span> <span class="tok-s2">"/dest/renamed-file"</span><span class="tok-p">)]</span></code></pre>
 </div>
@@ -1121,7 +1121,7 @@ Practice makes less imperfect! And now back to our regular programming&#8230;&#8
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-05-04 15:23:16 +0100
+Last updated 2020-05-13 20:35:58 +0100
 </div>
 </div>
 <style>
