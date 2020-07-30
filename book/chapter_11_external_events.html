@@ -138,7 +138,7 @@ table {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="chapter_11_external_events">11: Event-Driven Architecture: Using Events to Integrate Microservices<a class="anchor" href="#chapter_11_external_events"></a>Event-Driven Architecture: Using Events to Integrate Microservices</h2>
+<h2 id="chapter_11_external_events">11: Event-Driven Architecture: Using Events to Integrate Microservices<a class="anchor" href="#chapter_11_external_events"></a></h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -603,7 +603,7 @@ API to create batches, and then we&#8217;ll test both inbound and outbound messa
     <span class="tok-c1"># start with two batches and an order allocated to one of them  </span>#<b class="conum">(1)</b>
     <span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span> <span class="tok-o">=</span> <span class="tok-n">random_orderid</span><span class="tok-p">(),</span> <span class="tok-n">random_sku</span><span class="tok-p">()</span>
     <span class="tok-n">earlier_batch</span><span class="tok-p">,</span> <span class="tok-n">later_batch</span> <span class="tok-o">=</span> <span class="tok-n">random_batchref</span><span class="tok-p">(</span><span class="tok-s1">'old'</span><span class="tok-p">),</span> <span class="tok-n">random_batchref</span><span class="tok-p">(</span><span class="tok-s1">'newer'</span><span class="tok-p">)</span>
-    <span class="tok-n">api_client</span><span class="tok-o">.</span><span class="tok-n">post_to_add_batch</span><span class="tok-p">(</span><span class="tok-n">earlier_batch</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-o">=</span><span class="tok-mi">10</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-s1">'2011-01-02'</span><span class="tok-p">)</span>  #<b class="conum">(2)</b>
+    <span class="tok-n">api_client</span><span class="tok-o">.</span><span class="tok-n">post_to_add_batch</span><span class="tok-p">(</span><span class="tok-n">earlier_batch</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-o">=</span><span class="tok-mi">10</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-s1">'2011-01-01'</span><span class="tok-p">)</span>  #<b class="conum">(2)</b>
     <span class="tok-n">api_client</span><span class="tok-o">.</span><span class="tok-n">post_to_add_batch</span><span class="tok-p">(</span><span class="tok-n">later_batch</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-o">=</span><span class="tok-mi">10</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-s1">'2011-01-02'</span><span class="tok-p">)</span>
     <span class="tok-n">response</span> <span class="tok-o">=</span> <span class="tok-n">api_client</span><span class="tok-o">.</span><span class="tok-n">post_to_allocate</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">)</span>  #<b class="conum">(2)</b>
     <span class="tok-k">assert</span> <span class="tok-n">response</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()[</span><span class="tok-s1">'batchref'</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-n">earlier_batch</span>
@@ -947,7 +947,7 @@ reliability and eventual consistency. Read on to <a href="/book/epilogue_1_how_t
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-20 13:47:19 UTC
+Last updated 2020-07-30 14:51:25 +0100
 </div>
 </div>
 <style>

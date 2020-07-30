@@ -138,7 +138,7 @@ table {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="chapter_12_cqrs">12: Command-Query Responsibility Segregation (CQRS)<a class="anchor" href="#chapter_12_cqrs"></a>Command-Query Responsibility Segregation (CQRS)</h2>
+<h2 id="chapter_12_cqrs">12: Command-Query Responsibility Segregation (CQRS)<a class="anchor" href="#chapter_12_cqrs"></a></h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -396,8 +396,8 @@ operation. Post/Redirect/Get sidesteps the issue by separating the read and
 write phases of our operation.</p>
 </div>
 <div class="paragraph">
-<p>This technique is a simple example of command-query separation (CQS). In CQS we
-follow one simple rule: functions should either modify state or answer
+<p>This technique is a simple example of command-query separation (CQS).<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup>
+We follow one simple rule: functions should either modify state or answer
 questions, but never both. This makes software easier to reason about: we should
 always be able to ask, "Are the lights on?" without flicking the light switch.</p>
 </div>
@@ -418,11 +418,12 @@ When building APIs, we can apply the same design technique by returning a
 </div>
 <div class="paragraph">
 <p>As you&#8217;ll see, we can use the CQS principle to make our systems faster and more
-scalable, but first, let&#8217;s fix the CQS violation in our existing code. Ages ago, we introduced an <code>allocate</code> endpoint that takes an order and
-calls our service layer to allocate some stock. At the end of the call, we
-return a 200 OK and the batch ID. That&#8217;s led to some ugly design flaws so that
-we can get the data we need. Let&#8217;s change it to return a simple OK message and
-instead provide a new read-only endpoint to retrieve allocation state:</p>
+scalable, but first, let&#8217;s fix the CQS violation in our existing code. Ages
+ago, we introduced an <code>allocate</code> endpoint that takes an order and calls our
+service layer to allocate some stock. At the end of the call, we return a 200
+OK and the batch ID. That&#8217;s led to some ugly design flaws so that we can get
+the data we need. Let&#8217;s change it to return a simple OK message and instead
+provide a new read-only endpoint to retrieve allocation state:</p>
 </div>
 <div id="api_test_does_get_after_post" class="exampleblock">
 <div class="title">API test does a GET after the POST (tests/e2e/test_api.py)</div>
@@ -1211,11 +1212,18 @@ model become ever more compelling.</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Adds another query language with its own quirks and syntax.</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Use hand-rolled SQL</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Use hand-rolled SQL to query your normal model tables</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Offers fine control over performance with a standard query syntax.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Changes to DB schema have to be made to your hand-rolled queries <em>and</em> your
   ORM definitions. Highly normalized schemas may still have performance
   limitations.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Add some extra (denormalized) tables to your DB as a read model</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A denormalized table can be much faster to query. If we update the
+  normalized and denormalized ones in the same transaction, we will
+  still have good guarantees of data consistency</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">It will slow down writes slightly</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Create separate read stores with events</p></td>
@@ -1252,9 +1260,15 @@ the chapter.</p>
   <a class="next_chapter_link" href="/book/chapter_13_dependency_injection.html">Next - 13: Dependency Injection (and Bootstrapping) &gt;&gt;</a>
 </div>
 </div>
+<div id="footnotes">
+<hr>
+<div class="footnote" id="_footnotedef_1">
+<a href="#_footnoteref_1">1</a>. We&#8217;re using the terms somewhat interchangeably, but CQS is normally something you apply to a single class or module: functions that read state should be separate from those that modify it.  And CQRS is something you apply to your whole application: the classes, modules, code paths and even databases that read state can be separated from the ones that modify it.
+</div>
+</div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-04-28 10:44:37 +0100
+Last updated 2020-07-30 14:51:25 +0100
 </div>
 </div>
 <style>

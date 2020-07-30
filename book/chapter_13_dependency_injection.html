@@ -138,7 +138,7 @@ table {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="chapter_13_dependency_injection">13: Dependency Injection (and Bootstrapping)<a class="anchor" href="#chapter_13_dependency_injection"></a>Dependency Injection (and Bootstrapping)</h2>
+<h2 id="chapter_13_dependency_injection">13: Dependency Injection (and Bootstrapping)<a class="anchor" href="#chapter_13_dependency_injection"></a></h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>
@@ -421,9 +421,11 @@ handlers. If we add real and fake email classes, who will create them and
 pass them on?</p>
 </div>
 <div class="paragraph">
-<p>That&#8217;s extra (duplicated) cruft for Flask, Redis, and our tests. Moreover,
-putting all the responsibility for passing dependencies to the right handler
-onto the message bus feels like a violation of the SRP.</p>
+<p>It needs to happen as early as possible in the process lifecycle, so the most
+obvious place is in our entrypoints. That would mean extra (duplicated) cruft
+in Flask and Redis, and in our tests. And we&#8217;d also have to add the
+responsibility for passing dependencies around to the message bus, which
+already has a job to do; it feels like a violation of the SRP.</p>
 </div>
 <div class="paragraph">
 <p>
@@ -681,7 +683,7 @@ We want our bootstrap script to do the following:</p>
 <ol>
 <li>
 <p><code>orm.start_mappers()</code> is our example of initialization work that needs
-to be done once at the beginning of an app. We also see things like
+to be done once at the beginning of an app. Another common example is
 setting up the <code>logging</code> module.
 </p>
 </li>
@@ -783,11 +785,11 @@ but you can, like this:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Harry says he couldn&#8217;t even imagine writing out that many lines of code
-and having to look up that many function arguments manually.
-This is a perfectly viable solution, though, since it&#8217;s only one
-line of code or so per handler you add, and thus not a massive maintenance burden
-even if you have dozens of handlers.</p>
+<p>Harry says he couldn&#8217;t even imagine writing out that many lines of code and
+having to look up that many function arguments manually. It would be a
+perfectly viable solution, though, since it&#8217;s only one line of code or so per
+handler you add. Even if you have dozens of handlers, it wouldn&#8217;t be much of
+maintenance burden.</p>
 </div>
 <div class="paragraph">
 <p>Our app is structured in such a way that we always want to do dependency
@@ -804,9 +806,9 @@ framework.</p>
 </div>
 <div class="paragraph">
 <p>At MADE, we&#8217;ve used <a href="https://pypi.org/project/Inject">Inject</a> in a few places,
-and it&#8217;s fine, although it makes Pylint unhappy.  You might also check out
+and it&#8217;s <em>fine</em> (although it makes Pylint unhappy).  You might also check out
 <a href="https://pypi.org/project/punq">Punq</a>, as written by Bob himself, or the
-DRY-Python crew&#8217;s <a href="https://github.com/dry-python/dependencies">dependencies</a>.</p>
+DRY-Python crew&#8217;s <a href="https://github.com/dry-python/dependencies">Dependencies</a>.</p>
 </div>
 </div>
 </div>
@@ -1460,7 +1462,7 @@ World<sup>TM</sup>.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-20 13:47:19 UTC
+Last updated 2020-07-30 14:51:25 +0100
 </div>
 </div>
 <style>

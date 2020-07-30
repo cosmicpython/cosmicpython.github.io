@@ -138,7 +138,7 @@ table {
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="introduction">Introduction<a class="anchor" href="#introduction"></a>Introduction</h2>
+<h2 id="introduction">Introduction<a class="anchor" href="#introduction"></a></h2>
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="_why_do_our_designs_go_wrong"><a class="anchor" href="#_why_do_our_designs_go_wrong"></a>Why Do Our Designs Go Wrong?</h3>
@@ -262,13 +262,13 @@ want the code to perform for us and using an even higher-level abstraction to ma
 it explicit:</p>
 </div>
 <div id="ddg_example" class="exampleblock">
-<div class="title">Do a search with the duckduckgo module</div>
+<div class="title">Do a search with the duckduckgo client library</div>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">import</span> <span class="tok-nn">duckduckgo</span>
-<span class="tok-k">for</span> <span class="tok-n">r</span> <span class="tok-ow">in</span> <span class="tok-n">duckduckgo</span><span class="tok-o">.</span><span class="tok-n">query</span><span class="tok-p">(</span><span class="tok-s1">'Sausages'</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">results</span><span class="tok-p">:</span>
-    <span class="tok-k">print</span><span class="tok-p">(</span><span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">url</span> <span class="tok-o">+</span> <span class="tok-s1">' - '</span> <span class="tok-o">+</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">text</span><span class="tok-p">)</span></code></pre>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">import</span> <span class="tok-nn">duckduckpy</span>
+<span class="tok-k">for</span> <span class="tok-n">r</span> <span class="tok-ow">in</span> <span class="tok-n">duckduckpy</span><span class="tok-o">.</span><span class="tok-n">query</span><span class="tok-p">(</span><span class="tok-s1">'Sausages'</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">related_topics</span><span class="tok-p">:</span>
+    <span class="tok-k">print</span><span class="tok-p">(</span><span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">first_url</span><span class="tok-p">,</span> <span class="tok-s1">' - '</span><span class="tok-p">,</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">text</span><span class="tok-p">)</span></code></pre>
 </div>
 </div>
 </div>
@@ -501,7 +501,7 @@ by choosing the right abstractions and continuously applying the DIP.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-20 13:47:19 UTC
+Last updated 2020-07-30 14:56:02 +0100
 </div>
 </div>
 <style>
