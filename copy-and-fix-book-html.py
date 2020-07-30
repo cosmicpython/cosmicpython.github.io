@@ -126,6 +126,8 @@ def fix_title(contents, chapter, chapter_info):
         title = titles[0]
         _strip_keeptogethers(title)
         title.text = chapter_info[chapter].chapter_title
+        [anchor_link] = title.cssselect('a.anchor')
+        anchor_link.tail = ''
     return html.tostring(parsed)
 
 def _prep_prev_and_next_buttons(chapter, chapter_info, buttons_html):
