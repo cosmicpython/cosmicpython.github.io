@@ -2,7 +2,13 @@
 <html lang="en">
 
   <head>
-    <title>{% block title %}cosmic_python{% endblock %}</title>
+    <title>
+      {% if post %}
+        {{ post.title }}
+      {% else %}
+        cosmic_python
+      {% endif %}
+    </title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="author" content="Harry Percival and Bob Gregory">
