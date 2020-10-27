@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <title>
+      
+        Making Enums (as always, arguably) more Pythonic
+      
+    </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Harry Percival and Bob Gregory">
+    <meta name="description" content="">
+    <meta property="og:title" content="cosmic_python" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.cosmicpython.com/blog/2020-10-27-i-hate-enums.html" />
+    <meta property="og:image" content="https://www.cosmicpython.com/images/lobster_nebula.jpg" />
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/milligram/1.3.0/milligram.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pygments-css@1.0.0/friendly.css">
+    <link rel="stylesheet" href="/styles.css">
+
+  </head>
+
+  <body>
+    <main class="wrapper">
+
+      <nav class="navigation">
+        <section class="container">
+          <a class="navigation-title" href="/">
+            <h1 class="title">Cosmic Python</h1>
+          </a>
+        </section>
+      </nav>
+
+      <section class="container">
+        
+  <h1> Making Enums (as always, arguably) more Pythonic</h1>
+  <p>by Harry, 2020-10-27</p>
+
+  
+    <div class="row">
+      <div class="column">
+        <img src="/images/crab_nebula_multiple.png" />
+        
+          <p class="float-right">
+            <em><small><a href="https://commons.wikimedia.org/wiki/File:Crab_Nebula_in_Multiple_Wavelengths.png">
+              find out more about this image
+            </a></small></em></p>
+        
+      </div>
+    </div>
+  
+
+  <div class="content">
+    <p>OK this isn&rsquo;t really anything to do with software architecture, but:</p>
+<blockquote>
+<p>I hate <a href="https://docs.python.org/3/library/enum.html">enums</a>!</p>
+</blockquote>
+<p>I thought to myself, again and again, when having to deal with them recently.</p>
+<p>Why?</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">BRAIN</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">SMALL</span> <span class="o">=</span> <span class="s1">&#39;small&#39;</span>
+    <span class="n">MEDIUM</span> <span class="o">=</span> <span class="s1">&#39;medium&#39;</span>
+    <span class="n">GALAXY</span> <span class="o">=</span> <span class="s1">&#39;galaxy&#39;</span>
+</code></pre></div>
+
+
+<p>What could be wrong with that, I hear you ask?
+Well, accuse me of wanting to <em>stringly type</em> everything if you will,
+but: those enums may look like strings but they aren&rsquo;t!</p>
+<div class="codehilite"><pre><span></span><code><span class="k">assert</span> <span class="n">BRAIN</span><span class="o">.</span><span class="n">SMALL</span> <span class="o">==</span> <span class="s1">&#39;small&#39;</span>
+<span class="c1"># nope, &lt;BRAIN.SMALL: &#39;small&#39;&gt; != &#39;small&#39;</span>
+
+<span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="n">BRAIN</span><span class="o">.</span><span class="n">SMALL</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;small&#39;</span>
+<span class="c1"># nope, &#39;BRAIN.SMALL&#39; != &#39;small&#39;</span>
+
+<span class="k">assert</span> <span class="n">BRAIN</span><span class="o">.</span><span class="n">SMALL</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;small&#39;</span>
+<span class="c1"># finally, yes.</span>
+</code></pre></div>
+
+
+<p>I imagine some people think this is a feature rather than a bug?  But for me
+it&rsquo;s an endless source of annoyance.  They look like strings!  I defined them
+as strings!  Why don&rsquo;t they behave like strings arg!</p>
+<p>Just one common motivating example:  often what you want to do with those
+enums is dump them into a database column somewhere. This not-quite-a-string
+behaviour will cause your ORM or <code>db-api</code> library to complain like mad, and
+no end of footguns and headscratching when writing tests, custom SQL, and so on.
+At this point I&rsquo;m wanting to throw them out and just use normal constants!</p>
+<p>But, one of the nice promises from Python&rsquo;s <code>enum</code> module is that <strong>it&rsquo;s iterable</strong>.
+So it&rsquo;s easy not just to refer to one constant,
+but also to refer to the list of all allowed constants.  Maybe that&rsquo;s enough
+to want to rescue it?</p>
+<p>But, again, it doesn&rsquo;t quite work the way you might want it to:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">assert</span> <span class="nb">list</span><span class="p">(</span><span class="n">BRAIN</span><span class="p">)</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;small&#39;</span><span class="p">,</span> <span class="s1">&#39;medium&#39;</span><span class="p">,</span> <span class="s1">&#39;galaxy&#39;</span><span class="p">]</span>  <span class="c1"># nope</span>
+<span class="k">assert</span> <span class="p">[</span><span class="n">thing</span> <span class="k">for</span> <span class="n">thing</span> <span class="ow">in</span> <span class="n">BRAIN</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;small&#39;</span><span class="p">,</span> <span class="s1">&#39;medium&#39;</span><span class="p">,</span> <span class="s1">&#39;galaxy&#39;</span><span class="p">]</span>  <span class="c1"># nope</span>
+<span class="k">assert</span> <span class="p">[</span><span class="n">thing</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">thing</span> <span class="ow">in</span> <span class="n">BRAIN</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;small&#39;</span><span class="p">,</span> <span class="s1">&#39;medium&#39;</span><span class="p">,</span> <span class="s1">&#39;galaxy&#39;</span><span class="p">]</span>  <span class="c1"># yes</span>
+</code></pre></div>
+
+
+<p>Here&rsquo;s a <em>truly</em> wtf one:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">assert</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">BRAIN</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;small&#39;</span><span class="p">,</span> <span class="s1">&#39;medium&#39;</span><span class="p">,</span> <span class="s1">&#39;galaxy&#39;</span><span class="p">]</span>
+<span class="c1"># Raises an Exception!!!</span>
+
+  <span class="n">File</span> <span class="s2">&quot;/usr/local/lib/python3.9/random.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">346</span><span class="p">,</span> <span class="ow">in</span> <span class="n">choice</span>
+    <span class="k">return</span> <span class="n">seq</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_randbelow</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">))]</span>
+  <span class="n">File</span> <span class="s2">&quot;/usr/local/lib/python3.9/enum.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">355</span><span class="p">,</span> <span class="ow">in</span> <span class="fm">__getitem__</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+<span class="ne">KeyError</span><span class="p">:</span> <span class="mi">2</span>
+</code></pre></div>
+
+
+<p>I have no idea what&rsquo;s going on there. What we actually wanted was</p>
+<div class="codehilite"><pre><span></span><code><span class="k">assert</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">BRAIN</span><span class="p">))</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;small&#39;</span><span class="p">,</span> <span class="s1">&#39;medium&#39;</span><span class="p">,</span> <span class="s1">&#39;galaxy&#39;</span><span class="p">]</span>
+<span class="c1"># which is still not true, but at least it doesn&#39;t raise an exception</span>
+</code></pre></div>
+
+
+<p>Now the standard library does provide a solution
+if you want to duck-type your enums to integers,
+<a href="https://docs.python.org/3/library/enum.html#derived-enumerations">IntEnum</a></p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">IBRAIN</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="n">SMALL</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">MEDIUM</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">GALAXY</span> <span class="o">=</span> <span class="mi">3</span>
+
+<span class="k">assert</span> <span class="n">IBRAIN</span><span class="o">.</span><span class="n">SMALL</span> <span class="o">==</span> <span class="mi">1</span>
+<span class="k">assert</span> <span class="nb">int</span><span class="p">(</span><span class="n">IBRAIN</span><span class="o">.</span><span class="n">SMALL</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+<span class="k">assert</span> <span class="n">IBRAIN</span><span class="o">.</span><span class="n">SMALL</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="mi">1</span>
+<span class="k">assert</span> <span class="p">[</span><span class="n">thing</span> <span class="k">for</span> <span class="n">thing</span> <span class="ow">in</span> <span class="n">IBRAIN</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="k">assert</span> <span class="nb">list</span><span class="p">(</span><span class="n">IBRAIN</span><span class="p">)</span> <span class="o">==</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="k">assert</span> <span class="p">[</span><span class="n">thing</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">thing</span> <span class="ow">in</span> <span class="n">IBRAIN</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="k">assert</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">IBRAIN</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>  <span class="c1"># this still errors but:</span>
+<span class="k">assert</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">IBRAIN</span><span class="p">))</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>  <span class="c1"># this is ok</span>
+</code></pre></div>
+
+
+<p>That&rsquo;s all fine and good, but I don&rsquo;t <em>want</em> to use integers.
+I want to use strings, because then when I look in my database,
+or in printouts, or wherever,
+the values will make sense.</p>
+<p>Well, the <a href="https://docs.python.org/3/library/enum.html#others">docs say</a>
+you can just subclass <code>str</code> and make your own <code>StringEnum</code> that will work just like <code>IntEnum</code>.
+But it&rsquo;s LIES:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">BRAIN</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
+    <span class="n">SMALL</span> <span class="o">=</span> <span class="s1">&#39;small&#39;</span>
+    <span class="n">MEDIUM</span> <span class="o">=</span> <span class="s1">&#39;medium&#39;</span>
+    <span class="n">GALAXY</span> <span class="o">=</span> <span class="s1">&#39;galaxy&#39;</span>
+
+<span class="k">assert</span> <span class="n">BRAIN</span><span class="o">.</span><span class="n">SMALL</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;small&#39;</span>  <span class="c1"># ok, as before</span>
+<span class="k">assert</span> <span class="n">BRAIN</span><span class="o">.</span><span class="n">SMALL</span> <span class="o">==</span> <span class="s1">&#39;small&#39;</span>  <span class="c1"># yep</span>
+<span class="k">assert</span> <span class="nb">list</span><span class="p">(</span><span class="n">BRAIN</span><span class="p">)</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;small&#39;</span><span class="p">,</span> <span class="s1">&#39;medium&#39;</span><span class="p">,</span> <span class="s1">&#39;galaxy&#39;</span><span class="p">]</span>  <span class="c1"># hooray!</span>
+<span class="k">assert</span> <span class="p">[</span><span class="n">thing</span> <span class="k">for</span> <span class="n">thing</span> <span class="ow">in</span> <span class="n">BRAIN</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;small&#39;</span><span class="p">,</span> <span class="s1">&#39;medium&#39;</span><span class="p">,</span> <span class="s1">&#39;galaxy&#39;</span><span class="p">]</span>  <span class="c1"># hooray!</span>
+<span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">BRAIN</span><span class="p">)</span>  <span class="c1"># this still errors but ok i&#39;m getting over it.</span>
+
+<span class="c1"># but:</span>
+<span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="n">BRAIN</span><span class="o">.</span><span class="n">SMALL</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;small&#39;</span>   <span class="c1">#NOO!O!O!  &#39;BRAIN.SMALL&#39; != &#39;small&#39;</span>
+<span class="c1"># so, while BRAIN.SMALL == &#39;small&#39;, str(BRAIN.SMALL)  != &#39;small&#39; aaaargh</span>
+</code></pre></div>
+
+
+<p>So here&rsquo;s what I ended up with:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">BRAIN</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
+    <span class="n">SMALL</span> <span class="o">=</span> <span class="s1">&#39;small&#39;</span>
+    <span class="n">MEDIUM</span> <span class="o">=</span> <span class="s1">&#39;medium&#39;</span>
+    <span class="n">GALAXY</span> <span class="o">=</span> <span class="s1">&#39;galaxy&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</code></pre></div>
+
+
+<ul>
+<li>this basically avoids the need to use <code>.value</code> anywhere at all in your code</li>
+<li>enum values duck type to strings in the ways you&rsquo;d expect</li>
+<li>you can iterate over brain and get string-likes out</li>
+<li>altho <code>random.choice()</code> is still broken, i leave that as an exercise for the reader</li>
+<li>and type hints still work!</li>
+</ul>
+<div class="codehilite"><pre><span></span><code><span class="c1"># both of these type check ok</span>
+<span class="n">foo</span> <span class="o">=</span> <span class="n">BRAIN</span><span class="o">.</span><span class="n">SMALL</span>  <span class="c1"># type: str</span>
+<span class="n">bar</span> <span class="o">=</span> <span class="n">BRAIN</span><span class="o">.</span><span class="n">SMALL</span>  <span class="c1"># type: BRAIN</span>
+</code></pre></div>
+
+
+<p>Example code is <a href="https://gist.github.com/hjwp/405f04802ea558f042728ec5edbb4e62">in a Gist</a>
+if you want to play around.
+Let me know if you find anything better!</p>
+  </div>
+
+  <div id="disqus_thread" style="margin: 10px"></div>
+  <script>
+
+  var disqus_config = function () {
+    this.page.url = 'https://www.cosmicpython.com/blog/2020-10-27-i-hate-enums.html';
+    this.page.identifier = 'cosmic-python--blog-2020-10-27-i-hate-enums';
+  };
+
+  (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = 'https://cosmic-python.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+  })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-40928035-3"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-40928035-3');
+  </script>
+
+      </section>
+    </main>
+  </body>
+</html>

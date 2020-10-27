@@ -4,7 +4,7 @@ build:
 	./generate-html.py
 
 serve:
-	python -m http.server
+	python -m http.server 8899
 
 watch-build:
 	ls **/*.md **/*.html **/*.xml *.py | entr ./generate-html.py
