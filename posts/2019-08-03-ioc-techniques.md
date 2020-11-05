@@ -140,7 +140,7 @@ Let's look again at the Inversion of Control pattern.
 
 In order to invert control between ``A`` and ``B``, we've added two things to our design.
 
-The first is ``&lt;B&gt;``. We've separated out into its abstraction (which ``A`` will continue to depend on and know about),
+The first is ``<<B>>``. We've separated out into its abstraction (which ``A`` will continue to depend on and know about),
 from its implementation (of which ``A`` is blissfully ignorant).
 
 However, somehow the software will need to make sure that ``B`` is used in place of its abstraction. We therefore need

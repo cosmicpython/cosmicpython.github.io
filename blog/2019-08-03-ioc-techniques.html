@@ -151,7 +151,7 @@ generalise the separation between the interface and the implementation like so:<
 <p>Let&rsquo;s look again at the Inversion of Control pattern.</p>
 <p><img src="/images/ioc-techniques/di-pattern.png" alt="main pointing to A and B, A pointing to &lt;B&gt;, B pointing (open arrow) to &lt;B&gt;" /></p>
 <p>In order to invert control between <code>A</code> and <code>B</code>, we&rsquo;ve added two things to our design.</p>
-<p>The first is <code>&amp;lt;B&amp;gt;</code>. We&rsquo;ve separated out into its abstraction (which <code>A</code> will continue to depend on and know about),
+<p>The first is <code>&lt;&lt;B&gt;&gt;</code>. We&rsquo;ve separated out into its abstraction (which <code>A</code> will continue to depend on and know about),
 from its implementation (of which <code>A</code> is blissfully ignorant).</p>
 <p>However, somehow the software will need to make sure that <code>B</code> is used in place of its abstraction. We therefore need
 some orchestration code that knows about both <code>A</code> and <code>B</code>, and does the final linking of them together. I&rsquo;ve called
