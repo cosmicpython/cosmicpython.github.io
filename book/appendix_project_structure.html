@@ -306,17 +306,18 @@ app:</p>
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">import</span> <span class="tok-nn">os</span>
 
+
 <span class="tok-k">def</span> <span class="tok-nf">get_postgres_uri</span><span class="tok-p">():</span>  #<b class="conum">(1)</b>
-    <span class="tok-n">host</span> <span class="tok-o">=</span> <span class="tok-n">os</span><span class="tok-o">.</span><span class="tok-n">environ</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s1">'DB_HOST'</span><span class="tok-p">,</span> <span class="tok-s1">'localhost'</span><span class="tok-p">)</span>  #<b class="conum">(2)</b>
-    <span class="tok-n">port</span> <span class="tok-o">=</span> <span class="tok-mi">54321</span> <span class="tok-k">if</span> <span class="tok-n">host</span> <span class="tok-o">==</span> <span class="tok-s1">'localhost'</span> <span class="tok-k">else</span> <span class="tok-mi">5432</span>
-    <span class="tok-n">password</span> <span class="tok-o">=</span> <span class="tok-n">os</span><span class="tok-o">.</span><span class="tok-n">environ</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s1">'DB_PASSWORD'</span><span class="tok-p">,</span> <span class="tok-s1">'abc123'</span><span class="tok-p">)</span>
-    <span class="tok-n">user</span><span class="tok-p">,</span> <span class="tok-n">db_name</span> <span class="tok-o">=</span> <span class="tok-s1">'allocation'</span><span class="tok-p">,</span> <span class="tok-s1">'allocation'</span>
+    <span class="tok-n">host</span> <span class="tok-o">=</span> <span class="tok-n">os</span><span class="tok-o">.</span><span class="tok-n">environ</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s2">"DB_HOST"</span><span class="tok-p">,</span> <span class="tok-s2">"localhost"</span><span class="tok-p">)</span>  #<b class="conum">(2)</b>
+    <span class="tok-n">port</span> <span class="tok-o">=</span> <span class="tok-mi">54321</span> <span class="tok-k">if</span> <span class="tok-n">host</span> <span class="tok-o">==</span> <span class="tok-s2">"localhost"</span> <span class="tok-k">else</span> <span class="tok-mi">5432</span>
+    <span class="tok-n">password</span> <span class="tok-o">=</span> <span class="tok-n">os</span><span class="tok-o">.</span><span class="tok-n">environ</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s2">"DB_PASSWORD"</span><span class="tok-p">,</span> <span class="tok-s2">"abc123"</span><span class="tok-p">)</span>
+    <span class="tok-n">user</span><span class="tok-p">,</span> <span class="tok-n">db_name</span> <span class="tok-o">=</span> <span class="tok-s2">"allocation"</span><span class="tok-p">,</span> <span class="tok-s2">"allocation"</span>
     <span class="tok-k">return</span> <span class="tok-n">f</span><span class="tok-s2">"postgresql://{user}:{password}@{host}:{port}/{db_name}"</span>
 
 
 <span class="tok-k">def</span> <span class="tok-nf">get_api_url</span><span class="tok-p">():</span>
-    <span class="tok-n">host</span> <span class="tok-o">=</span> <span class="tok-n">os</span><span class="tok-o">.</span><span class="tok-n">environ</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s1">'API_HOST'</span><span class="tok-p">,</span> <span class="tok-s1">'localhost'</span><span class="tok-p">)</span>
-    <span class="tok-n">port</span> <span class="tok-o">=</span> <span class="tok-mi">5005</span> <span class="tok-k">if</span> <span class="tok-n">host</span> <span class="tok-o">==</span> <span class="tok-s1">'localhost'</span> <span class="tok-k">else</span> <span class="tok-mi">80</span>
+    <span class="tok-n">host</span> <span class="tok-o">=</span> <span class="tok-n">os</span><span class="tok-o">.</span><span class="tok-n">environ</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s2">"API_HOST"</span><span class="tok-p">,</span> <span class="tok-s2">"localhost"</span><span class="tok-p">)</span>
+    <span class="tok-n">port</span> <span class="tok-o">=</span> <span class="tok-mi">5005</span> <span class="tok-k">if</span> <span class="tok-n">host</span> <span class="tok-o">==</span> <span class="tok-s2">"localhost"</span> <span class="tok-k">else</span> <span class="tok-mi">80</span>
     <span class="tok-k">return</span> <span class="tok-n">f</span><span class="tok-s2">"http://{host}:{port}"</span></code></pre>
 </div>
 </div>
@@ -495,9 +496,7 @@ Inside Docker, other containers are available through hostnames named after
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">setuptools</span> <span class="tok-kn">import</span> <span class="tok-n">setup</span>
 
 <span class="tok-n">setup</span><span class="tok-p">(</span>
-    <span class="tok-n">name</span><span class="tok-o">=</span><span class="tok-s1">'allocation'</span><span class="tok-p">,</span>
-    <span class="tok-n">version</span><span class="tok-o">=</span><span class="tok-s1">'0.1'</span><span class="tok-p">,</span>
-    <span class="tok-n">packages</span><span class="tok-o">=</span><span class="tok-p">[</span><span class="tok-s1">'allocation'</span><span class="tok-p">],</span>
+    <span class="tok-n">name</span><span class="tok-o">=</span><span class="tok-s2">"allocation"</span><span class="tok-p">,</span> <span class="tok-n">version</span><span class="tok-o">=</span><span class="tok-s2">"0.1"</span><span class="tok-p">,</span> <span class="tok-n">packages</span><span class="tok-o">=</span><span class="tok-p">[</span><span class="tok-s2">"allocation"</span><span class="tok-p">],</span>
 <span class="tok-p">)</span></code></pre>
 </div>
 </div>
@@ -521,17 +520,14 @@ you&#8217;ll expect to see:</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="dockerfile"><span></span><span class="tok-k">FROM</span><span class="tok-s"> python:3.8-alpine</span>
+<pre class="pygments highlight"><code data-lang="dockerfile"><span></span><span class="tok-k">FROM</span><span class="tok-s"> python:3.9-slim-buster</span>
 
 <b class="conum">(1)</b>
-<span class="tok-k">RUN</span> apk add --no-cache --virtual .build-deps gcc postgresql-dev musl-dev python3-dev
-<span class="tok-k">RUN</span> apk add libpq
+<span class="tok-c"># RUN apt install gcc libpq (no longer needed bc we use psycopg2-binary)</span>
 
 <b class="conum">(2)</b>
 COPY requirements.txt /tmp/
 <span class="tok-k">RUN</span> pip install -r /tmp/requirements.txt
-
-<span class="tok-k">RUN</span> apk del --no-cache .build-deps
 
 <b class="conum">(3)</b>
 <span class="tok-k">RUN</span> mkdir -p /src
@@ -681,7 +677,7 @@ find some inspiration here.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-20 13:47:19 UTC
+Last updated 2021-02-24 22:04:29 UTC
 </div>
 </div>
 <style>

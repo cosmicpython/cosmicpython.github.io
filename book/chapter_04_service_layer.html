@@ -266,22 +266,26 @@ them <em>end-to-end tests</em> because it&#8217;s one of the most self-explanato
 <div class="content">
 <div class="listingblock non-head">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@pytest.mark.usefixtures</span><span class="tok-p">(</span><span class="tok-s1">'restart_api'</span><span class="tok-p">)</span>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@pytest.mark.usefixtures</span><span class="tok-p">(</span><span class="tok-s2">"restart_api"</span><span class="tok-p">)</span>
 <span class="tok-k">def</span> <span class="tok-nf">test_api_returns_allocation</span><span class="tok-p">(</span><span class="tok-n">add_stock</span><span class="tok-p">):</span>
-    <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">othersku</span> <span class="tok-o">=</span> <span class="tok-n">random_sku</span><span class="tok-p">(),</span> <span class="tok-n">random_sku</span><span class="tok-p">(</span><span class="tok-s1">'other'</span><span class="tok-p">)</span>  #<b class="conum">(1)</b>
+    <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">othersku</span> <span class="tok-o">=</span> <span class="tok-n">random_sku</span><span class="tok-p">(),</span> <span class="tok-n">random_sku</span><span class="tok-p">(</span><span class="tok-s2">"other"</span><span class="tok-p">)</span>  #<b class="conum">(1)</b>
     <span class="tok-n">earlybatch</span> <span class="tok-o">=</span> <span class="tok-n">random_batchref</span><span class="tok-p">(</span><span class="tok-mi">1</span><span class="tok-p">)</span>
     <span class="tok-n">laterbatch</span> <span class="tok-o">=</span> <span class="tok-n">random_batchref</span><span class="tok-p">(</span><span class="tok-mi">2</span><span class="tok-p">)</span>
     <span class="tok-n">otherbatch</span> <span class="tok-o">=</span> <span class="tok-n">random_batchref</span><span class="tok-p">(</span><span class="tok-mi">3</span><span class="tok-p">)</span>
-    <span class="tok-n">add_stock</span><span class="tok-p">([</span>  #<b class="conum">(2)</b>
-        <span class="tok-p">(</span><span class="tok-n">laterbatch</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-s1">'2011-01-02'</span><span class="tok-p">),</span>
-        <span class="tok-p">(</span><span class="tok-n">earlybatch</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-s1">'2011-01-01'</span><span class="tok-p">),</span>
-        <span class="tok-p">(</span><span class="tok-n">otherbatch</span><span class="tok-p">,</span> <span class="tok-n">othersku</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">),</span>
-    <span class="tok-p">])</span>
-    <span class="tok-n">data</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s1">'orderid'</span><span class="tok-p">:</span> <span class="tok-n">random_orderid</span><span class="tok-p">(),</span> <span class="tok-s1">'sku'</span><span class="tok-p">:</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-s1">'qty'</span><span class="tok-p">:</span> <span class="tok-mi">3</span><span class="tok-p">}</span>
+    <span class="tok-n">add_stock</span><span class="tok-p">(</span>  #<b class="conum">(2)</b>
+        <span class="tok-p">[</span>
+            <span class="tok-p">(</span><span class="tok-n">laterbatch</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-s2">"2011-01-02"</span><span class="tok-p">),</span>
+            <span class="tok-p">(</span><span class="tok-n">earlybatch</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-s2">"2011-01-01"</span><span class="tok-p">),</span>
+            <span class="tok-p">(</span><span class="tok-n">otherbatch</span><span class="tok-p">,</span> <span class="tok-n">othersku</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">),</span>
+        <span class="tok-p">]</span>
+    <span class="tok-p">)</span>
+    <span class="tok-n">data</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s2">"orderid"</span><span class="tok-p">:</span> <span class="tok-n">random_orderid</span><span class="tok-p">(),</span> <span class="tok-s2">"sku"</span><span class="tok-p">:</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-s2">"qty"</span><span class="tok-p">:</span> <span class="tok-mi">3</span><span class="tok-p">}</span>
     <span class="tok-n">url</span> <span class="tok-o">=</span> <span class="tok-n">config</span><span class="tok-o">.</span><span class="tok-n">get_api_url</span><span class="tok-p">()</span>  #<b class="conum">(3)</b>
-    <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">post</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'{url}/allocate'</span><span class="tok-p">,</span> <span class="tok-n">json</span><span class="tok-o">=</span><span class="tok-n">data</span><span class="tok-p">)</span>
+
+    <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">post</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s2">"{url}/allocate"</span><span class="tok-p">,</span> <span class="tok-n">json</span><span class="tok-o">=</span><span class="tok-n">data</span><span class="tok-p">)</span>
+
     <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">status_code</span> <span class="tok-o">==</span> <span class="tok-mi">201</span>
-    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()[</span><span class="tok-s1">'batchref'</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-n">earlybatch</span></code></pre>
+    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()[</span><span class="tok-s2">"batchref"</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-n">earlybatch</span></code></pre>
 </div>
 </div>
 </div>
@@ -324,7 +328,7 @@ Implementing things in the most obvious way, you might get something like this:<
 <div class="content">
 <div class="listingblock non-head">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">flask</span> <span class="tok-kn">import</span> <span class="tok-n">Flask</span><span class="tok-p">,</span> <span class="tok-n">jsonify</span><span class="tok-p">,</span> <span class="tok-n">request</span>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">flask</span> <span class="tok-kn">import</span> <span class="tok-n">Flask</span><span class="tok-p">,</span> <span class="tok-n">request</span>
 <span class="tok-kn">from</span> <span class="tok-nn">sqlalchemy</span> <span class="tok-kn">import</span> <span class="tok-n">create_engine</span>
 <span class="tok-kn">from</span> <span class="tok-nn">sqlalchemy.orm</span> <span class="tok-kn">import</span> <span class="tok-n">sessionmaker</span>
 
@@ -338,19 +342,18 @@ Implementing things in the most obvious way, you might get something like this:<
 <span class="tok-n">get_session</span> <span class="tok-o">=</span> <span class="tok-n">sessionmaker</span><span class="tok-p">(</span><span class="tok-n">bind</span><span class="tok-o">=</span><span class="tok-n">create_engine</span><span class="tok-p">(</span><span class="tok-n">config</span><span class="tok-o">.</span><span class="tok-n">get_postgres_uri</span><span class="tok-p">()))</span>
 <span class="tok-n">app</span> <span class="tok-o">=</span> <span class="tok-n">Flask</span><span class="tok-p">(</span><span class="tok-vm">__name__</span><span class="tok-p">)</span>
 
-<span class="tok-nd">@app.route</span><span class="tok-p">(</span><span class="tok-s2">"/allocate"</span><span class="tok-p">,</span> <span class="tok-n">methods</span><span class="tok-o">=</span><span class="tok-p">[</span><span class="tok-s1">'POST'</span><span class="tok-p">])</span>
+
+<span class="tok-nd">@app.route</span><span class="tok-p">(</span><span class="tok-s2">"/allocate"</span><span class="tok-p">,</span> <span class="tok-n">methods</span><span class="tok-o">=</span><span class="tok-p">[</span><span class="tok-s2">"POST"</span><span class="tok-p">])</span>
 <span class="tok-k">def</span> <span class="tok-nf">allocate_endpoint</span><span class="tok-p">():</span>
     <span class="tok-n">session</span> <span class="tok-o">=</span> <span class="tok-n">get_session</span><span class="tok-p">()</span>
     <span class="tok-n">batches</span> <span class="tok-o">=</span> <span class="tok-n">repository</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyRepository</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">list</span><span class="tok-p">()</span>
     <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span>
-        <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s1">'orderid'</span><span class="tok-p">],</span>
-        <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s1">'sku'</span><span class="tok-p">],</span>
-        <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s1">'qty'</span><span class="tok-p">],</span>
+        <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s2">"orderid"</span><span class="tok-p">],</span> <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s2">"sku"</span><span class="tok-p">],</span> <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s2">"qty"</span><span class="tok-p">],</span>
     <span class="tok-p">)</span>
 
     <span class="tok-n">batchref</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">)</span>
 
-    <span class="tok-k">return</span> <span class="tok-n">jsonify</span><span class="tok-p">({</span><span class="tok-s1">'batchref'</span><span class="tok-p">:</span> <span class="tok-n">batchref</span><span class="tok-p">}),</span> <span class="tok-mi">201</span></code></pre>
+    <span class="tok-k">return</span> <span class="tok-p">{</span><span class="tok-s2">"batchref"</span><span class="tok-p">:</span> <span class="tok-n">batchref</span><span class="tok-p">},</span> <span class="tok-mi">201</span></code></pre>
 </div>
 </div>
 </div>
@@ -372,28 +375,27 @@ depleted the batch:</p>
 <div class="content">
 <div class="listingblock non-head">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@pytest.mark.usefixtures</span><span class="tok-p">(</span><span class="tok-s1">'restart_api'</span><span class="tok-p">)</span>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@pytest.mark.usefixtures</span><span class="tok-p">(</span><span class="tok-s2">"restart_api"</span><span class="tok-p">)</span>
 <span class="tok-k">def</span> <span class="tok-nf">test_allocations_are_persisted</span><span class="tok-p">(</span><span class="tok-n">add_stock</span><span class="tok-p">):</span>
     <span class="tok-n">sku</span> <span class="tok-o">=</span> <span class="tok-n">random_sku</span><span class="tok-p">()</span>
     <span class="tok-n">batch1</span><span class="tok-p">,</span> <span class="tok-n">batch2</span> <span class="tok-o">=</span> <span class="tok-n">random_batchref</span><span class="tok-p">(</span><span class="tok-mi">1</span><span class="tok-p">),</span> <span class="tok-n">random_batchref</span><span class="tok-p">(</span><span class="tok-mi">2</span><span class="tok-p">)</span>
     <span class="tok-n">order1</span><span class="tok-p">,</span> <span class="tok-n">order2</span> <span class="tok-o">=</span> <span class="tok-n">random_orderid</span><span class="tok-p">(</span><span class="tok-mi">1</span><span class="tok-p">),</span> <span class="tok-n">random_orderid</span><span class="tok-p">(</span><span class="tok-mi">2</span><span class="tok-p">)</span>
-    <span class="tok-n">add_stock</span><span class="tok-p">([</span>
-        <span class="tok-p">(</span><span class="tok-n">batch1</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">,</span> <span class="tok-s1">'2011-01-01'</span><span class="tok-p">),</span>
-        <span class="tok-p">(</span><span class="tok-n">batch2</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">,</span> <span class="tok-s1">'2011-01-02'</span><span class="tok-p">),</span>
-    <span class="tok-p">])</span>
-    <span class="tok-n">line1</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s1">'orderid'</span><span class="tok-p">:</span> <span class="tok-n">order1</span><span class="tok-p">,</span> <span class="tok-s1">'sku'</span><span class="tok-p">:</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-s1">'qty'</span><span class="tok-p">:</span> <span class="tok-mi">10</span><span class="tok-p">}</span>
-    <span class="tok-n">line2</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s1">'orderid'</span><span class="tok-p">:</span> <span class="tok-n">order2</span><span class="tok-p">,</span> <span class="tok-s1">'sku'</span><span class="tok-p">:</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-s1">'qty'</span><span class="tok-p">:</span> <span class="tok-mi">10</span><span class="tok-p">}</span>
+    <span class="tok-n">add_stock</span><span class="tok-p">(</span>
+        <span class="tok-p">[(</span><span class="tok-n">batch1</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">,</span> <span class="tok-s2">"2011-01-01"</span><span class="tok-p">),</span> <span class="tok-p">(</span><span class="tok-n">batch2</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">,</span> <span class="tok-s2">"2011-01-02"</span><span class="tok-p">),]</span>
+    <span class="tok-p">)</span>
+    <span class="tok-n">line1</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s2">"orderid"</span><span class="tok-p">:</span> <span class="tok-n">order1</span><span class="tok-p">,</span> <span class="tok-s2">"sku"</span><span class="tok-p">:</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-s2">"qty"</span><span class="tok-p">:</span> <span class="tok-mi">10</span><span class="tok-p">}</span>
+    <span class="tok-n">line2</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s2">"orderid"</span><span class="tok-p">:</span> <span class="tok-n">order2</span><span class="tok-p">,</span> <span class="tok-s2">"sku"</span><span class="tok-p">:</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-s2">"qty"</span><span class="tok-p">:</span> <span class="tok-mi">10</span><span class="tok-p">}</span>
     <span class="tok-n">url</span> <span class="tok-o">=</span> <span class="tok-n">config</span><span class="tok-o">.</span><span class="tok-n">get_api_url</span><span class="tok-p">()</span>
 
     <span class="tok-c1"># first order uses up all stock in batch 1</span>
-    <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">post</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'{url}/allocate'</span><span class="tok-p">,</span> <span class="tok-n">json</span><span class="tok-o">=</span><span class="tok-n">line1</span><span class="tok-p">)</span>
+    <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">post</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s2">"{url}/allocate"</span><span class="tok-p">,</span> <span class="tok-n">json</span><span class="tok-o">=</span><span class="tok-n">line1</span><span class="tok-p">)</span>
     <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">status_code</span> <span class="tok-o">==</span> <span class="tok-mi">201</span>
-    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()[</span><span class="tok-s1">'batchref'</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-n">batch1</span>
+    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()[</span><span class="tok-s2">"batchref"</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-n">batch1</span>
 
     <span class="tok-c1"># second order should go to batch 2</span>
-    <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">post</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'{url}/allocate'</span><span class="tok-p">,</span> <span class="tok-n">json</span><span class="tok-o">=</span><span class="tok-n">line2</span><span class="tok-p">)</span>
+    <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">post</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s2">"{url}/allocate"</span><span class="tok-p">,</span> <span class="tok-n">json</span><span class="tok-o">=</span><span class="tok-n">line2</span><span class="tok-p">)</span>
     <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">status_code</span> <span class="tok-o">==</span> <span class="tok-mi">201</span>
-    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()[</span><span class="tok-s1">'batchref'</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-n">batch2</span></code></pre>
+    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()[</span><span class="tok-s2">"batchref"</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-n">batch2</span></code></pre>
 </div>
 </div>
 </div>
@@ -426,27 +428,27 @@ we even invoke the domain service.</p>
 <div class="content">
 <div class="listingblock non-head">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@pytest.mark.usefixtures</span><span class="tok-p">(</span><span class="tok-s1">'restart_api'</span><span class="tok-p">)</span>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@pytest.mark.usefixtures</span><span class="tok-p">(</span><span class="tok-s2">"restart_api"</span><span class="tok-p">)</span>
 <span class="tok-k">def</span> <span class="tok-nf">test_400_message_for_out_of_stock</span><span class="tok-p">(</span><span class="tok-n">add_stock</span><span class="tok-p">):</span>  #<b class="conum">(1)</b>
     <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">smalL_batch</span><span class="tok-p">,</span> <span class="tok-n">large_order</span> <span class="tok-o">=</span> <span class="tok-n">random_sku</span><span class="tok-p">(),</span> <span class="tok-n">random_batchref</span><span class="tok-p">(),</span> <span class="tok-n">random_orderid</span><span class="tok-p">()</span>
-    <span class="tok-n">add_stock</span><span class="tok-p">([</span>
-        <span class="tok-p">(</span><span class="tok-n">smalL_batch</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">,</span> <span class="tok-s1">'2011-01-01'</span><span class="tok-p">),</span>
-    <span class="tok-p">])</span>
-    <span class="tok-n">data</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s1">'orderid'</span><span class="tok-p">:</span> <span class="tok-n">large_order</span><span class="tok-p">,</span> <span class="tok-s1">'sku'</span><span class="tok-p">:</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-s1">'qty'</span><span class="tok-p">:</span> <span class="tok-mi">20</span><span class="tok-p">}</span>
+    <span class="tok-n">add_stock</span><span class="tok-p">(</span>
+        <span class="tok-p">[(</span><span class="tok-n">smalL_batch</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">,</span> <span class="tok-s2">"2011-01-01"</span><span class="tok-p">),]</span>
+    <span class="tok-p">)</span>
+    <span class="tok-n">data</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s2">"orderid"</span><span class="tok-p">:</span> <span class="tok-n">large_order</span><span class="tok-p">,</span> <span class="tok-s2">"sku"</span><span class="tok-p">:</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-s2">"qty"</span><span class="tok-p">:</span> <span class="tok-mi">20</span><span class="tok-p">}</span>
     <span class="tok-n">url</span> <span class="tok-o">=</span> <span class="tok-n">config</span><span class="tok-o">.</span><span class="tok-n">get_api_url</span><span class="tok-p">()</span>
-    <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">post</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'{url}/allocate'</span><span class="tok-p">,</span> <span class="tok-n">json</span><span class="tok-o">=</span><span class="tok-n">data</span><span class="tok-p">)</span>
+    <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">post</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s2">"{url}/allocate"</span><span class="tok-p">,</span> <span class="tok-n">json</span><span class="tok-o">=</span><span class="tok-n">data</span><span class="tok-p">)</span>
     <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">status_code</span> <span class="tok-o">==</span> <span class="tok-mi">400</span>
-    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()[</span><span class="tok-s1">'message'</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-n">f</span><span class="tok-s1">'Out of stock for sku {sku}'</span>
+    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()[</span><span class="tok-s2">"message"</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-n">f</span><span class="tok-s2">"Out of stock for sku {sku}"</span>
 
 
-<span class="tok-nd">@pytest.mark.usefixtures</span><span class="tok-p">(</span><span class="tok-s1">'restart_api'</span><span class="tok-p">)</span>
+<span class="tok-nd">@pytest.mark.usefixtures</span><span class="tok-p">(</span><span class="tok-s2">"restart_api"</span><span class="tok-p">)</span>
 <span class="tok-k">def</span> <span class="tok-nf">test_400_message_for_invalid_sku</span><span class="tok-p">():</span>  #<b class="conum">(2)</b>
     <span class="tok-n">unknown_sku</span><span class="tok-p">,</span> <span class="tok-n">orderid</span> <span class="tok-o">=</span> <span class="tok-n">random_sku</span><span class="tok-p">(),</span> <span class="tok-n">random_orderid</span><span class="tok-p">()</span>
-    <span class="tok-n">data</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s1">'orderid'</span><span class="tok-p">:</span> <span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-s1">'sku'</span><span class="tok-p">:</span> <span class="tok-n">unknown_sku</span><span class="tok-p">,</span> <span class="tok-s1">'qty'</span><span class="tok-p">:</span> <span class="tok-mi">20</span><span class="tok-p">}</span>
+    <span class="tok-n">data</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s2">"orderid"</span><span class="tok-p">:</span> <span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-s2">"sku"</span><span class="tok-p">:</span> <span class="tok-n">unknown_sku</span><span class="tok-p">,</span> <span class="tok-s2">"qty"</span><span class="tok-p">:</span> <span class="tok-mi">20</span><span class="tok-p">}</span>
     <span class="tok-n">url</span> <span class="tok-o">=</span> <span class="tok-n">config</span><span class="tok-o">.</span><span class="tok-n">get_api_url</span><span class="tok-p">()</span>
-    <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">post</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'{url}/allocate'</span><span class="tok-p">,</span> <span class="tok-n">json</span><span class="tok-o">=</span><span class="tok-n">data</span><span class="tok-p">)</span>
+    <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">post</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s2">"{url}/allocate"</span><span class="tok-p">,</span> <span class="tok-n">json</span><span class="tok-o">=</span><span class="tok-n">data</span><span class="tok-p">)</span>
     <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">status_code</span> <span class="tok-o">==</span> <span class="tok-mi">400</span>
-    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()[</span><span class="tok-s1">'message'</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-n">f</span><span class="tok-s1">'Invalid sku {unknown_sku}'</span></code></pre>
+    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()[</span><span class="tok-s2">"message"</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-n">f</span><span class="tok-s2">"Invalid sku {unknown_sku}"</span></code></pre>
 </div>
 </div>
 </div>
@@ -473,26 +475,25 @@ so it&#8217;s invalid as far as our app is concerned.</p>
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">is_valid_sku</span><span class="tok-p">(</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">):</span>
     <span class="tok-k">return</span> <span class="tok-n">sku</span> <span class="tok-ow">in</span> <span class="tok-p">{</span><span class="tok-n">b</span><span class="tok-o">.</span><span class="tok-n">sku</span> <span class="tok-k">for</span> <span class="tok-n">b</span> <span class="tok-ow">in</span> <span class="tok-n">batches</span><span class="tok-p">}</span>
 
-<span class="tok-nd">@app.route</span><span class="tok-p">(</span><span class="tok-s2">"/allocate"</span><span class="tok-p">,</span> <span class="tok-n">methods</span><span class="tok-o">=</span><span class="tok-p">[</span><span class="tok-s1">'POST'</span><span class="tok-p">])</span>
+
+<span class="tok-nd">@app.route</span><span class="tok-p">(</span><span class="tok-s2">"/allocate"</span><span class="tok-p">,</span> <span class="tok-n">methods</span><span class="tok-o">=</span><span class="tok-p">[</span><span class="tok-s2">"POST"</span><span class="tok-p">])</span>
 <span class="tok-k">def</span> <span class="tok-nf">allocate_endpoint</span><span class="tok-p">():</span>
     <span class="tok-n">session</span> <span class="tok-o">=</span> <span class="tok-n">get_session</span><span class="tok-p">()</span>
     <span class="tok-n">batches</span> <span class="tok-o">=</span> <span class="tok-n">repository</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyRepository</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">list</span><span class="tok-p">()</span>
     <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span>
-        <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s1">'orderid'</span><span class="tok-p">],</span>
-        <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s1">'sku'</span><span class="tok-p">],</span>
-        <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s1">'qty'</span><span class="tok-p">],</span>
+        <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s2">"orderid"</span><span class="tok-p">],</span> <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s2">"sku"</span><span class="tok-p">],</span> <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s2">"qty"</span><span class="tok-p">],</span>
     <span class="tok-p">)</span>
 
     <span class="tok-k">if</span> <span class="tok-ow">not</span> <span class="tok-n">is_valid_sku</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">):</span>
-        <span class="tok-k">return</span> <span class="tok-n">jsonify</span><span class="tok-p">({</span><span class="tok-s1">'message'</span><span class="tok-p">:</span> <span class="tok-n">f</span><span class="tok-s1">'Invalid sku {line.sku}'</span><span class="tok-p">}),</span> <span class="tok-mi">400</span>
+        <span class="tok-k">return</span> <span class="tok-p">{</span><span class="tok-s2">"message"</span><span class="tok-p">:</span> <span class="tok-n">f</span><span class="tok-s2">"Invalid sku {line.sku}"</span><span class="tok-p">},</span> <span class="tok-mi">400</span>
 
     <span class="tok-k">try</span><span class="tok-p">:</span>
         <span class="tok-n">batchref</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">)</span>
     <span class="tok-k">except</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OutOfStock</span> <span class="tok-k">as</span> <span class="tok-n">e</span><span class="tok-p">:</span>
-        <span class="tok-k">return</span> <span class="tok-n">jsonify</span><span class="tok-p">({</span><span class="tok-s1">'message'</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">(</span><span class="tok-n">e</span><span class="tok-p">)}),</span> <span class="tok-mi">400</span>
+        <span class="tok-k">return</span> <span class="tok-p">{</span><span class="tok-s2">"message"</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">(</span><span class="tok-n">e</span><span class="tok-p">)},</span> <span class="tok-mi">400</span>
 
     <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span>
-    <span class="tok-k">return</span> <span class="tok-n">jsonify</span><span class="tok-p">({</span><span class="tok-s1">'batchref'</span><span class="tok-p">:</span> <span class="tok-n">batchref</span><span class="tok-p">}),</span> <span class="tok-mi">201</span></code></pre>
+    <span class="tok-k">return</span> <span class="tok-p">{</span><span class="tok-s2">"batchref"</span><span class="tok-p">:</span> <span class="tok-n">batchref</span><span class="tok-p">},</span> <span class="tok-mi">201</span></code></pre>
 </div>
 </div>
 </div>
@@ -533,7 +534,6 @@ Do you remember the <code>FakeRepository</code> that we prepared in <a href="/bo
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">FakeRepository</span><span class="tok-p">(</span><span class="tok-n">repository</span><span class="tok-o">.</span><span class="tok-n">AbstractRepository</span><span class="tok-p">):</span>
-
     <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">):</span>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_batches</span> <span class="tok-o">=</span> <span class="tok-nb">set</span><span class="tok-p">(</span><span class="tok-n">batches</span><span class="tok-p">)</span>
 
@@ -605,7 +605,7 @@ the following code snippet.
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">FakeSession</span><span class="tok-p">():</span>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">FakeSession</span><span class="tok-p">:</span>
     <span class="tok-n">committed</span> <span class="tok-o">=</span> <span class="tok-bp">False</span>
 
     <span class="tok-k">def</span> <span class="tok-nf">commit</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
@@ -625,8 +625,8 @@ the fake <code>.commit()</code> lets us migrate a third test from the E2E layer:
 <div class="listingblock non-head">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_commits</span><span class="tok-p">():</span>
-    <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s1">'o1'</span><span class="tok-p">,</span> <span class="tok-s1">'OMINOUS-MIRROR'</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">)</span>
-    <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s1">'b1'</span><span class="tok-p">,</span> <span class="tok-s1">'OMINOUS-MIRROR'</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-bp">None</span><span class="tok-p">)</span>
+    <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s2">"o1"</span><span class="tok-p">,</span> <span class="tok-s2">"OMINOUS-MIRROR"</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">)</span>
+    <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"b1"</span><span class="tok-p">,</span> <span class="tok-s2">"OMINOUS-MIRROR"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-bp">None</span><span class="tok-p">)</span>
     <span class="tok-n">repo</span> <span class="tok-o">=</span> <span class="tok-n">FakeRepository</span><span class="tok-p">([</span><span class="tok-n">batch</span><span class="tok-p">])</span>
     <span class="tok-n">session</span> <span class="tok-o">=</span> <span class="tok-n">FakeSession</span><span class="tok-p">()</span>
 
@@ -657,10 +657,11 @@ We&#8217;ll write a service function that looks something like this:</p>
 <span class="tok-k">def</span> <span class="tok-nf">is_valid_sku</span><span class="tok-p">(</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">):</span>
     <span class="tok-k">return</span> <span class="tok-n">sku</span> <span class="tok-ow">in</span> <span class="tok-p">{</span><span class="tok-n">b</span><span class="tok-o">.</span><span class="tok-n">sku</span> <span class="tok-k">for</span> <span class="tok-n">b</span> <span class="tok-ow">in</span> <span class="tok-n">batches</span><span class="tok-p">}</span>
 
+
 <span class="tok-k">def</span> <span class="tok-nf">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">:</span> <span class="tok-n">OrderLine</span><span class="tok-p">,</span> <span class="tok-n">repo</span><span class="tok-p">:</span> <span class="tok-n">AbstractRepository</span><span class="tok-p">,</span> <span class="tok-n">session</span><span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-nb">str</span><span class="tok-p">:</span>
     <span class="tok-n">batches</span> <span class="tok-o">=</span> <span class="tok-n">repo</span><span class="tok-o">.</span><span class="tok-n">list</span><span class="tok-p">()</span>  #<b class="conum">(1)</b>
     <span class="tok-k">if</span> <span class="tok-ow">not</span> <span class="tok-n">is_valid_sku</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">):</span>  #<b class="conum">(2)</b>
-        <span class="tok-k">raise</span> <span class="tok-n">InvalidSku</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'Invalid sku {line.sku}'</span><span class="tok-p">)</span>
+        <span class="tok-k">raise</span> <span class="tok-n">InvalidSku</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s2">"Invalid sku {line.sku}"</span><span class="tok-p">)</span>
     <span class="tok-n">batchref</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">)</span>  #<b class="conum">(3)</b>
     <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span>  #<b class="conum">(4)</b>
     <span class="tok-k">return</span> <span class="tok-n">batchref</span></code></pre>
@@ -740,21 +741,20 @@ app now looks a lot cleaner:</p>
 <div class="content">
 <div class="listingblock non-head">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@app.route</span><span class="tok-p">(</span><span class="tok-s2">"/allocate"</span><span class="tok-p">,</span> <span class="tok-n">methods</span><span class="tok-o">=</span><span class="tok-p">[</span><span class="tok-s1">'POST'</span><span class="tok-p">])</span>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@app.route</span><span class="tok-p">(</span><span class="tok-s2">"/allocate"</span><span class="tok-p">,</span> <span class="tok-n">methods</span><span class="tok-o">=</span><span class="tok-p">[</span><span class="tok-s2">"POST"</span><span class="tok-p">])</span>
 <span class="tok-k">def</span> <span class="tok-nf">allocate_endpoint</span><span class="tok-p">():</span>
     <span class="tok-n">session</span> <span class="tok-o">=</span> <span class="tok-n">get_session</span><span class="tok-p">()</span>  #<b class="conum">(1)</b>
     <span class="tok-n">repo</span> <span class="tok-o">=</span> <span class="tok-n">repository</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyRepository</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">)</span>  #<b class="conum">(1)</b>
     <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span>
-        <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s1">'orderid'</span><span class="tok-p">],</span>  #<b class="conum">(2)</b>
-        <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s1">'sku'</span><span class="tok-p">],</span>  #<b class="conum">(2)</b>
-        <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s1">'qty'</span><span class="tok-p">],</span>  #<b class="conum">(2)</b>
+        <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s2">"orderid"</span><span class="tok-p">],</span> <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s2">"sku"</span><span class="tok-p">],</span> <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s2">"qty"</span><span class="tok-p">],</span>  #<b class="conum">(2)</b>
     <span class="tok-p">)</span>
+
     <span class="tok-k">try</span><span class="tok-p">:</span>
         <span class="tok-n">batchref</span> <span class="tok-o">=</span> <span class="tok-n">services</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">,</span> <span class="tok-n">repo</span><span class="tok-p">,</span> <span class="tok-n">session</span><span class="tok-p">)</span>  #<b class="conum">(2)</b>
     <span class="tok-k">except</span> <span class="tok-p">(</span><span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OutOfStock</span><span class="tok-p">,</span> <span class="tok-n">services</span><span class="tok-o">.</span><span class="tok-n">InvalidSku</span><span class="tok-p">)</span> <span class="tok-k">as</span> <span class="tok-n">e</span><span class="tok-p">:</span>
-        <span class="tok-k">return</span> <span class="tok-n">jsonify</span><span class="tok-p">({</span><span class="tok-s1">'message'</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">(</span><span class="tok-n">e</span><span class="tok-p">)}),</span> <span class="tok-mi">400</span>  <b class="conum">(3)</b>
+        <span class="tok-k">return</span> <span class="tok-p">{</span><span class="tok-s2">"message"</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">(</span><span class="tok-n">e</span><span class="tok-p">)},</span> <span class="tok-mi">400</span>  <b class="conum">(3)</b>
 
-    <span class="tok-k">return</span> <span class="tok-n">jsonify</span><span class="tok-p">({</span><span class="tok-s1">'batchref'</span><span class="tok-p">:</span> <span class="tok-n">batchref</span><span class="tok-p">}),</span> <span class="tok-mi">201</span>  <b class="conum">(3)</b></code></pre>
+    <span class="tok-k">return</span> <span class="tok-p">{</span><span class="tok-s2">"batchref"</span><span class="tok-p">:</span> <span class="tok-n">batchref</span><span class="tok-p">},</span> <span class="tok-mi">201</span>  <b class="conum">(3)</b></code></pre>
 </div>
 </div>
 </div>
@@ -790,32 +790,36 @@ the happy path and one for the unhappy path:</p>
 <div class="content">
 <div class="listingblock non-head">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@pytest.mark.usefixtures</span><span class="tok-p">(</span><span class="tok-s1">'restart_api'</span><span class="tok-p">)</span>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@pytest.mark.usefixtures</span><span class="tok-p">(</span><span class="tok-s2">"restart_api"</span><span class="tok-p">)</span>
 <span class="tok-k">def</span> <span class="tok-nf">test_happy_path_returns_201_and_allocated_batch</span><span class="tok-p">(</span><span class="tok-n">add_stock</span><span class="tok-p">):</span>
-    <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">othersku</span> <span class="tok-o">=</span> <span class="tok-n">random_sku</span><span class="tok-p">(),</span> <span class="tok-n">random_sku</span><span class="tok-p">(</span><span class="tok-s1">'other'</span><span class="tok-p">)</span>
+    <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">othersku</span> <span class="tok-o">=</span> <span class="tok-n">random_sku</span><span class="tok-p">(),</span> <span class="tok-n">random_sku</span><span class="tok-p">(</span><span class="tok-s2">"other"</span><span class="tok-p">)</span>
     <span class="tok-n">earlybatch</span> <span class="tok-o">=</span> <span class="tok-n">random_batchref</span><span class="tok-p">(</span><span class="tok-mi">1</span><span class="tok-p">)</span>
     <span class="tok-n">laterbatch</span> <span class="tok-o">=</span> <span class="tok-n">random_batchref</span><span class="tok-p">(</span><span class="tok-mi">2</span><span class="tok-p">)</span>
     <span class="tok-n">otherbatch</span> <span class="tok-o">=</span> <span class="tok-n">random_batchref</span><span class="tok-p">(</span><span class="tok-mi">3</span><span class="tok-p">)</span>
-    <span class="tok-n">add_stock</span><span class="tok-p">([</span>
-        <span class="tok-p">(</span><span class="tok-n">laterbatch</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-s1">'2011-01-02'</span><span class="tok-p">),</span>
-        <span class="tok-p">(</span><span class="tok-n">earlybatch</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-s1">'2011-01-01'</span><span class="tok-p">),</span>
-        <span class="tok-p">(</span><span class="tok-n">otherbatch</span><span class="tok-p">,</span> <span class="tok-n">othersku</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">),</span>
-    <span class="tok-p">])</span>
-    <span class="tok-n">data</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s1">'orderid'</span><span class="tok-p">:</span> <span class="tok-n">random_orderid</span><span class="tok-p">(),</span> <span class="tok-s1">'sku'</span><span class="tok-p">:</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-s1">'qty'</span><span class="tok-p">:</span> <span class="tok-mi">3</span><span class="tok-p">}</span>
+    <span class="tok-n">add_stock</span><span class="tok-p">(</span>
+        <span class="tok-p">[</span>
+            <span class="tok-p">(</span><span class="tok-n">laterbatch</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-s2">"2011-01-02"</span><span class="tok-p">),</span>
+            <span class="tok-p">(</span><span class="tok-n">earlybatch</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-s2">"2011-01-01"</span><span class="tok-p">),</span>
+            <span class="tok-p">(</span><span class="tok-n">otherbatch</span><span class="tok-p">,</span> <span class="tok-n">othersku</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">),</span>
+        <span class="tok-p">]</span>
+    <span class="tok-p">)</span>
+    <span class="tok-n">data</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s2">"orderid"</span><span class="tok-p">:</span> <span class="tok-n">random_orderid</span><span class="tok-p">(),</span> <span class="tok-s2">"sku"</span><span class="tok-p">:</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-s2">"qty"</span><span class="tok-p">:</span> <span class="tok-mi">3</span><span class="tok-p">}</span>
     <span class="tok-n">url</span> <span class="tok-o">=</span> <span class="tok-n">config</span><span class="tok-o">.</span><span class="tok-n">get_api_url</span><span class="tok-p">()</span>
-    <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">post</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'{url}/allocate'</span><span class="tok-p">,</span> <span class="tok-n">json</span><span class="tok-o">=</span><span class="tok-n">data</span><span class="tok-p">)</span>
+
+    <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">post</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s2">"{url}/allocate"</span><span class="tok-p">,</span> <span class="tok-n">json</span><span class="tok-o">=</span><span class="tok-n">data</span><span class="tok-p">)</span>
+
     <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">status_code</span> <span class="tok-o">==</span> <span class="tok-mi">201</span>
-    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()[</span><span class="tok-s1">'batchref'</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-n">earlybatch</span>
+    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()[</span><span class="tok-s2">"batchref"</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-n">earlybatch</span>
 
 
-<span class="tok-nd">@pytest.mark.usefixtures</span><span class="tok-p">(</span><span class="tok-s1">'restart_api'</span><span class="tok-p">)</span>
+<span class="tok-nd">@pytest.mark.usefixtures</span><span class="tok-p">(</span><span class="tok-s2">"restart_api"</span><span class="tok-p">)</span>
 <span class="tok-k">def</span> <span class="tok-nf">test_unhappy_path_returns_400_and_error_message</span><span class="tok-p">():</span>
     <span class="tok-n">unknown_sku</span><span class="tok-p">,</span> <span class="tok-n">orderid</span> <span class="tok-o">=</span> <span class="tok-n">random_sku</span><span class="tok-p">(),</span> <span class="tok-n">random_orderid</span><span class="tok-p">()</span>
-    <span class="tok-n">data</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s1">'orderid'</span><span class="tok-p">:</span> <span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-s1">'sku'</span><span class="tok-p">:</span> <span class="tok-n">unknown_sku</span><span class="tok-p">,</span> <span class="tok-s1">'qty'</span><span class="tok-p">:</span> <span class="tok-mi">20</span><span class="tok-p">}</span>
+    <span class="tok-n">data</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s2">"orderid"</span><span class="tok-p">:</span> <span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-s2">"sku"</span><span class="tok-p">:</span> <span class="tok-n">unknown_sku</span><span class="tok-p">,</span> <span class="tok-s2">"qty"</span><span class="tok-p">:</span> <span class="tok-mi">20</span><span class="tok-p">}</span>
     <span class="tok-n">url</span> <span class="tok-o">=</span> <span class="tok-n">config</span><span class="tok-o">.</span><span class="tok-n">get_api_url</span><span class="tok-p">()</span>
-    <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">post</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'{url}/allocate'</span><span class="tok-p">,</span> <span class="tok-n">json</span><span class="tok-o">=</span><span class="tok-n">data</span><span class="tok-p">)</span>
+    <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">post</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s2">"{url}/allocate"</span><span class="tok-p">,</span> <span class="tok-n">json</span><span class="tok-o">=</span><span class="tok-n">data</span><span class="tok-p">)</span>
     <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">status_code</span> <span class="tok-o">==</span> <span class="tok-mi">400</span>
-    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()[</span><span class="tok-s1">'message'</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-n">f</span><span class="tok-s1">'Invalid sku {unknown_sku}'</span></code></pre>
+    <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()[</span><span class="tok-s2">"message"</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-n">f</span><span class="tok-s2">"Invalid sku {unknown_sku}"</span></code></pre>
 </div>
 </div>
 </div>
@@ -1259,7 +1263,7 @@ You&#8217;ll see!</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-20 13:47:19 UTC
+Last updated 2021-02-24 22:04:29 UTC
 </div>
 </div>
 <style>

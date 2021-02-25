@@ -259,11 +259,13 @@ What kinds of commands do we have in our system right now?</p>
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">Command</span><span class="tok-p">:</span>
     <span class="tok-k">pass</span>
 
+
 <span class="tok-nd">@dataclass</span>
 <span class="tok-k">class</span> <span class="tok-nc">Allocate</span><span class="tok-p">(</span><span class="tok-n">Command</span><span class="tok-p">):</span>  #<b class="conum">(1)</b>
     <span class="tok-n">orderid</span><span class="tok-p">:</span> <span class="tok-nb">str</span>
     <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span>
     <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span>
+
 
 <span class="tok-nd">@dataclass</span>
 <span class="tok-k">class</span> <span class="tok-nc">CreateBatch</span><span class="tok-p">(</span><span class="tok-n">Command</span><span class="tok-p">):</span>  #<b class="conum">(2)</b>
@@ -271,6 +273,7 @@ What kinds of commands do we have in our system right now?</p>
     <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span>
     <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span>
     <span class="tok-n">eta</span><span class="tok-p">:</span> <span class="tok-n">Optional</span><span class="tok-p">[</span><span class="tok-n">date</span><span class="tok-p">]</span> <span class="tok-o">=</span> <span class="tok-bp">None</span>
+
 
 <span class="tok-nd">@dataclass</span>
 <span class="tok-k">class</span> <span class="tok-nc">ChangeBatchQuantity</span><span class="tok-p">(</span><span class="tok-n">Command</span><span class="tok-p">):</span>  #<b class="conum">(3)</b>
@@ -312,7 +315,10 @@ but not exactly the same.  Let&#8217;s see how our message bus changes:</p>
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-n">Message</span> <span class="tok-o">=</span> <span class="tok-n">Union</span><span class="tok-p">[</span><span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">Command</span><span class="tok-p">,</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">Event</span><span class="tok-p">]</span>
 
 
-<span class="tok-k">def</span> <span class="tok-nf">handle</span><span class="tok-p">(</span><span class="tok-n">message</span><span class="tok-p">:</span> <span class="tok-n">Message</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">):</span>  #<b class="conum">(1)</b>
+<span class="tok-k">def</span> <span class="tok-nf">handle</span><span class="tok-p">(</span>  #<b class="conum">(1)</b>
+    <span class="tok-n">message</span><span class="tok-p">:</span> <span class="tok-n">Message</span><span class="tok-p">,</span>
+    <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>
+<span class="tok-p">):</span>
     <span class="tok-n">results</span> <span class="tok-o">=</span> <span class="tok-p">[]</span>
     <span class="tok-n">queue</span> <span class="tok-o">=</span> <span class="tok-p">[</span><span class="tok-n">message</span><span class="tok-p">]</span>
     <span class="tok-k">while</span> <span class="tok-n">queue</span><span class="tok-p">:</span>
@@ -323,7 +329,7 @@ but not exactly the same.  Let&#8217;s see how our message bus changes:</p>
             <span class="tok-n">cmd_result</span> <span class="tok-o">=</span> <span class="tok-n">handle_command</span><span class="tok-p">(</span><span class="tok-n">message</span><span class="tok-p">,</span> <span class="tok-n">queue</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">)</span>  #<b class="conum">(2)</b>
             <span class="tok-n">results</span><span class="tok-o">.</span><span class="tok-n">append</span><span class="tok-p">(</span><span class="tok-n">cmd_result</span><span class="tok-p">)</span>
         <span class="tok-k">else</span><span class="tok-p">:</span>
-            <span class="tok-k">raise</span> <span class="tok-ne">Exception</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'{message} was not an Event or Command'</span><span class="tok-p">)</span>
+            <span class="tok-k">raise</span> <span class="tok-ne">Exception</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s2">"{message} was not an Event or Command"</span><span class="tok-p">)</span>
     <span class="tok-k">return</span> <span class="tok-n">results</span></code></pre>
 </div>
 </div>
@@ -351,15 +357,15 @@ be a command or an event.</p>
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">handle_event</span><span class="tok-p">(</span>
     <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">Event</span><span class="tok-p">,</span>
     <span class="tok-n">queue</span><span class="tok-p">:</span> <span class="tok-n">List</span><span class="tok-p">[</span><span class="tok-n">Message</span><span class="tok-p">],</span>
-    <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span>
+    <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>
 <span class="tok-p">):</span>
     <span class="tok-k">for</span> <span class="tok-n">handler</span> <span class="tok-ow">in</span> <span class="tok-n">EVENT_HANDLERS</span><span class="tok-p">[</span><span class="tok-nb">type</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">)]:</span>  #<b class="conum">(1)</b>
         <span class="tok-k">try</span><span class="tok-p">:</span>
-            <span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">debug</span><span class="tok-p">(</span><span class="tok-s1">'handling event </span><span class="tok-si">%s</span><span class="tok-s1"> with handler </span><span class="tok-si">%s</span><span class="tok-s1">'</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">,</span> <span class="tok-n">handler</span><span class="tok-p">)</span>
+            <span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">debug</span><span class="tok-p">(</span><span class="tok-s2">"handling event </span><span class="tok-si">%s</span><span class="tok-s2"> with handler </span><span class="tok-si">%s</span><span class="tok-s2">"</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">,</span> <span class="tok-n">handler</span><span class="tok-p">)</span>
             <span class="tok-n">handler</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-o">=</span><span class="tok-n">uow</span><span class="tok-p">)</span>
             <span class="tok-n">queue</span><span class="tok-o">.</span><span class="tok-n">extend</span><span class="tok-p">(</span><span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">collect_new_events</span><span class="tok-p">())</span>
         <span class="tok-k">except</span> <span class="tok-ne">Exception</span><span class="tok-p">:</span>
-            <span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">exception</span><span class="tok-p">(</span><span class="tok-s1">'Exception handling event </span><span class="tok-si">%s</span><span class="tok-s1">'</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">)</span>
+            <span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">exception</span><span class="tok-p">(</span><span class="tok-s2">"Exception handling event </span><span class="tok-si">%s</span><span class="tok-s2">"</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">)</span>
             <span class="tok-k">continue</span>  #<b class="conum">(2)</b></code></pre>
 </div>
 </div>
@@ -389,16 +395,16 @@ And here&#8217;s how we do commands:</p>
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">handle_command</span><span class="tok-p">(</span>
     <span class="tok-n">command</span><span class="tok-p">:</span> <span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">Command</span><span class="tok-p">,</span>
     <span class="tok-n">queue</span><span class="tok-p">:</span> <span class="tok-n">List</span><span class="tok-p">[</span><span class="tok-n">Message</span><span class="tok-p">],</span>
-    <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span>
+    <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>
 <span class="tok-p">):</span>
-    <span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">debug</span><span class="tok-p">(</span><span class="tok-s1">'handling command </span><span class="tok-si">%s</span><span class="tok-s1">'</span><span class="tok-p">,</span> <span class="tok-n">command</span><span class="tok-p">)</span>
+    <span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">debug</span><span class="tok-p">(</span><span class="tok-s2">"handling command </span><span class="tok-si">%s</span><span class="tok-s2">"</span><span class="tok-p">,</span> <span class="tok-n">command</span><span class="tok-p">)</span>
     <span class="tok-k">try</span><span class="tok-p">:</span>
         <span class="tok-n">handler</span> <span class="tok-o">=</span> <span class="tok-n">COMMAND_HANDLERS</span><span class="tok-p">[</span><span class="tok-nb">type</span><span class="tok-p">(</span><span class="tok-n">command</span><span class="tok-p">)]</span>  #<b class="conum">(1)</b>
         <span class="tok-n">result</span> <span class="tok-o">=</span> <span class="tok-n">handler</span><span class="tok-p">(</span><span class="tok-n">command</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-o">=</span><span class="tok-n">uow</span><span class="tok-p">)</span>
         <span class="tok-n">queue</span><span class="tok-o">.</span><span class="tok-n">extend</span><span class="tok-p">(</span><span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">collect_new_events</span><span class="tok-p">())</span>
         <span class="tok-k">return</span> <span class="tok-n">result</span>  #<b class="conum">(3)</b>
     <span class="tok-k">except</span> <span class="tok-ne">Exception</span><span class="tok-p">:</span>
-        <span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">exception</span><span class="tok-p">(</span><span class="tok-s1">'Exception handling command </span><span class="tok-si">%s</span><span class="tok-s1">'</span><span class="tok-p">,</span> <span class="tok-n">command</span><span class="tok-p">)</span>
+        <span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">exception</span><span class="tok-p">(</span><span class="tok-s2">"Exception handling command </span><span class="tok-si">%s</span><span class="tok-s2">"</span><span class="tok-p">,</span> <span class="tok-n">command</span><span class="tok-p">)</span>
         <span class="tok-k">raise</span>  #<b class="conum">(2)</b></code></pre>
 </div>
 </div>
@@ -661,15 +667,15 @@ Let&#8217;s look again at the <code>handle_event</code> method from our message 
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">handle_event</span><span class="tok-p">(</span>
     <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">Event</span><span class="tok-p">,</span>
     <span class="tok-n">queue</span><span class="tok-p">:</span> <span class="tok-n">List</span><span class="tok-p">[</span><span class="tok-n">Message</span><span class="tok-p">],</span>
-    <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span>
+    <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>
 <span class="tok-p">):</span>
     <span class="tok-k">for</span> <span class="tok-n">handler</span> <span class="tok-ow">in</span> <span class="tok-n">EVENT_HANDLERS</span><span class="tok-p">[</span><span class="tok-nb">type</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">)]:</span>
         <span class="tok-k">try</span><span class="tok-p">:</span>
-<span class="hll">            <span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">debug</span><span class="tok-p">(</span><span class="tok-s1">'handling event </span><span class="tok-si">%s</span><span class="tok-s1"> with handler </span><span class="tok-si">%s</span><span class="tok-s1">'</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">,</span> <span class="tok-n">handler</span><span class="tok-p">)</span>
+<span class="hll">            <span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">debug</span><span class="tok-p">(</span><span class="tok-s2">"handling event </span><span class="tok-si">%s</span><span class="tok-s2"> with handler </span><span class="tok-si">%s</span><span class="tok-s2">"</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">,</span> <span class="tok-n">handler</span><span class="tok-p">)</span>
 </span>            <span class="tok-n">handler</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-o">=</span><span class="tok-n">uow</span><span class="tok-p">)</span>
             <span class="tok-n">queue</span><span class="tok-o">.</span><span class="tok-n">extend</span><span class="tok-p">(</span><span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">collect_new_events</span><span class="tok-p">())</span>
         <span class="tok-k">except</span> <span class="tok-ne">Exception</span><span class="tok-p">:</span>
-<span class="hll">            <span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">exception</span><span class="tok-p">(</span><span class="tok-s1">'Exception handling event </span><span class="tok-si">%s</span><span class="tok-s1">'</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">)</span>
+<span class="hll">            <span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">exception</span><span class="tok-p">(</span><span class="tok-s2">"Exception handling event </span><span class="tok-si">%s</span><span class="tok-s2">"</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">)</span>
 </span>            <span class="tok-k">continue</span></code></pre>
 </div>
 </div>
@@ -721,9 +727,8 @@ exponentially increasing back-off period."</p>
 <span class="tok-k">def</span> <span class="tok-nf">handle_event</span><span class="tok-p">(</span>
     <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">Event</span><span class="tok-p">,</span>
     <span class="tok-n">queue</span><span class="tok-p">:</span> <span class="tok-n">List</span><span class="tok-p">[</span><span class="tok-n">Message</span><span class="tok-p">],</span>
-    <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span>
+    <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>
 <span class="tok-p">):</span>
-
     <span class="tok-k">for</span> <span class="tok-n">handler</span> <span class="tok-ow">in</span> <span class="tok-n">EVENT_HANDLERS</span><span class="tok-p">[</span><span class="tok-nb">type</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">)]:</span>
         <span class="tok-k">try</span><span class="tok-p">:</span>
             <span class="tok-k">for</span> <span class="tok-n">attempt</span> <span class="tok-ow">in</span> <span class="tok-n">Retrying</span><span class="tok-p">(</span>  #<b class="conum">(2)</b>
@@ -732,12 +737,12 @@ exponentially increasing back-off period."</p>
             <span class="tok-p">):</span>
 
                 <span class="tok-k">with</span> <span class="tok-n">attempt</span><span class="tok-p">:</span>
-                    <span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">debug</span><span class="tok-p">(</span><span class="tok-s1">'handling event </span><span class="tok-si">%s</span><span class="tok-s1"> with handler </span><span class="tok-si">%s</span><span class="tok-s1">'</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">,</span> <span class="tok-n">handler</span><span class="tok-p">)</span>
+                    <span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">debug</span><span class="tok-p">(</span><span class="tok-s2">"handling event </span><span class="tok-si">%s</span><span class="tok-s2"> with handler </span><span class="tok-si">%s</span><span class="tok-s2">"</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">,</span> <span class="tok-n">handler</span><span class="tok-p">)</span>
                     <span class="tok-n">handler</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-o">=</span><span class="tok-n">uow</span><span class="tok-p">)</span>
                     <span class="tok-n">queue</span><span class="tok-o">.</span><span class="tok-n">extend</span><span class="tok-p">(</span><span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">collect_new_events</span><span class="tok-p">())</span>
         <span class="tok-k">except</span> <span class="tok-n">RetryError</span> <span class="tok-k">as</span> <span class="tok-n">retry_failure</span><span class="tok-p">:</span>
             <span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">error</span><span class="tok-p">(</span>
-                <span class="tok-s1">'Failed to handle event </span><span class="tok-si">%s</span><span class="tok-s1"> times, giving up!'</span><span class="tok-p">,</span>
+                <span class="tok-s2">"Failed to handle event </span><span class="tok-si">%s</span><span class="tok-s2"> times, giving up!"</span><span class="tok-p">,</span>
                 <span class="tok-n">retry_failure</span><span class="tok-o">.</span><span class="tok-n">last_attempt</span><span class="tok-o">.</span><span class="tok-n">attempt_number</span>
             <span class="tok-p">)</span>
             <span class="tok-k">continue</span></code></pre>
@@ -855,7 +860,7 @@ This can make the system harder to reason about and requires better monitoring.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-05-04 15:23:16 +0100
+Last updated 2021-02-24 22:04:29 UTC
 </div>
 </div>
 <style>

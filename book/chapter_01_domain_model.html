@@ -456,7 +456,7 @@ scratch, or combine/rewrite them however you like.</p>
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_allocating_to_a_batch_reduces_the_available_quantity</span><span class="tok-p">():</span>
     <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"batch-001"</span><span class="tok-p">,</span> <span class="tok-s2">"SMALL-TABLE"</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-o">=</span><span class="tok-mi">20</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-n">today</span><span class="tok-p">())</span>
-    <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s1">'order-ref'</span><span class="tok-p">,</span> <span class="tok-s2">"SMALL-TABLE"</span><span class="tok-p">,</span> <span class="tok-mi">2</span><span class="tok-p">)</span>
+    <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s2">"order-ref"</span><span class="tok-p">,</span> <span class="tok-s2">"SMALL-TABLE"</span><span class="tok-p">,</span> <span class="tok-mi">2</span><span class="tok-p">)</span>
 
     <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">)</span>
 
@@ -487,9 +487,7 @@ they would agree that this correctly describes the behavior of the system.</p>
 
 
 <span class="tok-k">class</span> <span class="tok-nc">Batch</span><span class="tok-p">:</span>
-    <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span>
-        <span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">ref</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-p">:</span> <span class="tok-n">Optional</span><span class="tok-p">[</span><span class="tok-n">date</span><span class="tok-p">]</span>  #<b class="conum">(2)</b>
-    <span class="tok-p">):</span>
+    <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">ref</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-p">:</span> <span class="tok-n">Optional</span><span class="tok-p">[</span><span class="tok-n">date</span><span class="tok-p">]):</span>  #<b class="conum">(2)</b>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">reference</span> <span class="tok-o">=</span> <span class="tok-n">ref</span>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">sku</span> <span class="tok-o">=</span> <span class="tok-n">sku</span>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">eta</span> <span class="tok-o">=</span> <span class="tok-n">eta</span>
@@ -514,7 +512,7 @@ that this came via <code>from dataclasses import dataclass</code>; likewise,
 <code>typing.Optional</code> and <code>datetime.date</code>. If you want to double-check
 anything, you can see the full working code for each chapter in
 its branch (e.g.,
-<a href="https://github.com/python-leap/code/tree/chapter_01_domain_model">chapter_01_domain_model</a>).</p>
+<a href="https://github.com/cosmicpython/code/tree/chapter_01_domain_model">chapter_01_domain_model</a>).</p>
 </li>
 <li>
 <p>Type hints are still a matter of controversy in the Python world. For
@@ -526,10 +524,11 @@ You may decide the price paid in terms of readability is too high.
 </ol>
 </div>
 <div class="paragraph">
-<p>Our implementation here is trivial: a <code>Batch</code> just wraps an integer
-<code>available_quantity</code>, and we decrement that value on allocation. We&#8217;ve written
-quite a lot of code just to subtract one number from another, but we think that modeling our
-domain precisely will pay off.<sup class="footnote">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup>.]</p>
+<p>Our implementation here is trivial:
+a <code>Batch</code> just wraps an integer <code>available_quantity</code>,
+and we decrement that value on allocation.
+We&#8217;ve written quite a lot of code just to subtract one number from another,
+but we think that modeling our domain precisely will pay off.<sup class="footnote">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup>.]</p>
 </div>
 <div class="paragraph">
 <p>Let&#8217;s write some new failing tests:</p>
@@ -542,9 +541,8 @@ domain precisely will pay off.<sup class="footnote">[<a id="_footnoteref_3" clas
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">make_batch_and_line</span><span class="tok-p">(</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">batch_qty</span><span class="tok-p">,</span> <span class="tok-n">line_qty</span><span class="tok-p">):</span>
     <span class="tok-k">return</span> <span class="tok-p">(</span>
         <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"batch-001"</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">batch_qty</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-n">today</span><span class="tok-p">()),</span>
-        <span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s2">"order-123"</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">line_qty</span><span class="tok-p">)</span>
+        <span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s2">"order-123"</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">line_qty</span><span class="tok-p">),</span>
     <span class="tok-p">)</span>
-
 
 <span class="tok-k">def</span> <span class="tok-nf">test_can_allocate_if_available_greater_than_required</span><span class="tok-p">():</span>
     <span class="tok-n">large_batch</span><span class="tok-p">,</span> <span class="tok-n">small_line</span> <span class="tok-o">=</span> <span class="tok-n">make_batch_and_line</span><span class="tok-p">(</span><span class="tok-s2">"ELEGANT-LAMP"</span><span class="tok-p">,</span> <span class="tok-mi">20</span><span class="tok-p">,</span> <span class="tok-mi">2</span><span class="tok-p">)</span>
@@ -618,9 +616,7 @@ implementation:</p>
 <div class="listingblock non-head">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">Batch</span><span class="tok-p">:</span>
-    <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span>
-        <span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">ref</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-p">:</span> <span class="tok-n">Optional</span><span class="tok-p">[</span><span class="tok-n">date</span><span class="tok-p">]</span>
-    <span class="tok-p">):</span>
+    <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">ref</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-p">:</span> <span class="tok-n">Optional</span><span class="tok-p">[</span><span class="tok-n">date</span><span class="tok-p">]):</span>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">reference</span> <span class="tok-o">=</span> <span class="tok-n">ref</span>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">sku</span> <span class="tok-o">=</span> <span class="tok-n">sku</span>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">eta</span> <span class="tok-o">=</span> <span class="tok-n">eta</span>
@@ -870,8 +866,8 @@ product code, and quantity. We can still have complex behavior on a value
 object, though. In fact, it&#8217;s common to support operations on values; for
 example, mathematical operators:</p>
 </div>
-<div id="value_object_maths" class="exampleblock">
-<div class="title">Math with value objects</div>
+<div id="value_object_maths_tests" class="exampleblock">
+<div class="title">Testing Math with value objects</div>
 <div class="content">
 <div class="listingblock skip">
 <div class="content">
@@ -894,6 +890,30 @@ example, mathematical operators:</p>
 <span class="tok-k">def</span> <span class="tok-nf">multiplying_two_money_values_is_an_error</span><span class="tok-p">():</span>
     <span class="tok-k">with</span> <span class="tok-n">pytest</span><span class="tok-o">.</span><span class="tok-n">raises</span><span class="tok-p">(</span><span class="tok-ne">TypeError</span><span class="tok-p">):</span>
         <span class="tok-n">tenner</span> <span class="tok-o">*</span> <span class="tok-n">fiver</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>
+
+To get those tests to actually pass you&#8217;ll need to start implementing some
+magic methods on our <code>Money</code> class:</p>
+</div>
+<div id="value_object_maths" class="exampleblock">
+<div class="title">Implementing Math with value objects</div>
+<div class="content">
+<div class="listingblock skip">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@dataclass</span><span class="tok-p">(</span><span class="tok-n">frozen</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">)</span>
+<span class="tok-k">class</span> <span class="tok-nc">Money</span><span class="tok-p">:</span>
+    <span class="tok-n">currency</span><span class="tok-p">:</span> <span class="tok-nb">str</span>
+    <span class="tok-n">value</span><span class="tok-p">:</span> <span class="tok-nb">int</span>
+
+    <span class="tok-k">def</span> <span class="tok-fm">__add__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">other</span><span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-n">Money</span><span class="tok-p">:</span>
+        <span class="tok-k">if</span> <span class="tok-n">other</span><span class="tok-o">.</span><span class="tok-n">currency</span> <span class="tok-o">!=</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">currency</span><span class="tok-p">:</span>
+            <span class="tok-k">raise</span> <span class="tok-ne">ValueError</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s2">"Cannot add {self.currency} to {other.currency}"</span><span class="tok-p">)</span>
+        <span class="tok-k">return</span> <span class="tok-n">Money</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">currency</span><span class="tok-p">,</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">value</span> <span class="tok-o">+</span> <span class="tok-n">other</span><span class="tok-o">.</span><span class="tok-n">value</span><span class="tok-p">)</span></code></pre>
 </div>
 </div>
 </div>
@@ -1120,9 +1140,7 @@ And our service might look like this:</p>
 <div class="listingblock non-head">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">:</span> <span class="tok-n">OrderLine</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">:</span> <span class="tok-n">List</span><span class="tok-p">[</span><span class="tok-n">Batch</span><span class="tok-p">])</span> <span class="tok-o">-&gt;</span> <span class="tok-nb">str</span><span class="tok-p">:</span>
-    <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-nb">next</span><span class="tok-p">(</span>
-        <span class="tok-n">b</span> <span class="tok-k">for</span> <span class="tok-n">b</span> <span class="tok-ow">in</span> <span class="tok-nb">sorted</span><span class="tok-p">(</span><span class="tok-n">batches</span><span class="tok-p">)</span> <span class="tok-k">if</span> <span class="tok-n">b</span><span class="tok-o">.</span><span class="tok-n">can_allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">)</span>
-    <span class="tok-p">)</span>
+    <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-nb">next</span><span class="tok-p">(</span><span class="tok-n">b</span> <span class="tok-k">for</span> <span class="tok-n">b</span> <span class="tok-ow">in</span> <span class="tok-nb">sorted</span><span class="tok-p">(</span><span class="tok-n">batches</span><span class="tok-p">)</span> <span class="tok-k">if</span> <span class="tok-n">b</span><span class="tok-o">.</span><span class="tok-n">can_allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">))</span>
     <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">)</span>
     <span class="tok-k">return</span> <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">reference</span></code></pre>
 </div>
@@ -1179,11 +1197,11 @@ and we can capture that by using a <em>domain exception</em>:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_raises_out_of_stock_exception_if_cannot_allocate</span><span class="tok-p">():</span>
-    <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s1">'batch1'</span><span class="tok-p">,</span> <span class="tok-s1">'SMALL-FORK'</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-n">today</span><span class="tok-p">)</span>
-    <span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s1">'order1'</span><span class="tok-p">,</span> <span class="tok-s1">'SMALL-FORK'</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">),</span> <span class="tok-p">[</span><span class="tok-n">batch</span><span class="tok-p">])</span>
+    <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-s2">"SMALL-FORK"</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-n">today</span><span class="tok-p">)</span>
+    <span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s2">"order1"</span><span class="tok-p">,</span> <span class="tok-s2">"SMALL-FORK"</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">),</span> <span class="tok-p">[</span><span class="tok-n">batch</span><span class="tok-p">])</span>
 
-    <span class="tok-k">with</span> <span class="tok-n">pytest</span><span class="tok-o">.</span><span class="tok-n">raises</span><span class="tok-p">(</span><span class="tok-n">OutOfStock</span><span class="tok-p">,</span> <span class="tok-n">match</span><span class="tok-o">=</span><span class="tok-s1">'SMALL-FORK'</span><span class="tok-p">):</span>
-        <span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s1">'order2'</span><span class="tok-p">,</span> <span class="tok-s1">'SMALL-FORK'</span><span class="tok-p">,</span> <span class="tok-mi">1</span><span class="tok-p">),</span> <span class="tok-p">[</span><span class="tok-n">batch</span><span class="tok-p">])</span></code></pre>
+    <span class="tok-k">with</span> <span class="tok-n">pytest</span><span class="tok-o">.</span><span class="tok-n">raises</span><span class="tok-p">(</span><span class="tok-n">OutOfStock</span><span class="tok-p">,</span> <span class="tok-n">match</span><span class="tok-o">=</span><span class="tok-s2">"SMALL-FORK"</span><span class="tok-p">):</span>
+        <span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s2">"order2"</span><span class="tok-p">,</span> <span class="tok-s2">"SMALL-FORK"</span><span class="tok-p">,</span> <span class="tok-mi">1</span><span class="tok-p">),</span> <span class="tok-p">[</span><span class="tok-n">batch</span><span class="tok-p">])</span></code></pre>
 </div>
 </div>
 </div>
@@ -1252,7 +1270,7 @@ language, just as we do our entities, value objects, and services:</p>
         <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-nb">next</span><span class="tok-p">(</span>
         <span class="tok-o">...</span>
     <span class="tok-k">except</span> <span class="tok-ne">StopIteration</span><span class="tok-p">:</span>
-        <span class="tok-k">raise</span> <span class="tok-n">OutOfStock</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'Out of stock for sku {line.sku}'</span><span class="tok-p">)</span></code></pre>
+        <span class="tok-k">raise</span> <span class="tok-n">OutOfStock</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s2">"Out of stock for sku {line.sku}"</span><span class="tok-p">)</span></code></pre>
 </div>
 </div>
 </div>
@@ -1290,7 +1308,7 @@ first use case. But first we&#8217;ll need a database&#8230;&#8203;</p>
 <a href="#_footnoteref_2">2</a>. In previous Python versions, we might have used a namedtuple. You could also check out Hynek Schlawack&#8217;s excellent <a href="https://pypi.org/project/attrs">attrs</a>.
 </div>
 <div class="footnote" id="_footnotedef_3">
-<a href="#_footnoteref_3">3</a>. Or perhaps you think there&#8217;s not enough code?  What about some sort of check that the SKU in the <code>OrderLine</code> matches <code>Batch.sku</code>?  We saved some thoughts on validation for <a href="/book/appendix_validation.html">[appendix_validation
+<a href="#_footnoteref_3">3</a>. Or perhaps you think there&#8217;s not enough code? What about some sort of check that the SKU in the <code>OrderLine</code> matches <code>Batch.sku</code>? We saved some thoughts on validation for <a href="/book/appendix_validation.html">[appendix_validation
 </a></div>
 <div class="footnote" id="_footnotedef_4">
 <a href="#_footnoteref_4">4</a>. It is appalling. Please, please don&#8217;t do this. &#8212;Harry
@@ -1304,7 +1322,7 @@ first use case. But first we&#8217;ll need a database&#8230;&#8203;</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-20 13:47:19 UTC
+Last updated 2021-02-25 01:32:15 UTC
 </div>
 </div>
 <style>

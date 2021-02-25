@@ -499,11 +499,12 @@ between the schema and our domain model, what SQLAlchemy calls a
 <span class="tok-n">metadata</span> <span class="tok-o">=</span> <span class="tok-n">MetaData</span><span class="tok-p">()</span>
 
 <span class="tok-n">order_lines</span> <span class="tok-o">=</span> <span class="tok-n">Table</span><span class="tok-p">(</span>  #<b class="conum">(2)</b>
-    <span class="tok-s1">'order_lines'</span><span class="tok-p">,</span> <span class="tok-n">metadata</span><span class="tok-p">,</span>
-    <span class="tok-n">Column</span><span class="tok-p">(</span><span class="tok-s1">'id'</span><span class="tok-p">,</span> <span class="tok-n">Integer</span><span class="tok-p">,</span> <span class="tok-n">primary_key</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">,</span> <span class="tok-n">autoincrement</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">),</span>
-    <span class="tok-n">Column</span><span class="tok-p">(</span><span class="tok-s1">'sku'</span><span class="tok-p">,</span> <span class="tok-n">String</span><span class="tok-p">(</span><span class="tok-mi">255</span><span class="tok-p">)),</span>
-    <span class="tok-n">Column</span><span class="tok-p">(</span><span class="tok-s1">'qty'</span><span class="tok-p">,</span> <span class="tok-n">Integer</span><span class="tok-p">,</span> <span class="tok-n">nullable</span><span class="tok-o">=</span><span class="tok-bp">False</span><span class="tok-p">),</span>
-    <span class="tok-n">Column</span><span class="tok-p">(</span><span class="tok-s1">'orderid'</span><span class="tok-p">,</span> <span class="tok-n">String</span><span class="tok-p">(</span><span class="tok-mi">255</span><span class="tok-p">)),</span>
+    <span class="tok-s2">"order_lines"</span><span class="tok-p">,</span>
+    <span class="tok-n">metadata</span><span class="tok-p">,</span>
+    <span class="tok-n">Column</span><span class="tok-p">(</span><span class="tok-s2">"id"</span><span class="tok-p">,</span> <span class="tok-n">Integer</span><span class="tok-p">,</span> <span class="tok-n">primary_key</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">,</span> <span class="tok-n">autoincrement</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">),</span>
+    <span class="tok-n">Column</span><span class="tok-p">(</span><span class="tok-s2">"sku"</span><span class="tok-p">,</span> <span class="tok-n">String</span><span class="tok-p">(</span><span class="tok-mi">255</span><span class="tok-p">)),</span>
+    <span class="tok-n">Column</span><span class="tok-p">(</span><span class="tok-s2">"qty"</span><span class="tok-p">,</span> <span class="tok-n">Integer</span><span class="tok-p">,</span> <span class="tok-n">nullable</span><span class="tok-o">=</span><span class="tok-bp">False</span><span class="tok-p">),</span>
+    <span class="tok-n">Column</span><span class="tok-p">(</span><span class="tok-s2">"orderid"</span><span class="tok-p">,</span> <span class="tok-n">String</span><span class="tok-p">(</span><span class="tok-mi">255</span><span class="tok-p">)),</span>
 <span class="tok-p">)</span>
 
 <span class="tok-o">...</span>
@@ -553,7 +554,7 @@ tests for it, as in the following example:</p>
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_orderline_mapper_can_load_lines</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">):</span>  #<b class="conum">(1)</b>
     <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>
-        <span class="tok-s1">'INSERT INTO order_lines (orderid, sku, qty) VALUES '</span>
+        <span class="tok-s2">"INSERT INTO order_lines (orderid, sku, qty) VALUES "</span>
         <span class="tok-s1">'("order1", "RED-CHAIR", 12),'</span>
         <span class="tok-s1">'("order1", "RED-TABLE", 13),'</span>
         <span class="tok-s1">'("order2", "BLUE-LIPSTICK", 14)'</span>
@@ -707,7 +708,6 @@ Here&#8217;s what an abstract base class (ABC) for our repository would look lik
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">AbstractRepository</span><span class="tok-p">(</span><span class="tok-n">abc</span><span class="tok-o">.</span><span class="tok-n">ABC</span><span class="tok-p">):</span>
-
     <span class="tok-nd">@abc.abstractmethod</span>  #<b class="conum">(1)</b>
     <span class="tok-k">def</span> <span class="tok-nf">add</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">batch</span><span class="tok-p">:</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-p">):</span>
         <span class="tok-k">raise</span> <span class="tok-ne">NotImplementedError</span>  #<b class="conum">(2)</b>
@@ -868,10 +868,10 @@ Unlike the ORM tests from earlier, these tests are good candidates for
     <span class="tok-n">repo</span><span class="tok-o">.</span><span class="tok-n">add</span><span class="tok-p">(</span><span class="tok-n">batch</span><span class="tok-p">)</span>  #<b class="conum">(1)</b>
     <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span>  #<b class="conum">(2)</b>
 
-    <span class="tok-n">rows</span> <span class="tok-o">=</span> <span class="tok-nb">list</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>
-        <span class="tok-s1">'SELECT reference, sku, _purchased_quantity, eta FROM "batches"'</span>  #<b class="conum">(3)</b>
-    <span class="tok-p">))</span>
-    <span class="tok-k">assert</span> <span class="tok-n">rows</span> <span class="tok-o">==</span> <span class="tok-p">[(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-s2">"RUSTY-SOAPDISH"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">)]</span></code></pre>
+    <span class="tok-n">rows</span> <span class="tok-o">=</span> <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>  #<b class="conum">(3)</b>
+        <span class="tok-s1">'SELECT reference, sku, _purchased_quantity, eta FROM "batches"'</span>
+    <span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-nb">list</span><span class="tok-p">(</span><span class="tok-n">rows</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-p">[(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-s2">"RUSTY-SOAPDISH"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">)]</span></code></pre>
 </div>
 </div>
 </div>
@@ -905,14 +905,15 @@ complex:</p>
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">insert_order_line</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">):</span>
     <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>  #<b class="conum">(1)</b>
-        <span class="tok-s1">'INSERT INTO order_lines (orderid, sku, qty)'</span>
+        <span class="tok-s2">"INSERT INTO order_lines (orderid, sku, qty)"</span>
         <span class="tok-s1">' VALUES ("order1", "GENERIC-SOFA", 12)'</span>
     <span class="tok-p">)</span>
     <span class="tok-p">[[</span><span class="tok-n">orderline_id</span><span class="tok-p">]]</span> <span class="tok-o">=</span> <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>
-        <span class="tok-s1">'SELECT id FROM order_lines WHERE orderid=:orderid AND sku=:sku'</span><span class="tok-p">,</span>
-        <span class="tok-nb">dict</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-o">=</span><span class="tok-s2">"order1"</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-s2">"GENERIC-SOFA"</span><span class="tok-p">)</span>
+        <span class="tok-s2">"SELECT id FROM order_lines WHERE orderid=:orderid AND sku=:sku"</span><span class="tok-p">,</span>
+        <span class="tok-nb">dict</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-o">=</span><span class="tok-s2">"order1"</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-s2">"GENERIC-SOFA"</span><span class="tok-p">),</span>
     <span class="tok-p">)</span>
     <span class="tok-k">return</span> <span class="tok-n">orderline_id</span>
+
 
 <span class="tok-k">def</span> <span class="tok-nf">insert_batch</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">,</span> <span class="tok-n">batch_id</span><span class="tok-p">):</span>  #<b class="conum">(2)</b>
     <span class="tok-o">...</span>
@@ -977,7 +978,6 @@ specific test.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">SqlAlchemyRepository</span><span class="tok-p">(</span><span class="tok-n">AbstractRepository</span><span class="tok-p">):</span>
-
     <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">session</span><span class="tok-p">):</span>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">session</span> <span class="tok-o">=</span> <span class="tok-n">session</span>
 
@@ -1324,7 +1324,7 @@ exciting installment, <a href="/book/chapter_04_service_layer.html">the Service 
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-04-14 09:46:37 +0100
+Last updated 2021-02-24 22:04:29 UTC
 </div>
 </div>
 <style>

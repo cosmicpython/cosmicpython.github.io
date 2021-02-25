@@ -399,7 +399,8 @@ handlers so that they have the same inputs, an event and a UoW:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">add_batch</span><span class="tok-p">(</span>
-        <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">BatchCreated</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span>
+    <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">BatchCreated</span><span class="tok-p">,</span>
+    <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>
 <span class="tok-p">):</span>
     <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
         <span class="tok-n">product</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">products</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">)</span>
@@ -407,18 +408,20 @@ handlers so that they have the same inputs, an event and a UoW:</p>
 
 
 <span class="tok-k">def</span> <span class="tok-nf">allocate</span><span class="tok-p">(</span>
-        <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">AllocationRequired</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span>
+    <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">AllocationRequired</span><span class="tok-p">,</span>
+    <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>
 <span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-nb">str</span><span class="tok-p">:</span>
     <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">qty</span><span class="tok-p">)</span>
     <span class="tok-o">...</span>
 
 
 <span class="tok-k">def</span> <span class="tok-nf">send_out_of_stock_notification</span><span class="tok-p">(</span>
-        <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">OutOfStock</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>
+    <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">OutOfStock</span><span class="tok-p">,</span>
+    <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>
 <span class="tok-p">):</span>
     <span class="tok-n">email</span><span class="tok-o">.</span><span class="tok-n">send</span><span class="tok-p">(</span>
-        <span class="tok-s1">'stock@made.com'</span><span class="tok-p">,</span>
-        <span class="tok-n">f</span><span class="tok-s1">'Out of stock for {event.sku}'</span><span class="tok-p">,</span>
+        <span class="tok-s2">"stock@made.com"</span><span class="tok-p">,</span>
+        <span class="tok-n">f</span><span class="tok-s2">"Out of stock for {event.sku}"</span><span class="tok-p">,</span>
     <span class="tok-p">)</span></code></pre>
 </div>
 </div>
@@ -433,9 +436,9 @@ handlers so that they have the same inputs, an event and a UoW:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="diff"><span></span> def add_batch(
-<span class="tok-gd">-        ref: str, sku: str, qty: int, eta: Optional[date],</span>
-<span class="tok-gd">-        uow: unit_of_work.AbstractUnitOfWork</span>
-<span class="tok-gi">+        event: events.BatchCreated, uow: unit_of_work.AbstractUnitOfWork</span>
+<span class="tok-gd">-    ref: str, sku: str, qty: int, eta: Optional[date],</span>
+<span class="tok-gi">+    event: events.BatchCreated,</span>
+     uow: unit_of_work.AbstractUnitOfWork,
  ):
      with uow:
 <span class="tok-gd">-        product = uow.products.get(sku=sku)</span>
@@ -444,9 +447,9 @@ handlers so that they have the same inputs, an event and a UoW:</p>
 
 
  def allocate(
-<span class="tok-gd">-        orderid: str, sku: str, qty: int,</span>
-<span class="tok-gd">-        uow: unit_of_work.AbstractUnitOfWork</span>
-<span class="tok-gi">+        event: events.AllocationRequired, uow: unit_of_work.AbstractUnitOfWork</span>
+<span class="tok-gd">-    orderid: str, sku: str, qty: int,</span>
+<span class="tok-gi">+    event: events.AllocationRequired,</span>
+     uow: unit_of_work.AbstractUnitOfWork,
  ) -&gt; str:
 <span class="tok-gd">-    line = OrderLine(orderid, sku, qty)</span>
 <span class="tok-gi">+    line = OrderLine(event.orderid, event.sku, event.qty)</span>
@@ -454,7 +457,8 @@ handlers so that they have the same inputs, an event and a UoW:</p>
 
 <span class="tok-gi">+</span>
 <span class="tok-gi">+def send_out_of_stock_notification(</span>
-<span class="tok-gi">+        event: events.OutOfStock, uow: unit_of_work.AbstractUnitOfWork,</span>
+<span class="tok-gi">+    event: events.OutOfStock,</span>
+<span class="tok-gi">+    uow: unit_of_work.AbstractUnitOfWork,</span>
 <span class="tok-gi">+):</span>
 <span class="tok-gi">+    email.send(</span>
      ...</code></pre>
@@ -523,7 +527,10 @@ bus <em>pull</em> events from the UoW.</p>
 <div class="content">
 <div class="listingblock non-head">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">handle</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">Event</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">):</span>  #<b class="conum">(1)</b>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">handle</span><span class="tok-p">(</span>
+    <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">Event</span><span class="tok-p">,</span>
+    <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>  #<b class="conum">(1)</b>
+<span class="tok-p">):</span>
     <span class="tok-n">queue</span> <span class="tok-o">=</span> <span class="tok-p">[</span><span class="tok-n">event</span><span class="tok-p">]</span>  #<b class="conum">(2)</b>
     <span class="tok-k">while</span> <span class="tok-n">queue</span><span class="tok-p">:</span>
         <span class="tok-n">event</span> <span class="tok-o">=</span> <span class="tok-n">queue</span><span class="tok-o">.</span><span class="tok-n">pop</span><span class="tok-p">(</span><span class="tok-mi">0</span><span class="tok-p">)</span>  #<b class="conum">(3)</b>
@@ -565,11 +572,10 @@ generated and add them to the queue.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="diff"><span></span><span class="tok-gd">-from . import messagebus  </span>#<b class="conum">(1)</b>
-<span class="tok-gd">-</span>
 
 
  class AbstractUnitOfWork(abc.ABC):
-<span class="tok-gu">@@ -23,13 +21,11 @@ class AbstractUnitOfWork(abc.ABC):</span>
+<span class="tok-gu">@@ -22,13 +21,11 @@ class AbstractUnitOfWork(abc.ABC):</span>
 
      def commit(self):
          self._commit()
@@ -616,7 +622,6 @@ message bus, rather than invoking service-layer functions directly:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="diff"><span></span>class TestAddBatch:
-
      def test_for_new_product(self):
          uow = FakeUnitOfWork()
 <span class="tok-gd">-        services.add_batch("b1", "CRUNCHY-ARMCHAIR", 100, None, uow)</span>
@@ -629,7 +634,6 @@ message bus, rather than invoking service-layer functions directly:</p>
 ...
 
  class TestAllocate:
-
      def test_returns_allocation(self):
          uow = FakeUnitOfWork()
 <span class="tok-gd">-        services.add_batch("batch1", "COMPLICATED-LAMP", 100, None, uow)</span>
@@ -660,7 +664,10 @@ a temporary hack on our message bus to let it return events:</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="diff"><span></span> def handle(event: events.Event, uow: unit_of_work.AbstractUnitOfWork):
+<pre class="pygments highlight"><code data-lang="diff"><span></span> def handle(
+     event: events.Event,
+     uow: unit_of_work.AbstractUnitOfWork,
+ ):
 <span class="tok-gi">+    results = []</span>
      queue = [event]
      while queue:
@@ -688,16 +695,16 @@ We&#8217;ll come back to fix this wart in <a href="/book/chapter_12_cqrs.html">[
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="diff"><span></span> @app.route("/allocate", methods=['POST'])
+<pre class="pygments highlight"><code data-lang="diff"><span></span> @app.route("/allocate", methods=["POST"])
  def allocate_endpoint():
      try:
 <span class="tok-gd">-        batchref = services.allocate(</span>
-<span class="tok-gd">-            request.json['orderid'],  </span>#<b class="conum">(1)</b>
-<span class="tok-gd">-            request.json['sku'],</span>
-<span class="tok-gd">-            request.json['qty'],</span>
+<span class="tok-gd">-            request.json["orderid"],  </span>#<b class="conum">(1)</b>
+<span class="tok-gd">-            request.json["sku"],</span>
+<span class="tok-gd">-            request.json["qty"],</span>
 <span class="tok-gd">-            unit_of_work.SqlAlchemyUnitOfWork(),</span>
 <span class="tok-gi">+        event = events.AllocationRequired(  </span>#<b class="conum">(2)</b>
-<span class="tok-gi">+            request.json['orderid'], request.json['sku'], request.json['qty'],</span>
+<span class="tok-gi">+            request.json["orderid"], request.json["sku"], request.json["qty"]</span>
          )
 <span class="tok-gi">+        results = messagebus.handle(event, unit_of_work.SqlAlchemyUnitOfWork())  </span>#<b class="conum">(3)</b>
 <span class="tok-gi">+        batchref = results.pop(0)</span>
@@ -843,7 +850,6 @@ look like:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">TestChangeBatchQuantity</span><span class="tok-p">:</span>
-
     <span class="tok-k">def</span> <span class="tok-nf">test_changes_available_quantity</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
         <span class="tok-n">uow</span> <span class="tok-o">=</span> <span class="tok-n">FakeUnitOfWork</span><span class="tok-p">()</span>
         <span class="tok-n">messagebus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span>
@@ -855,7 +861,6 @@ look like:</p>
         <span class="tok-n">messagebus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">BatchQuantityChanged</span><span class="tok-p">(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-mi">50</span><span class="tok-p">),</span> <span class="tok-n">uow</span><span class="tok-p">)</span>
 
         <span class="tok-k">assert</span> <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">==</span> <span class="tok-mi">50</span>  #<b class="conum">(1)</b>
-
 
     <span class="tok-k">def</span> <span class="tok-nf">test_reallocates_if_necessary</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
         <span class="tok-n">uow</span> <span class="tok-o">=</span> <span class="tok-n">FakeUnitOfWork</span><span class="tok-p">()</span>
@@ -906,7 +911,8 @@ Our new handler is very simple:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">change_batch_quantity</span><span class="tok-p">(</span>
-        <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">BatchQuantityChanged</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span>
+    <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">BatchQuantityChanged</span><span class="tok-p">,</span>
+    <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>
 <span class="tok-p">):</span>
     <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
         <span class="tok-n">product</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">products</span><span class="tok-o">.</span><span class="tok-n">get_by_batchref</span><span class="tok-p">(</span><span class="tok-n">batchref</span><span class="tok-o">=</span><span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">ref</span><span class="tok-p">)</span>
@@ -957,9 +963,12 @@ We realize we&#8217;ll need a new query type on our repository:</p>
         <span class="tok-k">return</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">query</span><span class="tok-p">(</span><span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Product</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">filter_by</span><span class="tok-p">(</span><span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-n">sku</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">first</span><span class="tok-p">()</span>
 
 <span class="hll">    <span class="tok-k">def</span> <span class="tok-nf">_get_by_batchref</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">batchref</span><span class="tok-p">):</span>
-</span>        <span class="tok-k">return</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">query</span><span class="tok-p">(</span><span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Product</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">join</span><span class="tok-p">(</span><span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">filter</span><span class="tok-p">(</span>
-            <span class="tok-n">orm</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-o">.</span><span class="tok-n">c</span><span class="tok-o">.</span><span class="tok-n">reference</span> <span class="tok-o">==</span> <span class="tok-n">batchref</span><span class="tok-p">,</span>
-        <span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">first</span><span class="tok-p">()</span></code></pre>
+</span>        <span class="tok-k">return</span> <span class="tok-p">(</span>
+            <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">query</span><span class="tok-p">(</span><span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Product</span><span class="tok-p">)</span>
+            <span class="tok-o">.</span><span class="tok-n">join</span><span class="tok-p">(</span><span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-p">)</span>
+            <span class="tok-o">.</span><span class="tok-n">filter</span><span class="tok-p">(</span><span class="tok-n">orm</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-o">.</span><span class="tok-n">c</span><span class="tok-o">.</span><span class="tok-n">reference</span> <span class="tok-o">==</span> <span class="tok-n">batchref</span><span class="tok-p">)</span>
+            <span class="tok-o">.</span><span class="tok-n">first</span><span class="tok-p">()</span>
+        <span class="tok-p">)</span></code></pre>
 </div>
 </div>
 </div>
@@ -980,10 +989,10 @@ And on our <code>FakeRepository</code> too:</p>
         <span class="tok-k">return</span> <span class="tok-nb">next</span><span class="tok-p">((</span><span class="tok-n">p</span> <span class="tok-k">for</span> <span class="tok-n">p</span> <span class="tok-ow">in</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_products</span> <span class="tok-k">if</span> <span class="tok-n">p</span><span class="tok-o">.</span><span class="tok-n">sku</span> <span class="tok-o">==</span> <span class="tok-n">sku</span><span class="tok-p">),</span> <span class="tok-bp">None</span><span class="tok-p">)</span>
 
     <span class="tok-k">def</span> <span class="tok-nf">_get_by_batchref</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">batchref</span><span class="tok-p">):</span>
-        <span class="tok-k">return</span> <span class="tok-nb">next</span><span class="tok-p">((</span>
-            <span class="tok-n">p</span> <span class="tok-k">for</span> <span class="tok-n">p</span> <span class="tok-ow">in</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_products</span> <span class="tok-k">for</span> <span class="tok-n">b</span> <span class="tok-ow">in</span> <span class="tok-n">p</span><span class="tok-o">.</span><span class="tok-n">batches</span>
-            <span class="tok-k">if</span> <span class="tok-n">b</span><span class="tok-o">.</span><span class="tok-n">reference</span> <span class="tok-o">==</span> <span class="tok-n">batchref</span>
-        <span class="tok-p">),</span> <span class="tok-bp">None</span><span class="tok-p">)</span></code></pre>
+        <span class="tok-k">return</span> <span class="tok-nb">next</span><span class="tok-p">(</span>
+            <span class="tok-p">(</span><span class="tok-n">p</span> <span class="tok-k">for</span> <span class="tok-n">p</span> <span class="tok-ow">in</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_products</span> <span class="tok-k">for</span> <span class="tok-n">b</span> <span class="tok-ow">in</span> <span class="tok-n">p</span><span class="tok-o">.</span><span class="tok-n">batches</span> <span class="tok-k">if</span> <span class="tok-n">b</span><span class="tok-o">.</span><span class="tok-n">reference</span> <span class="tok-o">==</span> <span class="tok-n">batchref</span><span class="tok-p">),</span>
+            <span class="tok-bp">None</span><span class="tok-p">,</span>
+        <span class="tok-p">)</span></code></pre>
 </div>
 </div>
 </div>
@@ -1013,9 +1022,10 @@ We&#8217;re adding a query to our repository to make this use case easier to
 <h4 id="_a_new_method_on_the_domain_model"><a class="anchor" href="#_a_new_method_on_the_domain_model"></a>A New Method on the Domain Model</h4>
 <div class="paragraph">
 <p>
-We add the new method to the model, which does the quantity change and
-deallocation(s) inline and publishes a new event.  We also modify the existing
-allocate function to publish an event:</p>
+We add the new method to the model,
+which does the quantity change and deallocation(s) inline
+and publishes a new event.
+We also modify the existing allocate function to publish an event:</p>
 </div>
 <div id="change_batch_model_layer" class="exampleblock">
 <div class="title">Our model evolves to capture the new requirement (src/allocation/domain/model.py)</div>
@@ -1058,7 +1068,6 @@ We wire up our new handler:</p>
     <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">BatchQuantityChanged</span><span class="tok-p">:</span> <span class="tok-p">[</span><span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">change_batch_quantity</span><span class="tok-p">],</span>
     <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">AllocationRequired</span><span class="tok-p">:</span> <span class="tok-p">[</span><span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">],</span>
     <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">OutOfStock</span><span class="tok-p">:</span> <span class="tok-p">[</span><span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">send_out_of_stock_notification</span><span class="tok-p">],</span>
-
 <span class="tok-p">}</span>  <span class="tok-c1"># type: Dict[Type[events.Event], List[Callable]]</span></code></pre>
 </div>
 </div>
@@ -1099,7 +1108,6 @@ it record what events it sees:</p>
 <div class="listingblock non-head">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">FakeUnitOfWorkWithFakeMessageBus</span><span class="tok-p">(</span><span class="tok-n">FakeUnitOfWork</span><span class="tok-p">):</span>
-
     <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
         <span class="tok-nb">super</span><span class="tok-p">()</span><span class="tok-o">.</span><span class="tok-fm">__init__</span><span class="tok-p">()</span>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">events_published</span> <span class="tok-o">=</span> <span class="tok-p">[]</span>  <span class="tok-c1"># type: List[events.Event]</span>
@@ -1146,8 +1154,8 @@ below the total already allocated:</p>
     <span class="tok-c1"># assert on new events emitted rather than downstream side-effects</span>
     <span class="tok-p">[</span><span class="tok-n">reallocation_event</span><span class="tok-p">]</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">events_published</span>
     <span class="tok-k">assert</span> <span class="tok-nb">isinstance</span><span class="tok-p">(</span><span class="tok-n">reallocation_event</span><span class="tok-p">,</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">AllocationRequired</span><span class="tok-p">)</span>
-    <span class="tok-k">assert</span> <span class="tok-n">reallocation_event</span><span class="tok-o">.</span><span class="tok-n">orderid</span> <span class="tok-ow">in</span> <span class="tok-p">{</span><span class="tok-s1">'order1'</span><span class="tok-p">,</span> <span class="tok-s1">'order2'</span><span class="tok-p">}</span>
-    <span class="tok-k">assert</span> <span class="tok-n">reallocation_event</span><span class="tok-o">.</span><span class="tok-n">sku</span> <span class="tok-o">==</span> <span class="tok-s1">'INDIFFERENT-TABLE'</span></code></pre>
+    <span class="tok-k">assert</span> <span class="tok-n">reallocation_event</span><span class="tok-o">.</span><span class="tok-n">orderid</span> <span class="tok-ow">in</span> <span class="tok-p">{</span><span class="tok-s2">"order1"</span><span class="tok-p">,</span> <span class="tok-s2">"order2"</span><span class="tok-p">}</span>
+    <span class="tok-k">assert</span> <span class="tok-n">reallocation_event</span><span class="tok-o">.</span><span class="tok-n">sku</span> <span class="tok-o">==</span> <span class="tok-s2">"INDIFFERENT-TABLE"</span></code></pre>
 </div>
 </div>
 </div>
@@ -1327,7 +1335,7 @@ first, let&#8217;s talk about <a href="/book/chapter_10_commands.html">events ve
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-05-04 16:22:42 +0100
+Last updated 2021-02-24 22:04:29 UTC
 </div>
 </div>
 <style>

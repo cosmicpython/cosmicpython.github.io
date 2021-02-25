@@ -222,8 +222,8 @@ Let&#8217;s see the unit of work (or UoW, which we pronounce "you-wow") in actio
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">allocate</span><span class="tok-p">(</span>
-        <span class="tok-n">orderid</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">,</span>
-        <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span>
+    <span class="tok-n">orderid</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">,</span>
+    <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>
 <span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-nb">str</span><span class="tok-p">:</span>
     <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">)</span>
     <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>  #<b class="conum">(1)</b>
@@ -292,18 +292,18 @@ Here are our integration tests for the UOW:</p>
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_uow_can_retrieve_a_batch_and_allocate_to_it</span><span class="tok-p">(</span><span class="tok-n">session_factory</span><span class="tok-p">):</span>
     <span class="tok-n">session</span> <span class="tok-o">=</span> <span class="tok-n">session_factory</span><span class="tok-p">()</span>
-    <span class="tok-n">insert_batch</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">,</span> <span class="tok-s1">'batch1'</span><span class="tok-p">,</span> <span class="tok-s1">'HIPSTER-WORKBENCH'</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">)</span>
+    <span class="tok-n">insert_batch</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">,</span> <span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-s2">"HIPSTER-WORKBENCH"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">)</span>
     <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span>
 
     <span class="tok-n">uow</span> <span class="tok-o">=</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyUnitOfWork</span><span class="tok-p">(</span><span class="tok-n">session_factory</span><span class="tok-p">)</span>  #<b class="conum">(1)</b>
     <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
-        <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">reference</span><span class="tok-o">=</span><span class="tok-s1">'batch1'</span><span class="tok-p">)</span>  #<b class="conum">(2)</b>
-        <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s1">'o1'</span><span class="tok-p">,</span> <span class="tok-s1">'HIPSTER-WORKBENCH'</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">)</span>
+        <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">reference</span><span class="tok-o">=</span><span class="tok-s2">"batch1"</span><span class="tok-p">)</span>  #<b class="conum">(2)</b>
+        <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s2">"o1"</span><span class="tok-p">,</span> <span class="tok-s2">"HIPSTER-WORKBENCH"</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">)</span>
         <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">)</span>
         <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span>  #<b class="conum">(3)</b>
 
-    <span class="tok-n">batchref</span> <span class="tok-o">=</span> <span class="tok-n">get_allocated_batch_ref</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">,</span> <span class="tok-s1">'o1'</span><span class="tok-p">,</span> <span class="tok-s1">'HIPSTER-WORKBENCH'</span><span class="tok-p">)</span>
-    <span class="tok-k">assert</span> <span class="tok-n">batchref</span> <span class="tok-o">==</span> <span class="tok-s1">'batch1'</span></code></pre>
+    <span class="tok-n">batchref</span> <span class="tok-o">=</span> <span class="tok-n">get_allocated_batch_ref</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">,</span> <span class="tok-s2">"o1"</span><span class="tok-p">,</span> <span class="tok-s2">"HIPSTER-WORKBENCH"</span><span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">batchref</span> <span class="tok-o">==</span> <span class="tok-s2">"batch1"</span></code></pre>
 </div>
 </div>
 </div>
@@ -335,21 +335,21 @@ like this:</p>
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">insert_batch</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">,</span> <span class="tok-n">ref</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-p">):</span>
     <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>
-        <span class="tok-s1">'INSERT INTO batches (reference, sku, _purchased_quantity, eta)'</span>
-        <span class="tok-s1">' VALUES (:ref, :sku, :qty, :eta)'</span><span class="tok-p">,</span>
-        <span class="tok-nb">dict</span><span class="tok-p">(</span><span class="tok-n">ref</span><span class="tok-o">=</span><span class="tok-n">ref</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-o">=</span><span class="tok-n">qty</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-n">eta</span><span class="tok-p">)</span>
+        <span class="tok-s2">"INSERT INTO batches (reference, sku, _purchased_quantity, eta)"</span>
+        <span class="tok-s2">" VALUES (:ref, :sku, :qty, :eta)"</span><span class="tok-p">,</span>
+        <span class="tok-nb">dict</span><span class="tok-p">(</span><span class="tok-n">ref</span><span class="tok-o">=</span><span class="tok-n">ref</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-o">=</span><span class="tok-n">qty</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-n">eta</span><span class="tok-p">),</span>
     <span class="tok-p">)</span>
 
 
 <span class="tok-k">def</span> <span class="tok-nf">get_allocated_batch_ref</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">,</span> <span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">):</span>
     <span class="tok-p">[[</span><span class="tok-n">orderlineid</span><span class="tok-p">]]</span> <span class="tok-o">=</span> <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>
-        <span class="tok-s1">'SELECT id FROM order_lines WHERE orderid=:orderid AND sku=:sku'</span><span class="tok-p">,</span>
-        <span class="tok-nb">dict</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-o">=</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-n">sku</span><span class="tok-p">)</span>
+        <span class="tok-s2">"SELECT id FROM order_lines WHERE orderid=:orderid AND sku=:sku"</span><span class="tok-p">,</span>
+        <span class="tok-nb">dict</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-o">=</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-n">sku</span><span class="tok-p">),</span>
     <span class="tok-p">)</span>
     <span class="tok-p">[[</span><span class="tok-n">batchref</span><span class="tok-p">]]</span> <span class="tok-o">=</span> <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>
-        <span class="tok-s1">'SELECT b.reference FROM allocations JOIN batches AS b ON batch_id = b.id'</span>
-        <span class="tok-s1">' WHERE orderline_id=:orderlineid'</span><span class="tok-p">,</span>
-        <span class="tok-nb">dict</span><span class="tok-p">(</span><span class="tok-n">orderlineid</span><span class="tok-o">=</span><span class="tok-n">orderlineid</span><span class="tok-p">)</span>
+        <span class="tok-s2">"SELECT b.reference FROM allocations JOIN batches AS b ON batch_id = b.id"</span>
+        <span class="tok-s2">" WHERE orderline_id=:orderlineid"</span><span class="tok-p">,</span>
+        <span class="tok-nb">dict</span><span class="tok-p">(</span><span class="tok-n">orderlineid</span><span class="tok-o">=</span><span class="tok-n">orderlineid</span><span class="tok-p">),</span>
     <span class="tok-p">)</span>
     <span class="tok-k">return</span> <span class="tok-n">batchref</span></code></pre>
 </div>
@@ -426,12 +426,14 @@ database session:</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-n">DEFAULT_SESSION_FACTORY</span> <span class="tok-o">=</span> <span class="tok-n">sessionmaker</span><span class="tok-p">(</span><span class="tok-n">bind</span><span class="tok-o">=</span><span class="tok-n">create_engine</span><span class="tok-p">(</span>  #<b class="conum">(1)</b>
-    <span class="tok-n">config</span><span class="tok-o">.</span><span class="tok-n">get_postgres_uri</span><span class="tok-p">(),</span>
-<span class="tok-p">))</span>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-n">DEFAULT_SESSION_FACTORY</span> <span class="tok-o">=</span> <span class="tok-n">sessionmaker</span><span class="tok-p">(</span>  #<b class="conum">(1)</b>
+    <span class="tok-n">bind</span><span class="tok-o">=</span><span class="tok-n">create_engine</span><span class="tok-p">(</span>
+        <span class="tok-n">config</span><span class="tok-o">.</span><span class="tok-n">get_postgres_uri</span><span class="tok-p">(),</span>
+    <span class="tok-p">)</span>
+<span class="tok-p">)</span>
+
 
 <span class="tok-k">class</span> <span class="tok-nc">SqlAlchemyUnitOfWork</span><span class="tok-p">(</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">):</span>
-
     <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">session_factory</span><span class="tok-o">=</span><span class="tok-n">DEFAULT_SESSION_FACTORY</span><span class="tok-p">):</span>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">session_factory</span> <span class="tok-o">=</span> <span class="tok-n">session_factory</span>  #<b class="conum">(1)</b>
 
@@ -491,7 +493,6 @@ Here&#8217;s how we use a fake UoW in our service-layer tests:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">FakeUnitOfWork</span><span class="tok-p">(</span><span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">):</span>
-
     <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">batches</span> <span class="tok-o">=</span> <span class="tok-n">FakeRepository</span><span class="tok-p">([])</span>  #<b class="conum">(1)</b>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">committed</span> <span class="tok-o">=</span> <span class="tok-bp">False</span>  #<b class="conum">(2)</b>
@@ -501,7 +502,6 @@ Here&#8217;s how we use a fake UoW in our service-layer tests:</p>
 
     <span class="tok-k">def</span> <span class="tok-nf">rollback</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
         <span class="tok-k">pass</span>
-
 
 
 <span class="tok-k">def</span> <span class="tok-nf">test_add_batch</span><span class="tok-p">():</span>
@@ -593,8 +593,8 @@ Here&#8217;s what our new service layer looks like:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">add_batch</span><span class="tok-p">(</span>
-        <span class="tok-n">ref</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-p">:</span> <span class="tok-n">Optional</span><span class="tok-p">[</span><span class="tok-n">date</span><span class="tok-p">],</span>
-        <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span>  #<b class="conum">(1)</b>
+    <span class="tok-n">ref</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-p">:</span> <span class="tok-n">Optional</span><span class="tok-p">[</span><span class="tok-n">date</span><span class="tok-p">],</span>
+    <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>  #<b class="conum">(1)</b>
 <span class="tok-p">):</span>
     <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
         <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-o">.</span><span class="tok-n">add</span><span class="tok-p">(</span><span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-n">ref</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-p">))</span>
@@ -602,14 +602,14 @@ Here&#8217;s what our new service layer looks like:</p>
 
 
 <span class="tok-k">def</span> <span class="tok-nf">allocate</span><span class="tok-p">(</span>
-        <span class="tok-n">orderid</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">,</span>
-        <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span>  #<b class="conum">(1)</b>
+    <span class="tok-n">orderid</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">,</span>
+    <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>  #<b class="conum">(1)</b>
 <span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-nb">str</span><span class="tok-p">:</span>
     <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">)</span>
     <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
         <span class="tok-n">batches</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-o">.</span><span class="tok-n">list</span><span class="tok-p">()</span>
         <span class="tok-k">if</span> <span class="tok-ow">not</span> <span class="tok-n">is_valid_sku</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">):</span>
-            <span class="tok-k">raise</span> <span class="tok-n">InvalidSku</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'Invalid sku {line.sku}'</span><span class="tok-p">)</span>
+            <span class="tok-k">raise</span> <span class="tok-n">InvalidSku</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s2">"Invalid sku {line.sku}"</span><span class="tok-p">)</span>
         <span class="tok-n">batchref</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">)</span>
         <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span>
     <span class="tok-k">return</span> <span class="tok-n">batchref</span></code></pre>
@@ -620,8 +620,8 @@ Here&#8217;s what our new service layer looks like:</p>
 <div class="colist arabic">
 <ol>
 <li>
-<p>Our service layer now has only the one dependency, once again
-on an <em>abstract</em> UoW.
+<p>Our service layer now has only the one dependency,
+once again on an <em>abstract</em> UoW.
 </p>
 </li>
 </ol>
@@ -645,7 +645,7 @@ a couple of tests:</p>
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_rolls_back_uncommitted_work_by_default</span><span class="tok-p">(</span><span class="tok-n">session_factory</span><span class="tok-p">):</span>
     <span class="tok-n">uow</span> <span class="tok-o">=</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyUnitOfWork</span><span class="tok-p">(</span><span class="tok-n">session_factory</span><span class="tok-p">)</span>
     <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
-        <span class="tok-n">insert_batch</span><span class="tok-p">(</span><span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-p">,</span> <span class="tok-s1">'batch1'</span><span class="tok-p">,</span> <span class="tok-s1">'MEDIUM-PLINTH'</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">)</span>
+        <span class="tok-n">insert_batch</span><span class="tok-p">(</span><span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-p">,</span> <span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-s2">"MEDIUM-PLINTH"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">)</span>
 
     <span class="tok-n">new_session</span> <span class="tok-o">=</span> <span class="tok-n">session_factory</span><span class="tok-p">()</span>
     <span class="tok-n">rows</span> <span class="tok-o">=</span> <span class="tok-nb">list</span><span class="tok-p">(</span><span class="tok-n">new_session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span><span class="tok-s1">'SELECT * FROM "batches"'</span><span class="tok-p">))</span>
@@ -659,7 +659,7 @@ a couple of tests:</p>
     <span class="tok-n">uow</span> <span class="tok-o">=</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyUnitOfWork</span><span class="tok-p">(</span><span class="tok-n">session_factory</span><span class="tok-p">)</span>
     <span class="tok-k">with</span> <span class="tok-n">pytest</span><span class="tok-o">.</span><span class="tok-n">raises</span><span class="tok-p">(</span><span class="tok-n">MyException</span><span class="tok-p">):</span>
         <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
-            <span class="tok-n">insert_batch</span><span class="tok-p">(</span><span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-p">,</span> <span class="tok-s1">'batch1'</span><span class="tok-p">,</span> <span class="tok-s1">'LARGE-FORK'</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">)</span>
+            <span class="tok-n">insert_batch</span><span class="tok-p">(</span><span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-p">,</span> <span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-s2">"LARGE-FORK"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">)</span>
             <span class="tok-k">raise</span> <span class="tok-n">MyException</span><span class="tok-p">()</span>
 
     <span class="tok-n">new_session</span> <span class="tok-o">=</span> <span class="tok-n">session_factory</span><span class="tok-p">()</span>
@@ -785,7 +785,10 @@ Suppose we want to be able to deallocate and then reallocate orders:</p>
 <div class="content">
 <div class="listingblock skip">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">reallocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">:</span> <span class="tok-n">OrderLine</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-nb">str</span><span class="tok-p">:</span>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">reallocate</span><span class="tok-p">(</span>
+    <span class="tok-n">line</span><span class="tok-p">:</span> <span class="tok-n">OrderLine</span><span class="tok-p">,</span>
+    <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>
+<span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-nb">str</span><span class="tok-p">:</span>
     <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
         <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">)</span>
         <span class="tok-k">if</span> <span class="tok-n">batch</span> <span class="tok-ow">is</span> <span class="tok-bp">None</span><span class="tok-p">:</span>
@@ -821,7 +824,10 @@ opened, and half our sofas have fallen into the Indian Ocean. Oops!</p>
 <div class="content">
 <div class="listingblock skip">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">change_batch_quantity</span><span class="tok-p">(</span><span class="tok-n">batchref</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">new_qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">):</span>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">change_batch_quantity</span><span class="tok-p">(</span>
+    <span class="tok-n">batchref</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">new_qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">,</span>
+    <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>
+<span class="tok-p">):</span>
     <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
         <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">reference</span><span class="tok-o">=</span><span class="tok-n">batchref</span><span class="tok-p">)</span>
         <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">change_purchased_quantity</span><span class="tok-p">(</span><span class="tok-n">new_qty</span><span class="tok-p">)</span>
@@ -1082,7 +1088,7 @@ its work.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-04-14 09:49:00 +0100
+Last updated 2021-02-24 22:04:29 UTC
 </div>
 </div>
 <style>

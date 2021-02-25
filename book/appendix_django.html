@@ -288,7 +288,6 @@ but it is still made up of familiar-looking Django code:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">DjangoRepository</span><span class="tok-p">(</span><span class="tok-n">AbstractRepository</span><span class="tok-p">):</span>
-
     <span class="tok-k">def</span> <span class="tok-nf">add</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">batch</span><span class="tok-p">):</span>
         <span class="tok-nb">super</span><span class="tok-p">()</span><span class="tok-o">.</span><span class="tok-n">add</span><span class="tok-p">(</span><span class="tok-n">batch</span><span class="tok-p">)</span>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">update</span><span class="tok-p">(</span><span class="tok-n">batch</span><span class="tok-p">)</span>
@@ -297,9 +296,11 @@ but it is still made up of familiar-looking Django code:</p>
         <span class="tok-n">django_models</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-o">.</span><span class="tok-n">update_from_domain</span><span class="tok-p">(</span><span class="tok-n">batch</span><span class="tok-p">)</span>
 
     <span class="tok-k">def</span> <span class="tok-nf">_get</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">reference</span><span class="tok-p">):</span>
-        <span class="tok-k">return</span> <span class="tok-n">django_models</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-o">.</span><span class="tok-n">objects</span><span class="tok-o">.</span><span class="tok-n">filter</span><span class="tok-p">(</span>
-            <span class="tok-n">reference</span><span class="tok-o">=</span><span class="tok-n">reference</span>
-        <span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">first</span><span class="tok-p">()</span><span class="tok-o">.</span><span class="tok-n">to_domain</span><span class="tok-p">()</span>
+        <span class="tok-k">return</span> <span class="tok-p">(</span>
+            <span class="tok-n">django_models</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-o">.</span><span class="tok-n">objects</span><span class="tok-o">.</span><span class="tok-n">filter</span><span class="tok-p">(</span><span class="tok-n">reference</span><span class="tok-o">=</span><span class="tok-n">reference</span><span class="tok-p">)</span>
+            <span class="tok-o">.</span><span class="tok-n">first</span><span class="tok-p">()</span>
+            <span class="tok-o">.</span><span class="tok-n">to_domain</span><span class="tok-p">()</span>
+        <span class="tok-p">)</span>
 
     <span class="tok-k">def</span> <span class="tok-nf">list</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
         <span class="tok-k">return</span> <span class="tok-p">[</span><span class="tok-n">b</span><span class="tok-o">.</span><span class="tok-n">to_domain</span><span class="tok-p">()</span> <span class="tok-k">for</span> <span class="tok-n">b</span> <span class="tok-ow">in</span> <span class="tok-n">django_models</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-o">.</span><span class="tok-n">objects</span><span class="tok-o">.</span><span class="tok-n">all</span><span class="tok-p">()]</span></code></pre>
@@ -325,6 +326,7 @@ Those custom methods look something like this:</p>
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">from</span> <span class="tok-nn">django.db</span> <span class="tok-kn">import</span> <span class="tok-n">models</span>
 <span class="tok-kn">from</span> <span class="tok-nn">allocation.domain</span> <span class="tok-kn">import</span> <span class="tok-n">model</span> <span class="tok-k">as</span> <span class="tok-n">domain_model</span>
+
 
 <span class="tok-k">class</span> <span class="tok-nc">Batch</span><span class="tok-p">(</span><span class="tok-n">models</span><span class="tok-o">.</span><span class="tok-n">Model</span><span class="tok-p">):</span>
     <span class="tok-n">reference</span> <span class="tok-o">=</span> <span class="tok-n">models</span><span class="tok-o">.</span><span class="tok-n">CharField</span><span class="tok-p">(</span><span class="tok-n">max_length</span><span class="tok-o">=</span><span class="tok-mi">255</span><span class="tok-p">)</span>
@@ -412,6 +414,7 @@ The tests don&#8217;t change too much:</p>
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">insert_batch</span><span class="tok-p">(</span><span class="tok-n">ref</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-p">):</span>  #<b class="conum">(1)</b>
     <span class="tok-n">django_models</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-o">.</span><span class="tok-n">objects</span><span class="tok-o">.</span><span class="tok-n">create</span><span class="tok-p">(</span><span class="tok-n">reference</span><span class="tok-o">=</span><span class="tok-n">ref</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-o">=</span><span class="tok-n">qty</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-n">eta</span><span class="tok-p">)</span>
 
+
 <span class="tok-k">def</span> <span class="tok-nf">get_allocated_batch_ref</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">):</span>  #<b class="conum">(1)</b>
     <span class="tok-k">return</span> <span class="tok-n">django_models</span><span class="tok-o">.</span><span class="tok-n">Allocation</span><span class="tok-o">.</span><span class="tok-n">objects</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span>
         <span class="tok-n">line__orderid</span><span class="tok-o">=</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">line__sku</span><span class="tok-o">=</span><span class="tok-n">sku</span>
@@ -420,17 +423,17 @@ The tests don&#8217;t change too much:</p>
 
 <span class="tok-nd">@pytest.mark.django_db</span><span class="tok-p">(</span><span class="tok-n">transaction</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">)</span>
 <span class="tok-k">def</span> <span class="tok-nf">test_uow_can_retrieve_a_batch_and_allocate_to_it</span><span class="tok-p">():</span>
-    <span class="tok-n">insert_batch</span><span class="tok-p">(</span><span class="tok-s1">'batch1'</span><span class="tok-p">,</span> <span class="tok-s1">'HIPSTER-WORKBENCH'</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">)</span>
+    <span class="tok-n">insert_batch</span><span class="tok-p">(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-s2">"HIPSTER-WORKBENCH"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">)</span>
 
     <span class="tok-n">uow</span> <span class="tok-o">=</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">DjangoUnitOfWork</span><span class="tok-p">()</span>
     <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
-        <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">reference</span><span class="tok-o">=</span><span class="tok-s1">'batch1'</span><span class="tok-p">)</span>
-        <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s1">'o1'</span><span class="tok-p">,</span> <span class="tok-s1">'HIPSTER-WORKBENCH'</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">)</span>
+        <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">reference</span><span class="tok-o">=</span><span class="tok-s2">"batch1"</span><span class="tok-p">)</span>
+        <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s2">"o1"</span><span class="tok-p">,</span> <span class="tok-s2">"HIPSTER-WORKBENCH"</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">)</span>
         <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">)</span>
         <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span>
 
-    <span class="tok-n">batchref</span> <span class="tok-o">=</span> <span class="tok-n">get_allocated_batch_ref</span><span class="tok-p">(</span><span class="tok-s1">'o1'</span><span class="tok-p">,</span> <span class="tok-s1">'HIPSTER-WORKBENCH'</span><span class="tok-p">)</span>
-    <span class="tok-k">assert</span> <span class="tok-n">batchref</span> <span class="tok-o">==</span> <span class="tok-s1">'batch1'</span>
+    <span class="tok-n">batchref</span> <span class="tok-o">=</span> <span class="tok-n">get_allocated_batch_ref</span><span class="tok-p">(</span><span class="tok-s2">"o1"</span><span class="tok-p">,</span> <span class="tok-s2">"HIPSTER-WORKBENCH"</span><span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">batchref</span> <span class="tok-o">==</span> <span class="tok-s2">"batch1"</span>
 
 
 <span class="tok-nd">@pytest.mark.django_db</span><span class="tok-p">(</span><span class="tok-n">transaction</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">)</span>  #<b class="conum">(2)</b>
@@ -468,7 +471,6 @@ would work:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">DjangoUnitOfWork</span><span class="tok-p">(</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">):</span>
-
     <span class="tok-k">def</span> <span class="tok-fm">__enter__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">batches</span> <span class="tok-o">=</span> <span class="tok-n">repository</span><span class="tok-o">.</span><span class="tok-n">DjangoRepository</span><span class="tok-p">()</span>
         <span class="tok-n">transaction</span><span class="tok-o">.</span><span class="tok-n">set_autocommit</span><span class="tok-p">(</span><span class="tok-bp">False</span><span class="tok-p">)</span>  #<b class="conum">(1)</b>
@@ -527,35 +529,37 @@ thin wrapper around our service layer (which didn&#8217;t change at all, by the 
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-n">os</span><span class="tok-o">.</span><span class="tok-n">environ</span><span class="tok-p">[</span><span class="tok-s1">'DJANGO_SETTINGS_MODULE'</span><span class="tok-p">]</span> <span class="tok-o">=</span> <span class="tok-s1">'djangoproject.django_project.settings'</span>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-n">os</span><span class="tok-o">.</span><span class="tok-n">environ</span><span class="tok-p">[</span><span class="tok-s2">"DJANGO_SETTINGS_MODULE"</span><span class="tok-p">]</span> <span class="tok-o">=</span> <span class="tok-s2">"djangoproject.django_project.settings"</span>
 <span class="tok-n">django</span><span class="tok-o">.</span><span class="tok-n">setup</span><span class="tok-p">()</span>
+
 
 <span class="tok-nd">@csrf_exempt</span>
 <span class="tok-k">def</span> <span class="tok-nf">add_batch</span><span class="tok-p">(</span><span class="tok-n">request</span><span class="tok-p">):</span>
     <span class="tok-n">data</span> <span class="tok-o">=</span> <span class="tok-n">json</span><span class="tok-o">.</span><span class="tok-n">loads</span><span class="tok-p">(</span><span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">body</span><span class="tok-p">)</span>
-    <span class="tok-n">eta</span> <span class="tok-o">=</span> <span class="tok-n">data</span><span class="tok-p">[</span><span class="tok-s1">'eta'</span><span class="tok-p">]</span>
+    <span class="tok-n">eta</span> <span class="tok-o">=</span> <span class="tok-n">data</span><span class="tok-p">[</span><span class="tok-s2">"eta"</span><span class="tok-p">]</span>
     <span class="tok-k">if</span> <span class="tok-n">eta</span> <span class="tok-ow">is</span> <span class="tok-ow">not</span> <span class="tok-bp">None</span><span class="tok-p">:</span>
         <span class="tok-n">eta</span> <span class="tok-o">=</span> <span class="tok-n">datetime</span><span class="tok-o">.</span><span class="tok-n">fromisoformat</span><span class="tok-p">(</span><span class="tok-n">eta</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">date</span><span class="tok-p">()</span>
     <span class="tok-n">services</span><span class="tok-o">.</span><span class="tok-n">add_batch</span><span class="tok-p">(</span>
-        <span class="tok-n">data</span><span class="tok-p">[</span><span class="tok-s1">'ref'</span><span class="tok-p">],</span> <span class="tok-n">data</span><span class="tok-p">[</span><span class="tok-s1">'sku'</span><span class="tok-p">],</span> <span class="tok-n">data</span><span class="tok-p">[</span><span class="tok-s1">'qty'</span><span class="tok-p">],</span> <span class="tok-n">eta</span><span class="tok-p">,</span>
+        <span class="tok-n">data</span><span class="tok-p">[</span><span class="tok-s2">"ref"</span><span class="tok-p">],</span> <span class="tok-n">data</span><span class="tok-p">[</span><span class="tok-s2">"sku"</span><span class="tok-p">],</span> <span class="tok-n">data</span><span class="tok-p">[</span><span class="tok-s2">"qty"</span><span class="tok-p">],</span> <span class="tok-n">eta</span><span class="tok-p">,</span>
         <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">DjangoUnitOfWork</span><span class="tok-p">(),</span>
     <span class="tok-p">)</span>
-    <span class="tok-k">return</span> <span class="tok-n">HttpResponse</span><span class="tok-p">(</span><span class="tok-s1">'OK'</span><span class="tok-p">,</span> <span class="tok-n">status</span><span class="tok-o">=</span><span class="tok-mi">201</span><span class="tok-p">)</span>
+    <span class="tok-k">return</span> <span class="tok-n">HttpResponse</span><span class="tok-p">(</span><span class="tok-s2">"OK"</span><span class="tok-p">,</span> <span class="tok-n">status</span><span class="tok-o">=</span><span class="tok-mi">201</span><span class="tok-p">)</span>
+
 
 <span class="tok-nd">@csrf_exempt</span>
 <span class="tok-k">def</span> <span class="tok-nf">allocate</span><span class="tok-p">(</span><span class="tok-n">request</span><span class="tok-p">):</span>
     <span class="tok-n">data</span> <span class="tok-o">=</span> <span class="tok-n">json</span><span class="tok-o">.</span><span class="tok-n">loads</span><span class="tok-p">(</span><span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">body</span><span class="tok-p">)</span>
     <span class="tok-k">try</span><span class="tok-p">:</span>
         <span class="tok-n">batchref</span> <span class="tok-o">=</span> <span class="tok-n">services</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span>
-            <span class="tok-n">data</span><span class="tok-p">[</span><span class="tok-s1">'orderid'</span><span class="tok-p">],</span>
-            <span class="tok-n">data</span><span class="tok-p">[</span><span class="tok-s1">'sku'</span><span class="tok-p">],</span>
-            <span class="tok-n">data</span><span class="tok-p">[</span><span class="tok-s1">'qty'</span><span class="tok-p">],</span>
+            <span class="tok-n">data</span><span class="tok-p">[</span><span class="tok-s2">"orderid"</span><span class="tok-p">],</span>
+            <span class="tok-n">data</span><span class="tok-p">[</span><span class="tok-s2">"sku"</span><span class="tok-p">],</span>
+            <span class="tok-n">data</span><span class="tok-p">[</span><span class="tok-s2">"qty"</span><span class="tok-p">],</span>
             <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">DjangoUnitOfWork</span><span class="tok-p">(),</span>
         <span class="tok-p">)</span>
     <span class="tok-k">except</span> <span class="tok-p">(</span><span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">OutOfStock</span><span class="tok-p">,</span> <span class="tok-n">services</span><span class="tok-o">.</span><span class="tok-n">InvalidSku</span><span class="tok-p">)</span> <span class="tok-k">as</span> <span class="tok-n">e</span><span class="tok-p">:</span>
-        <span class="tok-k">return</span> <span class="tok-n">JsonResponse</span><span class="tok-p">({</span><span class="tok-s1">'message'</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">(</span><span class="tok-n">e</span><span class="tok-p">)},</span> <span class="tok-n">status</span><span class="tok-o">=</span><span class="tok-mi">400</span><span class="tok-p">)</span>
+        <span class="tok-k">return</span> <span class="tok-n">JsonResponse</span><span class="tok-p">({</span><span class="tok-s2">"message"</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">(</span><span class="tok-n">e</span><span class="tok-p">)},</span> <span class="tok-n">status</span><span class="tok-o">=</span><span class="tok-mi">400</span><span class="tok-p">)</span>
 
-    <span class="tok-k">return</span> <span class="tok-n">JsonResponse</span><span class="tok-p">({</span><span class="tok-s1">'batchref'</span><span class="tok-p">:</span> <span class="tok-n">batchref</span><span class="tok-p">},</span> <span class="tok-n">status</span><span class="tok-o">=</span><span class="tok-mi">201</span><span class="tok-p">)</span></code></pre>
+    <span class="tok-k">return</span> <span class="tok-n">JsonResponse</span><span class="tok-p">({</span><span class="tok-s2">"batchref"</span><span class="tok-p">:</span> <span class="tok-n">batchref</span><span class="tok-p">},</span> <span class="tok-n">status</span><span class="tok-o">=</span><span class="tok-mi">201</span><span class="tok-p">)</span></code></pre>
 </div>
 </div>
 </div>
@@ -712,7 +716,7 @@ applications, refer to the <a href="/book/epilogue_1_how_to_get_there_from_here.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-20 13:47:19 UTC
+Last updated 2021-02-24 22:04:29 UTC
 </div>
 </div>
 <style>

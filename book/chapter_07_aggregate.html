@@ -569,20 +569,17 @@ Let&#8217;s see how that looks in code form:</p>
 <div class="listingblock non-head">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">Product</span><span class="tok-p">:</span>
-
     <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">:</span> <span class="tok-n">List</span><span class="tok-p">[</span><span class="tok-n">Batch</span><span class="tok-p">]):</span>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">sku</span> <span class="tok-o">=</span> <span class="tok-n">sku</span>  #<b class="conum">(1)</b>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">batches</span> <span class="tok-o">=</span> <span class="tok-n">batches</span>  #<b class="conum">(2)</b>
 
     <span class="tok-k">def</span> <span class="tok-nf">allocate</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">line</span><span class="tok-p">:</span> <span class="tok-n">OrderLine</span><span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-nb">str</span><span class="tok-p">:</span>  #<b class="conum">(3)</b>
         <span class="tok-k">try</span><span class="tok-p">:</span>
-            <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-nb">next</span><span class="tok-p">(</span>
-                <span class="tok-n">b</span> <span class="tok-k">for</span> <span class="tok-n">b</span> <span class="tok-ow">in</span> <span class="tok-nb">sorted</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-p">)</span> <span class="tok-k">if</span> <span class="tok-n">b</span><span class="tok-o">.</span><span class="tok-n">can_allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">)</span>
-            <span class="tok-p">)</span>
+            <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-nb">next</span><span class="tok-p">(</span><span class="tok-n">b</span> <span class="tok-k">for</span> <span class="tok-n">b</span> <span class="tok-ow">in</span> <span class="tok-nb">sorted</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-p">)</span> <span class="tok-k">if</span> <span class="tok-n">b</span><span class="tok-o">.</span><span class="tok-n">can_allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">))</span>
             <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">)</span>
             <span class="tok-k">return</span> <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">reference</span>
         <span class="tok-k">except</span> <span class="tok-ne">StopIteration</span><span class="tok-p">:</span>
-            <span class="tok-k">raise</span> <span class="tok-n">OutOfStock</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'Out of stock for sku {line.sku}'</span><span class="tok-p">)</span></code></pre>
+            <span class="tok-k">raise</span> <span class="tok-n">OutOfStock</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s2">"Out of stock for sku {line.sku}"</span><span class="tok-p">)</span></code></pre>
 </div>
 </div>
 </div>
@@ -737,8 +734,8 @@ layer to see how it looks with <code>Product</code> as its main entrypoint:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">add_batch</span><span class="tok-p">(</span>
-        <span class="tok-n">ref</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-p">:</span> <span class="tok-n">Optional</span><span class="tok-p">[</span><span class="tok-n">date</span><span class="tok-p">],</span>
-        <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span>
+    <span class="tok-n">ref</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-p">:</span> <span class="tok-n">Optional</span><span class="tok-p">[</span><span class="tok-n">date</span><span class="tok-p">],</span>
+    <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>
 <span class="tok-p">):</span>
     <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
         <span class="tok-n">product</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">products</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-n">sku</span><span class="tok-p">)</span>
@@ -750,14 +747,14 @@ layer to see how it looks with <code>Product</code> as its main entrypoint:</p>
 
 
 <span class="tok-k">def</span> <span class="tok-nf">allocate</span><span class="tok-p">(</span>
-        <span class="tok-n">orderid</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">,</span>
-        <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span>
+    <span class="tok-n">orderid</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">,</span>
+    <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>
 <span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-nb">str</span><span class="tok-p">:</span>
     <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">)</span>
     <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
         <span class="tok-n">product</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">products</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">)</span>
         <span class="tok-k">if</span> <span class="tok-n">product</span> <span class="tok-ow">is</span> <span class="tok-bp">None</span><span class="tok-p">:</span>
-            <span class="tok-k">raise</span> <span class="tok-n">InvalidSku</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'Invalid sku {line.sku}'</span><span class="tok-p">)</span>
+            <span class="tok-k">raise</span> <span class="tok-n">InvalidSku</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s2">"Invalid sku {line.sku}"</span><span class="tok-p">)</span>
         <span class="tok-n">batchref</span> <span class="tok-o">=</span> <span class="tok-n">product</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">)</span>
         <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span>
     <span class="tok-k">return</span> <span class="tok-n">batchref</span></code></pre>
@@ -1032,7 +1029,6 @@ you might decide the cleanest trade-off is to put them in the domain:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">Product</span><span class="tok-p">:</span>
-
     <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">batches</span><span class="tok-p">:</span> <span class="tok-n">List</span><span class="tok-p">[</span><span class="tok-n">Batch</span><span class="tok-p">],</span> <span class="tok-n">version_number</span><span class="tok-p">:</span> <span class="tok-nb">int</span> <span class="tok-o">=</span> <span class="tok-mi">0</span><span class="tok-p">):</span>  #<b class="conum">(1)</b>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">sku</span> <span class="tok-o">=</span> <span class="tok-n">sku</span>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">batches</span> <span class="tok-o">=</span> <span class="tok-n">batches</span>
@@ -1040,14 +1036,12 @@ you might decide the cleanest trade-off is to put them in the domain:</p>
 
     <span class="tok-k">def</span> <span class="tok-nf">allocate</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">line</span><span class="tok-p">:</span> <span class="tok-n">OrderLine</span><span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-nb">str</span><span class="tok-p">:</span>
         <span class="tok-k">try</span><span class="tok-p">:</span>
-            <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-nb">next</span><span class="tok-p">(</span>
-                <span class="tok-n">b</span> <span class="tok-k">for</span> <span class="tok-n">b</span> <span class="tok-ow">in</span> <span class="tok-nb">sorted</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-p">)</span> <span class="tok-k">if</span> <span class="tok-n">b</span><span class="tok-o">.</span><span class="tok-n">can_allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">)</span>
-            <span class="tok-p">)</span>
+            <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-nb">next</span><span class="tok-p">(</span><span class="tok-n">b</span> <span class="tok-k">for</span> <span class="tok-n">b</span> <span class="tok-ow">in</span> <span class="tok-nb">sorted</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">batches</span><span class="tok-p">)</span> <span class="tok-k">if</span> <span class="tok-n">b</span><span class="tok-o">.</span><span class="tok-n">can_allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">))</span>
             <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">)</span>
             <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">version_number</span> <span class="tok-o">+=</span> <span class="tok-mi">1</span>  #<b class="conum">(1)</b>
             <span class="tok-k">return</span> <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">reference</span>
         <span class="tok-k">except</span> <span class="tok-ne">StopIteration</span><span class="tok-p">:</span>
-            <span class="tok-k">raise</span> <span class="tok-n">OutOfStock</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'Out of stock for sku {line.sku}'</span><span class="tok-p">)</span></code></pre>
+            <span class="tok-k">raise</span> <span class="tok-n">OutOfStock</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s2">"Out of stock for sku {line.sku}"</span><span class="tok-p">)</span></code></pre>
 </div>
 </div>
 </div>
@@ -1153,18 +1147,18 @@ threads:</p>
     <span class="tok-p">)</span>
     <span class="tok-k">assert</span> <span class="tok-n">version</span> <span class="tok-o">==</span> <span class="tok-mi">2</span>  #<b class="conum">(2)</b>
     <span class="tok-p">[</span><span class="tok-n">exception</span><span class="tok-p">]</span> <span class="tok-o">=</span> <span class="tok-n">exceptions</span>
-    <span class="tok-k">assert</span> <span class="tok-s1">'could not serialize access due to concurrent update'</span> <span class="tok-ow">in</span> <span class="tok-nb">str</span><span class="tok-p">(</span><span class="tok-n">exception</span><span class="tok-p">)</span>  #<b class="conum">(3)</b>
+    <span class="tok-k">assert</span> <span class="tok-s2">"could not serialize access due to concurrent update"</span> <span class="tok-ow">in</span> <span class="tok-nb">str</span><span class="tok-p">(</span><span class="tok-n">exception</span><span class="tok-p">)</span>  #<b class="conum">(3)</b>
 
-    <span class="tok-n">orders</span> <span class="tok-o">=</span> <span class="tok-nb">list</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>
+    <span class="tok-n">orders</span> <span class="tok-o">=</span> <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>
         <span class="tok-s2">"SELECT orderid FROM allocations"</span>
         <span class="tok-s2">" JOIN batches ON allocations.batch_id = batches.id"</span>
         <span class="tok-s2">" JOIN order_lines ON allocations.orderline_id = order_lines.id"</span>
         <span class="tok-s2">" WHERE order_lines.sku=:sku"</span><span class="tok-p">,</span>
         <span class="tok-nb">dict</span><span class="tok-p">(</span><span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-n">sku</span><span class="tok-p">),</span>
-    <span class="tok-p">))</span>
-    <span class="tok-k">assert</span> <span class="tok-nb">len</span><span class="tok-p">(</span><span class="tok-n">orders</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-mi">1</span>  #<b class="conum">(4)</b>
+    <span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">orders</span><span class="tok-o">.</span><span class="tok-n">rowcount</span> <span class="tok-o">==</span> <span class="tok-mi">1</span>  #<b class="conum">(4)</b>
     <span class="tok-k">with</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyUnitOfWork</span><span class="tok-p">()</span> <span class="tok-k">as</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
-        <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span><span class="tok-s1">'select 1'</span><span class="tok-p">)</span></code></pre>
+        <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span><span class="tok-s2">"select 1"</span><span class="tok-p">)</span></code></pre>
 </div>
 </div>
 </div>
@@ -1199,10 +1193,12 @@ on our session:</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-n">DEFAULT_SESSION_FACTORY</span> <span class="tok-o">=</span> <span class="tok-n">sessionmaker</span><span class="tok-p">(</span><span class="tok-n">bind</span><span class="tok-o">=</span><span class="tok-n">create_engine</span><span class="tok-p">(</span>
-    <span class="tok-n">config</span><span class="tok-o">.</span><span class="tok-n">get_postgres_uri</span><span class="tok-p">(),</span>
-    <span class="tok-n">isolation_level</span><span class="tok-o">=</span><span class="tok-s2">"REPEATABLE READ"</span><span class="tok-p">,</span>
-<span class="tok-p">))</span></code></pre>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-n">DEFAULT_SESSION_FACTORY</span> <span class="tok-o">=</span> <span class="tok-n">sessionmaker</span><span class="tok-p">(</span>
+    <span class="tok-n">bind</span><span class="tok-o">=</span><span class="tok-n">create_engine</span><span class="tok-p">(</span>
+        <span class="tok-n">config</span><span class="tok-o">.</span><span class="tok-n">get_postgres_uri</span><span class="tok-p">(),</span>
+        <span class="tok-n">isolation_level</span><span class="tok-o">=</span><span class="tok-s2">"REPEATABLE READ"</span><span class="tok-p">,</span>
+    <span class="tok-p">)</span>
+<span class="tok-p">)</span></code></pre>
 </div>
 </div>
 </div>
@@ -1251,10 +1247,12 @@ query time:</p>
 <div class="listingblock non-head">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span>    <span class="tok-k">def</span> <span class="tok-nf">get</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">):</span>
-        <span class="tok-k">return</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">query</span><span class="tok-p">(</span><span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Product</span><span class="tok-p">)</span> \
-                           <span class="tok-o">.</span><span class="tok-n">filter_by</span><span class="tok-p">(</span><span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-n">sku</span><span class="tok-p">)</span> \
-                           <span class="tok-o">.</span><span class="tok-n">with_for_update</span><span class="tok-p">()</span> \
-                           <span class="tok-o">.</span><span class="tok-n">first</span><span class="tok-p">()</span></code></pre>
+        <span class="tok-k">return</span> <span class="tok-p">(</span>
+            <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">query</span><span class="tok-p">(</span><span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Product</span><span class="tok-p">)</span>
+            <span class="tok-o">.</span><span class="tok-n">filter_by</span><span class="tok-p">(</span><span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-n">sku</span><span class="tok-p">)</span>
+            <span class="tok-o">.</span><span class="tok-n">with_for_update</span><span class="tok-p">()</span>
+            <span class="tok-o">.</span><span class="tok-n">first</span><span class="tok-p">()</span>
+        <span class="tok-p">)</span></code></pre>
 </div>
 </div>
 </div>
@@ -1500,7 +1498,7 @@ cross consistency boundaries?</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-04-28 10:44:39 +0100
+Last updated 2021-02-24 22:04:29 UTC
 </div>
 </div>
 <style>

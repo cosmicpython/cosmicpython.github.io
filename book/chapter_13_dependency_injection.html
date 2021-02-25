@@ -241,7 +241,8 @@ functions declare an explicit dependency on the UoW:</p>
 <div class="listingblock existing">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">allocate</span><span class="tok-p">(</span>
-        <span class="tok-n">cmd</span><span class="tok-p">:</span> <span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">Allocate</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span>
+    <span class="tok-n">cmd</span><span class="tok-p">:</span> <span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">Allocate</span><span class="tok-p">,</span>
+    <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>
 <span class="tok-p">):</span></code></pre>
 </div>
 </div>
@@ -271,7 +272,6 @@ service-layer tests:</p>
 <div class="listingblock existing">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">SqlAlchemyUnitOfWork</span><span class="tok-p">(</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">):</span>
-
     <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">session_factory</span><span class="tok-o">=</span><span class="tok-n">DEFAULT_SESSION_FACTORY</span><span class="tok-p">):</span>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">session_factory</span> <span class="tok-o">=</span> <span class="tok-n">session_factory</span>
         <span class="tok-o">...</span></code></pre>
@@ -323,11 +323,12 @@ languages:</p>
 <span class="tok-o">...</span>
 
 <span class="tok-k">def</span> <span class="tok-nf">send_out_of_stock_notification</span><span class="tok-p">(</span>
-        <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">OutOfStock</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>
+    <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">OutOfStock</span><span class="tok-p">,</span>
+    <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>
 <span class="tok-p">):</span>
     <span class="tok-n">email</span><span class="tok-o">.</span><span class="tok-n">send</span><span class="tok-p">(</span>  #<b class="conum">(2)</b>
-        <span class="tok-s1">'stock@made.com'</span><span class="tok-p">,</span>
-        <span class="tok-n">f</span><span class="tok-s1">'Out of stock for {event.sku}'</span><span class="tok-p">,</span>
+        <span class="tok-s2">"stock@made.com"</span><span class="tok-p">,</span>
+        <span class="tok-n">f</span><span class="tok-s2">"Out of stock for {event.sku}"</span><span class="tok-p">,</span>
     <span class="tok-p">)</span></code></pre>
 </div>
 </div>
@@ -402,11 +403,12 @@ a <em>specific</em> detail, we have an (explicit) dependency on an <em>abstracti
 <div class="listingblock non-head">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">send_out_of_stock_notification</span><span class="tok-p">(</span>
-        <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">OutOfStock</span><span class="tok-p">,</span> <span class="tok-n">send_mail</span><span class="tok-p">:</span> <span class="tok-n">Callable</span><span class="tok-p">,</span>
+    <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">OutOfStock</span><span class="tok-p">,</span>
+    <span class="tok-n">send_mail</span><span class="tok-p">:</span> <span class="tok-n">Callable</span><span class="tok-p">,</span>
 <span class="tok-p">):</span>
     <span class="tok-n">send_mail</span><span class="tok-p">(</span>
-        <span class="tok-s1">'stock@made.com'</span><span class="tok-p">,</span>
-        <span class="tok-n">f</span><span class="tok-s1">'Out of stock for {event.sku}'</span><span class="tok-p">,</span>
+        <span class="tok-s2">"stock@made.com"</span><span class="tok-p">,</span>
+        <span class="tok-n">f</span><span class="tok-s2">"Out of stock for {event.sku}"</span><span class="tok-p">,</span>
     <span class="tok-p">)</span></code></pre>
 </div>
 </div>
@@ -487,7 +489,8 @@ partial functions to compose the function with its dependencies:</p>
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-c1"># existing allocate function, with abstract uow dependency</span>
 <span class="tok-k">def</span> <span class="tok-nf">allocate</span><span class="tok-p">(</span>
-        <span class="tok-n">cmd</span><span class="tok-p">:</span> <span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">Allocate</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span>
+    <span class="tok-n">cmd</span><span class="tok-p">:</span> <span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">Allocate</span><span class="tok-p">,</span>
+    <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>
 <span class="tok-p">):</span>
     <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-n">cmd</span><span class="tok-o">.</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">cmd</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">cmd</span><span class="tok-o">.</span><span class="tok-n">qty</span><span class="tok-p">)</span>
     <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
@@ -538,10 +541,11 @@ which has different dependencies:</p>
 <div class="listingblock skip">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">send_out_of_stock_notification</span><span class="tok-p">(</span>
-        <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">OutOfStock</span><span class="tok-p">,</span> <span class="tok-n">send_mail</span><span class="tok-p">:</span> <span class="tok-n">Callable</span><span class="tok-p">,</span>
+    <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">OutOfStock</span><span class="tok-p">,</span>
+    <span class="tok-n">send_mail</span><span class="tok-p">:</span> <span class="tok-n">Callable</span><span class="tok-p">,</span>
 <span class="tok-p">):</span>
     <span class="tok-n">send_mail</span><span class="tok-p">(</span>
-        <span class="tok-s1">'stock@made.com'</span><span class="tok-p">,</span>
+        <span class="tok-s2">"stock@made.com"</span><span class="tok-p">,</span>
         <span class="tok-o">...</span>
 
 
@@ -574,7 +578,6 @@ classes, though:</p>
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-c1"># we replace the old `def allocate(cmd, uow)` with:</span>
 
 <span class="tok-k">class</span> <span class="tok-nc">AllocateHandler</span><span class="tok-p">:</span>
-
     <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">):</span>  #<b class="conum">(2)</b>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">uow</span> <span class="tok-o">=</span> <span class="tok-n">uow</span>
 
@@ -657,7 +660,7 @@ We want our bootstrap script to do the following:</p>
     <span class="tok-k">if</span> <span class="tok-n">start_orm</span><span class="tok-p">:</span>
         <span class="tok-n">orm</span><span class="tok-o">.</span><span class="tok-n">start_mappers</span><span class="tok-p">()</span>  #<b class="conum">(1)</b>
 
-    <span class="tok-n">dependencies</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s1">'uow'</span><span class="tok-p">:</span> <span class="tok-n">uow</span><span class="tok-p">,</span> <span class="tok-s1">'send_mail'</span><span class="tok-p">:</span> <span class="tok-n">send_mail</span><span class="tok-p">,</span> <span class="tok-s1">'publish'</span><span class="tok-p">:</span> <span class="tok-n">publish</span><span class="tok-p">}</span>
+    <span class="tok-n">dependencies</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s2">"uow"</span><span class="tok-p">:</span> <span class="tok-n">uow</span><span class="tok-p">,</span> <span class="tok-s2">"send_mail"</span><span class="tok-p">:</span> <span class="tok-n">send_mail</span><span class="tok-p">,</span> <span class="tok-s2">"publish"</span><span class="tok-p">:</span> <span class="tok-n">publish</span><span class="tok-p">}</span>
     <span class="tok-n">injected_event_handlers</span> <span class="tok-o">=</span> <span class="tok-p">{</span>  #<b class="conum">(3)</b>
         <span class="tok-n">event_type</span><span class="tok-p">:</span> <span class="tok-p">[</span>
             <span class="tok-n">inject_dependencies</span><span class="tok-p">(</span><span class="tok-n">handler</span><span class="tok-p">,</span> <span class="tok-n">dependencies</span><span class="tok-p">)</span>
@@ -771,12 +774,11 @@ but you can, like this:</p>
         <span class="tok-p">],</span>
         <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">OutOfStock</span><span class="tok-p">:</span> <span class="tok-p">[</span>
             <span class="tok-k">lambda</span> <span class="tok-n">e</span><span class="tok-p">:</span> <span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">send_out_of_stock_notification</span><span class="tok-p">(</span><span class="tok-n">e</span><span class="tok-p">,</span> <span class="tok-n">send_mail</span><span class="tok-p">)</span>
-        <span class="tok-p">]</span>
+        <span class="tok-p">],</span>
     <span class="tok-p">}</span>
     <span class="tok-n">injected_command_handlers</span> <span class="tok-o">=</span> <span class="tok-p">{</span>
         <span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">Allocate</span><span class="tok-p">:</span> <span class="tok-k">lambda</span> <span class="tok-n">c</span><span class="tok-p">:</span> <span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">c</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">),</span>
-        <span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">CreateBatch</span><span class="tok-p">:</span> \
-            <span class="tok-k">lambda</span> <span class="tok-n">c</span><span class="tok-p">:</span> <span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">add_batch</span><span class="tok-p">(</span><span class="tok-n">c</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">),</span>
+        <span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">CreateBatch</span><span class="tok-p">:</span> <span class="tok-k">lambda</span> <span class="tok-n">c</span><span class="tok-p">:</span> <span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">add_batch</span><span class="tok-p">(</span><span class="tok-n">c</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">),</span>
         <span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">ChangeBatchQuantity</span><span class="tok-p">:</span> \
             <span class="tok-k">lambda</span> <span class="tok-n">c</span><span class="tok-p">:</span> <span class="tok-n">handlers</span><span class="tok-o">.</span><span class="tok-n">change_batch_quantity</span><span class="tok-p">(</span><span class="tok-n">c</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">),</span>
     <span class="tok-p">}</span></code></pre>
@@ -827,7 +829,6 @@ class:</p>
 <div class="listingblock non-head">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">MessageBus</span><span class="tok-p">:</span>  #<b class="conum">(1)</b>
-
     <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span>
         <span class="tok-bp">self</span><span class="tok-p">,</span>
         <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">AbstractUnitOfWork</span><span class="tok-p">,</span>
@@ -847,7 +848,7 @@ class:</p>
             <span class="tok-k">elif</span> <span class="tok-nb">isinstance</span><span class="tok-p">(</span><span class="tok-n">message</span><span class="tok-p">,</span> <span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">Command</span><span class="tok-p">):</span>
                 <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">handle_command</span><span class="tok-p">(</span><span class="tok-n">message</span><span class="tok-p">)</span>
             <span class="tok-k">else</span><span class="tok-p">:</span>
-                <span class="tok-k">raise</span> <span class="tok-ne">Exception</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'{message} was not an Event or Command'</span><span class="tok-p">)</span></code></pre>
+                <span class="tok-k">raise</span> <span class="tok-ne">Exception</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s2">"{message} was not an Event or Command"</span><span class="tok-p">)</span></code></pre>
 </div>
 </div>
 </div>
@@ -885,22 +886,21 @@ What else changes in the bus?</p>
 <pre class="pygments highlight"><code data-lang="python"><span></span>    <span class="tok-k">def</span> <span class="tok-nf">handle_event</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">:</span> <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">Event</span><span class="tok-p">):</span>
         <span class="tok-k">for</span> <span class="tok-n">handler</span> <span class="tok-ow">in</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">event_handlers</span><span class="tok-p">[</span><span class="tok-nb">type</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">)]:</span>  #<b class="conum">(1)</b>
             <span class="tok-k">try</span><span class="tok-p">:</span>
-                <span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">debug</span><span class="tok-p">(</span><span class="tok-s1">'handling event </span><span class="tok-si">%s</span><span class="tok-s1"> with handler </span><span class="tok-si">%s</span><span class="tok-s1">'</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">,</span> <span class="tok-n">handler</span><span class="tok-p">)</span>
+                <span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">debug</span><span class="tok-p">(</span><span class="tok-s2">"handling event </span><span class="tok-si">%s</span><span class="tok-s2"> with handler </span><span class="tok-si">%s</span><span class="tok-s2">"</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">,</span> <span class="tok-n">handler</span><span class="tok-p">)</span>
                 <span class="tok-n">handler</span><span class="tok-p">(</span><span class="tok-n">event</span><span class="tok-p">)</span>  #<b class="conum">(2)</b>
                 <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">queue</span><span class="tok-o">.</span><span class="tok-n">extend</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">collect_new_events</span><span class="tok-p">())</span>
             <span class="tok-k">except</span> <span class="tok-ne">Exception</span><span class="tok-p">:</span>
-                <span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">exception</span><span class="tok-p">(</span><span class="tok-s1">'Exception handling event </span><span class="tok-si">%s</span><span class="tok-s1">'</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">)</span>
+                <span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">exception</span><span class="tok-p">(</span><span class="tok-s2">"Exception handling event </span><span class="tok-si">%s</span><span class="tok-s2">"</span><span class="tok-p">,</span> <span class="tok-n">event</span><span class="tok-p">)</span>
                 <span class="tok-k">continue</span>
 
-
     <span class="tok-k">def</span> <span class="tok-nf">handle_command</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">command</span><span class="tok-p">:</span> <span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">Command</span><span class="tok-p">):</span>
-        <span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">debug</span><span class="tok-p">(</span><span class="tok-s1">'handling command </span><span class="tok-si">%s</span><span class="tok-s1">'</span><span class="tok-p">,</span> <span class="tok-n">command</span><span class="tok-p">)</span>
+        <span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">debug</span><span class="tok-p">(</span><span class="tok-s2">"handling command </span><span class="tok-si">%s</span><span class="tok-s2">"</span><span class="tok-p">,</span> <span class="tok-n">command</span><span class="tok-p">)</span>
         <span class="tok-k">try</span><span class="tok-p">:</span>
             <span class="tok-n">handler</span> <span class="tok-o">=</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">command_handlers</span><span class="tok-p">[</span><span class="tok-nb">type</span><span class="tok-p">(</span><span class="tok-n">command</span><span class="tok-p">)]</span>  #<b class="conum">(1)</b>
             <span class="tok-n">handler</span><span class="tok-p">(</span><span class="tok-n">command</span><span class="tok-p">)</span>  #<b class="conum">(2)</b>
             <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">queue</span><span class="tok-o">.</span><span class="tok-n">extend</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">collect_new_events</span><span class="tok-p">())</span>
         <span class="tok-k">except</span> <span class="tok-ne">Exception</span><span class="tok-p">:</span>
-            <span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">exception</span><span class="tok-p">(</span><span class="tok-s1">'Exception handling command </span><span class="tok-si">%s</span><span class="tok-s1">'</span><span class="tok-p">,</span> <span class="tok-n">command</span><span class="tok-p">)</span>
+            <span class="tok-n">logger</span><span class="tok-o">.</span><span class="tok-n">exception</span><span class="tok-p">(</span><span class="tok-s2">"Exception handling command </span><span class="tok-si">%s</span><span class="tok-s2">"</span><span class="tok-p">,</span> <span class="tok-n">command</span><span class="tok-p">)</span>
             <span class="tok-k">raise</span></code></pre>
 </div>
 </div>
@@ -943,15 +943,15 @@ rest of it:</p>
 <span class="tok-gi">+bus = bootstrap.bootstrap()</span>
 
 
- @app.route("/add_batch", methods=['POST'])
+ @app.route("/add_batch", methods=["POST"])
 <span class="tok-gu">@@ -19,8 +16,7 @@ def add_batch():</span>
      cmd = commands.CreateBatch(
-         request.json['ref'], request.json['sku'], request.json['qty'], eta,
+         request.json["ref"], request.json["sku"], request.json["qty"], eta
      )
 <span class="tok-gd">-    uow = unit_of_work.SqlAlchemyUnitOfWork()  </span>#<b class="conum">(2)</b>
 <span class="tok-gd">-    messagebus.handle(cmd, uow)</span>
 <span class="tok-gi">+    bus.handle(cmd)  </span>#<b class="conum">(3)</b>
-     return 'OK', 201</code></pre>
+     return "OK", 201</code></pre>
 </div>
 </div>
 </div>
@@ -997,13 +997,14 @@ custom message bus. Here&#8217;s an example in an integration test:</p>
     <span class="tok-k">yield</span> <span class="tok-n">bus</span>
     <span class="tok-n">clear_mappers</span><span class="tok-p">()</span>
 
+
 <span class="tok-k">def</span> <span class="tok-nf">test_allocations_view</span><span class="tok-p">(</span><span class="tok-n">sqlite_bus</span><span class="tok-p">):</span>
-    <span class="tok-n">sqlite_bus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">CreateBatch</span><span class="tok-p">(</span><span class="tok-s1">'sku1batch'</span><span class="tok-p">,</span> <span class="tok-s1">'sku1'</span><span class="tok-p">,</span> <span class="tok-mi">50</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">))</span>
-    <span class="tok-n">sqlite_bus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">CreateBatch</span><span class="tok-p">(</span><span class="tok-s1">'sku2batch'</span><span class="tok-p">,</span> <span class="tok-s1">'sku2'</span><span class="tok-p">,</span> <span class="tok-mi">50</span><span class="tok-p">,</span> <span class="tok-n">today</span><span class="tok-p">))</span>
+    <span class="tok-n">sqlite_bus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">CreateBatch</span><span class="tok-p">(</span><span class="tok-s2">"sku1batch"</span><span class="tok-p">,</span> <span class="tok-s2">"sku1"</span><span class="tok-p">,</span> <span class="tok-mi">50</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">))</span>
+    <span class="tok-n">sqlite_bus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">CreateBatch</span><span class="tok-p">(</span><span class="tok-s2">"sku2batch"</span><span class="tok-p">,</span> <span class="tok-s2">"sku2"</span><span class="tok-p">,</span> <span class="tok-mi">50</span><span class="tok-p">,</span> <span class="tok-n">today</span><span class="tok-p">))</span>
     <span class="tok-o">...</span>
-    <span class="tok-k">assert</span> <span class="tok-n">views</span><span class="tok-o">.</span><span class="tok-n">allocations</span><span class="tok-p">(</span><span class="tok-s1">'order1'</span><span class="tok-p">,</span> <span class="tok-n">sqlite_bus</span><span class="tok-o">.</span><span class="tok-n">uow</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-p">[</span>
-        <span class="tok-p">{</span><span class="tok-s1">'sku'</span><span class="tok-p">:</span> <span class="tok-s1">'sku1'</span><span class="tok-p">,</span> <span class="tok-s1">'batchref'</span><span class="tok-p">:</span> <span class="tok-s1">'sku1batch'</span><span class="tok-p">},</span>
-        <span class="tok-p">{</span><span class="tok-s1">'sku'</span><span class="tok-p">:</span> <span class="tok-s1">'sku2'</span><span class="tok-p">,</span> <span class="tok-s1">'batchref'</span><span class="tok-p">:</span> <span class="tok-s1">'sku2batch'</span><span class="tok-p">},</span>
+    <span class="tok-k">assert</span> <span class="tok-n">views</span><span class="tok-o">.</span><span class="tok-n">allocations</span><span class="tok-p">(</span><span class="tok-s2">"order1"</span><span class="tok-p">,</span> <span class="tok-n">sqlite_bus</span><span class="tok-o">.</span><span class="tok-n">uow</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-p">[</span>
+        <span class="tok-p">{</span><span class="tok-s2">"sku"</span><span class="tok-p">:</span> <span class="tok-s2">"sku1"</span><span class="tok-p">,</span> <span class="tok-s2">"batchref"</span><span class="tok-p">:</span> <span class="tok-s2">"sku1batch"</span><span class="tok-p">},</span>
+        <span class="tok-p">{</span><span class="tok-s2">"sku"</span><span class="tok-p">:</span> <span class="tok-s2">"sku2"</span><span class="tok-p">,</span> <span class="tok-s2">"batchref"</span><span class="tok-p">:</span> <span class="tok-s2">"sku2batch"</span><span class="tok-p">},</span>
     <span class="tok-p">]</span></code></pre>
 </div>
 </div>
@@ -1144,7 +1145,6 @@ email, could be SMS, could be Slack posts one day.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">AbstractNotifications</span><span class="tok-p">(</span><span class="tok-n">abc</span><span class="tok-o">.</span><span class="tok-n">ABC</span><span class="tok-p">):</span>
-
     <span class="tok-nd">@abc.abstractmethod</span>
     <span class="tok-k">def</span> <span class="tok-nf">send</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">destination</span><span class="tok-p">,</span> <span class="tok-n">message</span><span class="tok-p">):</span>
         <span class="tok-k">raise</span> <span class="tok-ne">NotImplementedError</span>
@@ -1152,17 +1152,16 @@ email, could be SMS, could be Slack posts one day.</p>
 <span class="tok-o">...</span>
 
 <span class="tok-k">class</span> <span class="tok-nc">EmailNotifications</span><span class="tok-p">(</span><span class="tok-n">AbstractNotifications</span><span class="tok-p">):</span>
-
     <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">smtp_host</span><span class="tok-o">=</span><span class="tok-n">DEFAULT_HOST</span><span class="tok-p">,</span> <span class="tok-n">port</span><span class="tok-o">=</span><span class="tok-n">DEFAULT_PORT</span><span class="tok-p">):</span>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">server</span> <span class="tok-o">=</span> <span class="tok-n">smtplib</span><span class="tok-o">.</span><span class="tok-n">SMTP</span><span class="tok-p">(</span><span class="tok-n">smtp_host</span><span class="tok-p">,</span> <span class="tok-n">port</span><span class="tok-o">=</span><span class="tok-n">port</span><span class="tok-p">)</span>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">server</span><span class="tok-o">.</span><span class="tok-n">noop</span><span class="tok-p">()</span>
 
     <span class="tok-k">def</span> <span class="tok-nf">send</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">destination</span><span class="tok-p">,</span> <span class="tok-n">message</span><span class="tok-p">):</span>
-        <span class="tok-n">msg</span> <span class="tok-o">=</span> <span class="tok-n">f</span><span class="tok-s1">'Subject: allocation service notification</span><span class="tok-se">\n</span><span class="tok-s1">{message}'</span>
+        <span class="tok-n">msg</span> <span class="tok-o">=</span> <span class="tok-n">f</span><span class="tok-s2">"Subject: allocation service notification</span><span class="tok-se">\n</span><span class="tok-s2">{message}"</span>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">server</span><span class="tok-o">.</span><span class="tok-n">sendmail</span><span class="tok-p">(</span>
-            <span class="tok-n">from_addr</span><span class="tok-o">=</span><span class="tok-s1">'allocations@example.com'</span><span class="tok-p">,</span>
+            <span class="tok-n">from_addr</span><span class="tok-o">=</span><span class="tok-s2">"allocations@example.com"</span><span class="tok-p">,</span>
             <span class="tok-n">to_addrs</span><span class="tok-o">=</span><span class="tok-p">[</span><span class="tok-n">destination</span><span class="tok-p">],</span>
-            <span class="tok-n">msg</span><span class="tok-o">=</span><span class="tok-n">msg</span>
+            <span class="tok-n">msg</span><span class="tok-o">=</span><span class="tok-n">msg</span><span class="tok-p">,</span>
         <span class="tok-p">)</span></code></pre>
 </div>
 </div>
@@ -1201,7 +1200,6 @@ We work through and define a fake version for unit testing:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">FakeNotifications</span><span class="tok-p">(</span><span class="tok-n">notifications</span><span class="tok-o">.</span><span class="tok-n">AbstractNotifications</span><span class="tok-p">):</span>
-
     <span class="tok-k">def</span> <span class="tok-fm">__init__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">sent</span> <span class="tok-o">=</span> <span class="tok-n">defaultdict</span><span class="tok-p">(</span><span class="tok-nb">list</span><span class="tok-p">)</span>  <span class="tok-c1"># type: Dict[str, List[str]]</span>
 
@@ -1230,7 +1228,7 @@ We work through and define a fake version for unit testing:</p>
         <span class="tok-p">)</span>
         <span class="tok-n">bus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">CreateBatch</span><span class="tok-p">(</span><span class="tok-s2">"b1"</span><span class="tok-p">,</span> <span class="tok-s2">"POPULAR-CURTAINS"</span><span class="tok-p">,</span> <span class="tok-mi">9</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">))</span>
         <span class="tok-n">bus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">Allocate</span><span class="tok-p">(</span><span class="tok-s2">"o1"</span><span class="tok-p">,</span> <span class="tok-s2">"POPULAR-CURTAINS"</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">))</span>
-        <span class="tok-k">assert</span> <span class="tok-n">fake_notifs</span><span class="tok-o">.</span><span class="tok-n">sent</span><span class="tok-p">[</span><span class="tok-s1">'stock@made.com'</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-p">[</span>
+        <span class="tok-k">assert</span> <span class="tok-n">fake_notifs</span><span class="tok-o">.</span><span class="tok-n">sent</span><span class="tok-p">[</span><span class="tok-s2">"stock@made.com"</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-p">[</span>
             <span class="tok-n">f</span><span class="tok-s2">"Out of stock for POPULAR-CURTAINS"</span><span class="tok-p">,</span>
         <span class="tok-p">]</span></code></pre>
 </div>
@@ -1306,19 +1304,19 @@ talking to the MailHog server in the Docker cluster:</p>
 
 
 <span class="tok-k">def</span> <span class="tok-nf">get_email_from_mailhog</span><span class="tok-p">(</span><span class="tok-n">sku</span><span class="tok-p">):</span>  #<b class="conum">(2)</b>
-    <span class="tok-n">host</span><span class="tok-p">,</span> <span class="tok-n">port</span> <span class="tok-o">=</span> <span class="tok-nb">map</span><span class="tok-p">(</span><span class="tok-n">config</span><span class="tok-o">.</span><span class="tok-n">get_email_host_and_port</span><span class="tok-p">()</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">,</span> <span class="tok-p">[</span><span class="tok-s1">'host'</span><span class="tok-p">,</span> <span class="tok-s1">'http_port'</span><span class="tok-p">])</span>
-    <span class="tok-n">all_emails</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s1">'http://{host}:{port}/api/v2/messages'</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()</span>
-    <span class="tok-k">return</span> <span class="tok-nb">next</span><span class="tok-p">(</span><span class="tok-n">m</span> <span class="tok-k">for</span> <span class="tok-n">m</span> <span class="tok-ow">in</span> <span class="tok-n">all_emails</span><span class="tok-p">[</span><span class="tok-s1">'items'</span><span class="tok-p">]</span> <span class="tok-k">if</span> <span class="tok-n">sku</span> <span class="tok-ow">in</span> <span class="tok-nb">str</span><span class="tok-p">(</span><span class="tok-n">m</span><span class="tok-p">))</span>
+    <span class="tok-n">host</span><span class="tok-p">,</span> <span class="tok-n">port</span> <span class="tok-o">=</span> <span class="tok-nb">map</span><span class="tok-p">(</span><span class="tok-n">config</span><span class="tok-o">.</span><span class="tok-n">get_email_host_and_port</span><span class="tok-p">()</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">,</span> <span class="tok-p">[</span><span class="tok-s2">"host"</span><span class="tok-p">,</span> <span class="tok-s2">"http_port"</span><span class="tok-p">])</span>
+    <span class="tok-n">all_emails</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s2">"http://{host}:{port}/api/v2/messages"</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()</span>
+    <span class="tok-k">return</span> <span class="tok-nb">next</span><span class="tok-p">(</span><span class="tok-n">m</span> <span class="tok-k">for</span> <span class="tok-n">m</span> <span class="tok-ow">in</span> <span class="tok-n">all_emails</span><span class="tok-p">[</span><span class="tok-s2">"items"</span><span class="tok-p">]</span> <span class="tok-k">if</span> <span class="tok-n">sku</span> <span class="tok-ow">in</span> <span class="tok-nb">str</span><span class="tok-p">(</span><span class="tok-n">m</span><span class="tok-p">))</span>
 
 
 <span class="tok-k">def</span> <span class="tok-nf">test_out_of_stock_email</span><span class="tok-p">(</span><span class="tok-n">bus</span><span class="tok-p">):</span>
     <span class="tok-n">sku</span> <span class="tok-o">=</span> <span class="tok-n">random_sku</span><span class="tok-p">()</span>
-    <span class="tok-n">bus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">CreateBatch</span><span class="tok-p">(</span><span class="tok-s1">'batch1'</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">9</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">))</span>  #<b class="conum">(3)</b>
-    <span class="tok-n">bus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">Allocate</span><span class="tok-p">(</span><span class="tok-s1">'order1'</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">))</span>
+    <span class="tok-n">bus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">CreateBatch</span><span class="tok-p">(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">9</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">))</span>  #<b class="conum">(3)</b>
+    <span class="tok-n">bus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span><span class="tok-n">commands</span><span class="tok-o">.</span><span class="tok-n">Allocate</span><span class="tok-p">(</span><span class="tok-s2">"order1"</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">))</span>
     <span class="tok-n">email</span> <span class="tok-o">=</span> <span class="tok-n">get_email_from_mailhog</span><span class="tok-p">(</span><span class="tok-n">sku</span><span class="tok-p">)</span>
-    <span class="tok-k">assert</span> <span class="tok-n">email</span><span class="tok-p">[</span><span class="tok-s1">'Raw'</span><span class="tok-p">][</span><span class="tok-s1">'From'</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-s1">'allocations@example.com'</span>  #<b class="conum">(4)</b>
-    <span class="tok-k">assert</span> <span class="tok-n">email</span><span class="tok-p">[</span><span class="tok-s1">'Raw'</span><span class="tok-p">][</span><span class="tok-s1">'To'</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-p">[</span><span class="tok-s1">'stock@made.com'</span><span class="tok-p">]</span>
-    <span class="tok-k">assert</span> <span class="tok-n">f</span><span class="tok-s1">'Out of stock for {sku}'</span> <span class="tok-ow">in</span> <span class="tok-n">email</span><span class="tok-p">[</span><span class="tok-s1">'Raw'</span><span class="tok-p">][</span><span class="tok-s1">'Data'</span><span class="tok-p">]</span></code></pre>
+    <span class="tok-k">assert</span> <span class="tok-n">email</span><span class="tok-p">[</span><span class="tok-s2">"Raw"</span><span class="tok-p">][</span><span class="tok-s2">"From"</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-s2">"allocations@example.com"</span>  #<b class="conum">(4)</b>
+    <span class="tok-k">assert</span> <span class="tok-n">email</span><span class="tok-p">[</span><span class="tok-s2">"Raw"</span><span class="tok-p">][</span><span class="tok-s2">"To"</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-p">[</span><span class="tok-s2">"stock@made.com"</span><span class="tok-p">]</span>
+    <span class="tok-k">assert</span> <span class="tok-n">f</span><span class="tok-s2">"Out of stock for {sku}"</span> <span class="tok-ow">in</span> <span class="tok-n">email</span><span class="tok-p">[</span><span class="tok-s2">"Raw"</span><span class="tok-p">][</span><span class="tok-s2">"Data"</span><span class="tok-p">]</span></code></pre>
 </div>
 </div>
 </div>
@@ -1462,7 +1460,7 @@ World<sup>TM</sup>.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-08-22 06:02:38 +0100
+Last updated 2021-02-24 22:04:29 UTC
 </div>
 </div>
 <style>

@@ -292,6 +292,7 @@ enough:</p>
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-n">BLOCKSIZE</span> <span class="tok-o">=</span> <span class="tok-mi">65536</span>
 
+
 <span class="tok-k">def</span> <span class="tok-nf">hash_file</span><span class="tok-p">(</span><span class="tok-n">path</span><span class="tok-p">):</span>
     <span class="tok-n">hasher</span> <span class="tok-o">=</span> <span class="tok-n">hashlib</span><span class="tok-o">.</span><span class="tok-n">sha1</span><span class="tok-p">()</span>
     <span class="tok-k">with</span> <span class="tok-n">path</span><span class="tok-o">.</span><span class="tok-n">open</span><span class="tok-p">(</span><span class="tok-s2">"rb"</span><span class="tok-p">)</span> <span class="tok-k">as</span> <span class="tok-nb">file</span><span class="tok-p">:</span>
@@ -327,6 +328,7 @@ iteratively make the solution richer and better designed.</p>
 <span class="tok-kn">import</span> <span class="tok-nn">os</span>
 <span class="tok-kn">import</span> <span class="tok-nn">shutil</span>
 <span class="tok-kn">from</span> <span class="tok-nn">pathlib</span> <span class="tok-kn">import</span> <span class="tok-n">Path</span>
+
 
 <span class="tok-k">def</span> <span class="tok-nf">sync</span><span class="tok-p">(</span><span class="tok-n">source</span><span class="tok-p">,</span> <span class="tok-n">dest</span><span class="tok-p">):</span>
     <span class="tok-c1"># Walk the source folder and build a dict of filenames and their hashes</span>
@@ -377,11 +379,11 @@ hard drive, maybe we should test it. How do we go about testing this sort of thi
         <span class="tok-n">dest</span> <span class="tok-o">=</span> <span class="tok-n">tempfile</span><span class="tok-o">.</span><span class="tok-n">mkdtemp</span><span class="tok-p">()</span>
 
         <span class="tok-n">content</span> <span class="tok-o">=</span> <span class="tok-s2">"I am a very useful file"</span>
-        <span class="tok-p">(</span><span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">source</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-s1">'my-file'</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">write_text</span><span class="tok-p">(</span><span class="tok-n">content</span><span class="tok-p">)</span>
+        <span class="tok-p">(</span><span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">source</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-s2">"my-file"</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">write_text</span><span class="tok-p">(</span><span class="tok-n">content</span><span class="tok-p">)</span>
 
         <span class="tok-n">sync</span><span class="tok-p">(</span><span class="tok-n">source</span><span class="tok-p">,</span> <span class="tok-n">dest</span><span class="tok-p">)</span>
 
-        <span class="tok-n">expected_path</span> <span class="tok-o">=</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">dest</span><span class="tok-p">)</span> <span class="tok-o">/</span>  <span class="tok-s1">'my-file'</span>
+        <span class="tok-n">expected_path</span> <span class="tok-o">=</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">dest</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-s2">"my-file"</span>
         <span class="tok-k">assert</span> <span class="tok-n">expected_path</span><span class="tok-o">.</span><span class="tok-n">exists</span><span class="tok-p">()</span>
         <span class="tok-k">assert</span> <span class="tok-n">expected_path</span><span class="tok-o">.</span><span class="tok-n">read_text</span><span class="tok-p">()</span> <span class="tok-o">==</span> <span class="tok-n">content</span>
 
@@ -396,9 +398,9 @@ hard drive, maybe we should test it. How do we go about testing this sort of thi
         <span class="tok-n">dest</span> <span class="tok-o">=</span> <span class="tok-n">tempfile</span><span class="tok-o">.</span><span class="tok-n">mkdtemp</span><span class="tok-p">()</span>
 
         <span class="tok-n">content</span> <span class="tok-o">=</span> <span class="tok-s2">"I am a file that was renamed"</span>
-        <span class="tok-n">source_path</span> <span class="tok-o">=</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">source</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-s1">'source-filename'</span>
-        <span class="tok-n">old_dest_path</span> <span class="tok-o">=</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">dest</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-s1">'dest-filename'</span>
-        <span class="tok-n">expected_dest_path</span> <span class="tok-o">=</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">dest</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-s1">'source-filename'</span>
+        <span class="tok-n">source_path</span> <span class="tok-o">=</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">source</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-s2">"source-filename"</span>
+        <span class="tok-n">old_dest_path</span> <span class="tok-o">=</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">dest</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-s2">"dest-filename"</span>
+        <span class="tok-n">expected_dest_path</span> <span class="tok-o">=</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">dest</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-s2">"source-filename"</span>
         <span class="tok-n">source_path</span><span class="tok-o">.</span><span class="tok-n">write_text</span><span class="tok-p">(</span><span class="tok-n">content</span><span class="tok-p">)</span>
         <span class="tok-n">old_dest_path</span><span class="tok-o">.</span><span class="tok-n">write_text</span><span class="tok-p">(</span><span class="tok-n">content</span><span class="tok-p">)</span>
 
@@ -406,7 +408,6 @@ hard drive, maybe we should test it. How do we go about testing this sort of thi
 
         <span class="tok-k">assert</span> <span class="tok-n">old_dest_path</span><span class="tok-o">.</span><span class="tok-n">exists</span><span class="tok-p">()</span> <span class="tok-ow">is</span> <span class="tok-bp">False</span>
         <span class="tok-k">assert</span> <span class="tok-n">expected_dest_path</span><span class="tok-o">.</span><span class="tok-n">read_text</span><span class="tok-p">()</span> <span class="tok-o">==</span> <span class="tok-n">content</span>
-
 
     <span class="tok-k">finally</span><span class="tok-p">:</span>
         <span class="tok-n">shutil</span><span class="tok-o">.</span><span class="tok-n">rmtree</span><span class="tok-p">(</span><span class="tok-n">source</span><span class="tok-p">)</span>
@@ -608,11 +609,11 @@ imperative series of steps: gather inputs, call our logic, apply outputs:</p>
 
     <span class="tok-c1"># imperative shell step 3, apply outputs</span>
     <span class="tok-k">for</span> <span class="tok-n">action</span><span class="tok-p">,</span> <span class="tok-o">*</span><span class="tok-n">paths</span> <span class="tok-ow">in</span> <span class="tok-n">actions</span><span class="tok-p">:</span>
-        <span class="tok-k">if</span> <span class="tok-n">action</span> <span class="tok-o">==</span> <span class="tok-s1">'copy'</span><span class="tok-p">:</span>
+        <span class="tok-k">if</span> <span class="tok-n">action</span> <span class="tok-o">==</span> <span class="tok-s2">"copy"</span><span class="tok-p">:</span>
             <span class="tok-n">shutil</span><span class="tok-o">.</span><span class="tok-n">copyfile</span><span class="tok-p">(</span><span class="tok-o">*</span><span class="tok-n">paths</span><span class="tok-p">)</span>
-        <span class="tok-k">if</span> <span class="tok-n">action</span> <span class="tok-o">==</span> <span class="tok-s1">'move'</span><span class="tok-p">:</span>
+        <span class="tok-k">if</span> <span class="tok-n">action</span> <span class="tok-o">==</span> <span class="tok-s2">"move"</span><span class="tok-p">:</span>
             <span class="tok-n">shutil</span><span class="tok-o">.</span><span class="tok-n">move</span><span class="tok-p">(</span><span class="tok-o">*</span><span class="tok-n">paths</span><span class="tok-p">)</span>
-        <span class="tok-k">if</span> <span class="tok-n">action</span> <span class="tok-o">==</span> <span class="tok-s1">'delete'</span><span class="tok-p">:</span>
+        <span class="tok-k">if</span> <span class="tok-n">action</span> <span class="tok-o">==</span> <span class="tok-s2">"delete"</span><span class="tok-p">:</span>
             <span class="tok-n">os</span><span class="tok-o">.</span><span class="tok-n">remove</span><span class="tok-p">(</span><span class="tok-n">paths</span><span class="tok-p">[</span><span class="tok-mi">0</span><span class="tok-p">])</span></code></pre>
 </div>
 </div>
@@ -665,16 +666,16 @@ structures:</p>
         <span class="tok-k">if</span> <span class="tok-n">sha</span> <span class="tok-ow">not</span> <span class="tok-ow">in</span> <span class="tok-n">dst_hashes</span><span class="tok-p">:</span>
             <span class="tok-n">sourcepath</span> <span class="tok-o">=</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">src_folder</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-n">filename</span>
             <span class="tok-n">destpath</span> <span class="tok-o">=</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">dst_folder</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-n">filename</span>
-            <span class="tok-k">yield</span> <span class="tok-s1">'copy'</span><span class="tok-p">,</span> <span class="tok-n">sourcepath</span><span class="tok-p">,</span> <span class="tok-n">destpath</span>
+            <span class="tok-k">yield</span> <span class="tok-s2">"copy"</span><span class="tok-p">,</span> <span class="tok-n">sourcepath</span><span class="tok-p">,</span> <span class="tok-n">destpath</span>
 
         <span class="tok-k">elif</span> <span class="tok-n">dst_hashes</span><span class="tok-p">[</span><span class="tok-n">sha</span><span class="tok-p">]</span> <span class="tok-o">!=</span> <span class="tok-n">filename</span><span class="tok-p">:</span>
             <span class="tok-n">olddestpath</span> <span class="tok-o">=</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">dst_folder</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-n">dst_hashes</span><span class="tok-p">[</span><span class="tok-n">sha</span><span class="tok-p">]</span>
             <span class="tok-n">newdestpath</span> <span class="tok-o">=</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-n">dst_folder</span><span class="tok-p">)</span> <span class="tok-o">/</span> <span class="tok-n">filename</span>
-            <span class="tok-k">yield</span> <span class="tok-s1">'move'</span><span class="tok-p">,</span> <span class="tok-n">olddestpath</span><span class="tok-p">,</span> <span class="tok-n">newdestpath</span>
+            <span class="tok-k">yield</span> <span class="tok-s2">"move"</span><span class="tok-p">,</span> <span class="tok-n">olddestpath</span><span class="tok-p">,</span> <span class="tok-n">newdestpath</span>
 
     <span class="tok-k">for</span> <span class="tok-n">sha</span><span class="tok-p">,</span> <span class="tok-n">filename</span> <span class="tok-ow">in</span> <span class="tok-n">dst_hashes</span><span class="tok-o">.</span><span class="tok-n">items</span><span class="tok-p">():</span>
         <span class="tok-k">if</span> <span class="tok-n">sha</span> <span class="tok-ow">not</span> <span class="tok-ow">in</span> <span class="tok-n">src_hashes</span><span class="tok-p">:</span>
-            <span class="tok-k">yield</span> <span class="tok-s1">'delete'</span><span class="tok-p">,</span> <span class="tok-n">dst_folder</span> <span class="tok-o">/</span> <span class="tok-n">filename</span></code></pre>
+            <span class="tok-k">yield</span> <span class="tok-s2">"delete"</span><span class="tok-p">,</span> <span class="tok-n">dst_folder</span> <span class="tok-o">/</span> <span class="tok-n">filename</span></code></pre>
 </div>
 </div>
 </div>
@@ -688,16 +689,17 @@ structures:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_when_a_file_exists_in_the_source_but_not_the_destination</span><span class="tok-p">():</span>
-    <span class="tok-n">src_hashes</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s1">'hash1'</span><span class="tok-p">:</span> <span class="tok-s1">'fn1'</span><span class="tok-p">}</span>
+    <span class="tok-n">src_hashes</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s2">"hash1"</span><span class="tok-p">:</span> <span class="tok-s2">"fn1"</span><span class="tok-p">}</span>
     <span class="tok-n">dst_hashes</span> <span class="tok-o">=</span> <span class="tok-p">{}</span>
-    <span class="tok-n">actions</span> <span class="tok-o">=</span> <span class="tok-n">determine_actions</span><span class="tok-p">(</span><span class="tok-n">src_hashes</span><span class="tok-p">,</span> <span class="tok-n">dst_hashes</span><span class="tok-p">,</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-s1">'/src'</span><span class="tok-p">),</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-s1">'/dst'</span><span class="tok-p">))</span>
-    <span class="tok-k">assert</span> <span class="tok-nb">list</span><span class="tok-p">(</span><span class="tok-n">actions</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-p">[(</span><span class="tok-s1">'copy'</span><span class="tok-p">,</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-s1">'/src/fn1'</span><span class="tok-p">),</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-s1">'/dst/fn1'</span><span class="tok-p">))]</span>
+    <span class="tok-n">actions</span> <span class="tok-o">=</span> <span class="tok-n">determine_actions</span><span class="tok-p">(</span><span class="tok-n">src_hashes</span><span class="tok-p">,</span> <span class="tok-n">dst_hashes</span><span class="tok-p">,</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-s2">"/src"</span><span class="tok-p">),</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-s2">"/dst"</span><span class="tok-p">))</span>
+    <span class="tok-k">assert</span> <span class="tok-nb">list</span><span class="tok-p">(</span><span class="tok-n">actions</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-p">[(</span><span class="tok-s2">"copy"</span><span class="tok-p">,</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-s2">"/src/fn1"</span><span class="tok-p">),</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-s2">"/dst/fn1"</span><span class="tok-p">))]</span>
+
 
 <span class="tok-k">def</span> <span class="tok-nf">test_when_a_file_has_been_renamed_in_the_source</span><span class="tok-p">():</span>
-    <span class="tok-n">src_hashes</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s1">'hash1'</span><span class="tok-p">:</span> <span class="tok-s1">'fn1'</span><span class="tok-p">}</span>
-    <span class="tok-n">dst_hashes</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s1">'hash1'</span><span class="tok-p">:</span> <span class="tok-s1">'fn2'</span><span class="tok-p">}</span>
-    <span class="tok-n">actions</span> <span class="tok-o">=</span> <span class="tok-n">determine_actions</span><span class="tok-p">(</span><span class="tok-n">src_hashes</span><span class="tok-p">,</span> <span class="tok-n">dst_hashes</span><span class="tok-p">,</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-s1">'/src'</span><span class="tok-p">),</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-s1">'/dst'</span><span class="tok-p">))</span>
-    <span class="tok-k">assert</span> <span class="tok-nb">list</span><span class="tok-p">(</span><span class="tok-n">actions</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-p">[(</span><span class="tok-s1">'move'</span><span class="tok-p">,</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-s1">'/dst/fn2'</span><span class="tok-p">),</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-s1">'/dst/fn1'</span><span class="tok-p">))]</span></code></pre>
+    <span class="tok-n">src_hashes</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s2">"hash1"</span><span class="tok-p">:</span> <span class="tok-s2">"fn1"</span><span class="tok-p">}</span>
+    <span class="tok-n">dst_hashes</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s2">"hash1"</span><span class="tok-p">:</span> <span class="tok-s2">"fn2"</span><span class="tok-p">}</span>
+    <span class="tok-n">actions</span> <span class="tok-o">=</span> <span class="tok-n">determine_actions</span><span class="tok-p">(</span><span class="tok-n">src_hashes</span><span class="tok-p">,</span> <span class="tok-n">dst_hashes</span><span class="tok-p">,</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-s2">"/src"</span><span class="tok-p">),</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-s2">"/dst"</span><span class="tok-p">))</span>
+    <span class="tok-k">assert</span> <span class="tok-nb">list</span><span class="tok-p">(</span><span class="tok-n">actions</span><span class="tok-p">)</span> <span class="tok-o">==</span> <span class="tok-p">[(</span><span class="tok-s2">"move"</span><span class="tok-p">,</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-s2">"/dst/fn2"</span><span class="tok-p">),</span> <span class="tok-n">Path</span><span class="tok-p">(</span><span class="tok-s2">"/dst/fn1"</span><span class="tok-p">))]</span></code></pre>
 </div>
 </div>
 </div>
@@ -1121,7 +1123,7 @@ Practice makes less imperfect! And now back to our regular programming&#8230;&#8
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-07-30 14:51:23 +0100
+Last updated 2021-02-24 22:04:29 UTC
 </div>
 </div>
 <style>
