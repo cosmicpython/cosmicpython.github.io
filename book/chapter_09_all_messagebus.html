@@ -3,7 +3,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="generator" content="Asciidoctor 2.0.16">
 <title>Going to Town on the Message Bus</title>
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -98,6 +98,82 @@ table {
   font-size: 3vw;
 }
 
+</style>
+<style>
+pre { line-height: 125%; }
+td.linenos .normal { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+pre.pygments .hll { background-color: #ffffcc }
+pre.pygments { background: #f0f0f0; }
+pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
+pre.pygments .tok-err { border: 1px solid #FF0000 } /* Error */
+pre.pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
+pre.pygments .tok-o { color: #666666 } /* Operator */
+pre.pygments .tok-ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
+pre.pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
+pre.pygments .tok-cp { color: #007020 } /* Comment.Preproc */
+pre.pygments .tok-cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
+pre.pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
+pre.pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
+pre.pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
+pre.pygments .tok-ge { font-style: italic } /* Generic.Emph */
+pre.pygments .tok-gr { color: #FF0000 } /* Generic.Error */
+pre.pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
+pre.pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
+pre.pygments .tok-go { color: #888888 } /* Generic.Output */
+pre.pygments .tok-gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+pre.pygments .tok-gs { font-weight: bold } /* Generic.Strong */
+pre.pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+pre.pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
+pre.pygments .tok-kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+pre.pygments .tok-kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+pre.pygments .tok-kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+pre.pygments .tok-kp { color: #007020 } /* Keyword.Pseudo */
+pre.pygments .tok-kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+pre.pygments .tok-kt { color: #902000 } /* Keyword.Type */
+pre.pygments .tok-m { color: #40a070 } /* Literal.Number */
+pre.pygments .tok-s { color: #4070a0 } /* Literal.String */
+pre.pygments .tok-na { color: #4070a0 } /* Name.Attribute */
+pre.pygments .tok-nb { color: #007020 } /* Name.Builtin */
+pre.pygments .tok-nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+pre.pygments .tok-no { color: #60add5 } /* Name.Constant */
+pre.pygments .tok-nd { color: #555555; font-weight: bold } /* Name.Decorator */
+pre.pygments .tok-ni { color: #d55537; font-weight: bold } /* Name.Entity */
+pre.pygments .tok-ne { color: #007020 } /* Name.Exception */
+pre.pygments .tok-nf { color: #06287e } /* Name.Function */
+pre.pygments .tok-nl { color: #002070; font-weight: bold } /* Name.Label */
+pre.pygments .tok-nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+pre.pygments .tok-nt { color: #062873; font-weight: bold } /* Name.Tag */
+pre.pygments .tok-nv { color: #bb60d5 } /* Name.Variable */
+pre.pygments .tok-ow { color: #007020; font-weight: bold } /* Operator.Word */
+pre.pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
+pre.pygments .tok-mb { color: #40a070 } /* Literal.Number.Bin */
+pre.pygments .tok-mf { color: #40a070 } /* Literal.Number.Float */
+pre.pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
+pre.pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
+pre.pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
+pre.pygments .tok-sa { color: #4070a0 } /* Literal.String.Affix */
+pre.pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
+pre.pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
+pre.pygments .tok-dl { color: #4070a0 } /* Literal.String.Delimiter */
+pre.pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+pre.pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
+pre.pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+pre.pygments .tok-sh { color: #4070a0 } /* Literal.String.Heredoc */
+pre.pygments .tok-si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+pre.pygments .tok-sx { color: #c65d09 } /* Literal.String.Other */
+pre.pygments .tok-sr { color: #235388 } /* Literal.String.Regex */
+pre.pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
+pre.pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
+pre.pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
+pre.pygments .tok-fm { color: #06287e } /* Name.Function.Magic */
+pre.pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
+pre.pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
+pre.pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
+pre.pygments .tok-vm { color: #bb60d5 } /* Name.Variable.Magic */
+pre.pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
 </style>
 </head>
 <body class="article toc2 toc-left">
@@ -375,7 +451,7 @@ inputs&#8212;AllocationRequired and <code>BatchCreated</code>:</p>
     <span class="tok-n">ref</span><span class="tok-p">:</span> <span class="tok-nb">str</span>
     <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span>
     <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span>
-    <span class="tok-n">eta</span><span class="tok-p">:</span> <span class="tok-n">Optional</span><span class="tok-p">[</span><span class="tok-n">date</span><span class="tok-p">]</span> <span class="tok-o">=</span> <span class="tok-bp">None</span>
+    <span class="tok-n">eta</span><span class="tok-p">:</span> <span class="tok-n">Optional</span><span class="tok-p">[</span><span class="tok-n">date</span><span class="tok-p">]</span> <span class="tok-o">=</span> <span class="tok-kc">None</span>
 
 <span class="tok-o">...</span>
 
@@ -421,7 +497,7 @@ handlers so that they have the same inputs, an event and a UoW:</p>
 <span class="tok-p">):</span>
     <span class="tok-n">email</span><span class="tok-o">.</span><span class="tok-n">send</span><span class="tok-p">(</span>
         <span class="tok-s2">"stock@made.com"</span><span class="tok-p">,</span>
-        <span class="tok-n">f</span><span class="tok-s2">"Out of stock for {event.sku}"</span><span class="tok-p">,</span>
+        <span class="tok-sa">f</span><span class="tok-s2">"Out of stock for </span><span class="tok-si">{</span><span class="tok-n">event</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-si">}</span><span class="tok-s2">"</span><span class="tok-p">,</span>
     <span class="tok-p">)</span></code></pre>
 </div>
 </div>
@@ -435,33 +511,33 @@ handlers so that they have the same inputs, an event and a UoW:</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="diff"><span></span> def add_batch(
-<span class="tok-gd">-    ref: str, sku: str, qty: int, eta: Optional[date],</span>
-<span class="tok-gi">+    event: events.BatchCreated,</span>
-     uow: unit_of_work.AbstractUnitOfWork,
- ):
-     with uow:
-<span class="tok-gd">-        product = uow.products.get(sku=sku)</span>
-<span class="tok-gi">+        product = uow.products.get(sku=event.sku)</span>
-     ...
+<pre class="pygments highlight"><code data-lang="diff"><span></span><span class="tok-w"> </span>def add_batch(<span class="tok-w"></span>
+<span class="tok-gd">-    ref: str, sku: str, qty: int, eta: Optional[date],</span><span class="tok-w"></span>
+<span class="tok-gi">+    event: events.BatchCreated,</span><span class="tok-w"></span>
+<span class="tok-w"> </span>    uow: unit_of_work.AbstractUnitOfWork,<span class="tok-w"></span>
+<span class="tok-w"> </span>):<span class="tok-w"></span>
+<span class="tok-w"> </span>    with uow:<span class="tok-w"></span>
+<span class="tok-gd">-        product = uow.products.get(sku=sku)</span><span class="tok-w"></span>
+<span class="tok-gi">+        product = uow.products.get(sku=event.sku)</span><span class="tok-w"></span>
+<span class="tok-w"> </span>    ...<span class="tok-w"></span>
 
 
- def allocate(
-<span class="tok-gd">-    orderid: str, sku: str, qty: int,</span>
-<span class="tok-gi">+    event: events.AllocationRequired,</span>
-     uow: unit_of_work.AbstractUnitOfWork,
- ) -&gt; str:
-<span class="tok-gd">-    line = OrderLine(orderid, sku, qty)</span>
-<span class="tok-gi">+    line = OrderLine(event.orderid, event.sku, event.qty)</span>
-     ...
+<span class="tok-w"> </span>def allocate(<span class="tok-w"></span>
+<span class="tok-gd">-    orderid: str, sku: str, qty: int,</span><span class="tok-w"></span>
+<span class="tok-gi">+    event: events.AllocationRequired,</span><span class="tok-w"></span>
+<span class="tok-w"> </span>    uow: unit_of_work.AbstractUnitOfWork,<span class="tok-w"></span>
+<span class="tok-w"> </span>) -&gt; str:<span class="tok-w"></span>
+<span class="tok-gd">-    line = OrderLine(orderid, sku, qty)</span><span class="tok-w"></span>
+<span class="tok-gi">+    line = OrderLine(event.orderid, event.sku, event.qty)</span><span class="tok-w"></span>
+<span class="tok-w"> </span>    ...<span class="tok-w"></span>
 
-<span class="tok-gi">+</span>
-<span class="tok-gi">+def send_out_of_stock_notification(</span>
-<span class="tok-gi">+    event: events.OutOfStock,</span>
-<span class="tok-gi">+    uow: unit_of_work.AbstractUnitOfWork,</span>
-<span class="tok-gi">+):</span>
-<span class="tok-gi">+    email.send(</span>
-     ...</code></pre>
+<span class="tok-gi">+</span><span class="tok-w"></span>
+<span class="tok-gi">+def send_out_of_stock_notification(</span><span class="tok-w"></span>
+<span class="tok-gi">+    event: events.OutOfStock,</span><span class="tok-w"></span>
+<span class="tok-gi">+    uow: unit_of_work.AbstractUnitOfWork,</span><span class="tok-w"></span>
+<span class="tok-gi">+):</span><span class="tok-w"></span>
+<span class="tok-gi">+    email.send(</span><span class="tok-w"></span>
+<span class="tok-w"> </span>    ...<span class="tok-w"></span></code></pre>
 </div>
 </div>
 </div>
@@ -571,23 +647,23 @@ generated and add them to the queue.</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="diff"><span></span><span class="tok-gd">-from . import messagebus  </span>#<b class="conum">(1)</b>
+<pre class="pygments highlight"><code data-lang="diff"><span></span><span class="tok-gd">-from . import messagebus  </span><span class="tok-w"></span>#<b class="conum">(1)</b>
 
 
- class AbstractUnitOfWork(abc.ABC):
-<span class="tok-gu">@@ -22,13 +21,11 @@ class AbstractUnitOfWork(abc.ABC):</span>
+<span class="tok-w"> </span>class AbstractUnitOfWork(abc.ABC):<span class="tok-w"></span>
+<span class="tok-gu">@@ -22,13 +21,11 @@ class AbstractUnitOfWork(abc.ABC):</span><span class="tok-w"></span>
 
-     def commit(self):
-         self._commit()
-<span class="tok-gd">-        self.publish_events()  </span>#<b class="conum">(2)</b>
+<span class="tok-w"> </span>    def commit(self):<span class="tok-w"></span>
+<span class="tok-w"> </span>        self._commit()<span class="tok-w"></span>
+<span class="tok-gd">-        self.publish_events()  </span><span class="tok-w"></span>#<b class="conum">(2)</b>
 
-<span class="tok-gd">-    def publish_events(self):</span>
-<span class="tok-gi">+    def collect_new_events(self):</span>
-         for product in self.products.seen:
-             while product.events:
-<span class="tok-gd">-                event = product.events.pop(0)</span>
-<span class="tok-gd">-                messagebus.handle(event)</span>
-<span class="tok-gi">+                yield product.events.pop(0)  </span>#<b class="conum">(3)</b></code></pre>
+<span class="tok-gd">-    def publish_events(self):</span><span class="tok-w"></span>
+<span class="tok-gi">+    def collect_new_events(self):</span><span class="tok-w"></span>
+<span class="tok-w"> </span>        for product in self.products.seen:<span class="tok-w"></span>
+<span class="tok-w"> </span>            while product.events:<span class="tok-w"></span>
+<span class="tok-gd">-                event = product.events.pop(0)</span><span class="tok-w"></span>
+<span class="tok-gd">-                messagebus.handle(event)</span><span class="tok-w"></span>
+<span class="tok-gi">+                yield product.events.pop(0)  </span><span class="tok-w"></span>#<b class="conum">(3)</b></code></pre>
 </div>
 </div>
 </div>
@@ -621,30 +697,30 @@ message bus, rather than invoking service-layer functions directly:</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="diff"><span></span>class TestAddBatch:
-     def test_for_new_product(self):
-         uow = FakeUnitOfWork()
-<span class="tok-gd">-        services.add_batch("b1", "CRUNCHY-ARMCHAIR", 100, None, uow)</span>
-<span class="tok-gi">+        messagebus.handle(</span>
-<span class="tok-gi">+            events.BatchCreated("b1", "CRUNCHY-ARMCHAIR", 100, None), uow</span>
-<span class="tok-gi">+        )</span>
-         assert uow.products.get("CRUNCHY-ARMCHAIR") is not None
-         assert uow.committed
+<pre class="pygments highlight"><code data-lang="diff"><span></span><span class="tok-w">class TestAddBatch:</span>
+<span class="tok-w"> </span>    def test_for_new_product(self):<span class="tok-w"></span>
+<span class="tok-w"> </span>        uow = FakeUnitOfWork()<span class="tok-w"></span>
+<span class="tok-gd">-        services.add_batch("b1", "CRUNCHY-ARMCHAIR", 100, None, uow)</span><span class="tok-w"></span>
+<span class="tok-gi">+        messagebus.handle(</span><span class="tok-w"></span>
+<span class="tok-gi">+            events.BatchCreated("b1", "CRUNCHY-ARMCHAIR", 100, None), uow</span><span class="tok-w"></span>
+<span class="tok-gi">+        )</span><span class="tok-w"></span>
+<span class="tok-w"> </span>        assert uow.products.get("CRUNCHY-ARMCHAIR") is not None<span class="tok-w"></span>
+<span class="tok-w"> </span>        assert uow.committed<span class="tok-w"></span>
 
-...
+<span class="tok-w">...</span>
 
- class TestAllocate:
-     def test_returns_allocation(self):
-         uow = FakeUnitOfWork()
-<span class="tok-gd">-        services.add_batch("batch1", "COMPLICATED-LAMP", 100, None, uow)</span>
-<span class="tok-gd">-        result = services.allocate("o1", "COMPLICATED-LAMP", 10, uow)</span>
-<span class="tok-gi">+        messagebus.handle(</span>
-<span class="tok-gi">+            events.BatchCreated("batch1", "COMPLICATED-LAMP", 100, None), uow</span>
-<span class="tok-gi">+        )</span>
-<span class="tok-gi">+        result = messagebus.handle(</span>
-<span class="tok-gi">+            events.AllocationRequired("o1", "COMPLICATED-LAMP", 10), uow</span>
-<span class="tok-gi">+        )</span>
-         assert result == "batch1"</code></pre>
+<span class="tok-w"> </span>class TestAllocate:<span class="tok-w"></span>
+<span class="tok-w"> </span>    def test_returns_allocation(self):<span class="tok-w"></span>
+<span class="tok-w"> </span>        uow = FakeUnitOfWork()<span class="tok-w"></span>
+<span class="tok-gd">-        services.add_batch("batch1", "COMPLICATED-LAMP", 100, None, uow)</span><span class="tok-w"></span>
+<span class="tok-gd">-        result = services.allocate("o1", "COMPLICATED-LAMP", 10, uow)</span><span class="tok-w"></span>
+<span class="tok-gi">+        messagebus.handle(</span><span class="tok-w"></span>
+<span class="tok-gi">+            events.BatchCreated("batch1", "COMPLICATED-LAMP", 100, None), uow</span><span class="tok-w"></span>
+<span class="tok-gi">+        )</span><span class="tok-w"></span>
+<span class="tok-gi">+        result = messagebus.handle(</span><span class="tok-w"></span>
+<span class="tok-gi">+            events.AllocationRequired("o1", "COMPLICATED-LAMP", 10), uow</span><span class="tok-w"></span>
+<span class="tok-gi">+        )</span><span class="tok-w"></span>
+<span class="tok-w"> </span>        assert result == "batch1"<span class="tok-w"></span></code></pre>
 </div>
 </div>
 </div>
@@ -664,19 +740,19 @@ a temporary hack on our message bus to let it return events:</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="diff"><span></span> def handle(
-     event: events.Event,
-     uow: unit_of_work.AbstractUnitOfWork,
- ):
-<span class="tok-gi">+    results = []</span>
-     queue = [event]
-     while queue:
-         event = queue.pop(0)
-         for handler in HANDLERS[type(event)]:
-<span class="tok-gd">-            handler(event, uow=uow)</span>
-<span class="tok-gi">+            results.append(handler(event, uow=uow))</span>
-             queue.extend(uow.collect_new_events())
-<span class="tok-gi">+    return results</span></code></pre>
+<pre class="pygments highlight"><code data-lang="diff"><span></span><span class="tok-w"> </span>def handle(<span class="tok-w"></span>
+<span class="tok-w"> </span>    event: events.Event,<span class="tok-w"></span>
+<span class="tok-w"> </span>    uow: unit_of_work.AbstractUnitOfWork,<span class="tok-w"></span>
+<span class="tok-w"> </span>):<span class="tok-w"></span>
+<span class="tok-gi">+    results = []</span><span class="tok-w"></span>
+<span class="tok-w"> </span>    queue = [event]<span class="tok-w"></span>
+<span class="tok-w"> </span>    while queue:<span class="tok-w"></span>
+<span class="tok-w"> </span>        event = queue.pop(0)<span class="tok-w"></span>
+<span class="tok-w"> </span>        for handler in HANDLERS[type(event)]:<span class="tok-w"></span>
+<span class="tok-gd">-            handler(event, uow=uow)</span><span class="tok-w"></span>
+<span class="tok-gi">+            results.append(handler(event, uow=uow))</span><span class="tok-w"></span>
+<span class="tok-w"> </span>            queue.extend(uow.collect_new_events())<span class="tok-w"></span>
+<span class="tok-gi">+    return results</span><span class="tok-w"></span></code></pre>
 </div>
 </div>
 </div>
@@ -695,20 +771,20 @@ We&#8217;ll come back to fix this wart in <a href="/book/chapter_12_cqrs.html">[
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="diff"><span></span> @app.route("/allocate", methods=["POST"])
- def allocate_endpoint():
-     try:
-<span class="tok-gd">-        batchref = services.allocate(</span>
-<span class="tok-gd">-            request.json["orderid"],  </span>#<b class="conum">(1)</b>
-<span class="tok-gd">-            request.json["sku"],</span>
-<span class="tok-gd">-            request.json["qty"],</span>
-<span class="tok-gd">-            unit_of_work.SqlAlchemyUnitOfWork(),</span>
-<span class="tok-gi">+        event = events.AllocationRequired(  </span>#<b class="conum">(2)</b>
-<span class="tok-gi">+            request.json["orderid"], request.json["sku"], request.json["qty"]</span>
-         )
-<span class="tok-gi">+        results = messagebus.handle(event, unit_of_work.SqlAlchemyUnitOfWork())  </span>#<b class="conum">(3)</b>
-<span class="tok-gi">+        batchref = results.pop(0)</span>
-     except InvalidSku as e:</code></pre>
+<pre class="pygments highlight"><code data-lang="diff"><span></span><span class="tok-w"> </span>@app.route("/allocate", methods=["POST"])<span class="tok-w"></span>
+<span class="tok-w"> </span>def allocate_endpoint():<span class="tok-w"></span>
+<span class="tok-w"> </span>    try:<span class="tok-w"></span>
+<span class="tok-gd">-        batchref = services.allocate(</span><span class="tok-w"></span>
+<span class="tok-gd">-            request.json["orderid"],  </span><span class="tok-w"></span>#<b class="conum">(1)</b>
+<span class="tok-gd">-            request.json["sku"],</span><span class="tok-w"></span>
+<span class="tok-gd">-            request.json["qty"],</span><span class="tok-w"></span>
+<span class="tok-gd">-            unit_of_work.SqlAlchemyUnitOfWork(),</span><span class="tok-w"></span>
+<span class="tok-gi">+        event = events.AllocationRequired(  </span><span class="tok-w"></span>#<b class="conum">(2)</b>
+<span class="tok-gi">+            request.json["orderid"], request.json["sku"], request.json["qty"]</span><span class="tok-w"></span>
+<span class="tok-w"> </span>        )<span class="tok-w"></span>
+<span class="tok-gi">+        results = messagebus.handle(event, unit_of_work.SqlAlchemyUnitOfWork())  </span><span class="tok-w"></span>#<b class="conum">(3)</b>
+<span class="tok-gi">+        batchref = results.pop(0)</span><span class="tok-w"></span>
+<span class="tok-w"> </span>    except InvalidSku as e:<span class="tok-w"></span></code></pre>
 </div>
 </div>
 </div>
@@ -853,7 +929,7 @@ look like:</p>
     <span class="tok-k">def</span> <span class="tok-nf">test_changes_available_quantity</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
         <span class="tok-n">uow</span> <span class="tok-o">=</span> <span class="tok-n">FakeUnitOfWork</span><span class="tok-p">()</span>
         <span class="tok-n">messagebus</span><span class="tok-o">.</span><span class="tok-n">handle</span><span class="tok-p">(</span>
-            <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">BatchCreated</span><span class="tok-p">(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-s2">"ADORABLE-SETTEE"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">),</span> <span class="tok-n">uow</span>
+            <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">BatchCreated</span><span class="tok-p">(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-s2">"ADORABLE-SETTEE"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-kc">None</span><span class="tok-p">),</span> <span class="tok-n">uow</span>
         <span class="tok-p">)</span>
         <span class="tok-p">[</span><span class="tok-n">batch</span><span class="tok-p">]</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">products</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-s2">"ADORABLE-SETTEE"</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">batches</span>
         <span class="tok-k">assert</span> <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">==</span> <span class="tok-mi">100</span>  #<b class="conum">(1)</b>
@@ -865,7 +941,7 @@ look like:</p>
     <span class="tok-k">def</span> <span class="tok-nf">test_reallocates_if_necessary</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
         <span class="tok-n">uow</span> <span class="tok-o">=</span> <span class="tok-n">FakeUnitOfWork</span><span class="tok-p">()</span>
         <span class="tok-n">event_history</span> <span class="tok-o">=</span> <span class="tok-p">[</span>
-            <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">BatchCreated</span><span class="tok-p">(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-s2">"INDIFFERENT-TABLE"</span><span class="tok-p">,</span> <span class="tok-mi">50</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">),</span>
+            <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">BatchCreated</span><span class="tok-p">(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-s2">"INDIFFERENT-TABLE"</span><span class="tok-p">,</span> <span class="tok-mi">50</span><span class="tok-p">,</span> <span class="tok-kc">None</span><span class="tok-p">),</span>
             <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">BatchCreated</span><span class="tok-p">(</span><span class="tok-s2">"batch2"</span><span class="tok-p">,</span> <span class="tok-s2">"INDIFFERENT-TABLE"</span><span class="tok-p">,</span> <span class="tok-mi">50</span><span class="tok-p">,</span> <span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-n">today</span><span class="tok-p">()),</span>
             <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">AllocationRequired</span><span class="tok-p">(</span><span class="tok-s2">"order1"</span><span class="tok-p">,</span> <span class="tok-s2">"INDIFFERENT-TABLE"</span><span class="tok-p">,</span> <span class="tok-mi">20</span><span class="tok-p">),</span>
             <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">AllocationRequired</span><span class="tok-p">(</span><span class="tok-s2">"order2"</span><span class="tok-p">,</span> <span class="tok-s2">"INDIFFERENT-TABLE"</span><span class="tok-p">,</span> <span class="tok-mi">20</span><span class="tok-p">),</span>
@@ -943,15 +1019,15 @@ We realize we&#8217;ll need a new query type on our repository:</p>
             <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">seen</span><span class="tok-o">.</span><span class="tok-n">add</span><span class="tok-p">(</span><span class="tok-n">product</span><span class="tok-p">)</span>
         <span class="tok-k">return</span> <span class="tok-n">product</span>
 
-    <span class="tok-nd">@abc.abstractmethod</span>
+    <span class="tok-nd">@abc</span><span class="tok-o">.</span><span class="tok-n">abstractmethod</span>
     <span class="tok-k">def</span> <span class="tok-nf">_add</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">product</span><span class="tok-p">:</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Product</span><span class="tok-p">):</span>
         <span class="tok-k">raise</span> <span class="tok-ne">NotImplementedError</span>
 
-    <span class="tok-nd">@abc.abstractmethod</span>
+    <span class="tok-nd">@abc</span><span class="tok-o">.</span><span class="tok-n">abstractmethod</span>
     <span class="tok-k">def</span> <span class="tok-nf">_get</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Product</span><span class="tok-p">:</span>
         <span class="tok-k">raise</span> <span class="tok-ne">NotImplementedError</span>
 
-    <span class="tok-nd">@abc.abstractmethod</span>
+    <span class="tok-nd">@abc</span><span class="tok-o">.</span><span class="tok-n">abstractmethod</span>
 <span class="hll">    <span class="tok-k">def</span> <span class="tok-nf">_get_by_batchref</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">batchref</span><span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Product</span><span class="tok-p">:</span>
 </span>        <span class="tok-k">raise</span> <span class="tok-ne">NotImplementedError</span>
     <span class="tok-o">...</span>
@@ -986,12 +1062,12 @@ And on our <code>FakeRepository</code> too:</p>
     <span class="tok-o">...</span>
 
     <span class="tok-k">def</span> <span class="tok-nf">_get</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">):</span>
-        <span class="tok-k">return</span> <span class="tok-nb">next</span><span class="tok-p">((</span><span class="tok-n">p</span> <span class="tok-k">for</span> <span class="tok-n">p</span> <span class="tok-ow">in</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_products</span> <span class="tok-k">if</span> <span class="tok-n">p</span><span class="tok-o">.</span><span class="tok-n">sku</span> <span class="tok-o">==</span> <span class="tok-n">sku</span><span class="tok-p">),</span> <span class="tok-bp">None</span><span class="tok-p">)</span>
+        <span class="tok-k">return</span> <span class="tok-nb">next</span><span class="tok-p">((</span><span class="tok-n">p</span> <span class="tok-k">for</span> <span class="tok-n">p</span> <span class="tok-ow">in</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_products</span> <span class="tok-k">if</span> <span class="tok-n">p</span><span class="tok-o">.</span><span class="tok-n">sku</span> <span class="tok-o">==</span> <span class="tok-n">sku</span><span class="tok-p">),</span> <span class="tok-kc">None</span><span class="tok-p">)</span>
 
     <span class="tok-k">def</span> <span class="tok-nf">_get_by_batchref</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">batchref</span><span class="tok-p">):</span>
         <span class="tok-k">return</span> <span class="tok-nb">next</span><span class="tok-p">(</span>
             <span class="tok-p">(</span><span class="tok-n">p</span> <span class="tok-k">for</span> <span class="tok-n">p</span> <span class="tok-ow">in</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">_products</span> <span class="tok-k">for</span> <span class="tok-n">b</span> <span class="tok-ow">in</span> <span class="tok-n">p</span><span class="tok-o">.</span><span class="tok-n">batches</span> <span class="tok-k">if</span> <span class="tok-n">b</span><span class="tok-o">.</span><span class="tok-n">reference</span> <span class="tok-o">==</span> <span class="tok-n">batchref</span><span class="tok-p">),</span>
-            <span class="tok-bp">None</span><span class="tok-p">,</span>
+            <span class="tok-kc">None</span><span class="tok-p">,</span>
         <span class="tok-p">)</span></code></pre>
 </div>
 </div>
@@ -1138,7 +1214,7 @@ below the total already allocated:</p>
 
     <span class="tok-c1"># test setup as before</span>
     <span class="tok-n">event_history</span> <span class="tok-o">=</span> <span class="tok-p">[</span>
-        <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">BatchCreated</span><span class="tok-p">(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-s2">"INDIFFERENT-TABLE"</span><span class="tok-p">,</span> <span class="tok-mi">50</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">),</span>
+        <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">BatchCreated</span><span class="tok-p">(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-s2">"INDIFFERENT-TABLE"</span><span class="tok-p">,</span> <span class="tok-mi">50</span><span class="tok-p">,</span> <span class="tok-kc">None</span><span class="tok-p">),</span>
         <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">BatchCreated</span><span class="tok-p">(</span><span class="tok-s2">"batch2"</span><span class="tok-p">,</span> <span class="tok-s2">"INDIFFERENT-TABLE"</span><span class="tok-p">,</span> <span class="tok-mi">50</span><span class="tok-p">,</span> <span class="tok-n">date</span><span class="tok-o">.</span><span class="tok-n">today</span><span class="tok-p">()),</span>
         <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">AllocationRequired</span><span class="tok-p">(</span><span class="tok-s2">"order1"</span><span class="tok-p">,</span> <span class="tok-s2">"INDIFFERENT-TABLE"</span><span class="tok-p">,</span> <span class="tok-mi">20</span><span class="tok-p">),</span>
         <span class="tok-n">events</span><span class="tok-o">.</span><span class="tok-n">AllocationRequired</span><span class="tok-p">(</span><span class="tok-s2">"order2"</span><span class="tok-p">,</span> <span class="tok-s2">"INDIFFERENT-TABLE"</span><span class="tok-p">,</span> <span class="tok-mi">20</span><span class="tok-p">),</span>
@@ -1335,80 +1411,9 @@ first, let&#8217;s talk about <a href="/book/chapter_10_commands.html">events ve
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-02-24 22:04:29 UTC
+Last updated 2021-02-26 00:40:46 UTC
 </div>
 </div>
-<style>
-pre.pygments .hll { background-color: #ffffcc }
-pre.pygments  { background: #f0f0f0; }
-pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
-pre.pygments .tok-err { border: 1px solid #FF0000 } /* Error */
-pre.pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
-pre.pygments .tok-o { color: #666666 } /* Operator */
-pre.pygments .tok-ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
-pre.pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
-pre.pygments .tok-cp { color: #007020 } /* Comment.Preproc */
-pre.pygments .tok-cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
-pre.pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
-pre.pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
-pre.pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
-pre.pygments .tok-ge { font-style: italic } /* Generic.Emph */
-pre.pygments .tok-gr { color: #FF0000 } /* Generic.Error */
-pre.pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
-pre.pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
-pre.pygments .tok-go { color: #888888 } /* Generic.Output */
-pre.pygments .tok-gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
-pre.pygments .tok-gs { font-weight: bold } /* Generic.Strong */
-pre.pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
-pre.pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
-pre.pygments .tok-kc { color: #007020; font-weight: bold } /* Keyword.Constant */
-pre.pygments .tok-kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
-pre.pygments .tok-kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
-pre.pygments .tok-kp { color: #007020 } /* Keyword.Pseudo */
-pre.pygments .tok-kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
-pre.pygments .tok-kt { color: #902000 } /* Keyword.Type */
-pre.pygments .tok-m { color: #40a070 } /* Literal.Number */
-pre.pygments .tok-s { color: #4070a0 } /* Literal.String */
-pre.pygments .tok-na { color: #4070a0 } /* Name.Attribute */
-pre.pygments .tok-nb { color: #007020 } /* Name.Builtin */
-pre.pygments .tok-nc { color: #0e84b5; font-weight: bold } /* Name.Class */
-pre.pygments .tok-no { color: #60add5 } /* Name.Constant */
-pre.pygments .tok-nd { color: #555555; font-weight: bold } /* Name.Decorator */
-pre.pygments .tok-ni { color: #d55537; font-weight: bold } /* Name.Entity */
-pre.pygments .tok-ne { color: #007020 } /* Name.Exception */
-pre.pygments .tok-nf { color: #06287e } /* Name.Function */
-pre.pygments .tok-nl { color: #002070; font-weight: bold } /* Name.Label */
-pre.pygments .tok-nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
-pre.pygments .tok-nt { color: #062873; font-weight: bold } /* Name.Tag */
-pre.pygments .tok-nv { color: #bb60d5 } /* Name.Variable */
-pre.pygments .tok-ow { color: #007020; font-weight: bold } /* Operator.Word */
-pre.pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
-pre.pygments .tok-mb { color: #40a070 } /* Literal.Number.Bin */
-pre.pygments .tok-mf { color: #40a070 } /* Literal.Number.Float */
-pre.pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
-pre.pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
-pre.pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
-pre.pygments .tok-sa { color: #4070a0 } /* Literal.String.Affix */
-pre.pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
-pre.pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
-pre.pygments .tok-dl { color: #4070a0 } /* Literal.String.Delimiter */
-pre.pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
-pre.pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
-pre.pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
-pre.pygments .tok-sh { color: #4070a0 } /* Literal.String.Heredoc */
-pre.pygments .tok-si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
-pre.pygments .tok-sx { color: #c65d09 } /* Literal.String.Other */
-pre.pygments .tok-sr { color: #235388 } /* Literal.String.Regex */
-pre.pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
-pre.pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
-pre.pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
-pre.pygments .tok-fm { color: #06287e } /* Name.Function.Magic */
-pre.pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
-pre.pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
-pre.pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
-pre.pygments .tok-vm { color: #bb60d5 } /* Name.Variable.Magic */
-pre.pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
-</style>
 <div><div id="disqus_thread" style="margin: 10px"></div>
 <script>
 

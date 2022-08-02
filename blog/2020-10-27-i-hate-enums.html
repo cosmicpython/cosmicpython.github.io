@@ -66,7 +66,6 @@
     <span class="n">GALAXY</span> <span class="o">=</span> <span class="s1">&#39;galaxy&#39;</span>
 </code></pre></div>
 
-
 <p>What could be wrong with that, I hear you ask?
 Well, accuse me of wanting to <em>stringly type</em> everything if you will,
 but: those enums may look like strings but they aren&rsquo;t!</p>
@@ -79,7 +78,6 @@ but: those enums may look like strings but they aren&rsquo;t!</p>
 <span class="k">assert</span> <span class="n">BRAIN</span><span class="o">.</span><span class="n">SMALL</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;small&#39;</span>
 <span class="c1"># finally, yes.</span>
 </code></pre></div>
-
 
 <p>I imagine some people think this is a feature rather than a bug?  But for me
 it&rsquo;s an endless source of annoyance.  They look like strings!  I defined them
@@ -99,7 +97,6 @@ to want to rescue it?</p>
 <span class="k">assert</span> <span class="p">[</span><span class="n">thing</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">thing</span> <span class="ow">in</span> <span class="n">BRAIN</span><span class="p">]</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;small&#39;</span><span class="p">,</span> <span class="s1">&#39;medium&#39;</span><span class="p">,</span> <span class="s1">&#39;galaxy&#39;</span><span class="p">]</span>  <span class="c1"># yes</span>
 </code></pre></div>
 
-
 <p>Here&rsquo;s a <em>truly</em> wtf one:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">assert</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">BRAIN</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;small&#39;</span><span class="p">,</span> <span class="s1">&#39;medium&#39;</span><span class="p">,</span> <span class="s1">&#39;galaxy&#39;</span><span class="p">]</span>
 <span class="c1"># Raises an Exception!!!</span>
@@ -111,12 +108,10 @@ to want to rescue it?</p>
 <span class="ne">KeyError</span><span class="p">:</span> <span class="mi">2</span>
 </code></pre></div>
 
-
 <p>I have no idea what&rsquo;s going on there. What we actually wanted was</p>
 <div class="codehilite"><pre><span></span><code><span class="k">assert</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">BRAIN</span><span class="p">))</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;small&#39;</span><span class="p">,</span> <span class="s1">&#39;medium&#39;</span><span class="p">,</span> <span class="s1">&#39;galaxy&#39;</span><span class="p">]</span>
 <span class="c1"># which is still not true, but at least it doesn&#39;t raise an exception</span>
 </code></pre></div>
-
 
 <p>Now the standard library does provide a solution
 if you want to duck-type your enums to integers,
@@ -135,7 +130,6 @@ if you want to duck-type your enums to integers,
 <span class="k">assert</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">IBRAIN</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>  <span class="c1"># this still errors but:</span>
 <span class="k">assert</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">IBRAIN</span><span class="p">))</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>  <span class="c1"># this is ok</span>
 </code></pre></div>
-
 
 <p>That&rsquo;s all fine and good, but I don&rsquo;t <em>want</em> to use integers.
 I want to use strings, because then when I look in my database,
@@ -160,7 +154,6 @@ But it&rsquo;s LIES:</p>
 <span class="c1"># so, while BRAIN.SMALL == &#39;small&#39;, str(BRAIN.SMALL)  != &#39;small&#39; aaaargh</span>
 </code></pre></div>
 
-
 <p>So here&rsquo;s what I ended up with:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">BRAIN</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
     <span class="n">SMALL</span> <span class="o">=</span> <span class="s1">&#39;small&#39;</span>
@@ -170,7 +163,6 @@ But it&rsquo;s LIES:</p>
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">str</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 </code></pre></div>
-
 
 <ul>
 <li>this basically avoids the need to use <code>.value</code> anywhere at all in your code</li>
@@ -183,7 +175,6 @@ But it&rsquo;s LIES:</p>
 <span class="n">foo</span> <span class="o">=</span> <span class="n">BRAIN</span><span class="o">.</span><span class="n">SMALL</span>  <span class="c1"># type: str</span>
 <span class="n">bar</span> <span class="o">=</span> <span class="n">BRAIN</span><span class="o">.</span><span class="n">SMALL</span>  <span class="c1"># type: BRAIN</span>
 </code></pre></div>
-
 
 <p>Example code is <a href="https://gist.github.com/hjwp/405f04802ea558f042728ec5edbb4e62">in a Gist</a>
 if you want to play around.

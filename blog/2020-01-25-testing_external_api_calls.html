@@ -91,7 +91,6 @@ of real-life complexity, in this small example).</p>
              <span class="c1"># knows how to save itself to the DB.  like Django.</span>
 </code></pre></div>
 
-
 <p>We want to sync our shipments model with a third party, the cargo freight
 company, via their API. We have a couple of use cases: creating new shipments,
 and checking for updated etas.</p>
@@ -107,7 +106,6 @@ looks familiar:</p>
     <span class="n">sync_to_api</span><span class="p">(</span><span class="n">shipment</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>How do we sync to the API?  A simple POST request, with a bit of datatype
 conversion and wrangling.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">sync_to_api</span><span class="p">(</span><span class="n">shipment</span><span class="p">):</span>
@@ -120,7 +118,6 @@ conversion and wrangling.</p>
         <span class="p">]</span>
     <span class="p">})</span>
 </code></pre></div>
-
 
 <p>Not too bad!</p>
 <p>How do we test it? In a case like this, the typical reaction is to reach for mocks,
@@ -137,7 +134,6 @@ and <em>as long as things stay simple</em>, it&rsquo;s pretty manageable</p>
             <span class="n">API_URL</span> <span class="o">+</span> <span class="s1">&#39;/shipments/&#39;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">expected_data</span>
         <span class="p">)</span>
 </code></pre></div>
-
 
 <p>And you can imagine adding a few more tests, perhaps one that checks that we do
 the date-to-isoformat conversion correctly, maybe one that checks we can handle
@@ -179,7 +175,6 @@ an existing one:</p>
     <span class="p">)</span>
 </code></pre></div>
 
-
 <p>And as usual, complexity creeps in:</p>
 <ul>
 <li>
@@ -212,7 +207,6 @@ all these options.  Here&rsquo;s just one, as an example:</p>
         <span class="p">)</span>
 </code></pre></div>
 
-
 <p>&hellip;and our tests are getting less and less pleasant.  Again, the details don&rsquo;t
 matter too much, the hope is that this sort of test ugliness is familiar.</p>
 <p>And this is only the beginning, we&rsquo;ve shown an API integration that only cares
@@ -241,7 +235,6 @@ have some business logic about notifying people of delays&hellip;</p>
     <span class="n">shipment</span><span class="o">.</span><span class="n">eta</span> <span class="o">=</span> <span class="n">latest_eta</span>
     <span class="n">shipment</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 </code></pre></div>
-
 
 <p>I haven&rsquo;t coded up what all the tests would look like, but you could imagine them:</p>
 <ol>
@@ -321,7 +314,6 @@ this pattern.</p>
             <span class="o">...</span>
 </code></pre></div>
 
-
 <p>Now how do our tests look?</p>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">test_create_shipment_syncs_to_api</span><span class="p">():</span>
     <span class="k">with</span> <span class="n">mock</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;controllers.RealCargoAPI&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">mock_RealCargoAPI</span><span class="p">:</span>
@@ -329,7 +321,6 @@ this pattern.</p>
         <span class="n">shipment</span> <span class="o">=</span> <span class="n">create_shipment</span><span class="p">({</span><span class="s1">&#39;sku1&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">},</span> <span class="n">incoterm</span><span class="o">=</span><span class="s1">&#39;EXW&#39;</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">mock_cargo_api</span><span class="o">.</span><span class="n">sync</span><span class="o">.</span><span class="n">call_args</span> <span class="o">==</span> <span class="n">mock</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">shipment</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>Much more manageable!</p>
 <p>But:</p>
@@ -358,7 +349,6 @@ this pattern.</p>
             <span class="n">API_URL</span> <span class="o">+</span> <span class="s1">&#39;/shipments/&#39;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">expected_data</span>
         <span class="p">)</span>
 </code></pre></div>
-
 
 <h1>SUGGESTION: Use (only?) integration tests to test your Adapter</h1>
 <p>Now we can test our adapter separately from our main application code, we
@@ -395,7 +385,6 @@ tests:</p>
     <span class="n">new_shipment</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">shipments</span> <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s1">&#39;client_reference&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">ref</span><span class="p">)</span>
     <span class="k">assert</span> <span class="n">new_shipment</span><span class="p">[</span><span class="s1">&#39;products&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="p">[{</span><span class="s1">&#39;sku&#39;</span><span class="p">:</span> <span class="s1">&#39;sku1&#39;</span><span class="p">,</span> <span class="s1">&#39;quantity&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">}]</span>
 </code></pre></div>
-
 
 <p>That relies on your third-party api having a decent sandbox that you can test against.
 You&rsquo;ll need to think about:</p>
@@ -533,7 +522,6 @@ might just pop json objects in an out of an in-memory dict, for example:</p>
     <span class="k">return</span> <span class="s1">&#39;ok&#39;</span><span class="p">,</span> <span class="mi">200</span>
 </code></pre></div>
 
-
 <p>This doesn&rsquo;t mean you <em>never</em> test against the third-party API, but
 you&rsquo;ve now given yourself the <em>option</em> not to.</p>
 <ul>
@@ -603,7 +591,6 @@ You could use an <code>abc.ABC</code>, or if you&rsquo;re anti-inheritance, a ne
         <span class="o">...</span>
 </code></pre></div>
 
-
 <p>Now we can add our explicit dependency where it&rsquo;s needed, replacing
 a hardcoded <code>import</code> with a new, explicit argument to a function somewhere.
 Possibly event with a type hint:</p>
@@ -616,7 +603,6 @@ Possibly event with a type hint:</p>
     <span class="c1"># rest of controller code essentially unchanged.</span>
 </code></pre></div>
 
-
 <p>What effect does that have on our tests?  Well, instead of needing to
 call <code>with mock.patch()</code>, we can create a standalone mock, and pass it
 in:</p>
@@ -625,7 +611,6 @@ in:</p>
     <span class="n">shipment</span> <span class="o">=</span> <span class="n">create_shipment</span><span class="p">({</span><span class="s1">&#39;sku1&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">},</span> <span class="n">incoterm</span><span class="o">=</span><span class="s1">&#39;EXW&#39;</span><span class="p">,</span> <span class="n">cargo_api</span><span class="o">=</span><span class="n">mock_api</span><span class="p">)</span>
     <span class="k">assert</span> <span class="n">mock_api</span><span class="o">.</span><span class="n">sync</span><span class="o">.</span><span class="n">call_args</span> <span class="o">==</span> <span class="n">mock</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">shipment</span><span class="p">)</span>
 </code></pre></div>
-
 
 <h4>DI tradeoffs</h4>
 <h5>Pros:</h5>
@@ -663,7 +648,6 @@ lot:</p>
         <span class="k">return</span> <span class="n">shipment</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shipments</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
 </code></pre></div>
 
-
 <p>The fake is in-memory and in-process this time, but again, it&rsquo;s just a
 thin wrapper around some sort of container, a dict in this case.</p>
 <p><code>get_latest_eta()</code> and <code>sync()</code> are the two methods we need to define
@@ -678,7 +662,6 @@ to make it emulate the real api (and comply with the <code>Protocol</code>).</p>
     <span class="n">shipment</span> <span class="o">=</span> <span class="n">create_shipment</span><span class="p">({</span><span class="s1">&#39;sku1&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">},</span> <span class="n">incoterm</span><span class="o">=</span><span class="s1">&#39;EXW&#39;</span><span class="p">,</span> <span class="n">cargo_api</span><span class="o">=</span><span class="n">api</span><span class="p">)</span>
     <span class="k">assert</span> <span class="n">shipment</span> <span class="ow">in</span> <span class="n">api</span>
 </code></pre></div>
-
 
 <p>Why bother with this?</p>
 <h4>Handrolled fakes for unit tests, the tradeoffs</h4>

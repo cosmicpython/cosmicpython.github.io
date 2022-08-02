@@ -87,7 +87,6 @@ static value.</p>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">light_is_on</span>
 </code></pre></div>
 
-
 <p>In this class, the is_on  method is referentially transparent - I can replace it
 with the value True or False without any loss of functionality, but the method
 toggle_light  is side-effectual: replacing its calls with a static value would
@@ -116,7 +115,6 @@ repositories in your UI entrypoints.</p>
         <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">open_issues</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>This is totally fine unless you have complex formatting, or multiple entrypoints
 to your system. The problem with using your repositories directly in this way is
 that it&rsquo;s a slippery slope. Sooner or later you&rsquo;re going to have a tight
@@ -129,7 +127,6 @@ command/handler nonsense and do it directly in the web api.</p>
          <span class="n">issue</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
          <span class="n">uow</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
 </code></pre></div>
-
 
 <p>Super convenient, but then you need to add some error handling and some logging
 and an email notification.</p>
@@ -157,7 +154,6 @@ and an email notification.</p>
     <span class="k">return</span> <span class="s2">&quot;Deleted!&quot;</span><span class="p">,</span> <span class="mi">202</span>
 </code></pre></div>
 
-
 <p>Aaaaand, we&rsquo;re back to where we started: business logic mixed with glue code,
 and the whole mess slowly congealing in our web controllers. Of course, the
 slippery slope argument isn&rsquo;t a good reason not to do something, so if your
@@ -184,7 +180,6 @@ define our views explicitly.</p>
     <span class="n">view_builder</span> <span class="o">=</span> <span class="n">OpenIssuesList</span><span class="p">(</span><span class="n">session_maker</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">view_builder</span><span class="o">.</span><span class="n">fetch</span><span class="p">())</span>
 </code></pre></div>
-
 
 <p>This is my favourite part of teaching ports and adapters to junior programmers,
 because the conversation inevitably goes like this:</p>
@@ -224,7 +219,6 @@ database because people write code like this:</p>
     <span class="n">assignee</span><span class="o">.</span><span class="n">notifications</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">notification</span><span class="p">)</span>
     <span class="n">assignee</span><span class="o">.</span><span class="n">queues</span><span class="o">.</span><span class="n">inbox</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>ORMs make it very easy to &ldquo;dot&rdquo; through the object model this way, and pretend
 that we have our data in memory, but this quickly leads to performance issues
@@ -309,7 +303,6 @@ database choose ids for you, just choose them yourself.</p>
     <span class="n">handler</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
     <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">201</span><span class="p">,</span> <span class="p">{</span> <span class="s1">&#39;Location&#39;</span><span class="p">:</span> <span class="s1">&#39;/issues/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">issue_id</span><span class="p">)</span> <span class="p">}</span>
 </code></pre></div>
-
 
 <p>There&rsquo;s a few ways to do this, the most common is just to use a UUID, but you
 can also implement something like

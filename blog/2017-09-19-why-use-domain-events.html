@@ -145,7 +145,6 @@ existing unit test for reporting an issue:</p>
         <span class="n">expect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">issue</span><span class="o">.</span><span class="n">state</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">IssueState</span><span class="o">.</span><span class="n">AwaitingTriage</span><span class="p">))</span>
 </code></pre></div>
 
-
 <p>We&rsquo;re introducing a new concept - Issues now have a state, and a newly reported
 issue begins in the AwaitingTriage  state. We can quickly add a command and
 handler that allows us to triage an issue.</p>
@@ -160,7 +159,6 @@ handler that allows us to triage an issue.</p>
             <span class="n">issue</span><span class="o">.</span><span class="n">triage</span><span class="p">(</span><span class="n">cmd</span><span class="o">.</span><span class="n">priority</span><span class="p">,</span> <span class="n">cmd</span><span class="o">.</span><span class="n">category</span><span class="p">)</span>
             <span class="n">uow</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
 </code></pre></div>
-
 
 <p>Triaging an issue, for now, is a matter of selecting a category and priority.
 We&rsquo;ll use a free string for category, and an enumeration for Priority. Once an
@@ -179,7 +177,6 @@ assignment, but for now let&rsquo;s quickly add a handler so that an engineer ca
             <span class="n">issue</span><span class="o">.</span><span class="n">assign_to</span><span class="p">(</span><span class="n">cmd</span><span class="o">.</span><span class="n">picked_by</span><span class="p">)</span>
             <span class="n">uow</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
 </code></pre></div>
-
 
 <p>At this point, the handlers are becoming a little boring. As I said way back in
 the first part [https://io.made.com/blog/introducing-command-handler/], commands
@@ -224,7 +221,6 @@ Let&rsquo;s try and implement this new requirement. Here&rsquo;s a first attempt
                 <span class="n">issue</span><span class="o">.</span><span class="n">problem_description</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">email_sender</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>Something here feels wrong, right? Our command-handler now has two very distinct
 responsibilities. Back at the beginning of this series we said we would stick
@@ -290,7 +286,6 @@ I don&rsquo;t want to see an error - let the sysadmins clear it up later.</p>
             <span class="bp">self</span><span class="o">.</span><span class="n">email_sender</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>We don&rsquo;t really need a unit of work here, because we&rsquo;re not making any
 persistent changes to the Issue state, so what if we use a view builder instead?</p>
 <div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">SendAssignmentEmailHandler</span>
@@ -311,7 +306,6 @@ persistent changes to the Issue state, so what if we use a view builder instead?
             <span class="n">issue</span><span class="p">[</span><span class="s1">&#39;problem_description&#39;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">email_sender</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>That seems better, but how should we invoke our new handler? Building a new
 command and handler from inside our AssignIssueHandler also sounds like a
@@ -386,7 +380,6 @@ based on the name of an event. That sounds like a dict to me:</p>
 <span class="n">bus</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>Here we have a bare-bones implementation of a message bus. It doesn&rsquo;t do
 anything fancy, but it will do the job for now. In a production system, the
 message bus is an excellent place to put cross-cutting concerns; for example, we
@@ -403,7 +396,6 @@ API handlers.</p>
     <span class="n">bus</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
     <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">201</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;Location&quot;</span><span class="p">:</span> <span class="s2">&quot;/issues/&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">issue_id</span><span class="p">)</span> <span class="p">}</span>
 </code></pre></div>
-
 
 <p>Not much has changed here - we&rsquo;re still building our command in the Flask
 adapter, but now we&rsquo;re passing it into a bus instead of directly constructing a
@@ -425,7 +417,6 @@ like this:</p>
             <span class="n">cmd</span><span class="o">.</span><span class="n">assigned_by</span><span class="p">))</span>
 </code></pre></div>
 
-
 <p>I usually think of this event-raising as a kind of glue - it&rsquo;s orchestration
 code. Raising events from your handlers this way makes the flow of messages
 explicit - you don&rsquo;t have to look anywhere else in the system to understand
@@ -445,7 +436,6 @@ treat them as part our domain model proper.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">IssueAssignedToEngineer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">assigned_to</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">assigned_by</span><span class="p">))</span>
 </code></pre></div>
 
-
 <p>There&rsquo;s a couple of benefits of doing this: firstly, it keeps our command
 handler simpler, but secondly it pushes the logic for deciding when to send an
 event into the model. For example, maybe we don&rsquo;t always  need to raise the
@@ -460,7 +450,6 @@ event.</p>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">assigned_to</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assigned_by</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">events</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">IssueAssignedToEngineer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">assigned_to</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">assigned_by</span><span class="p">))</span>
 </code></pre></div>
-
 
 <p>Now we&rsquo;ll only raise our event if the issue was assigned by another engineer.
 Cases like this are more like business logic than glue code, so today I&rsquo;m
@@ -484,7 +473,6 @@ because we&rsquo;re just exposing the events as a list on our model objects:</p>
                                     <span class="bp">self</span><span class="o">.</span><span class="n">assigned_to</span><span class="p">,</span>
                                     <span class="bp">self</span><span class="o">.</span><span class="n">assigned_by</span><span class="p">)))</span>
 </code></pre></div>
-
 
 <p>The have_raised  function is a custom matcher I wrote that checks the events
 attribute of our object to see if we raised the correct event. It&rsquo;s easy to test
@@ -539,7 +527,6 @@ exits, we raise the events.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">publish_events</span><span class="p">()</span>
 </code></pre></div>
-
 
 <p>Okay, we&rsquo;ve covered a lot of ground here. We&rsquo;ve discussed why you might want to
 use domain events, how a message bus actually works in practice, and how we can

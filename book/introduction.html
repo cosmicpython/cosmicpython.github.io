@@ -3,7 +3,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="generator" content="Asciidoctor 2.0.16">
 <title>Introduction</title>
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -99,6 +99,82 @@ table {
 }
 
 </style>
+<style>
+pre { line-height: 125%; }
+td.linenos .normal { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+pre.pygments .hll { background-color: #ffffcc }
+pre.pygments { background: #f0f0f0; }
+pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
+pre.pygments .tok-err { border: 1px solid #FF0000 } /* Error */
+pre.pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
+pre.pygments .tok-o { color: #666666 } /* Operator */
+pre.pygments .tok-ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
+pre.pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
+pre.pygments .tok-cp { color: #007020 } /* Comment.Preproc */
+pre.pygments .tok-cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
+pre.pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
+pre.pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
+pre.pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
+pre.pygments .tok-ge { font-style: italic } /* Generic.Emph */
+pre.pygments .tok-gr { color: #FF0000 } /* Generic.Error */
+pre.pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
+pre.pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
+pre.pygments .tok-go { color: #888888 } /* Generic.Output */
+pre.pygments .tok-gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+pre.pygments .tok-gs { font-weight: bold } /* Generic.Strong */
+pre.pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+pre.pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
+pre.pygments .tok-kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+pre.pygments .tok-kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+pre.pygments .tok-kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+pre.pygments .tok-kp { color: #007020 } /* Keyword.Pseudo */
+pre.pygments .tok-kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+pre.pygments .tok-kt { color: #902000 } /* Keyword.Type */
+pre.pygments .tok-m { color: #40a070 } /* Literal.Number */
+pre.pygments .tok-s { color: #4070a0 } /* Literal.String */
+pre.pygments .tok-na { color: #4070a0 } /* Name.Attribute */
+pre.pygments .tok-nb { color: #007020 } /* Name.Builtin */
+pre.pygments .tok-nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+pre.pygments .tok-no { color: #60add5 } /* Name.Constant */
+pre.pygments .tok-nd { color: #555555; font-weight: bold } /* Name.Decorator */
+pre.pygments .tok-ni { color: #d55537; font-weight: bold } /* Name.Entity */
+pre.pygments .tok-ne { color: #007020 } /* Name.Exception */
+pre.pygments .tok-nf { color: #06287e } /* Name.Function */
+pre.pygments .tok-nl { color: #002070; font-weight: bold } /* Name.Label */
+pre.pygments .tok-nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+pre.pygments .tok-nt { color: #062873; font-weight: bold } /* Name.Tag */
+pre.pygments .tok-nv { color: #bb60d5 } /* Name.Variable */
+pre.pygments .tok-ow { color: #007020; font-weight: bold } /* Operator.Word */
+pre.pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
+pre.pygments .tok-mb { color: #40a070 } /* Literal.Number.Bin */
+pre.pygments .tok-mf { color: #40a070 } /* Literal.Number.Float */
+pre.pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
+pre.pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
+pre.pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
+pre.pygments .tok-sa { color: #4070a0 } /* Literal.String.Affix */
+pre.pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
+pre.pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
+pre.pygments .tok-dl { color: #4070a0 } /* Literal.String.Delimiter */
+pre.pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+pre.pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
+pre.pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+pre.pygments .tok-sh { color: #4070a0 } /* Literal.String.Heredoc */
+pre.pygments .tok-si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+pre.pygments .tok-sx { color: #c65d09 } /* Literal.String.Other */
+pre.pygments .tok-sr { color: #235388 } /* Literal.String.Regex */
+pre.pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
+pre.pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
+pre.pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
+pre.pygments .tok-fm { color: #06287e } /* Name.Function.Magic */
+pre.pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
+pre.pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
+pre.pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
+pre.pygments .tok-vm { color: #bb60d5 } /* Name.Variable.Magic */
+pre.pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
+</style>
 </head>
 <body class="article toc2 toc-left">
 <div id="buy_the_book" style="position: absolute; top: 0; right: 0; z-index:100">
@@ -168,7 +244,7 @@ have domain knowledge and send email and perform logging; "business logic"
 classes that perform no calculations but do perform I/O; and everything coupled
 to everything else so that changing any part of the system becomes fraught with
 danger. This is so common that software engineers have their own term for
-chaos: the Big Ball of Mud antipattern (<a href="#bbom_image">A real-life dependency diagram (source: </a><a href="https://oreil.ly/dbGTW">"Enterprise Dependency: Big Ball of Yarn"</a> by Alex Papadimoulis)).</p>
+chaos: the Big Ball of Mud antipattern (<a href="#bbom_image">A real-life dependency diagram (source: "Enterprise Dependency: Big Ball of Yarn" by Alex Papadimoulis)</a>).</p>
 </div>
 <div id="bbom_image" class="imageblock">
 <div class="content">
@@ -220,7 +296,7 @@ and giving that task to a well-defined object or function. We call that object o
 <span class="tok-kn">from</span> <span class="tok-nn">urllib.request</span> <span class="tok-kn">import</span> <span class="tok-n">urlopen</span>
 <span class="tok-kn">from</span> <span class="tok-nn">urllib.parse</span> <span class="tok-kn">import</span> <span class="tok-n">urlencode</span>
 
-<span class="tok-n">params</span> <span class="tok-o">=</span> <span class="tok-nb">dict</span><span class="tok-p">(</span><span class="tok-n">q</span><span class="tok-o">=</span><span class="tok-s1">'Sausages'</span><span class="tok-p">,</span> <span class="tok-n">format</span><span class="tok-o">=</span><span class="tok-s1">'json'</span><span class="tok-p">)</span>
+<span class="tok-n">params</span> <span class="tok-o">=</span> <span class="tok-nb">dict</span><span class="tok-p">(</span><span class="tok-n">q</span><span class="tok-o">=</span><span class="tok-s1">'Sausages'</span><span class="tok-p">,</span> <span class="tok-nb">format</span><span class="tok-o">=</span><span class="tok-s1">'json'</span><span class="tok-p">)</span>
 <span class="tok-n">handle</span> <span class="tok-o">=</span> <span class="tok-n">urlopen</span><span class="tok-p">(</span><span class="tok-s1">'http://api.duckduckgo.com'</span> <span class="tok-o">+</span> <span class="tok-s1">'?'</span> <span class="tok-o">+</span> <span class="tok-n">urlencode</span><span class="tok-p">(</span><span class="tok-n">params</span><span class="tok-p">))</span>
 <span class="tok-n">raw_text</span> <span class="tok-o">=</span> <span class="tok-n">handle</span><span class="tok-o">.</span><span class="tok-n">read</span><span class="tok-p">()</span><span class="tok-o">.</span><span class="tok-n">decode</span><span class="tok-p">(</span><span class="tok-s1">'utf8'</span><span class="tok-p">)</span>
 <span class="tok-n">parsed</span> <span class="tok-o">=</span> <span class="tok-n">json</span><span class="tok-o">.</span><span class="tok-n">loads</span><span class="tok-p">(</span><span class="tok-n">raw_text</span><span class="tok-p">)</span>
@@ -228,7 +304,7 @@ and giving that task to a well-defined object or function. We call that object o
 <span class="tok-n">results</span> <span class="tok-o">=</span> <span class="tok-n">parsed</span><span class="tok-p">[</span><span class="tok-s1">'RelatedTopics'</span><span class="tok-p">]</span>
 <span class="tok-k">for</span> <span class="tok-n">r</span> <span class="tok-ow">in</span> <span class="tok-n">results</span><span class="tok-p">:</span>
     <span class="tok-k">if</span> <span class="tok-s1">'Text'</span> <span class="tok-ow">in</span> <span class="tok-n">r</span><span class="tok-p">:</span>
-        <span class="tok-k">print</span><span class="tok-p">(</span><span class="tok-n">r</span><span class="tok-p">[</span><span class="tok-s1">'FirstURL'</span><span class="tok-p">]</span> <span class="tok-o">+</span> <span class="tok-s1">' - '</span> <span class="tok-o">+</span> <span class="tok-n">r</span><span class="tok-p">[</span><span class="tok-s1">'Text'</span><span class="tok-p">])</span></code></pre>
+        <span class="tok-nb">print</span><span class="tok-p">(</span><span class="tok-n">r</span><span class="tok-p">[</span><span class="tok-s1">'FirstURL'</span><span class="tok-p">]</span> <span class="tok-o">+</span> <span class="tok-s1">' - '</span> <span class="tok-o">+</span> <span class="tok-n">r</span><span class="tok-p">[</span><span class="tok-s1">'Text'</span><span class="tok-p">])</span></code></pre>
 </div>
 </div>
 </div>
@@ -240,13 +316,13 @@ and giving that task to a well-defined object or function. We call that object o
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">import</span> <span class="tok-nn">requests</span>
 
-<span class="tok-n">params</span> <span class="tok-o">=</span> <span class="tok-nb">dict</span><span class="tok-p">(</span><span class="tok-n">q</span><span class="tok-o">=</span><span class="tok-s1">'Sausages'</span><span class="tok-p">,</span> <span class="tok-n">format</span><span class="tok-o">=</span><span class="tok-s1">'json'</span><span class="tok-p">)</span>
+<span class="tok-n">params</span> <span class="tok-o">=</span> <span class="tok-nb">dict</span><span class="tok-p">(</span><span class="tok-n">q</span><span class="tok-o">=</span><span class="tok-s1">'Sausages'</span><span class="tok-p">,</span> <span class="tok-nb">format</span><span class="tok-o">=</span><span class="tok-s1">'json'</span><span class="tok-p">)</span>
 <span class="tok-n">parsed</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s1">'http://api.duckduckgo.com/'</span><span class="tok-p">,</span> <span class="tok-n">params</span><span class="tok-o">=</span><span class="tok-n">params</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()</span>
 
 <span class="tok-n">results</span> <span class="tok-o">=</span> <span class="tok-n">parsed</span><span class="tok-p">[</span><span class="tok-s1">'RelatedTopics'</span><span class="tok-p">]</span>
 <span class="tok-k">for</span> <span class="tok-n">r</span> <span class="tok-ow">in</span> <span class="tok-n">results</span><span class="tok-p">:</span>
     <span class="tok-k">if</span> <span class="tok-s1">'Text'</span> <span class="tok-ow">in</span> <span class="tok-n">r</span><span class="tok-p">:</span>
-        <span class="tok-k">print</span><span class="tok-p">(</span><span class="tok-n">r</span><span class="tok-p">[</span><span class="tok-s1">'FirstURL'</span><span class="tok-p">]</span> <span class="tok-o">+</span> <span class="tok-s1">' - '</span> <span class="tok-o">+</span> <span class="tok-n">r</span><span class="tok-p">[</span><span class="tok-s1">'Text'</span><span class="tok-p">])</span></code></pre>
+        <span class="tok-nb">print</span><span class="tok-p">(</span><span class="tok-n">r</span><span class="tok-p">[</span><span class="tok-s1">'FirstURL'</span><span class="tok-p">]</span> <span class="tok-o">+</span> <span class="tok-s1">' - '</span> <span class="tok-o">+</span> <span class="tok-n">r</span><span class="tok-p">[</span><span class="tok-s1">'Text'</span><span class="tok-p">])</span></code></pre>
 </div>
 </div>
 </div>
@@ -268,7 +344,7 @@ it explicit:</p>
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-kn">import</span> <span class="tok-nn">duckduckpy</span>
 <span class="tok-k">for</span> <span class="tok-n">r</span> <span class="tok-ow">in</span> <span class="tok-n">duckduckpy</span><span class="tok-o">.</span><span class="tok-n">query</span><span class="tok-p">(</span><span class="tok-s1">'Sausages'</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">related_topics</span><span class="tok-p">:</span>
-    <span class="tok-k">print</span><span class="tok-p">(</span><span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">first_url</span><span class="tok-p">,</span> <span class="tok-s1">' - '</span><span class="tok-p">,</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">text</span><span class="tok-p">)</span></code></pre>
+    <span class="tok-nb">print</span><span class="tok-p">(</span><span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">first_url</span><span class="tok-p">,</span> <span class="tok-s1">' - '</span><span class="tok-p">,</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">text</span><span class="tok-p">)</span></code></pre>
 </div>
 </div>
 </div>
@@ -326,7 +402,7 @@ kind of network or graph.</p>
 </div>
 <div class="paragraph">
 <p>In a big ball of mud, the dependencies are out of control (as you saw in
-<a href="#bbom_image">A real-life dependency diagram (source: </a><a href="https://oreil.ly/dbGTW">"Enterprise Dependency: Big Ball of Yarn"</a> by Alex Papadimoulis)). Changing one node of the graph becomes difficult because it
+<a href="#bbom_image">A real-life dependency diagram (source: "Enterprise Dependency: Big Ball of Yarn" by Alex Papadimoulis)</a>). Changing one node of the graph becomes difficult because it
 has the potential to affect many other parts of the system. Layered
 architectures are one way of tackling this problem. In a layered architecture,
 we divide our code into discrete categories or roles, and we introduce rules
@@ -501,80 +577,9 @@ by choosing the right abstractions and continuously applying the DIP.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-07-30 14:56:02 +0100
+Last updated 2021-03-22 22:31:07 UTC
 </div>
 </div>
-<style>
-pre.pygments .hll { background-color: #ffffcc }
-pre.pygments  { background: #f0f0f0; }
-pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
-pre.pygments .tok-err { border: 1px solid #FF0000 } /* Error */
-pre.pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
-pre.pygments .tok-o { color: #666666 } /* Operator */
-pre.pygments .tok-ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
-pre.pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
-pre.pygments .tok-cp { color: #007020 } /* Comment.Preproc */
-pre.pygments .tok-cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
-pre.pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
-pre.pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
-pre.pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
-pre.pygments .tok-ge { font-style: italic } /* Generic.Emph */
-pre.pygments .tok-gr { color: #FF0000 } /* Generic.Error */
-pre.pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
-pre.pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
-pre.pygments .tok-go { color: #888888 } /* Generic.Output */
-pre.pygments .tok-gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
-pre.pygments .tok-gs { font-weight: bold } /* Generic.Strong */
-pre.pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
-pre.pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
-pre.pygments .tok-kc { color: #007020; font-weight: bold } /* Keyword.Constant */
-pre.pygments .tok-kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
-pre.pygments .tok-kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
-pre.pygments .tok-kp { color: #007020 } /* Keyword.Pseudo */
-pre.pygments .tok-kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
-pre.pygments .tok-kt { color: #902000 } /* Keyword.Type */
-pre.pygments .tok-m { color: #40a070 } /* Literal.Number */
-pre.pygments .tok-s { color: #4070a0 } /* Literal.String */
-pre.pygments .tok-na { color: #4070a0 } /* Name.Attribute */
-pre.pygments .tok-nb { color: #007020 } /* Name.Builtin */
-pre.pygments .tok-nc { color: #0e84b5; font-weight: bold } /* Name.Class */
-pre.pygments .tok-no { color: #60add5 } /* Name.Constant */
-pre.pygments .tok-nd { color: #555555; font-weight: bold } /* Name.Decorator */
-pre.pygments .tok-ni { color: #d55537; font-weight: bold } /* Name.Entity */
-pre.pygments .tok-ne { color: #007020 } /* Name.Exception */
-pre.pygments .tok-nf { color: #06287e } /* Name.Function */
-pre.pygments .tok-nl { color: #002070; font-weight: bold } /* Name.Label */
-pre.pygments .tok-nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
-pre.pygments .tok-nt { color: #062873; font-weight: bold } /* Name.Tag */
-pre.pygments .tok-nv { color: #bb60d5 } /* Name.Variable */
-pre.pygments .tok-ow { color: #007020; font-weight: bold } /* Operator.Word */
-pre.pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
-pre.pygments .tok-mb { color: #40a070 } /* Literal.Number.Bin */
-pre.pygments .tok-mf { color: #40a070 } /* Literal.Number.Float */
-pre.pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
-pre.pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
-pre.pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
-pre.pygments .tok-sa { color: #4070a0 } /* Literal.String.Affix */
-pre.pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
-pre.pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
-pre.pygments .tok-dl { color: #4070a0 } /* Literal.String.Delimiter */
-pre.pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
-pre.pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
-pre.pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
-pre.pygments .tok-sh { color: #4070a0 } /* Literal.String.Heredoc */
-pre.pygments .tok-si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
-pre.pygments .tok-sx { color: #c65d09 } /* Literal.String.Other */
-pre.pygments .tok-sr { color: #235388 } /* Literal.String.Regex */
-pre.pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
-pre.pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
-pre.pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
-pre.pygments .tok-fm { color: #06287e } /* Name.Function.Magic */
-pre.pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
-pre.pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
-pre.pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
-pre.pygments .tok-vm { color: #bb60d5 } /* Name.Variable.Magic */
-pre.pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
-</style>
 <div><div id="disqus_thread" style="margin: 10px"></div>
 <script>
 

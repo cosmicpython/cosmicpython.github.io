@@ -3,7 +3,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="generator" content="Asciidoctor 2.0.16">
 <title>Preface</title>
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -264,7 +264,10 @@ the Python world&#8212;&#8203;Flask, Django, Celery, and so on.</p>
 <div class="title">Note</div>
 </td>
 <td class="content">
-Don&#8217;t be put off if you&#8217;re not working with (or interested in) microservices.  The vast majority of the patterns we discuss, including much of the event-driven architecture material, is absolutely applicable in a monolithic architecture.
+Don&#8217;t be put off if you&#8217;re not working with (or interested in) microservices.
+    The vast majority of the patterns we discuss,
+    including much of the event-driven architecture material,
+    is absolutely applicable in a monolithic architecture.
 </td>
 </tr>
 </table>
@@ -365,17 +368,21 @@ and writing unit tests at the highest possible level of abstraction.</p>
 <dl>
 <dt class="hdlist1">Event-driven architecture (Chapters <a href="/book/chapter_08_events_and_message_bus.html">8</a>-<a href="/book/chapter_11_external_events.html">11</a>)</dt>
 <dd>
-<p>We introduce three more mutually reinforcing patterns: the Domain Events, Message Bus, and Handler patterns. <em>Domain events</em> are a vehicle for capturing the idea that some
-interactions with a system are triggers for others. We use  a <em>message
-bus</em> to allow actions to trigger events and call appropriate <em>handlers</em>.
-We move on to discuss how events can be used as a pattern for integration
-between services in a microservices architecture. Finally, we distinguish between <em>commands</em> and <em>events</em>. Our application is now
-fundamentally a message-processing system.</p>
+<p>We introduce three more mutually reinforcing patterns:
+the Domain Events, Message Bus, and Handler patterns.
+<em>Domain events</em> are a vehicle for capturing the idea that
+some interactions with a system are triggers for others.
+We use  a <em>message bus</em> to allow actions to trigger events
+and call appropriate <em>handlers</em>.
+We move on to discuss how events can be used as a pattern
+for integration between services in a microservices architecture.
+Finally, we distinguish between <em>commands</em> and <em>events</em>.
+Our application is now fundamentally a message-processing system.</p>
 </dd>
 <dt class="hdlist1">Command-query responsibility segregation (<a href="/book/chapter_12_cqrs.html">[chapter_12_cqrs]</a>)</dt>
 <dd>
-<p>We present an example of <em>command-query responsibility segregation</em>, with and without
-events.</p>
+<p>We present an example of <em>command-query responsibility segregation</em>,
+with and without events.</p>
 </dd>
 <dt class="hdlist1">Dependency injection (<a href="/book/chapter_13_dependency_injection.html">[chapter_13_dependency_injection]</a>)</dt>
 <dd>
@@ -617,6 +624,7 @@ Ben Judson, James Gregory, &#321;ukasz Lechowicz, Clinton Roy, Vitorino Ara&#250
 Susan Goodbody, Josh Harwood, Daniel Butler, Liu Haibin, Jimmy Davies, Ignacio
 Vergara Kausel, Gaia Canestrani, Renne Rocha, pedroabi, Ashia Zawaduk, Jostein
 Leira, Brandon Rhodes, Jazeps Basko, simkimsia, Adrien Brunet, Sergey Nosko,
+Dmitry Bychkov,
 and many more; our apologies if we missed you on this list.</p>
 </div>
 <div class="paragraph">
@@ -646,7 +654,7 @@ detail. This book is immeasurably improved thanks to you.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-01-25 12:39:27 UTC
+Last updated 2022-04-23 09:13:59 +0100
 </div>
 </div>
 <div><div id="disqus_thread" style="margin: 10px"></div>

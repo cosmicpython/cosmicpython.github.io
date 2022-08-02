@@ -74,7 +74,6 @@ principles:</p>
 <span class="n">issue_log</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">issue</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>The IssueLog is a term from our conversation with the domain expert. It&rsquo;s the
 place that they record the list of all issues. This is part of the jargon used
 by our customers, and so it clearly belongs in the domain, but it&rsquo;s also the
@@ -106,7 +105,6 @@ circuit is useless.</p>
             <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>Because we had the great foresight to use standardised ports, we can plug any
 number of different devices into our circuit. For example, we could attach a
 light-detector to the input and a buzzer to the output, or we could attach a
@@ -132,7 +130,6 @@ dial to the input, and a light to the output, and so on.</p>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">on</span> <span class="o">=</span> <span class="kc">False</span>
 </code></pre></div>
-
 
 <p>Considered in isolation, this is just an example of good OO practice: we are
 extending our system through composition. What makes this a ports-and-adapters
@@ -161,7 +158,6 @@ databases?</p>
             <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>By analogy to our circuit example, the IssueLog is a WriteablePort - it&rsquo;s a way
 for us to get data out of the system. SqlAlchemy and the file system are two
 types of adapter that we can plug in, just like the Buzzer or Light classes. In
@@ -186,7 +182,6 @@ repository, and get things out of the repository, and that&rsquo;s essentially i
                 <span class="nb">filter</span><span class="p">(</span><span class="n">foo</span><span class="o">.</span><span class="n">latitude</span> <span class="o">==</span> <span class="n">latitude</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>We expose a few methods, one to add new items, one to get items by their id, and
 a third to find items by some criterion. This FooRepository is using a 
 SqlAlchemy session
@@ -208,7 +203,6 @@ tests.</p>
         <span class="k">return</span> <span class="p">(</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span>
                      <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">latitude</span> <span class="o">==</span> <span class="n">latitude</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>This adapter works just the same as the one backed by a real database, but does
 so without any external state. This allows us to test our code without resorting
@@ -267,7 +261,6 @@ request.</p>
         <span class="k">return</span> <span class="n">IssueRepository</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>This code is taken from a current production system - the code to implement
 these patterns really isn&rsquo;t complex. The only thing missing here is some logging
 and error handling in the commit method. Our unit-of-work manager creates a new
@@ -286,7 +279,6 @@ first command handler and see how we might use these patterns together.</p>
             <span class="n">unit_of_work</span><span class="o">.</span><span class="n">issues</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">issue</span><span class="p">)</span>
             <span class="n">unit_of_work</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
 </code></pre></div>
-
 
 <p>Our command handler looks more or less the same, except that it&rsquo;s now
 responsible for starting a unit-of-work, and committing the unit-of-work when it
@@ -340,7 +332,6 @@ service layer.</p>
     <span class="k">def</span> <span class="nf">it_should_have_committed_the_unit_of_work</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">expect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uow</span><span class="o">.</span><span class="n">was_committed</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">be_true</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>Next time [https://io.made.com/blog/commands-and-queries-handlers-and-views] 
 we&rsquo;ll look at how to get data back out of the system.</p>

@@ -3,7 +3,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="generator" content="Asciidoctor 2.0.16">
 <title>TDD in High Gear and Low Gear</title>
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -98,6 +98,82 @@ table {
   font-size: 3vw;
 }
 
+</style>
+<style>
+pre { line-height: 125%; }
+td.linenos .normal { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+pre.pygments .hll { background-color: #ffffcc }
+pre.pygments { background: #f0f0f0; }
+pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
+pre.pygments .tok-err { border: 1px solid #FF0000 } /* Error */
+pre.pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
+pre.pygments .tok-o { color: #666666 } /* Operator */
+pre.pygments .tok-ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
+pre.pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
+pre.pygments .tok-cp { color: #007020 } /* Comment.Preproc */
+pre.pygments .tok-cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
+pre.pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
+pre.pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
+pre.pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
+pre.pygments .tok-ge { font-style: italic } /* Generic.Emph */
+pre.pygments .tok-gr { color: #FF0000 } /* Generic.Error */
+pre.pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
+pre.pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
+pre.pygments .tok-go { color: #888888 } /* Generic.Output */
+pre.pygments .tok-gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+pre.pygments .tok-gs { font-weight: bold } /* Generic.Strong */
+pre.pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+pre.pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
+pre.pygments .tok-kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+pre.pygments .tok-kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+pre.pygments .tok-kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+pre.pygments .tok-kp { color: #007020 } /* Keyword.Pseudo */
+pre.pygments .tok-kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+pre.pygments .tok-kt { color: #902000 } /* Keyword.Type */
+pre.pygments .tok-m { color: #40a070 } /* Literal.Number */
+pre.pygments .tok-s { color: #4070a0 } /* Literal.String */
+pre.pygments .tok-na { color: #4070a0 } /* Name.Attribute */
+pre.pygments .tok-nb { color: #007020 } /* Name.Builtin */
+pre.pygments .tok-nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+pre.pygments .tok-no { color: #60add5 } /* Name.Constant */
+pre.pygments .tok-nd { color: #555555; font-weight: bold } /* Name.Decorator */
+pre.pygments .tok-ni { color: #d55537; font-weight: bold } /* Name.Entity */
+pre.pygments .tok-ne { color: #007020 } /* Name.Exception */
+pre.pygments .tok-nf { color: #06287e } /* Name.Function */
+pre.pygments .tok-nl { color: #002070; font-weight: bold } /* Name.Label */
+pre.pygments .tok-nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+pre.pygments .tok-nt { color: #062873; font-weight: bold } /* Name.Tag */
+pre.pygments .tok-nv { color: #bb60d5 } /* Name.Variable */
+pre.pygments .tok-ow { color: #007020; font-weight: bold } /* Operator.Word */
+pre.pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
+pre.pygments .tok-mb { color: #40a070 } /* Literal.Number.Bin */
+pre.pygments .tok-mf { color: #40a070 } /* Literal.Number.Float */
+pre.pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
+pre.pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
+pre.pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
+pre.pygments .tok-sa { color: #4070a0 } /* Literal.String.Affix */
+pre.pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
+pre.pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
+pre.pygments .tok-dl { color: #4070a0 } /* Literal.String.Delimiter */
+pre.pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+pre.pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
+pre.pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+pre.pygments .tok-sh { color: #4070a0 } /* Literal.String.Heredoc */
+pre.pygments .tok-si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+pre.pygments .tok-sx { color: #c65d09 } /* Literal.String.Other */
+pre.pygments .tok-sr { color: #235388 } /* Literal.String.Regex */
+pre.pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
+pre.pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
+pre.pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
+pre.pygments .tok-fm { color: #06287e } /* Name.Function.Magic */
+pre.pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
+pre.pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
+pre.pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
+pre.pygments .tok-vm { color: #bb60d5 } /* Name.Variable.Magic */
+pre.pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
 </style>
 </head>
 <body class="article toc2 toc-left">
@@ -229,7 +305,7 @@ model anymore. Instead, we could rewrite all of the domain-level tests from
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-c1"># domain-layer test:</span>
 <span class="tok-k">def</span> <span class="tok-nf">test_prefers_current_stock_batches_to_shipments</span><span class="tok-p">():</span>
-    <span class="tok-n">in_stock_batch</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"in-stock-batch"</span><span class="tok-p">,</span> <span class="tok-s2">"RETRO-CLOCK"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-bp">None</span><span class="tok-p">)</span>
+    <span class="tok-n">in_stock_batch</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"in-stock-batch"</span><span class="tok-p">,</span> <span class="tok-s2">"RETRO-CLOCK"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-kc">None</span><span class="tok-p">)</span>
     <span class="tok-n">shipment_batch</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"shipment-batch"</span><span class="tok-p">,</span> <span class="tok-s2">"RETRO-CLOCK"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-n">tomorrow</span><span class="tok-p">)</span>
     <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s2">"oref"</span><span class="tok-p">,</span> <span class="tok-s2">"RETRO-CLOCK"</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">)</span>
 
@@ -241,7 +317,7 @@ model anymore. Instead, we could rewrite all of the domain-level tests from
 
 <span class="tok-c1"># service-layer test:</span>
 <span class="tok-k">def</span> <span class="tok-nf">test_prefers_warehouse_batches_to_shipments</span><span class="tok-p">():</span>
-    <span class="tok-n">in_stock_batch</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"in-stock-batch"</span><span class="tok-p">,</span> <span class="tok-s2">"RETRO-CLOCK"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-bp">None</span><span class="tok-p">)</span>
+    <span class="tok-n">in_stock_batch</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"in-stock-batch"</span><span class="tok-p">,</span> <span class="tok-s2">"RETRO-CLOCK"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-kc">None</span><span class="tok-p">)</span>
     <span class="tok-n">shipment_batch</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"shipment-batch"</span><span class="tok-p">,</span> <span class="tok-s2">"RETRO-CLOCK"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-n">tomorrow</span><span class="tok-p">)</span>
     <span class="tok-n">repo</span> <span class="tok-o">=</span> <span class="tok-n">FakeRepository</span><span class="tok-p">([</span><span class="tok-n">in_stock_batch</span><span class="tok-p">,</span> <span class="tok-n">shipment_batch</span><span class="tok-p">])</span>
     <span class="tok-n">session</span> <span class="tok-o">=</span> <span class="tok-n">FakeSession</span><span class="tok-p">()</span>
@@ -446,7 +522,7 @@ rewrite its API to work in terms of primitives.</p>
 <div class="listingblock non-head">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_returns_allocation</span><span class="tok-p">():</span>
-    <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-s2">"COMPLICATED-LAMP"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-bp">None</span><span class="tok-p">)</span>
+    <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-s2">"COMPLICATED-LAMP"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-kc">None</span><span class="tok-p">)</span>
     <span class="tok-n">repo</span> <span class="tok-o">=</span> <span class="tok-n">FakeRepository</span><span class="tok-p">([</span><span class="tok-n">batch</span><span class="tok-p">])</span>
 
     <span class="tok-n">result</span> <span class="tok-o">=</span> <span class="tok-n">services</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-s2">"o1"</span><span class="tok-p">,</span> <span class="tok-s2">"COMPLICATED-LAMP"</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">,</span> <span class="tok-n">repo</span><span class="tok-p">,</span> <span class="tok-n">FakeSession</span><span class="tok-p">())</span>
@@ -479,7 +555,7 @@ function on <code>FakeRepository</code>:</p>
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">FakeRepository</span><span class="tok-p">(</span><span class="tok-nb">set</span><span class="tok-p">):</span>
 
     <span class="tok-nd">@staticmethod</span>
-    <span class="tok-k">def</span> <span class="tok-nf">for_batch</span><span class="tok-p">(</span><span class="tok-n">ref</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-bp">None</span><span class="tok-p">):</span>
+    <span class="tok-k">def</span> <span class="tok-nf">for_batch</span><span class="tok-p">(</span><span class="tok-n">ref</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-kc">None</span><span class="tok-p">):</span>
         <span class="tok-k">return</span> <span class="tok-n">FakeRepository</span><span class="tok-p">([</span>
             <span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-n">ref</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-p">),</span>
         <span class="tok-p">])</span>
@@ -488,7 +564,7 @@ function on <code>FakeRepository</code>:</p>
 
 
 <span class="tok-k">def</span> <span class="tok-nf">test_returns_allocation</span><span class="tok-p">():</span>
-    <span class="tok-n">repo</span> <span class="tok-o">=</span> <span class="tok-n">FakeRepository</span><span class="tok-o">.</span><span class="tok-n">for_batch</span><span class="tok-p">(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-s2">"COMPLICATED-LAMP"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-bp">None</span><span class="tok-p">)</span>
+    <span class="tok-n">repo</span> <span class="tok-o">=</span> <span class="tok-n">FakeRepository</span><span class="tok-o">.</span><span class="tok-n">for_batch</span><span class="tok-p">(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-s2">"COMPLICATED-LAMP"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-kc">None</span><span class="tok-p">)</span>
     <span class="tok-n">result</span> <span class="tok-o">=</span> <span class="tok-n">services</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-s2">"o1"</span><span class="tok-p">,</span> <span class="tok-s2">"COMPLICATED-LAMP"</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">,</span> <span class="tok-n">repo</span><span class="tok-p">,</span> <span class="tok-n">FakeSession</span><span class="tok-p">())</span>
     <span class="tok-k">assert</span> <span class="tok-n">result</span> <span class="tok-o">==</span> <span class="tok-s2">"batch1"</span></code></pre>
 </div>
@@ -516,8 +592,8 @@ on the domain:</p>
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_add_batch</span><span class="tok-p">():</span>
     <span class="tok-n">repo</span><span class="tok-p">,</span> <span class="tok-n">session</span> <span class="tok-o">=</span> <span class="tok-n">FakeRepository</span><span class="tok-p">([]),</span> <span class="tok-n">FakeSession</span><span class="tok-p">()</span>
-    <span class="tok-n">services</span><span class="tok-o">.</span><span class="tok-n">add_batch</span><span class="tok-p">(</span><span class="tok-s2">"b1"</span><span class="tok-p">,</span> <span class="tok-s2">"CRUNCHY-ARMCHAIR"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">,</span> <span class="tok-n">repo</span><span class="tok-p">,</span> <span class="tok-n">session</span><span class="tok-p">)</span>
-    <span class="tok-k">assert</span> <span class="tok-n">repo</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s2">"b1"</span><span class="tok-p">)</span> <span class="tok-ow">is</span> <span class="tok-ow">not</span> <span class="tok-bp">None</span>
+    <span class="tok-n">services</span><span class="tok-o">.</span><span class="tok-n">add_batch</span><span class="tok-p">(</span><span class="tok-s2">"b1"</span><span class="tok-p">,</span> <span class="tok-s2">"CRUNCHY-ARMCHAIR"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-kc">None</span><span class="tok-p">,</span> <span class="tok-n">repo</span><span class="tok-p">,</span> <span class="tok-n">session</span><span class="tok-p">)</span>
+    <span class="tok-k">assert</span> <span class="tok-n">repo</span><span class="tok-o">.</span><span class="tok-n">get</span><span class="tok-p">(</span><span class="tok-s2">"b1"</span><span class="tok-p">)</span> <span class="tok-ow">is</span> <span class="tok-ow">not</span> <span class="tok-kc">None</span>
     <span class="tok-k">assert</span> <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">committed</span></code></pre>
 </div>
 </div>
@@ -548,7 +624,7 @@ In general, if you find yourself needing to do domain-layer stuff directly
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">add_batch</span><span class="tok-p">(</span>
     <span class="tok-n">ref</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-p">:</span> <span class="tok-n">Optional</span><span class="tok-p">[</span><span class="tok-n">date</span><span class="tok-p">],</span>
     <span class="tok-n">repo</span><span class="tok-p">:</span> <span class="tok-n">AbstractRepository</span><span class="tok-p">,</span> <span class="tok-n">session</span><span class="tok-p">,</span>
-<span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-bp">None</span><span class="tok-p">:</span>
+<span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-kc">None</span><span class="tok-p">:</span>
     <span class="tok-n">repo</span><span class="tok-o">.</span><span class="tok-n">add</span><span class="tok-p">(</span><span class="tok-n">model</span><span class="tok-o">.</span><span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-n">ref</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-p">))</span>
     <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">commit</span><span class="tok-p">()</span>
 
@@ -588,14 +664,14 @@ any dependencies on the model:</p>
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_allocate_returns_allocation</span><span class="tok-p">():</span>
     <span class="tok-n">repo</span><span class="tok-p">,</span> <span class="tok-n">session</span> <span class="tok-o">=</span> <span class="tok-n">FakeRepository</span><span class="tok-p">([]),</span> <span class="tok-n">FakeSession</span><span class="tok-p">()</span>
-    <span class="tok-n">services</span><span class="tok-o">.</span><span class="tok-n">add_batch</span><span class="tok-p">(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-s2">"COMPLICATED-LAMP"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">,</span> <span class="tok-n">repo</span><span class="tok-p">,</span> <span class="tok-n">session</span><span class="tok-p">)</span>
+    <span class="tok-n">services</span><span class="tok-o">.</span><span class="tok-n">add_batch</span><span class="tok-p">(</span><span class="tok-s2">"batch1"</span><span class="tok-p">,</span> <span class="tok-s2">"COMPLICATED-LAMP"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-kc">None</span><span class="tok-p">,</span> <span class="tok-n">repo</span><span class="tok-p">,</span> <span class="tok-n">session</span><span class="tok-p">)</span>
     <span class="tok-n">result</span> <span class="tok-o">=</span> <span class="tok-n">services</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-s2">"o1"</span><span class="tok-p">,</span> <span class="tok-s2">"COMPLICATED-LAMP"</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">,</span> <span class="tok-n">repo</span><span class="tok-p">,</span> <span class="tok-n">session</span><span class="tok-p">)</span>
     <span class="tok-k">assert</span> <span class="tok-n">result</span> <span class="tok-o">==</span> <span class="tok-s2">"batch1"</span>
 
 
 <span class="tok-k">def</span> <span class="tok-nf">test_allocate_errors_for_invalid_sku</span><span class="tok-p">():</span>
     <span class="tok-n">repo</span><span class="tok-p">,</span> <span class="tok-n">session</span> <span class="tok-o">=</span> <span class="tok-n">FakeRepository</span><span class="tok-p">([]),</span> <span class="tok-n">FakeSession</span><span class="tok-p">()</span>
-    <span class="tok-n">services</span><span class="tok-o">.</span><span class="tok-n">add_batch</span><span class="tok-p">(</span><span class="tok-s2">"b1"</span><span class="tok-p">,</span> <span class="tok-s2">"AREALSKU"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">,</span> <span class="tok-n">repo</span><span class="tok-p">,</span> <span class="tok-n">session</span><span class="tok-p">)</span>
+    <span class="tok-n">services</span><span class="tok-o">.</span><span class="tok-n">add_batch</span><span class="tok-p">(</span><span class="tok-s2">"b1"</span><span class="tok-p">,</span> <span class="tok-s2">"AREALSKU"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-kc">None</span><span class="tok-p">,</span> <span class="tok-n">repo</span><span class="tok-p">,</span> <span class="tok-n">session</span><span class="tok-p">)</span>
 
     <span class="tok-k">with</span> <span class="tok-n">pytest</span><span class="tok-o">.</span><span class="tok-n">raises</span><span class="tok-p">(</span><span class="tok-n">services</span><span class="tok-o">.</span><span class="tok-n">InvalidSku</span><span class="tok-p">,</span> <span class="tok-n">match</span><span class="tok-o">=</span><span class="tok-s2">"Invalid sku NONEXISTENTSKU"</span><span class="tok-p">):</span>
         <span class="tok-n">services</span><span class="tok-o">.</span><span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-s2">"o1"</span><span class="tok-p">,</span> <span class="tok-s2">"NONEXISTENTSKU"</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">,</span> <span class="tok-n">repo</span><span class="tok-p">,</span> <span class="tok-n">FakeSession</span><span class="tok-p">())</span></code></pre>
@@ -634,12 +710,12 @@ JSON wrangling and a single function call required:</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@app.route</span><span class="tok-p">(</span><span class="tok-s2">"/add_batch"</span><span class="tok-p">,</span> <span class="tok-n">methods</span><span class="tok-o">=</span><span class="tok-p">[</span><span class="tok-s2">"POST"</span><span class="tok-p">])</span>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@app</span><span class="tok-o">.</span><span class="tok-n">route</span><span class="tok-p">(</span><span class="tok-s2">"/add_batch"</span><span class="tok-p">,</span> <span class="tok-n">methods</span><span class="tok-o">=</span><span class="tok-p">[</span><span class="tok-s2">"POST"</span><span class="tok-p">])</span>
 <span class="tok-k">def</span> <span class="tok-nf">add_batch</span><span class="tok-p">():</span>
     <span class="tok-n">session</span> <span class="tok-o">=</span> <span class="tok-n">get_session</span><span class="tok-p">()</span>
     <span class="tok-n">repo</span> <span class="tok-o">=</span> <span class="tok-n">repository</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyRepository</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">)</span>
     <span class="tok-n">eta</span> <span class="tok-o">=</span> <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s2">"eta"</span><span class="tok-p">]</span>
-    <span class="tok-k">if</span> <span class="tok-n">eta</span> <span class="tok-ow">is</span> <span class="tok-ow">not</span> <span class="tok-bp">None</span><span class="tok-p">:</span>
+    <span class="tok-k">if</span> <span class="tok-n">eta</span> <span class="tok-ow">is</span> <span class="tok-ow">not</span> <span class="tok-kc">None</span><span class="tok-p">:</span>
         <span class="tok-n">eta</span> <span class="tok-o">=</span> <span class="tok-n">datetime</span><span class="tok-o">.</span><span class="tok-n">fromisoformat</span><span class="tok-p">(</span><span class="tok-n">eta</span><span class="tok-p">)</span><span class="tok-o">.</span><span class="tok-n">date</span><span class="tok-p">()</span>
     <span class="tok-n">services</span><span class="tok-o">.</span><span class="tok-n">add_batch</span><span class="tok-p">(</span>
         <span class="tok-n">request</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">[</span><span class="tok-s2">"ref"</span><span class="tok-p">],</span>
@@ -683,13 +759,13 @@ which is also nice:</p>
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">post_to_add_batch</span><span class="tok-p">(</span><span class="tok-n">ref</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">qty</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-p">):</span>
     <span class="tok-n">url</span> <span class="tok-o">=</span> <span class="tok-n">config</span><span class="tok-o">.</span><span class="tok-n">get_api_url</span><span class="tok-p">()</span>
     <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">post</span><span class="tok-p">(</span>
-        <span class="tok-n">f</span><span class="tok-s2">"{url}/add_batch"</span><span class="tok-p">,</span> <span class="tok-n">json</span><span class="tok-o">=</span><span class="tok-p">{</span><span class="tok-s2">"ref"</span><span class="tok-p">:</span> <span class="tok-n">ref</span><span class="tok-p">,</span> <span class="tok-s2">"sku"</span><span class="tok-p">:</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-s2">"qty"</span><span class="tok-p">:</span> <span class="tok-n">qty</span><span class="tok-p">,</span> <span class="tok-s2">"eta"</span><span class="tok-p">:</span> <span class="tok-n">eta</span><span class="tok-p">}</span>
+        <span class="tok-sa">f</span><span class="tok-s2">"</span><span class="tok-si">{</span><span class="tok-n">url</span><span class="tok-si">}</span><span class="tok-s2">/add_batch"</span><span class="tok-p">,</span> <span class="tok-n">json</span><span class="tok-o">=</span><span class="tok-p">{</span><span class="tok-s2">"ref"</span><span class="tok-p">:</span> <span class="tok-n">ref</span><span class="tok-p">,</span> <span class="tok-s2">"sku"</span><span class="tok-p">:</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-s2">"qty"</span><span class="tok-p">:</span> <span class="tok-n">qty</span><span class="tok-p">,</span> <span class="tok-s2">"eta"</span><span class="tok-p">:</span> <span class="tok-n">eta</span><span class="tok-p">}</span>
     <span class="tok-p">)</span>
     <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">status_code</span> <span class="tok-o">==</span> <span class="tok-mi">201</span>
 
 
-<span class="tok-nd">@pytest.mark.usefixtures</span><span class="tok-p">(</span><span class="tok-s2">"postgres_db"</span><span class="tok-p">)</span>
-<span class="tok-nd">@pytest.mark.usefixtures</span><span class="tok-p">(</span><span class="tok-s2">"restart_api"</span><span class="tok-p">)</span>
+<span class="tok-nd">@pytest</span><span class="tok-o">.</span><span class="tok-n">mark</span><span class="tok-o">.</span><span class="tok-n">usefixtures</span><span class="tok-p">(</span><span class="tok-s2">"postgres_db"</span><span class="tok-p">)</span>
+<span class="tok-nd">@pytest</span><span class="tok-o">.</span><span class="tok-n">mark</span><span class="tok-o">.</span><span class="tok-n">usefixtures</span><span class="tok-p">(</span><span class="tok-s2">"restart_api"</span><span class="tok-p">)</span>
 <span class="tok-k">def</span> <span class="tok-nf">test_happy_path_returns_201_and_allocated_batch</span><span class="tok-p">():</span>
     <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-n">othersku</span> <span class="tok-o">=</span> <span class="tok-n">random_sku</span><span class="tok-p">(),</span> <span class="tok-n">random_sku</span><span class="tok-p">(</span><span class="tok-s2">"other"</span><span class="tok-p">)</span>
     <span class="tok-n">earlybatch</span> <span class="tok-o">=</span> <span class="tok-n">random_batchref</span><span class="tok-p">(</span><span class="tok-mi">1</span><span class="tok-p">)</span>
@@ -697,11 +773,11 @@ which is also nice:</p>
     <span class="tok-n">otherbatch</span> <span class="tok-o">=</span> <span class="tok-n">random_batchref</span><span class="tok-p">(</span><span class="tok-mi">3</span><span class="tok-p">)</span>
     <span class="tok-n">post_to_add_batch</span><span class="tok-p">(</span><span class="tok-n">laterbatch</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-s2">"2011-01-02"</span><span class="tok-p">)</span>
     <span class="tok-n">post_to_add_batch</span><span class="tok-p">(</span><span class="tok-n">earlybatch</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-s2">"2011-01-01"</span><span class="tok-p">)</span>
-    <span class="tok-n">post_to_add_batch</span><span class="tok-p">(</span><span class="tok-n">otherbatch</span><span class="tok-p">,</span> <span class="tok-n">othersku</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-bp">None</span><span class="tok-p">)</span>
+    <span class="tok-n">post_to_add_batch</span><span class="tok-p">(</span><span class="tok-n">otherbatch</span><span class="tok-p">,</span> <span class="tok-n">othersku</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-kc">None</span><span class="tok-p">)</span>
     <span class="tok-n">data</span> <span class="tok-o">=</span> <span class="tok-p">{</span><span class="tok-s2">"orderid"</span><span class="tok-p">:</span> <span class="tok-n">random_orderid</span><span class="tok-p">(),</span> <span class="tok-s2">"sku"</span><span class="tok-p">:</span> <span class="tok-n">sku</span><span class="tok-p">,</span> <span class="tok-s2">"qty"</span><span class="tok-p">:</span> <span class="tok-mi">3</span><span class="tok-p">}</span>
 
     <span class="tok-n">url</span> <span class="tok-o">=</span> <span class="tok-n">config</span><span class="tok-o">.</span><span class="tok-n">get_api_url</span><span class="tok-p">()</span>
-    <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">post</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s2">"{url}/allocate"</span><span class="tok-p">,</span> <span class="tok-n">json</span><span class="tok-o">=</span><span class="tok-n">data</span><span class="tok-p">)</span>
+    <span class="tok-n">r</span> <span class="tok-o">=</span> <span class="tok-n">requests</span><span class="tok-o">.</span><span class="tok-n">post</span><span class="tok-p">(</span><span class="tok-sa">f</span><span class="tok-s2">"</span><span class="tok-si">{</span><span class="tok-n">url</span><span class="tok-si">}</span><span class="tok-s2">/allocate"</span><span class="tok-p">,</span> <span class="tok-n">json</span><span class="tok-o">=</span><span class="tok-n">data</span><span class="tok-p">)</span>
 
     <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">status_code</span> <span class="tok-o">==</span> <span class="tok-mi">201</span>
     <span class="tok-k">assert</span> <span class="tok-n">r</span><span class="tok-o">.</span><span class="tok-n">json</span><span class="tok-p">()[</span><span class="tok-s2">"batchref"</span><span class="tok-p">]</span> <span class="tok-o">==</span> <span class="tok-n">earlybatch</span></code></pre>
@@ -735,8 +811,7 @@ are glued together correctly.
 <p>These edge-to-edge tests offer a good trade-off between coverage,
 runtime, and efficiency. Each test tends to cover one code path of a
 feature and use fakes for I/O. This is the place to exhaustively
-cover all the edge cases and the ins and outs of your business logic.<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup> and
-<a href="/book/chapter_09_all_messagebus.html#fake_message_bus">[fake_message_bus]</a>.]
+cover all the edge cases and the ins and outs of your business logic.<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup>
 </p>
 </dd>
 <dt class="hdlist1">Maintain a small core of tests written against your domain model</dt>
@@ -792,85 +867,14 @@ repositories or the database. This pays off in your end-to-end tests as well.
 <div id="footnotes">
 <hr>
 <div class="footnote" id="_footnotedef_1">
-<a href="#_footnoteref_1">1</a>. A valid concern about writing tests at a higher level is that it can lead to combinatorial explosion for more complex use cases. In these cases, dropping down to lower-level unit tests of the various collaborating domain objects can be useful. But see also <a href="/book/chapter_08_events_and_message_bus.html">[chapter_08_events_and_message_bus
-</a></div>
+<a href="#_footnoteref_1">1</a>. A valid concern about writing tests at a higher level is that it can lead to combinatorial explosion for more complex use cases. In these cases, dropping down to lower-level unit tests of the various collaborating domain objects can be useful. But see also <a href="/book/chapter_08_events_and_message_bus.html">[chapter_08_events_and_message_bus]</a> and <a href="/book/chapter_09_all_messagebus.html#fake_message_bus">[fake_message_bus]</a>.
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-02-24 22:04:29 UTC
+Last updated 2021-02-26 00:40:46 UTC
 </div>
 </div>
-<style>
-pre.pygments .hll { background-color: #ffffcc }
-pre.pygments  { background: #f0f0f0; }
-pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
-pre.pygments .tok-err { border: 1px solid #FF0000 } /* Error */
-pre.pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
-pre.pygments .tok-o { color: #666666 } /* Operator */
-pre.pygments .tok-ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
-pre.pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
-pre.pygments .tok-cp { color: #007020 } /* Comment.Preproc */
-pre.pygments .tok-cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
-pre.pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
-pre.pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
-pre.pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
-pre.pygments .tok-ge { font-style: italic } /* Generic.Emph */
-pre.pygments .tok-gr { color: #FF0000 } /* Generic.Error */
-pre.pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
-pre.pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
-pre.pygments .tok-go { color: #888888 } /* Generic.Output */
-pre.pygments .tok-gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
-pre.pygments .tok-gs { font-weight: bold } /* Generic.Strong */
-pre.pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
-pre.pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
-pre.pygments .tok-kc { color: #007020; font-weight: bold } /* Keyword.Constant */
-pre.pygments .tok-kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
-pre.pygments .tok-kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
-pre.pygments .tok-kp { color: #007020 } /* Keyword.Pseudo */
-pre.pygments .tok-kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
-pre.pygments .tok-kt { color: #902000 } /* Keyword.Type */
-pre.pygments .tok-m { color: #40a070 } /* Literal.Number */
-pre.pygments .tok-s { color: #4070a0 } /* Literal.String */
-pre.pygments .tok-na { color: #4070a0 } /* Name.Attribute */
-pre.pygments .tok-nb { color: #007020 } /* Name.Builtin */
-pre.pygments .tok-nc { color: #0e84b5; font-weight: bold } /* Name.Class */
-pre.pygments .tok-no { color: #60add5 } /* Name.Constant */
-pre.pygments .tok-nd { color: #555555; font-weight: bold } /* Name.Decorator */
-pre.pygments .tok-ni { color: #d55537; font-weight: bold } /* Name.Entity */
-pre.pygments .tok-ne { color: #007020 } /* Name.Exception */
-pre.pygments .tok-nf { color: #06287e } /* Name.Function */
-pre.pygments .tok-nl { color: #002070; font-weight: bold } /* Name.Label */
-pre.pygments .tok-nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
-pre.pygments .tok-nt { color: #062873; font-weight: bold } /* Name.Tag */
-pre.pygments .tok-nv { color: #bb60d5 } /* Name.Variable */
-pre.pygments .tok-ow { color: #007020; font-weight: bold } /* Operator.Word */
-pre.pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
-pre.pygments .tok-mb { color: #40a070 } /* Literal.Number.Bin */
-pre.pygments .tok-mf { color: #40a070 } /* Literal.Number.Float */
-pre.pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
-pre.pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
-pre.pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
-pre.pygments .tok-sa { color: #4070a0 } /* Literal.String.Affix */
-pre.pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
-pre.pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
-pre.pygments .tok-dl { color: #4070a0 } /* Literal.String.Delimiter */
-pre.pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
-pre.pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
-pre.pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
-pre.pygments .tok-sh { color: #4070a0 } /* Literal.String.Heredoc */
-pre.pygments .tok-si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
-pre.pygments .tok-sx { color: #c65d09 } /* Literal.String.Other */
-pre.pygments .tok-sr { color: #235388 } /* Literal.String.Regex */
-pre.pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
-pre.pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
-pre.pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
-pre.pygments .tok-fm { color: #06287e } /* Name.Function.Magic */
-pre.pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
-pre.pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
-pre.pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
-pre.pygments .tok-vm { color: #bb60d5 } /* Name.Variable.Magic */
-pre.pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
-</style>
 <div><div id="disqus_thread" style="margin: 10px"></div>
 <script>
 

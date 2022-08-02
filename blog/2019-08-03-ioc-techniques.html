@@ -81,7 +81,6 @@ to Python.</p>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Woof.&quot;</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>In this example, <code>Animal</code> is an <em>abstraction</em>: it declares its <code>speak</code> method, but it&rsquo;s not intended to be run (as
 is signalled by the <code>NotImplementedError</code>).</p>
 <p><code>Cat</code> and <code>Dog</code>, however, are <em>implementations</em>: they both implement the <code>speak</code> method, each in their own way.</p>
@@ -100,7 +99,6 @@ implementations of <code>Animal</code>.</p>
 <span class="n">make_animal_speak</span><span class="p">(</span><span class="n">Dog</span><span class="p">())</span>
 </code></pre></div>
 
-
 <p>The <code>make_animal_speak</code> function need not know anything about cats or dogs; all it has to know is how to interact
 with the abstract concept of an animal. Interacting with objects without knowing
 their specific type, only their interface, is known as &lsquo;polymorphism&rsquo;.</p>
@@ -114,7 +112,6 @@ their specific type, only their interface, is known as &lsquo;polymorphism&rsquo
     <span class="k">def</span> <span class="nf">speak</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Woof.&quot;</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>Even if <code>Cat</code> and <code>Dog</code> don&rsquo;t inherit <code>Animal</code>, they can still be passed to <code>make_animal_speak</code> and things
 will work just fine. This informal ability to interact with an object without it explicitly declaring an interface
@@ -132,7 +129,6 @@ is known as &lsquo;duck typing&rsquo;.</p>
     <span class="n">notify</span><span class="p">(</span><span class="n">customer</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>We may even use Python modules:</p>
 <div class="codehilite"><pre><span></span><code><span class="kn">import</span> <span class="nn">email</span>
 <span class="kn">import</span> <span class="nn">text_message</span>
@@ -141,7 +137,6 @@ is known as &lsquo;duck typing&rsquo;.</p>
 <span class="k">for</span> <span class="n">notification_method</span> <span class="ow">in</span> <span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">text_message</span><span class="p">):</span>
     <span class="n">notification_method</span><span class="o">.</span><span class="n">notify</span><span class="p">(</span><span class="n">customer</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>Whether a shared interface is manifested in a formal, object oriented manner, or more implicitly, we can
 generalise the separation between the interface and the implementation like so:</p>
@@ -167,7 +162,6 @@ this <code>main</code>.</p>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hello, world.&quot;</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>This function is called from a top level function like so:</p>
 <div class="codehilite"><pre><span></span><code><span class="c1"># main.py</span>
 
@@ -177,7 +171,6 @@ this <code>main</code>.</p>
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">hello_world</span><span class="p">()</span>
 </code></pre></div>
-
 
 <p><code>hello_world</code> has one dependency that is of interest to us: the built in function <code>print</code>. We can draw a diagram
 of these dependencies like this:</p>
@@ -192,7 +185,6 @@ function that outputs a message it is supplied &mdash; let&rsquo;s call it <code
     <span class="n">output_function</span><span class="p">(</span><span class="s2">&quot;Hello, world.&quot;</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>All we do is allow it to receive the output function as an argument. The orchestration code then passes in the <code>print</code> function via the argument:</p>
 <div class="codehilite"><pre><span></span><code><span class="c1"># main.py</span>
 
@@ -202,7 +194,6 @@ function that outputs a message it is supplied &mdash; let&rsquo;s call it <code
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">hello_world</span><span class="o">.</span><span class="n">hello_world</span><span class="p">(</span><span class="n">output_function</span><span class="o">=</span><span class="nb">print</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>That&rsquo;s it. It couldn&rsquo;t get much simpler, could it? In this example, we&rsquo;re injecting a callable, but other
 implementations could expect a class, an instance or even a module.</p>
@@ -229,7 +220,6 @@ to allow its behaviour to be configured from outside.</p>
     <span class="n">output_function</span><span class="p">(</span><span class="s2">&quot;Hello, world.&quot;</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>To complete the picture, here&rsquo;s how it could be configured externally:</p>
 <div class="codehilite"><pre><span></span><code><span class="c1"># main.py</span>
 
@@ -242,7 +232,6 @@ to allow its behaviour to be configured from outside.</p>
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">hello_world</span><span class="o">.</span><span class="n">hello_world</span><span class="p">()</span>
 </code></pre></div>
-
 
 <p>The machinery in this case is simply a dictionary that is written to from outside the module. In a real world system,
 we might want a slightly more sophisticated config system (making it immutable for example, is a good idea). But at heart,
@@ -266,7 +255,6 @@ able to add people to the list of those we should greet.</p>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Hello, </span><span class="si">{</span><span class="n">person</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 </code></pre></div>
 
-
 <div class="codehilite"><pre><span></span><code><span class="c1"># john.py</span>
 
 <span class="kn">import</span> <span class="nn">hello_people</span>
@@ -275,7 +263,6 @@ able to add people to the list of those we should greet.</p>
 <span class="n">hello_people</span><span class="o">.</span><span class="n">people</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;John&quot;</span><span class="p">)</span>
 </code></pre></div>
 
-
 <div class="codehilite"><pre><span></span><code><span class="c1"># martha.py</span>
 
 <span class="kn">import</span> <span class="nn">hello_people</span>
@@ -283,7 +270,6 @@ able to add people to the list of those we should greet.</p>
 
 <span class="n">hello_people</span><span class="o">.</span><span class="n">people</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Martha&quot;</span><span class="p">)</span>
 </code></pre></div>
-
 
 <p>As with the configuration registry, there is a store that can be written to from outside. But instead of
 being a dictionary, it&rsquo;s a list. This list is populated, typically
@@ -309,7 +295,6 @@ a.k.a. pub/sub.</p>
         <span class="n">subscriber</span><span class="p">()</span>
 </code></pre></div>
 
-
 <div class="codehilite"><pre><span></span><code><span class="c1"># log.py</span>
 
 <span class="kn">import</span> <span class="nn">hello_world</span>
@@ -321,7 +306,6 @@ a.k.a. pub/sub.</p>
 
 <span class="n">hello_world</span><span class="o">.</span><span class="n">subscribers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">write_to_log</span><span class="p">)</span>
 </code></pre></div>
-
 
 <h2>Technique Three: Monkey Patching</h2>
 <p>Our final technique, <em>Monkey Patching</em>, is very different to the others, as it doesn&rsquo;t use the Inversion of Control
@@ -340,7 +324,6 @@ built in <code>print</code> function with something different:</p>
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">hello_world</span><span class="o">.</span><span class="n">hello_world</span><span class="p">()</span>
 </code></pre></div>
-
 
 <p>Monkey patching takes other forms. You could manipulate to your heart&rsquo;s content some hapless class defined elsewhere
 &mdash; changing attributes, swapping in other methods, and generally doing whatever you like to it.</p>

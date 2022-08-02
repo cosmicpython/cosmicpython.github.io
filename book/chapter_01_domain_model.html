@@ -3,7 +3,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="generator" content="Asciidoctor 2.0.16">
 <title>Domain Modeling</title>
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -98,6 +98,82 @@ table {
   font-size: 3vw;
 }
 
+</style>
+<style>
+pre { line-height: 125%; }
+td.linenos .normal { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+pre.pygments .hll { background-color: #ffffcc }
+pre.pygments { background: #f0f0f0; }
+pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
+pre.pygments .tok-err { border: 1px solid #FF0000 } /* Error */
+pre.pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
+pre.pygments .tok-o { color: #666666 } /* Operator */
+pre.pygments .tok-ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
+pre.pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
+pre.pygments .tok-cp { color: #007020 } /* Comment.Preproc */
+pre.pygments .tok-cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
+pre.pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
+pre.pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
+pre.pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
+pre.pygments .tok-ge { font-style: italic } /* Generic.Emph */
+pre.pygments .tok-gr { color: #FF0000 } /* Generic.Error */
+pre.pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
+pre.pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
+pre.pygments .tok-go { color: #888888 } /* Generic.Output */
+pre.pygments .tok-gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+pre.pygments .tok-gs { font-weight: bold } /* Generic.Strong */
+pre.pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+pre.pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
+pre.pygments .tok-kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+pre.pygments .tok-kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+pre.pygments .tok-kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+pre.pygments .tok-kp { color: #007020 } /* Keyword.Pseudo */
+pre.pygments .tok-kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+pre.pygments .tok-kt { color: #902000 } /* Keyword.Type */
+pre.pygments .tok-m { color: #40a070 } /* Literal.Number */
+pre.pygments .tok-s { color: #4070a0 } /* Literal.String */
+pre.pygments .tok-na { color: #4070a0 } /* Name.Attribute */
+pre.pygments .tok-nb { color: #007020 } /* Name.Builtin */
+pre.pygments .tok-nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+pre.pygments .tok-no { color: #60add5 } /* Name.Constant */
+pre.pygments .tok-nd { color: #555555; font-weight: bold } /* Name.Decorator */
+pre.pygments .tok-ni { color: #d55537; font-weight: bold } /* Name.Entity */
+pre.pygments .tok-ne { color: #007020 } /* Name.Exception */
+pre.pygments .tok-nf { color: #06287e } /* Name.Function */
+pre.pygments .tok-nl { color: #002070; font-weight: bold } /* Name.Label */
+pre.pygments .tok-nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+pre.pygments .tok-nt { color: #062873; font-weight: bold } /* Name.Tag */
+pre.pygments .tok-nv { color: #bb60d5 } /* Name.Variable */
+pre.pygments .tok-ow { color: #007020; font-weight: bold } /* Operator.Word */
+pre.pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
+pre.pygments .tok-mb { color: #40a070 } /* Literal.Number.Bin */
+pre.pygments .tok-mf { color: #40a070 } /* Literal.Number.Float */
+pre.pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
+pre.pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
+pre.pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
+pre.pygments .tok-sa { color: #4070a0 } /* Literal.String.Affix */
+pre.pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
+pre.pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
+pre.pygments .tok-dl { color: #4070a0 } /* Literal.String.Delimiter */
+pre.pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+pre.pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
+pre.pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+pre.pygments .tok-sh { color: #4070a0 } /* Literal.String.Heredoc */
+pre.pygments .tok-si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+pre.pygments .tok-sx { color: #c65d09 } /* Literal.String.Other */
+pre.pygments .tok-sr { color: #235388 } /* Literal.String.Regex */
+pre.pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
+pre.pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
+pre.pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
+pre.pygments .tok-fm { color: #06287e } /* Name.Function.Magic */
+pre.pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
+pre.pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
+pre.pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
+pre.pygments .tok-vm { color: #bb60d5 } /* Name.Variable.Magic */
+pre.pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
 </style>
 </head>
 <body class="article toc2 toc-left">
@@ -438,7 +514,7 @@ how we would construct a model from this business conversation.</p>
 <div class="paragraph">
 <p>Why not have a go at solving this problem yourself? Write a few unit tests to
 see if you can capture the essence of these business rules in nice, clean
-code.</p>
+code (ideally without looking at the solution we came up with below!)</p>
 </div>
 <div class="paragraph">
 <p>You&#8217;ll find some <a href="https://github.com/cosmicpython/code/tree/chapter_01_domain_model_exercise">placeholder unit tests on GitHub</a>, but you could just start from
@@ -479,7 +555,7 @@ they would agree that this correctly describes the behavior of the system.</p>
 <div class="content">
 <div class="listingblock non-head">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@dataclass</span><span class="tok-p">(</span><span class="tok-n">frozen</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">)</span>  #<b class="conum">(1)</b> <b class="conum">(2)</b>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@dataclass</span><span class="tok-p">(</span><span class="tok-n">frozen</span><span class="tok-o">=</span><span class="tok-kc">True</span><span class="tok-p">)</span>  #<b class="conum">(1)</b> <b class="conum">(2)</b>
 <span class="tok-k">class</span> <span class="tok-nc">OrderLine</span><span class="tok-p">:</span>
     <span class="tok-n">orderid</span><span class="tok-p">:</span> <span class="tok-nb">str</span>
     <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span>
@@ -493,8 +569,8 @@ they would agree that this correctly describes the behavior of the system.</p>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">eta</span> <span class="tok-o">=</span> <span class="tok-n">eta</span>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">=</span> <span class="tok-n">qty</span>
 
-    <span class="tok-k">def</span> <span class="tok-nf">allocate</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">line</span><span class="tok-p">:</span> <span class="tok-n">OrderLine</span><span class="tok-p">):</span>
-        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">-=</span> <span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">qty</span>  #<b class="conum">(3)</b></code></pre>
+    <span class="tok-k">def</span> <span class="tok-nf">allocate</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">line</span><span class="tok-p">:</span> <span class="tok-n">OrderLine</span><span class="tok-p">):</span>  #<b class="conum">(3)</b>
+        <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">available_quantity</span> <span class="tok-o">-=</span> <span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">qty</span></code></pre>
 </div>
 </div>
 </div>
@@ -528,7 +604,7 @@ You may decide the price paid in terms of readability is too high.
 a <code>Batch</code> just wraps an integer <code>available_quantity</code>,
 and we decrement that value on allocation.
 We&#8217;ve written quite a lot of code just to subtract one number from another,
-but we think that modeling our domain precisely will pay off.<sup class="footnote">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup>.]</p>
+but we think that modeling our domain precisely will pay off.<sup class="footnote">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup></p>
 </div>
 <div class="paragraph">
 <p>Let&#8217;s write some new failing tests:</p>
@@ -550,16 +626,16 @@ but we think that modeling our domain precisely will pay off.<sup class="footnot
 
 <span class="tok-k">def</span> <span class="tok-nf">test_cannot_allocate_if_available_smaller_than_required</span><span class="tok-p">():</span>
     <span class="tok-n">small_batch</span><span class="tok-p">,</span> <span class="tok-n">large_line</span> <span class="tok-o">=</span> <span class="tok-n">make_batch_and_line</span><span class="tok-p">(</span><span class="tok-s2">"ELEGANT-LAMP"</span><span class="tok-p">,</span> <span class="tok-mi">2</span><span class="tok-p">,</span> <span class="tok-mi">20</span><span class="tok-p">)</span>
-    <span class="tok-k">assert</span> <span class="tok-n">small_batch</span><span class="tok-o">.</span><span class="tok-n">can_allocate</span><span class="tok-p">(</span><span class="tok-n">large_line</span><span class="tok-p">)</span> <span class="tok-ow">is</span> <span class="tok-bp">False</span>
+    <span class="tok-k">assert</span> <span class="tok-n">small_batch</span><span class="tok-o">.</span><span class="tok-n">can_allocate</span><span class="tok-p">(</span><span class="tok-n">large_line</span><span class="tok-p">)</span> <span class="tok-ow">is</span> <span class="tok-kc">False</span>
 
 <span class="tok-k">def</span> <span class="tok-nf">test_can_allocate_if_available_equal_to_required</span><span class="tok-p">():</span>
     <span class="tok-n">batch</span><span class="tok-p">,</span> <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">make_batch_and_line</span><span class="tok-p">(</span><span class="tok-s2">"ELEGANT-LAMP"</span><span class="tok-p">,</span> <span class="tok-mi">2</span><span class="tok-p">,</span> <span class="tok-mi">2</span><span class="tok-p">)</span>
     <span class="tok-k">assert</span> <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">can_allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">)</span>
 
 <span class="tok-k">def</span> <span class="tok-nf">test_cannot_allocate_if_skus_do_not_match</span><span class="tok-p">():</span>
-    <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"batch-001"</span><span class="tok-p">,</span> <span class="tok-s2">"UNCOMFORTABLE-CHAIR"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-bp">None</span><span class="tok-p">)</span>
+    <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"batch-001"</span><span class="tok-p">,</span> <span class="tok-s2">"UNCOMFORTABLE-CHAIR"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-kc">None</span><span class="tok-p">)</span>
     <span class="tok-n">different_sku_line</span> <span class="tok-o">=</span> <span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s2">"order-123"</span><span class="tok-p">,</span> <span class="tok-s2">"EXPENSIVE-TOASTER"</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">)</span>
-    <span class="tok-k">assert</span> <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">can_allocate</span><span class="tok-p">(</span><span class="tok-n">different_sku_line</span><span class="tok-p">)</span> <span class="tok-ow">is</span> <span class="tok-bp">False</span></code></pre>
+    <span class="tok-k">assert</span> <span class="tok-n">batch</span><span class="tok-o">.</span><span class="tok-n">can_allocate</span><span class="tok-p">(</span><span class="tok-n">different_sku_line</span><span class="tok-p">)</span> <span class="tok-ow">is</span> <span class="tok-kc">False</span></code></pre>
 </div>
 </div>
 </div>
@@ -784,14 +860,14 @@ containing order information might look like this:</p>
 <div class="content">
 <div class="listingblock skip">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="yaml"><span></span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">Order_reference</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">12345</span>
-<span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">Lines</span><span class="tok-p tok-p-Indicator">:</span>
-  <span class="tok-p tok-p-Indicator">-</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">sku</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">RED-CHAIR</span>
-    <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">qty</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">25</span>
-  <span class="tok-p tok-p-Indicator">-</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">sku</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">BLU-CHAIR</span>
-    <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">qty</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">25</span>
-  <span class="tok-p tok-p-Indicator">-</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">sku</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">GRN-CHAIR</span>
-    <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">qty</span><span class="tok-p tok-p-Indicator">:</span> <span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">25</span></code></pre>
+<pre class="pygments highlight"><code data-lang="yaml"><span></span><span class="tok-nt">Order_reference</span><span class="tok-p">:</span><span class="tok-w"> </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">12345</span><span class="tok-w"></span>
+<span class="tok-nt">Lines</span><span class="tok-p">:</span><span class="tok-w"></span>
+<span class="tok-w">  </span><span class="tok-p tok-p-Indicator">-</span><span class="tok-w"> </span><span class="tok-nt">sku</span><span class="tok-p">:</span><span class="tok-w"> </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">RED-CHAIR</span><span class="tok-w"></span>
+<span class="tok-w">    </span><span class="tok-nt">qty</span><span class="tok-p">:</span><span class="tok-w"> </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">25</span><span class="tok-w"></span>
+<span class="tok-w">  </span><span class="tok-p tok-p-Indicator">-</span><span class="tok-w"> </span><span class="tok-nt">sku</span><span class="tok-p">:</span><span class="tok-w"> </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">BLU-CHAIR</span><span class="tok-w"></span>
+<span class="tok-w">    </span><span class="tok-nt">qty</span><span class="tok-p">:</span><span class="tok-w"> </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">25</span><span class="tok-w"></span>
+<span class="tok-w">  </span><span class="tok-p tok-p-Indicator">-</span><span class="tok-w"> </span><span class="tok-nt">sku</span><span class="tok-p">:</span><span class="tok-w"> </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">GRN-CHAIR</span><span class="tok-w"></span>
+<span class="tok-w">    </span><span class="tok-nt">qty</span><span class="tok-p">:</span><span class="tok-w"> </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">25</span><span class="tok-w"></span></code></pre>
 </div>
 </div>
 </div>
@@ -813,7 +889,7 @@ make them immutable:</p>
 <div class="content">
 <div class="listingblock skip">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@dataclass</span><span class="tok-p">(</span><span class="tok-n">frozen</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">)</span>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@dataclass</span><span class="tok-p">(</span><span class="tok-n">frozen</span><span class="tok-o">=</span><span class="tok-kc">True</span><span class="tok-p">)</span>
 <span class="tok-k">class</span> <span class="tok-nc">OrderLine</span><span class="tok-p">:</span>
     <span class="tok-n">orderid</span><span class="tok-p">:</span> <span class="tok-n">OrderReference</span>
     <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-n">ProductReference</span>
@@ -837,7 +913,7 @@ equality</em>, which is the fancy way of saying, "Two lines with the same <code>
 <span class="tok-kn">from</span> <span class="tok-nn">typing</span> <span class="tok-kn">import</span> <span class="tok-n">NamedTuple</span>
 <span class="tok-kn">from</span> <span class="tok-nn">collections</span> <span class="tok-kn">import</span> <span class="tok-n">namedtuple</span>
 
-<span class="tok-nd">@dataclass</span><span class="tok-p">(</span><span class="tok-n">frozen</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">)</span>
+<span class="tok-nd">@dataclass</span><span class="tok-p">(</span><span class="tok-n">frozen</span><span class="tok-o">=</span><span class="tok-kc">True</span><span class="tok-p">)</span>
 <span class="tok-k">class</span> <span class="tok-nc">Name</span><span class="tok-p">:</span>
     <span class="tok-n">first_name</span><span class="tok-p">:</span> <span class="tok-nb">str</span>
     <span class="tok-n">surname</span><span class="tok-p">:</span> <span class="tok-nb">str</span>
@@ -905,14 +981,14 @@ magic methods on our <code>Money</code> class:</p>
 <div class="content">
 <div class="listingblock skip">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@dataclass</span><span class="tok-p">(</span><span class="tok-n">frozen</span><span class="tok-o">=</span><span class="tok-bp">True</span><span class="tok-p">)</span>
+<pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-nd">@dataclass</span><span class="tok-p">(</span><span class="tok-n">frozen</span><span class="tok-o">=</span><span class="tok-kc">True</span><span class="tok-p">)</span>
 <span class="tok-k">class</span> <span class="tok-nc">Money</span><span class="tok-p">:</span>
     <span class="tok-n">currency</span><span class="tok-p">:</span> <span class="tok-nb">str</span>
     <span class="tok-n">value</span><span class="tok-p">:</span> <span class="tok-nb">int</span>
 
     <span class="tok-k">def</span> <span class="tok-fm">__add__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">other</span><span class="tok-p">)</span> <span class="tok-o">-&gt;</span> <span class="tok-n">Money</span><span class="tok-p">:</span>
         <span class="tok-k">if</span> <span class="tok-n">other</span><span class="tok-o">.</span><span class="tok-n">currency</span> <span class="tok-o">!=</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">currency</span><span class="tok-p">:</span>
-            <span class="tok-k">raise</span> <span class="tok-ne">ValueError</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s2">"Cannot add {self.currency} to {other.currency}"</span><span class="tok-p">)</span>
+            <span class="tok-k">raise</span> <span class="tok-ne">ValueError</span><span class="tok-p">(</span><span class="tok-sa">f</span><span class="tok-s2">"Cannot add </span><span class="tok-si">{</span><span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">currency</span><span class="tok-si">}</span><span class="tok-s2"> to </span><span class="tok-si">{</span><span class="tok-n">other</span><span class="tok-o">.</span><span class="tok-n">currency</span><span class="tok-si">}</span><span class="tok-s2">"</span><span class="tok-p">)</span>
         <span class="tok-k">return</span> <span class="tok-n">Money</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">currency</span><span class="tok-p">,</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">value</span> <span class="tok-o">+</span> <span class="tok-n">other</span><span class="tok-o">.</span><span class="tok-n">value</span><span class="tok-p">)</span></code></pre>
 </div>
 </div>
@@ -1002,7 +1078,7 @@ entities:</p>
 
     <span class="tok-k">def</span> <span class="tok-fm">__eq__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">other</span><span class="tok-p">):</span>
         <span class="tok-k">if</span> <span class="tok-ow">not</span> <span class="tok-nb">isinstance</span><span class="tok-p">(</span><span class="tok-n">other</span><span class="tok-p">,</span> <span class="tok-n">Batch</span><span class="tok-p">):</span>
-            <span class="tok-k">return</span> <span class="tok-bp">False</span>
+            <span class="tok-k">return</span> <span class="tok-kc">False</span>
         <span class="tok-k">return</span> <span class="tok-n">other</span><span class="tok-o">.</span><span class="tok-n">reference</span> <span class="tok-o">==</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">reference</span>
 
     <span class="tok-k">def</span> <span class="tok-fm">__hash__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">):</span>
@@ -1097,7 +1173,7 @@ language and just make it a function.
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">test_prefers_current_stock_batches_to_shipments</span><span class="tok-p">():</span>
-    <span class="tok-n">in_stock_batch</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"in-stock-batch"</span><span class="tok-p">,</span> <span class="tok-s2">"RETRO-CLOCK"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-bp">None</span><span class="tok-p">)</span>
+    <span class="tok-n">in_stock_batch</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"in-stock-batch"</span><span class="tok-p">,</span> <span class="tok-s2">"RETRO-CLOCK"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-kc">None</span><span class="tok-p">)</span>
     <span class="tok-n">shipment_batch</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"shipment-batch"</span><span class="tok-p">,</span> <span class="tok-s2">"RETRO-CLOCK"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-n">tomorrow</span><span class="tok-p">)</span>
     <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s2">"oref"</span><span class="tok-p">,</span> <span class="tok-s2">"RETRO-CLOCK"</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">)</span>
 
@@ -1121,7 +1197,7 @@ language and just make it a function.
 
 
 <span class="tok-k">def</span> <span class="tok-nf">test_returns_allocated_batch_ref</span><span class="tok-p">():</span>
-    <span class="tok-n">in_stock_batch</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"in-stock-batch-ref"</span><span class="tok-p">,</span> <span class="tok-s2">"HIGHBROW-POSTER"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-bp">None</span><span class="tok-p">)</span>
+    <span class="tok-n">in_stock_batch</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"in-stock-batch-ref"</span><span class="tok-p">,</span> <span class="tok-s2">"HIGHBROW-POSTER"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-kc">None</span><span class="tok-p">)</span>
     <span class="tok-n">shipment_batch</span> <span class="tok-o">=</span> <span class="tok-n">Batch</span><span class="tok-p">(</span><span class="tok-s2">"shipment-batch-ref"</span><span class="tok-p">,</span> <span class="tok-s2">"HIGHBROW-POSTER"</span><span class="tok-p">,</span> <span class="tok-mi">100</span><span class="tok-p">,</span> <span class="tok-n">eta</span><span class="tok-o">=</span><span class="tok-n">tomorrow</span><span class="tok-p">)</span>
     <span class="tok-n">line</span> <span class="tok-o">=</span> <span class="tok-n">OrderLine</span><span class="tok-p">(</span><span class="tok-s2">"oref"</span><span class="tok-p">,</span> <span class="tok-s2">"HIGHBROW-POSTER"</span><span class="tok-p">,</span> <span class="tok-mi">10</span><span class="tok-p">)</span>
     <span class="tok-n">allocation</span> <span class="tok-o">=</span> <span class="tok-n">allocate</span><span class="tok-p">(</span><span class="tok-n">line</span><span class="tok-p">,</span> <span class="tok-p">[</span><span class="tok-n">in_stock_batch</span><span class="tok-p">,</span> <span class="tok-n">shipment_batch</span><span class="tok-p">])</span>
@@ -1168,10 +1244,10 @@ batches is nice, idiomatic Python.</p>
     <span class="tok-o">...</span>
 
     <span class="tok-k">def</span> <span class="tok-fm">__gt__</span><span class="tok-p">(</span><span class="tok-bp">self</span><span class="tok-p">,</span> <span class="tok-n">other</span><span class="tok-p">):</span>
-        <span class="tok-k">if</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">eta</span> <span class="tok-ow">is</span> <span class="tok-bp">None</span><span class="tok-p">:</span>
-            <span class="tok-k">return</span> <span class="tok-bp">False</span>
-        <span class="tok-k">if</span> <span class="tok-n">other</span><span class="tok-o">.</span><span class="tok-n">eta</span> <span class="tok-ow">is</span> <span class="tok-bp">None</span><span class="tok-p">:</span>
-            <span class="tok-k">return</span> <span class="tok-bp">True</span>
+        <span class="tok-k">if</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">eta</span> <span class="tok-ow">is</span> <span class="tok-kc">None</span><span class="tok-p">:</span>
+            <span class="tok-k">return</span> <span class="tok-kc">False</span>
+        <span class="tok-k">if</span> <span class="tok-n">other</span><span class="tok-o">.</span><span class="tok-n">eta</span> <span class="tok-ow">is</span> <span class="tok-kc">None</span><span class="tok-p">:</span>
+            <span class="tok-k">return</span> <span class="tok-kc">True</span>
         <span class="tok-k">return</span> <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">eta</span> <span class="tok-o">&gt;</span> <span class="tok-n">other</span><span class="tok-o">.</span><span class="tok-n">eta</span></code></pre>
 </div>
 </div>
@@ -1270,7 +1346,7 @@ language, just as we do our entities, value objects, and services:</p>
         <span class="tok-n">batch</span> <span class="tok-o">=</span> <span class="tok-nb">next</span><span class="tok-p">(</span>
         <span class="tok-o">...</span>
     <span class="tok-k">except</span> <span class="tok-ne">StopIteration</span><span class="tok-p">:</span>
-        <span class="tok-k">raise</span> <span class="tok-n">OutOfStock</span><span class="tok-p">(</span><span class="tok-n">f</span><span class="tok-s2">"Out of stock for sku {line.sku}"</span><span class="tok-p">)</span></code></pre>
+        <span class="tok-k">raise</span> <span class="tok-n">OutOfStock</span><span class="tok-p">(</span><span class="tok-sa">f</span><span class="tok-s2">"Out of stock for sku </span><span class="tok-si">{</span><span class="tok-n">line</span><span class="tok-o">.</span><span class="tok-n">sku</span><span class="tok-si">}</span><span class="tok-s2">"</span><span class="tok-p">)</span></code></pre>
 </div>
 </div>
 </div>
@@ -1308,8 +1384,8 @@ first use case. But first we&#8217;ll need a database&#8230;&#8203;</p>
 <a href="#_footnoteref_2">2</a>. In previous Python versions, we might have used a namedtuple. You could also check out Hynek Schlawack&#8217;s excellent <a href="https://pypi.org/project/attrs">attrs</a>.
 </div>
 <div class="footnote" id="_footnotedef_3">
-<a href="#_footnoteref_3">3</a>. Or perhaps you think there&#8217;s not enough code? What about some sort of check that the SKU in the <code>OrderLine</code> matches <code>Batch.sku</code>? We saved some thoughts on validation for <a href="/book/appendix_validation.html">[appendix_validation
-</a></div>
+<a href="#_footnoteref_3">3</a>. Or perhaps you think there&#8217;s not enough code? What about some sort of check that the SKU in the <code>OrderLine</code> matches <code>Batch.sku</code>? We saved some thoughts on validation for <a href="/book/appendix_validation.html">[appendix_validation]</a>.
+</div>
 <div class="footnote" id="_footnotedef_4">
 <a href="#_footnoteref_4">4</a>. It is appalling. Please, please don&#8217;t do this. &#8212;Harry
 </div>
@@ -1322,80 +1398,9 @@ first use case. But first we&#8217;ll need a database&#8230;&#8203;</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-02-25 01:32:15 UTC
+Last updated 2022-04-23 09:12:42 +0100
 </div>
 </div>
-<style>
-pre.pygments .hll { background-color: #ffffcc }
-pre.pygments  { background: #f0f0f0; }
-pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
-pre.pygments .tok-err { border: 1px solid #FF0000 } /* Error */
-pre.pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
-pre.pygments .tok-o { color: #666666 } /* Operator */
-pre.pygments .tok-ch { color: #60a0b0; font-style: italic } /* Comment.Hashbang */
-pre.pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
-pre.pygments .tok-cp { color: #007020 } /* Comment.Preproc */
-pre.pygments .tok-cpf { color: #60a0b0; font-style: italic } /* Comment.PreprocFile */
-pre.pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
-pre.pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
-pre.pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
-pre.pygments .tok-ge { font-style: italic } /* Generic.Emph */
-pre.pygments .tok-gr { color: #FF0000 } /* Generic.Error */
-pre.pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
-pre.pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
-pre.pygments .tok-go { color: #888888 } /* Generic.Output */
-pre.pygments .tok-gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
-pre.pygments .tok-gs { font-weight: bold } /* Generic.Strong */
-pre.pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
-pre.pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
-pre.pygments .tok-kc { color: #007020; font-weight: bold } /* Keyword.Constant */
-pre.pygments .tok-kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
-pre.pygments .tok-kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
-pre.pygments .tok-kp { color: #007020 } /* Keyword.Pseudo */
-pre.pygments .tok-kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
-pre.pygments .tok-kt { color: #902000 } /* Keyword.Type */
-pre.pygments .tok-m { color: #40a070 } /* Literal.Number */
-pre.pygments .tok-s { color: #4070a0 } /* Literal.String */
-pre.pygments .tok-na { color: #4070a0 } /* Name.Attribute */
-pre.pygments .tok-nb { color: #007020 } /* Name.Builtin */
-pre.pygments .tok-nc { color: #0e84b5; font-weight: bold } /* Name.Class */
-pre.pygments .tok-no { color: #60add5 } /* Name.Constant */
-pre.pygments .tok-nd { color: #555555; font-weight: bold } /* Name.Decorator */
-pre.pygments .tok-ni { color: #d55537; font-weight: bold } /* Name.Entity */
-pre.pygments .tok-ne { color: #007020 } /* Name.Exception */
-pre.pygments .tok-nf { color: #06287e } /* Name.Function */
-pre.pygments .tok-nl { color: #002070; font-weight: bold } /* Name.Label */
-pre.pygments .tok-nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
-pre.pygments .tok-nt { color: #062873; font-weight: bold } /* Name.Tag */
-pre.pygments .tok-nv { color: #bb60d5 } /* Name.Variable */
-pre.pygments .tok-ow { color: #007020; font-weight: bold } /* Operator.Word */
-pre.pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
-pre.pygments .tok-mb { color: #40a070 } /* Literal.Number.Bin */
-pre.pygments .tok-mf { color: #40a070 } /* Literal.Number.Float */
-pre.pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
-pre.pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
-pre.pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
-pre.pygments .tok-sa { color: #4070a0 } /* Literal.String.Affix */
-pre.pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
-pre.pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
-pre.pygments .tok-dl { color: #4070a0 } /* Literal.String.Delimiter */
-pre.pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
-pre.pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
-pre.pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
-pre.pygments .tok-sh { color: #4070a0 } /* Literal.String.Heredoc */
-pre.pygments .tok-si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
-pre.pygments .tok-sx { color: #c65d09 } /* Literal.String.Other */
-pre.pygments .tok-sr { color: #235388 } /* Literal.String.Regex */
-pre.pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
-pre.pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
-pre.pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
-pre.pygments .tok-fm { color: #06287e } /* Name.Function.Magic */
-pre.pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
-pre.pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
-pre.pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
-pre.pygments .tok-vm { color: #bb60d5 } /* Name.Variable.Magic */
-pre.pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
-</style>
 <div><div id="disqus_thread" style="margin: 10px"></div>
 <script>
 

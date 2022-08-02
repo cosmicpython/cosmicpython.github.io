@@ -160,7 +160,6 @@ concept of a Controller in an MVC architecture.</p>
         <span class="n">problem_description</span><span class="p">:</span> <span class="nb">str</span>
 </code></pre></div>
 
-
 <p>A command object is a small object that represents a state-changing action that
 can happen in the system. Commands have no behaviour, they&rsquo;re pure data
 structures. There&rsquo;s no reason why you have to represent them with classes, since
@@ -209,7 +208,6 @@ model. This has two major benefits:</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">issue_log</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">issue</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>Command handlers are stateless objects that orchestrate the behaviour of a
 system. They are a kind of glue code, and manage the boring work of fetching and
 saving objects, and then notifying other parts of the system. In keeping with
@@ -240,7 +238,6 @@ skip ahead a little to a new command handler:</p>
             <span class="n">issue</span><span class="o">.</span><span class="n">mark_as_resolved</span><span class="p">(</span><span class="n">cmd</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>This handler violates our glue-code principle because it encodes a business
 rule: &ldquo;If an issue is already resolved, then it can&rsquo;t be resolved a second
 time&rdquo;. This rule belongs in our domain model, probably in the mark_as_resolved
@@ -258,14 +255,12 @@ rewrite our ReportIssueHandler like this:</p>
     <span class="n">issue_log</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">issue</span><span class="p">)</span>
 </code></pre></div>
 
-
 <p>If magic methods make you feel queasy, you can define a handler to be a class
 that exposes a handle method like this:</p>
 <div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">ReportIssueHandler</span><span class="p">:</span>
     <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">):</span>
        <span class="o">...</span>
 </code></pre></div>
-
 
 <p>However you structure them, the important ideas of commands and handlers are:</p>
 <ol>
@@ -374,7 +369,6 @@ dependencies work.</p>
     <span class="k">def</span> <span class="nf">it_should_have_recorded_the_description</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">expect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">issues</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">description</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">equal</span><span class="p">(</span><span class="n">desc</span><span class="p">))</span>
 </code></pre></div>
-
 
 <p>There&rsquo;s not a lot of functionality here, and our issue log has a couple of
 problems, firstly there&rsquo;s no way to see the issues in the log yet, and secondly
