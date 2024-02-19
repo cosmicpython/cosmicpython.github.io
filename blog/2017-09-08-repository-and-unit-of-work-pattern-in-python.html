@@ -220,7 +220,7 @@ dirty checks on our objects, and flushing any changes to state at the end of a
 request.</p>
 <p>What does a unit of work look like?</p>
 <div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">SqlAlchemyUnitOfWorkManager</span><span class="p">(</span><span class="n">UnitOfWorkManager</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The Unit of work manager returns a new unit of work. </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The Unit of work manager returns a new unit of work. </span>
 <span class="sd">       Our UOW is backed by a sql alchemy session whose </span>
 <span class="sd">       lifetime can be scoped to a web request, or a </span>
 <span class="sd">       long-lived background job.&quot;&quot;&quot;</span>
@@ -232,7 +232,7 @@ request.</p>
 
 
 <span class="k">class</span> <span class="nc">SqlAlchemyUnitOfWork</span><span class="p">(</span><span class="n">UnitOfWork</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The unit of work captures the idea of a set of things that</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The unit of work captures the idea of a set of things that</span>
 <span class="sd">       need to happen together. </span>
 
 <span class="sd">       Usually, in a relational database, </span>

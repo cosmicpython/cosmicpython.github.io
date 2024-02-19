@@ -111,7 +111,7 @@ How can we improve things?</p>
 <p>There are a few ways to tackle a circular dependency. You may be able to extract a shared dependency into a separate
 module, that the other two modules depend on. You may be able to create an extra module that coordinates the two modules,
 instead of them calling each other. Or you can use inversion of control.</p>
-<p>At the moment, each module calls each other. We can pick one of the calls (let&rsquo;s say <code>A</code>&lsquo;s call to <code>B</code>) and invert
+<p>At the moment, each module calls each other. We can pick one of the calls (let&rsquo;s say <code>A</code>&rsquo;s call to <code>B</code>) and invert
 control so that <code>A</code> no longer needs to know anything about <code>B</code>. Instead, it exposes a way of plugging into its
 behaviour, that <code>B</code> can then exploit. This can be diagrammed like so:</p>
 <p><img src="/images/why-di/plugin.png" alt="B plugging into A" /></p>
