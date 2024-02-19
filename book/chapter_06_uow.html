@@ -3,7 +3,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.16">
+<meta name="generator" content="Asciidoctor 2.0.20">
 <title>Unit of Work Pattern</title>
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -100,11 +100,6 @@ table {
 
 </style>
 <style>
-pre { line-height: 125%; }
-td.linenos .normal { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
-span.linenos { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
-td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
-span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
 pre.pygments .hll { background-color: #ffffcc }
 pre.pygments { background: #f0f0f0; }
 pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
@@ -418,11 +413,11 @@ like this:</p>
 
 
 <span class="tok-k">def</span> <span class="tok-nf">get_allocated_batch_ref</span><span class="tok-p">(</span><span class="tok-n">session</span><span class="tok-p">,</span> <span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-p">):</span>
-    <span class="tok-p">[[</span><span class="tok-n">orderlineid</span><span class="tok-p">]]</span> <span class="tok-o">=</span> <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>
+    <span class="tok-p">[[</span><span class="tok-n">orderlineid</span><span class="tok-p">]]</span> <span class="tok-o">=</span> <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>  #<b class="conum">(1)</b>
         <span class="tok-s2">"SELECT id FROM order_lines WHERE orderid=:orderid AND sku=:sku"</span><span class="tok-p">,</span>
         <span class="tok-nb">dict</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-o">=</span><span class="tok-n">orderid</span><span class="tok-p">,</span> <span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-n">sku</span><span class="tok-p">),</span>
     <span class="tok-p">)</span>
-    <span class="tok-p">[[</span><span class="tok-n">batchref</span><span class="tok-p">]]</span> <span class="tok-o">=</span> <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>
+    <span class="tok-p">[[</span><span class="tok-n">batchref</span><span class="tok-p">]]</span> <span class="tok-o">=</span> <span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>  #<b class="conum">(1)</b>
         <span class="tok-s2">"SELECT b.reference FROM allocations JOIN batches AS b ON batch_id = b.id"</span>
         <span class="tok-s2">" WHERE orderline_id=:orderlineid"</span><span class="tok-p">,</span>
         <span class="tok-nb">dict</span><span class="tok-p">(</span><span class="tok-n">orderlineid</span><span class="tok-o">=</span><span class="tok-n">orderlineid</span><span class="tok-p">),</span>
@@ -431,6 +426,21 @@ like this:</p>
 </div>
 </div>
 </div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>The <code><a id="orderlineid"></a> =</code> syntax is a little too-clever-by-half, apologies.
+What&#8217;s happening is that <code>session.execute</code> returns a list of rows,
+where each row is a tuple of column values;
+in our specific case, it&#8217;s a list of one row,
+which is a tuple with one column value in.
+The double-square-bracket on the left hand side
+is doing (double) assignment-unpacking to get the single value
+back out of these two nested sequences.
+It becomes readable once you&#8217;ve used it a few times!</p>
+</li>
+</ol>
 </div>
 </div>
 <div class="sect2">
@@ -1164,7 +1174,7 @@ its work.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-02-26 00:40:46 UTC
+Last updated 2023-11-24 02:20:52 UTC
 </div>
 </div>
 <div><div id="disqus_thread" style="margin: 10px"></div>

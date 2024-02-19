@@ -3,7 +3,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.16">
+<meta name="generator" content="Asciidoctor 2.0.20">
 <title>Validation</title>
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -100,11 +100,6 @@ table {
 
 </style>
 <style>
-pre { line-height: 125%; }
-td.linenos .normal { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
-span.linenos { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
-td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
-span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
 pre.pygments .hll { background-color: #ffffcc }
 pre.pygments { background: #f0f0f0; }
 pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
@@ -295,9 +290,9 @@ and contains all required information.</p>
 <span class="tok-k">class</span> <span class="tok-nc">Allocate</span><span class="tok-p">(</span><span class="tok-n">Command</span><span class="tok-p">):</span>
 
     <span class="tok-n">_schema</span> <span class="tok-o">=</span> <span class="tok-n">Schema</span><span class="tok-p">({</span>  #<b class="conum">(1)</b>
-        <span class="tok-s1">'orderid'</span><span class="tok-p">:</span> <span class="tok-nb">int</span><span class="tok-p">,</span>
-         <span class="tok-n">sku</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span>
-         <span class="tok-n">qty</span><span class="tok-p">:</span> <span class="tok-n">And</span><span class="tok-p">(</span><span class="tok-n">Use</span><span class="tok-p">(</span><span class="tok-nb">int</span><span class="tok-p">),</span> <span class="tok-k">lambda</span> <span class="tok-n">n</span><span class="tok-p">:</span> <span class="tok-n">n</span> <span class="tok-o">&gt;</span> <span class="tok-mi">0</span><span class="tok-p">)</span>
+        <span class="tok-s1">'orderid'</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span>
+        <span class="tok-s1">'sku'</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span>
+        <span class="tok-s1">'qty'</span><span class="tok-p">:</span> <span class="tok-n">And</span><span class="tok-p">(</span><span class="tok-n">Use</span><span class="tok-p">(</span><span class="tok-nb">int</span><span class="tok-p">),</span> <span class="tok-k">lambda</span> <span class="tok-n">n</span><span class="tok-p">:</span> <span class="tok-n">n</span> <span class="tok-o">&gt;</span> <span class="tok-mi">0</span><span class="tok-p">)</span>
      <span class="tok-p">},</span> <span class="tok-n">ignore_extra_keys</span><span class="tok-o">=</span><span class="tok-kc">True</span><span class="tok-p">)</span>
 
     <span class="tok-n">orderid</span><span class="tok-p">:</span> <span class="tok-nb">str</span>
@@ -346,12 +341,14 @@ declaration of our message types:</p>
 <span class="tok-n">quantity</span> <span class="tok-o">=</span> <span class="tok-n">And</span><span class="tok-p">(</span><span class="tok-n">Use</span><span class="tok-p">(</span><span class="tok-nb">int</span><span class="tok-p">),</span> <span class="tok-n">greater_than_zero</span><span class="tok-p">)</span>  #<b class="conum">(4)</b>
 
 <span class="tok-n">Allocate</span> <span class="tok-o">=</span> <span class="tok-n">command</span><span class="tok-p">(</span>  #<b class="conum">(5)</b>
+    <span class="tok-s1">'Allocate'</span><span class="tok-p">,</span>
     <span class="tok-n">orderid</span><span class="tok-o">=</span><span class="tok-nb">int</span><span class="tok-p">,</span>
     <span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-nb">str</span><span class="tok-p">,</span>
     <span class="tok-n">qty</span><span class="tok-o">=</span><span class="tok-n">quantity</span>
 <span class="tok-p">)</span>
 
 <span class="tok-n">AddStock</span> <span class="tok-o">=</span> <span class="tok-n">command</span><span class="tok-p">(</span>
+    <span class="tok-s1">'AddStock'</span><span class="tok-p">,</span>
     <span class="tok-n">sku</span><span class="tok-o">=</span><span class="tok-nb">str</span><span class="tok-p">,</span>
     <span class="tok-n">qty</span><span class="tok-o">=</span><span class="tok-n">quantity</span></code></pre>
 </div>
@@ -630,7 +627,7 @@ of contract-based programming:</p>
         <span class="tok-bp">self</span><span class="tok-o">.</span><span class="tok-n">message</span> <span class="tok-o">=</span> <span class="tok-n">message</span>
 
 <span class="tok-k">class</span> <span class="tok-nc">ProductNotFound</span><span class="tok-p">(</span><span class="tok-n">MessageUnprocessable</span><span class="tok-p">):</span>  #<b class="conum">(2)</b>
-    <span class="tok-sd">""""</span>
+<span class="tok-w">    </span><span class="tok-sd">""""</span>
 <span class="tok-sd">    This exception is raised when we try to perform an action on a product</span>
 <span class="tok-sd">    that doesn't exist in our database.</span>
 <span class="tok-sd">    """</span><span class="tok-s2">"</span>
@@ -702,7 +699,7 @@ continue to the next message:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">class</span> <span class="tok-nc">SkipMessage</span> <span class="tok-p">(</span><span class="tok-ne">Exception</span><span class="tok-p">):</span>
-    <span class="tok-sd">""""</span>
+<span class="tok-w">    </span><span class="tok-sd">""""</span>
 <span class="tok-sd">    This exception is raised when a message can't be processed, but there's no</span>
 <span class="tok-sd">    incorrect behavior. For example, we might receive the same message multiple</span>
 <span class="tok-sd">    times, or we might receive a message that is now out of date.</span>
@@ -834,7 +831,7 @@ available.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-04-23 09:04:28 +0100
+Last updated 2023-11-24 02:20:52 UTC
 </div>
 </div>
 <div><div id="disqus_thread" style="margin: 10px"></div>

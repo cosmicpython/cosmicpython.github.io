@@ -3,7 +3,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.16">
+<meta name="generator" content="Asciidoctor 2.0.20">
 <title>TDD in High Gear and Low Gear</title>
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -100,11 +100,6 @@ table {
 
 </style>
 <style>
-pre { line-height: 125%; }
-td.linenos .normal { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
-span.linenos { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
-td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
-span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
 pre.pygments .hll { background-color: #ffffcc }
 pre.pygments { background: #f0f0f0; }
 pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
@@ -269,7 +264,7 @@ does to our test pyramid:</p>
 <div class="content">
 <div class="listingblock skip">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="sh"><span></span>$ grep -c test_ **/test_*.py
+<pre class="pygments highlight"><code data-lang="sh"><span></span>$<span class="tok-w"> </span>grep<span class="tok-w"> </span>-c<span class="tok-w"> </span>test_<span class="tok-w"> </span>*/*/test_*.py
 tests/unit/test_allocate.py:4
 tests/unit/test_batches.py:8
 tests/unit/test_services.py:3
@@ -872,7 +867,7 @@ repositories or the database. This pays off in your end-to-end tests as well.
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-02-26 00:40:46 UTC
+Last updated 2023-11-24 02:20:52 UTC
 </div>
 </div>
 <div><div id="disqus_thread" style="margin: 10px"></div>

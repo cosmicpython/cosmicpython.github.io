@@ -3,7 +3,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.16">
+<meta name="generator" content="Asciidoctor 2.0.20">
 <title>Going to Town on the Message Bus</title>
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -100,11 +100,6 @@ table {
 
 </style>
 <style>
-pre { line-height: 125%; }
-td.linenos .normal { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
-span.linenos { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
-td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
-span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
 pre.pygments .hll { background-color: #ffffcc }
 pre.pygments { background: #f0f0f0; }
 pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
@@ -511,33 +506,33 @@ handlers so that they have the same inputs, an event and a UoW:</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="diff"><span></span><span class="tok-w"> </span>def add_batch(<span class="tok-w"></span>
-<span class="tok-gd">-    ref: str, sku: str, qty: int, eta: Optional[date],</span><span class="tok-w"></span>
-<span class="tok-gi">+    event: events.BatchCreated,</span><span class="tok-w"></span>
-<span class="tok-w"> </span>    uow: unit_of_work.AbstractUnitOfWork,<span class="tok-w"></span>
-<span class="tok-w"> </span>):<span class="tok-w"></span>
-<span class="tok-w"> </span>    with uow:<span class="tok-w"></span>
-<span class="tok-gd">-        product = uow.products.get(sku=sku)</span><span class="tok-w"></span>
-<span class="tok-gi">+        product = uow.products.get(sku=event.sku)</span><span class="tok-w"></span>
-<span class="tok-w"> </span>    ...<span class="tok-w"></span>
+<pre class="pygments highlight"><code data-lang="diff"><span></span><span class="tok-w"> </span>def add_batch(
+<span class="tok-gd">-    ref: str, sku: str, qty: int, eta: Optional[date],</span>
+<span class="tok-gi">+    event: events.BatchCreated,</span>
+<span class="tok-w"> </span>    uow: unit_of_work.AbstractUnitOfWork,
+<span class="tok-w"> </span>):
+<span class="tok-w"> </span>    with uow:
+<span class="tok-gd">-        product = uow.products.get(sku=sku)</span>
+<span class="tok-gi">+        product = uow.products.get(sku=event.sku)</span>
+<span class="tok-w"> </span>    ...
 
 
-<span class="tok-w"> </span>def allocate(<span class="tok-w"></span>
-<span class="tok-gd">-    orderid: str, sku: str, qty: int,</span><span class="tok-w"></span>
-<span class="tok-gi">+    event: events.AllocationRequired,</span><span class="tok-w"></span>
-<span class="tok-w"> </span>    uow: unit_of_work.AbstractUnitOfWork,<span class="tok-w"></span>
-<span class="tok-w"> </span>) -&gt; str:<span class="tok-w"></span>
-<span class="tok-gd">-    line = OrderLine(orderid, sku, qty)</span><span class="tok-w"></span>
-<span class="tok-gi">+    line = OrderLine(event.orderid, event.sku, event.qty)</span><span class="tok-w"></span>
-<span class="tok-w"> </span>    ...<span class="tok-w"></span>
+<span class="tok-w"> </span>def allocate(
+<span class="tok-gd">-    orderid: str, sku: str, qty: int,</span>
+<span class="tok-gi">+    event: events.AllocationRequired,</span>
+<span class="tok-w"> </span>    uow: unit_of_work.AbstractUnitOfWork,
+<span class="tok-w"> </span>) -&gt; str:
+<span class="tok-gd">-    line = OrderLine(orderid, sku, qty)</span>
+<span class="tok-gi">+    line = OrderLine(event.orderid, event.sku, event.qty)</span>
+<span class="tok-w"> </span>    ...
 
-<span class="tok-gi">+</span><span class="tok-w"></span>
-<span class="tok-gi">+def send_out_of_stock_notification(</span><span class="tok-w"></span>
-<span class="tok-gi">+    event: events.OutOfStock,</span><span class="tok-w"></span>
-<span class="tok-gi">+    uow: unit_of_work.AbstractUnitOfWork,</span><span class="tok-w"></span>
-<span class="tok-gi">+):</span><span class="tok-w"></span>
-<span class="tok-gi">+    email.send(</span><span class="tok-w"></span>
-<span class="tok-w"> </span>    ...<span class="tok-w"></span></code></pre>
+<span class="tok-gi">+</span>
+<span class="tok-gi">+def send_out_of_stock_notification(</span>
+<span class="tok-gi">+    event: events.OutOfStock,</span>
+<span class="tok-gi">+    uow: unit_of_work.AbstractUnitOfWork,</span>
+<span class="tok-gi">+):</span>
+<span class="tok-gi">+    email.send(</span>
+<span class="tok-w"> </span>    ...</code></pre>
 </div>
 </div>
 </div>
@@ -647,23 +642,23 @@ generated and add them to the queue.</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="diff"><span></span><span class="tok-gd">-from . import messagebus  </span><span class="tok-w"></span>#<b class="conum">(1)</b>
+<pre class="pygments highlight"><code data-lang="diff"><span></span><span class="tok-gd">-from . import messagebus  </span>#<b class="conum">(1)</b>
 
 
-<span class="tok-w"> </span>class AbstractUnitOfWork(abc.ABC):<span class="tok-w"></span>
-<span class="tok-gu">@@ -22,13 +21,11 @@ class AbstractUnitOfWork(abc.ABC):</span><span class="tok-w"></span>
+<span class="tok-w"> </span>class AbstractUnitOfWork(abc.ABC):
+<span class="tok-gu">@@ -22,13 +21,11 @@ class AbstractUnitOfWork(abc.ABC):</span>
 
-<span class="tok-w"> </span>    def commit(self):<span class="tok-w"></span>
-<span class="tok-w"> </span>        self._commit()<span class="tok-w"></span>
-<span class="tok-gd">-        self.publish_events()  </span><span class="tok-w"></span>#<b class="conum">(2)</b>
+<span class="tok-w"> </span>    def commit(self):
+<span class="tok-w"> </span>        self._commit()
+<span class="tok-gd">-        self.publish_events()  </span>#<b class="conum">(2)</b>
 
-<span class="tok-gd">-    def publish_events(self):</span><span class="tok-w"></span>
-<span class="tok-gi">+    def collect_new_events(self):</span><span class="tok-w"></span>
-<span class="tok-w"> </span>        for product in self.products.seen:<span class="tok-w"></span>
-<span class="tok-w"> </span>            while product.events:<span class="tok-w"></span>
-<span class="tok-gd">-                event = product.events.pop(0)</span><span class="tok-w"></span>
-<span class="tok-gd">-                messagebus.handle(event)</span><span class="tok-w"></span>
-<span class="tok-gi">+                yield product.events.pop(0)  </span><span class="tok-w"></span>#<b class="conum">(3)</b></code></pre>
+<span class="tok-gd">-    def publish_events(self):</span>
+<span class="tok-gi">+    def collect_new_events(self):</span>
+<span class="tok-w"> </span>        for product in self.products.seen:
+<span class="tok-w"> </span>            while product.events:
+<span class="tok-gd">-                event = product.events.pop(0)</span>
+<span class="tok-gd">-                messagebus.handle(event)</span>
+<span class="tok-gi">+                yield product.events.pop(0)  </span>#<b class="conum">(3)</b></code></pre>
 </div>
 </div>
 </div>
@@ -697,30 +692,30 @@ message bus, rather than invoking service-layer functions directly:</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="diff"><span></span><span class="tok-w">class TestAddBatch:</span>
-<span class="tok-w"> </span>    def test_for_new_product(self):<span class="tok-w"></span>
-<span class="tok-w"> </span>        uow = FakeUnitOfWork()<span class="tok-w"></span>
-<span class="tok-gd">-        services.add_batch("b1", "CRUNCHY-ARMCHAIR", 100, None, uow)</span><span class="tok-w"></span>
-<span class="tok-gi">+        messagebus.handle(</span><span class="tok-w"></span>
-<span class="tok-gi">+            events.BatchCreated("b1", "CRUNCHY-ARMCHAIR", 100, None), uow</span><span class="tok-w"></span>
-<span class="tok-gi">+        )</span><span class="tok-w"></span>
-<span class="tok-w"> </span>        assert uow.products.get("CRUNCHY-ARMCHAIR") is not None<span class="tok-w"></span>
-<span class="tok-w"> </span>        assert uow.committed<span class="tok-w"></span>
+<pre class="pygments highlight"><code data-lang="diff"><span></span>class TestAddBatch:
+<span class="tok-w"> </span>    def test_for_new_product(self):
+<span class="tok-w"> </span>        uow = FakeUnitOfWork()
+<span class="tok-gd">-        services.add_batch("b1", "CRUNCHY-ARMCHAIR", 100, None, uow)</span>
+<span class="tok-gi">+        messagebus.handle(</span>
+<span class="tok-gi">+            events.BatchCreated("b1", "CRUNCHY-ARMCHAIR", 100, None), uow</span>
+<span class="tok-gi">+        )</span>
+<span class="tok-w"> </span>        assert uow.products.get("CRUNCHY-ARMCHAIR") is not None
+<span class="tok-w"> </span>        assert uow.committed
 
-<span class="tok-w">...</span>
+...
 
-<span class="tok-w"> </span>class TestAllocate:<span class="tok-w"></span>
-<span class="tok-w"> </span>    def test_returns_allocation(self):<span class="tok-w"></span>
-<span class="tok-w"> </span>        uow = FakeUnitOfWork()<span class="tok-w"></span>
-<span class="tok-gd">-        services.add_batch("batch1", "COMPLICATED-LAMP", 100, None, uow)</span><span class="tok-w"></span>
-<span class="tok-gd">-        result = services.allocate("o1", "COMPLICATED-LAMP", 10, uow)</span><span class="tok-w"></span>
-<span class="tok-gi">+        messagebus.handle(</span><span class="tok-w"></span>
-<span class="tok-gi">+            events.BatchCreated("batch1", "COMPLICATED-LAMP", 100, None), uow</span><span class="tok-w"></span>
-<span class="tok-gi">+        )</span><span class="tok-w"></span>
-<span class="tok-gi">+        result = messagebus.handle(</span><span class="tok-w"></span>
-<span class="tok-gi">+            events.AllocationRequired("o1", "COMPLICATED-LAMP", 10), uow</span><span class="tok-w"></span>
-<span class="tok-gi">+        )</span><span class="tok-w"></span>
-<span class="tok-w"> </span>        assert result == "batch1"<span class="tok-w"></span></code></pre>
+<span class="tok-w"> </span>class TestAllocate:
+<span class="tok-w"> </span>    def test_returns_allocation(self):
+<span class="tok-w"> </span>        uow = FakeUnitOfWork()
+<span class="tok-gd">-        services.add_batch("batch1", "COMPLICATED-LAMP", 100, None, uow)</span>
+<span class="tok-gd">-        result = services.allocate("o1", "COMPLICATED-LAMP", 10, uow)</span>
+<span class="tok-gi">+        messagebus.handle(</span>
+<span class="tok-gi">+            events.BatchCreated("batch1", "COMPLICATED-LAMP", 100, None), uow</span>
+<span class="tok-gi">+        )</span>
+<span class="tok-gi">+        result = messagebus.handle(</span>
+<span class="tok-gi">+            events.AllocationRequired("o1", "COMPLICATED-LAMP", 10), uow</span>
+<span class="tok-gi">+        )</span>
+<span class="tok-w"> </span>        assert result == "batch1"</code></pre>
 </div>
 </div>
 </div>
@@ -740,19 +735,19 @@ a temporary hack on our message bus to let it return events:</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="diff"><span></span><span class="tok-w"> </span>def handle(<span class="tok-w"></span>
-<span class="tok-w"> </span>    event: events.Event,<span class="tok-w"></span>
-<span class="tok-w"> </span>    uow: unit_of_work.AbstractUnitOfWork,<span class="tok-w"></span>
-<span class="tok-w"> </span>):<span class="tok-w"></span>
-<span class="tok-gi">+    results = []</span><span class="tok-w"></span>
-<span class="tok-w"> </span>    queue = [event]<span class="tok-w"></span>
-<span class="tok-w"> </span>    while queue:<span class="tok-w"></span>
-<span class="tok-w"> </span>        event = queue.pop(0)<span class="tok-w"></span>
-<span class="tok-w"> </span>        for handler in HANDLERS[type(event)]:<span class="tok-w"></span>
-<span class="tok-gd">-            handler(event, uow=uow)</span><span class="tok-w"></span>
-<span class="tok-gi">+            results.append(handler(event, uow=uow))</span><span class="tok-w"></span>
-<span class="tok-w"> </span>            queue.extend(uow.collect_new_events())<span class="tok-w"></span>
-<span class="tok-gi">+    return results</span><span class="tok-w"></span></code></pre>
+<pre class="pygments highlight"><code data-lang="diff"><span></span><span class="tok-w"> </span>def handle(
+<span class="tok-w"> </span>    event: events.Event,
+<span class="tok-w"> </span>    uow: unit_of_work.AbstractUnitOfWork,
+<span class="tok-w"> </span>):
+<span class="tok-gi">+    results = []</span>
+<span class="tok-w"> </span>    queue = [event]
+<span class="tok-w"> </span>    while queue:
+<span class="tok-w"> </span>        event = queue.pop(0)
+<span class="tok-w"> </span>        for handler in HANDLERS[type(event)]:
+<span class="tok-gd">-            handler(event, uow=uow)</span>
+<span class="tok-gi">+            results.append(handler(event, uow=uow))</span>
+<span class="tok-w"> </span>            queue.extend(uow.collect_new_events())
+<span class="tok-gi">+    return results</span></code></pre>
 </div>
 </div>
 </div>
@@ -771,20 +766,20 @@ We&#8217;ll come back to fix this wart in <a href="/book/chapter_12_cqrs.html">[
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="diff"><span></span><span class="tok-w"> </span>@app.route("/allocate", methods=["POST"])<span class="tok-w"></span>
-<span class="tok-w"> </span>def allocate_endpoint():<span class="tok-w"></span>
-<span class="tok-w"> </span>    try:<span class="tok-w"></span>
-<span class="tok-gd">-        batchref = services.allocate(</span><span class="tok-w"></span>
-<span class="tok-gd">-            request.json["orderid"],  </span><span class="tok-w"></span>#<b class="conum">(1)</b>
-<span class="tok-gd">-            request.json["sku"],</span><span class="tok-w"></span>
-<span class="tok-gd">-            request.json["qty"],</span><span class="tok-w"></span>
-<span class="tok-gd">-            unit_of_work.SqlAlchemyUnitOfWork(),</span><span class="tok-w"></span>
-<span class="tok-gi">+        event = events.AllocationRequired(  </span><span class="tok-w"></span>#<b class="conum">(2)</b>
-<span class="tok-gi">+            request.json["orderid"], request.json["sku"], request.json["qty"]</span><span class="tok-w"></span>
-<span class="tok-w"> </span>        )<span class="tok-w"></span>
-<span class="tok-gi">+        results = messagebus.handle(event, unit_of_work.SqlAlchemyUnitOfWork())  </span><span class="tok-w"></span>#<b class="conum">(3)</b>
-<span class="tok-gi">+        batchref = results.pop(0)</span><span class="tok-w"></span>
-<span class="tok-w"> </span>    except InvalidSku as e:<span class="tok-w"></span></code></pre>
+<pre class="pygments highlight"><code data-lang="diff"><span></span><span class="tok-w"> </span>@app.route("/allocate", methods=["POST"])
+<span class="tok-w"> </span>def allocate_endpoint():
+<span class="tok-w"> </span>    try:
+<span class="tok-gd">-        batchref = services.allocate(</span>
+<span class="tok-gd">-            request.json["orderid"],  </span>#<b class="conum">(1)</b>
+<span class="tok-gd">-            request.json["sku"],</span>
+<span class="tok-gd">-            request.json["qty"],</span>
+<span class="tok-gd">-            unit_of_work.SqlAlchemyUnitOfWork(),</span>
+<span class="tok-gi">+        event = events.AllocationRequired(  </span>#<b class="conum">(2)</b>
+<span class="tok-gi">+            request.json["orderid"], request.json["sku"], request.json["qty"]</span>
+<span class="tok-w"> </span>        )
+<span class="tok-gi">+        results = messagebus.handle(event, unit_of_work.SqlAlchemyUnitOfWork())  </span>#<b class="conum">(3)</b>
+<span class="tok-gi">+        batchref = results.pop(0)</span>
+<span class="tok-w"> </span>    except InvalidSku as e:</code></pre>
 </div>
 </div>
 </div>
@@ -1411,7 +1406,7 @@ first, let&#8217;s talk about <a href="/book/chapter_10_commands.html">events ve
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-02-26 00:40:46 UTC
+Last updated 2023-11-24 02:20:52 UTC
 </div>
 </div>
 <div><div id="disqus_thread" style="margin: 10px"></div>

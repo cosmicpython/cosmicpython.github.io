@@ -3,7 +3,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.16">
+<meta name="generator" content="Asciidoctor 2.0.20">
 <title>Dependency Injection (and Bootstrapping)</title>
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -100,11 +100,6 @@ table {
 
 </style>
 <style>
-pre { line-height: 125%; }
-td.linenos .normal { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
-span.linenos { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
-td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
-span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
 pre.pygments .hll { background-color: #ffffcc }
 pre.pygments { background: #f0f0f0; }
 pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
@@ -1011,23 +1006,23 @@ rest of it:</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="diff"><span></span><span class="tok-gd">-from allocation import views</span><span class="tok-w"></span>
-<span class="tok-gi">+from allocation import bootstrap, views</span><span class="tok-w"></span>
+<pre class="pygments highlight"><code data-lang="diff"><span></span><span class="tok-gd">-from allocation import views</span>
+<span class="tok-gi">+from allocation import bootstrap, views</span>
 
-<span class="tok-w"> </span>app = Flask(__name__)<span class="tok-w"></span>
-<span class="tok-gd">-orm.start_mappers()  </span><span class="tok-w"></span>#<b class="conum">(1)</b>
-<span class="tok-gi">+bus = bootstrap.bootstrap()</span><span class="tok-w"></span>
+<span class="tok-w"> </span>app = Flask(__name__)
+<span class="tok-gd">-orm.start_mappers()  </span>#<b class="conum">(1)</b>
+<span class="tok-gi">+bus = bootstrap.bootstrap()</span>
 
 
-<span class="tok-w"> </span>@app.route("/add_batch", methods=["POST"])<span class="tok-w"></span>
-<span class="tok-gu">@@ -19,8 +16,7 @@ def add_batch():</span><span class="tok-w"></span>
-<span class="tok-w"> </span>    cmd = commands.CreateBatch(<span class="tok-w"></span>
-<span class="tok-w"> </span>        request.json["ref"], request.json["sku"], request.json["qty"], eta<span class="tok-w"></span>
-<span class="tok-w"> </span>    )<span class="tok-w"></span>
-<span class="tok-gd">-    uow = unit_of_work.SqlAlchemyUnitOfWork()  </span><span class="tok-w"></span>#<b class="conum">(2)</b>
-<span class="tok-gd">-    messagebus.handle(cmd, uow)</span><span class="tok-w"></span>
-<span class="tok-gi">+    bus.handle(cmd)  </span><span class="tok-w"></span>#<b class="conum">(3)</b>
-<span class="tok-w"> </span>    return "OK", 201<span class="tok-w"></span></code></pre>
+<span class="tok-w"> </span>@app.route("/add_batch", methods=["POST"])
+<span class="tok-gu">@@ -19,8 +16,7 @@ def add_batch():</span>
+<span class="tok-w"> </span>    cmd = commands.CreateBatch(
+<span class="tok-w"> </span>        request.json["ref"], request.json["sku"], request.json["qty"], eta
+<span class="tok-w"> </span>    )
+<span class="tok-gd">-    uow = unit_of_work.SqlAlchemyUnitOfWork()  </span>#<b class="conum">(2)</b>
+<span class="tok-gd">-    messagebus.handle(cmd, uow)</span>
+<span class="tok-gi">+    bus.handle(cmd)  </span>#<b class="conum">(3)</b>
+<span class="tok-w"> </span>    return "OK", 201</code></pre>
 </div>
 </div>
 </div>
@@ -1252,13 +1247,13 @@ We change the dependency in the bootstrap script:</p>
 <div class="content">
 <div class="listingblock skip">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="diff"><span></span><span class="tok-w"> </span>def bootstrap(<span class="tok-w"></span>
-<span class="tok-w"> </span>    start_orm: bool = True,<span class="tok-w"></span>
-<span class="tok-w"> </span>    uow: unit_of_work.AbstractUnitOfWork = unit_of_work.SqlAlchemyUnitOfWork(),<span class="tok-w"></span>
-<span class="tok-gd">-    send_mail: Callable = email.send,</span><span class="tok-w"></span>
-<span class="tok-gi">+    notifications: AbstractNotifications = EmailNotifications(),</span><span class="tok-w"></span>
-<span class="tok-w"> </span>    publish: Callable = redis_eventpublisher.publish,<span class="tok-w"></span>
-<span class="tok-w"> </span>) -&gt; messagebus.MessageBus:<span class="tok-w"></span></code></pre>
+<pre class="pygments highlight"><code data-lang="diff"><span></span><span class="tok-w"> </span>def bootstrap(
+<span class="tok-w"> </span>    start_orm: bool = True,
+<span class="tok-w"> </span>    uow: unit_of_work.AbstractUnitOfWork = unit_of_work.SqlAlchemyUnitOfWork(),
+<span class="tok-gd">-    send_mail: Callable = email.send,</span>
+<span class="tok-gi">+    notifications: AbstractNotifications = EmailNotifications(),</span>
+<span class="tok-w"> </span>    publish: Callable = redis_eventpublisher.publish,
+<span class="tok-w"> </span>) -&gt; messagebus.MessageBus:</code></pre>
 </div>
 </div>
 </div>
@@ -1325,34 +1320,34 @@ real-ish email server for our Docker dev environment:</p>
 <div class="content">
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="yaml"><span></span><span class="tok-nt">version</span><span class="tok-p">:</span><span class="tok-w"> </span><span class="tok-s">"3"</span><span class="tok-w"></span>
+<pre class="pygments highlight"><code data-lang="yaml"><span></span><span class="tok-nt">version</span><span class="tok-p">:</span><span class="tok-w"> </span><span class="tok-s">"3"</span>
 
-<span class="tok-nt">services</span><span class="tok-p">:</span><span class="tok-w"></span>
+<span class="tok-nt">services</span><span class="tok-p">:</span>
 
-<span class="tok-w">  </span><span class="tok-nt">redis_pubsub</span><span class="tok-p">:</span><span class="tok-w"></span>
-<span class="tok-w">    </span><span class="tok-nt">build</span><span class="tok-p">:</span><span class="tok-w"></span>
-<span class="tok-w">      </span><span class="tok-nt">context</span><span class="tok-p">:</span><span class="tok-w"> </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">.</span><span class="tok-w"></span>
-<span class="tok-w">      </span><span class="tok-nt">dockerfile</span><span class="tok-p">:</span><span class="tok-w"> </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">Dockerfile</span><span class="tok-w"></span>
-<span class="tok-w">    </span><span class="tok-nt">image</span><span class="tok-p">:</span><span class="tok-w"> </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">allocation-image</span><span class="tok-w"></span>
-<span class="tok-w">    </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">...</span><span class="tok-w"></span>
+<span class="tok-w">  </span><span class="tok-nt">redis_pubsub</span><span class="tok-p">:</span>
+<span class="tok-w">    </span><span class="tok-nt">build</span><span class="tok-p">:</span>
+<span class="tok-w">      </span><span class="tok-nt">context</span><span class="tok-p">:</span><span class="tok-w"> </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">.</span>
+<span class="tok-w">      </span><span class="tok-nt">dockerfile</span><span class="tok-p">:</span><span class="tok-w"> </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">Dockerfile</span>
+<span class="tok-w">    </span><span class="tok-nt">image</span><span class="tok-p">:</span><span class="tok-w"> </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">allocation-image</span>
+<span class="tok-w">    </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">...</span>
 
-<span class="tok-w">  </span><span class="tok-nt">api</span><span class="tok-p">:</span><span class="tok-w"></span>
-<span class="tok-w">    </span><span class="tok-nt">image</span><span class="tok-p">:</span><span class="tok-w"> </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">allocation-image</span><span class="tok-w"></span>
-<span class="tok-w">    </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">...</span><span class="tok-w"></span>
+<span class="tok-w">  </span><span class="tok-nt">api</span><span class="tok-p">:</span>
+<span class="tok-w">    </span><span class="tok-nt">image</span><span class="tok-p">:</span><span class="tok-w"> </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">allocation-image</span>
+<span class="tok-w">    </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">...</span>
 
-<span class="tok-w">  </span><span class="tok-nt">postgres</span><span class="tok-p">:</span><span class="tok-w"></span>
-<span class="tok-w">    </span><span class="tok-nt">image</span><span class="tok-p">:</span><span class="tok-w"> </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">postgres:9.6</span><span class="tok-w"></span>
-<span class="tok-w">    </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">...</span><span class="tok-w"></span>
+<span class="tok-w">  </span><span class="tok-nt">postgres</span><span class="tok-p">:</span>
+<span class="tok-w">    </span><span class="tok-nt">image</span><span class="tok-p">:</span><span class="tok-w"> </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">postgres:9.6</span>
+<span class="tok-w">    </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">...</span>
 
-<span class="tok-w">  </span><span class="tok-nt">redis</span><span class="tok-p">:</span><span class="tok-w"></span>
-<span class="tok-w">    </span><span class="tok-nt">image</span><span class="tok-p">:</span><span class="tok-w"> </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">redis:alpine</span><span class="tok-w"></span>
-<span class="tok-w">    </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">...</span><span class="tok-w"></span>
+<span class="tok-w">  </span><span class="tok-nt">redis</span><span class="tok-p">:</span>
+<span class="tok-w">    </span><span class="tok-nt">image</span><span class="tok-p">:</span><span class="tok-w"> </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">redis:alpine</span>
+<span class="tok-w">    </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">...</span>
 
-<span class="tok-w">  </span><span class="tok-nt">mailhog</span><span class="tok-p">:</span><span class="tok-w"></span>
-<span class="tok-w">    </span><span class="tok-nt">image</span><span class="tok-p">:</span><span class="tok-w"> </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">mailhog/mailhog</span><span class="tok-w"></span>
-<span class="tok-w">    </span><span class="tok-nt">ports</span><span class="tok-p">:</span><span class="tok-w"></span>
-<span class="tok-w">      </span><span class="tok-p tok-p-Indicator">-</span><span class="tok-w"> </span><span class="tok-s">"11025:1025"</span><span class="tok-w"></span>
-<span class="tok-w">      </span><span class="tok-p tok-p-Indicator">-</span><span class="tok-w"> </span><span class="tok-s">"18025:8025"</span><span class="tok-w"></span></code></pre>
+<span class="tok-w">  </span><span class="tok-nt">mailhog</span><span class="tok-p">:</span>
+<span class="tok-w">    </span><span class="tok-nt">image</span><span class="tok-p">:</span><span class="tok-w"> </span><span class="tok-l tok-l-Scalar tok-l-Scalar-Plain">mailhog/mailhog</span>
+<span class="tok-w">    </span><span class="tok-nt">ports</span><span class="tok-p">:</span>
+<span class="tok-w">      </span><span class="tok-p tok-p-Indicator">-</span><span class="tok-w"> </span><span class="tok-s">"11025:1025"</span>
+<span class="tok-w">      </span><span class="tok-p tok-p-Indicator">-</span><span class="tok-w"> </span><span class="tok-s">"18025:8025"</span></code></pre>
 </div>
 </div>
 </div>
@@ -1536,7 +1531,7 @@ World<sup>TM</sup>.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-02-26 00:40:46 UTC
+Last updated 2023-11-24 02:20:52 UTC
 </div>
 </div>
 <div><div id="disqus_thread" style="margin: 10px"></div>

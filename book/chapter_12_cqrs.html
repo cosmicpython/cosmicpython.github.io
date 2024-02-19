@@ -3,7 +3,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.16">
+<meta name="generator" content="Asciidoctor 2.0.20">
 <title>Command-Query Responsibility Segregation (CQRS)</title>
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -100,11 +100,6 @@ table {
 
 </style>
 <style>
-pre { line-height: 125%; }
-td.linenos .normal { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
-span.linenos { color: #666666; background-color: transparent; padding-left: 5px; padding-right: 5px; }
-td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
-span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
 pre.pygments .hll { background-color: #ffffcc }
 pre.pygments { background: #f0f0f0; }
 pre.pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
@@ -598,7 +593,7 @@ object:</p>
 <span class="tok-k">def</span> <span class="tok-nf">allocations</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyUnitOfWork</span><span class="tok-p">):</span>
     <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
         <span class="tok-n">results</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>
-            <span class="tok-sd">"""</span>
+<span class="tok-w">            </span><span class="tok-sd">"""</span>
 <span class="tok-sd">            SELECT ol.sku, b.reference</span>
 <span class="tok-sd">            FROM allocations AS a</span>
 <span class="tok-sd">            JOIN batches AS b ON a.batch_id = b.id</span>
@@ -908,7 +903,7 @@ we made it nicer&#8230;&#8203;</p>
 <pre class="pygments highlight"><code data-lang="python"><span></span><span class="tok-k">def</span> <span class="tok-nf">allocations</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-p">:</span> <span class="tok-nb">str</span><span class="tok-p">,</span> <span class="tok-n">uow</span><span class="tok-p">:</span> <span class="tok-n">unit_of_work</span><span class="tok-o">.</span><span class="tok-n">SqlAlchemyUnitOfWork</span><span class="tok-p">):</span>
     <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
         <span class="tok-n">results</span> <span class="tok-o">=</span> <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>
-            <span class="tok-sd">"""</span>
+<span class="tok-w">            </span><span class="tok-sd">"""</span>
 <span class="tok-sd">            SELECT sku, batchref FROM allocations_view WHERE orderid = :orderid</span>
 <span class="tok-sd">            """</span><span class="tok-p">,</span>
             <span class="tok-nb">dict</span><span class="tok-p">(</span><span class="tok-n">orderid</span><span class="tok-o">=</span><span class="tok-n">orderid</span><span class="tok-p">),</span>
@@ -1015,7 +1010,7 @@ architecture instead.</p>
 <span class="tok-p">):</span>
     <span class="tok-k">with</span> <span class="tok-n">uow</span><span class="tok-p">:</span>
         <span class="tok-n">uow</span><span class="tok-o">.</span><span class="tok-n">session</span><span class="tok-o">.</span><span class="tok-n">execute</span><span class="tok-p">(</span>
-            <span class="tok-sd">"""</span>
+<span class="tok-w">            </span><span class="tok-sd">"""</span>
 <span class="tok-sd">            INSERT INTO allocations_view (orderid, sku, batchref)</span>
 <span class="tok-sd">            VALUES (:orderid, :sku, :batchref)</span>
 <span class="tok-sd">            """</span><span class="tok-p">,</span>
@@ -1357,7 +1352,7 @@ the chapter.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-02-26 00:40:46 UTC
+Last updated 2023-11-24 02:20:52 UTC
 </div>
 </div>
 <div><div id="disqus_thread" style="margin: 10px"></div>
