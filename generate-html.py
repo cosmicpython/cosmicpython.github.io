@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # copied from https://github.com/tonybaloney/tonybaloney.github.io/blob/master/blog-gen.py
+import shutil
 from dataclasses import dataclass
 from datetime import date, datetime, time
 from email.utils import formatdate, format_datetime  # for RFC2822 formatting
@@ -10,8 +11,11 @@ import markdown
 
 TEMPLATE_FILE = "templates/blog_post_template.html"
 FEED_TEMPLATE_FILE = "templates/rss_feed_template.xml"
-BLOG_POSTS_PATH = Path("posts")
-OUTPUT_DIR = Path(".")
+BLOG_POSTS_PATH = Path("_posts")
+OUTPUT_DIR = Path("dist")
+
+# Static assets served as-is, copied into OUTPUT_DIR alongside the rendered HTML.
+STATIC_ASSETS = ["styles.css", "favicon.ico", "images", "book"]
 
 
 
@@ -35,7 +39,19 @@ class Post:
         return format_datetime(datetime.combine(self.date, time(12, 00)))
 
 
+def copy_static_assets():
+    for asset in STATIC_ASSETS:
+        src = Path(asset)
+        dst = OUTPUT_DIR / asset
+        if src.is_dir():
+            shutil.copytree(src, dst, dirs_exist_ok=True)
+        elif src.exists():
+            shutil.copy2(src, dst)
+
+
 def main():
+    (OUTPUT_DIR / "blog").mkdir(parents=True, exist_ok=True)
+
     md_post_paths = sorted(BLOG_POSTS_PATH.glob("*.md"))
     extensions = ['extra', 'smarty', 'meta', 'codehilite']
     _md = markdown.Markdown(extensions=extensions, output_format='html5')
@@ -83,6 +99,8 @@ def main():
             posts=all_posts, date=formatdate()
         )
     )
+
+    copy_static_assets()
 
 
 if __name__ == "__main__":
