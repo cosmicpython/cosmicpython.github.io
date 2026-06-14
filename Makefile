@@ -3,8 +3,11 @@ all: build update-book serve
 build:
 	./generate-html.py
 
-serve:
-	python -m http.server 8899
+serve: build
+	cd dist && python -m http.server 8899
+
+preview: build
+	npx wrangler dev
 
 watch-build:
 	ls **/*.md **/*.html **/*.xml *.py | entr ./generate-html.py
